@@ -45,37 +45,140 @@
             transform-origin: left center;
         }
 
-        /* Modal ÚNICO - SEM formulário depois */
-        .modal-login {
+        /* Card de Login */
+        .card-login {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 500px;
+            animation: cardAppear 0.6s ease;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-login h1 {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.25);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border: none;
+            color: white;
+            padding: 16px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .cadastro-link {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+        }
+
+        .cadastro-link a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .cadastro-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Modal de Escolha (escondido inicialmente) */
+        .modal-escolha {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
             backdrop-filter: blur(10px);
         }
 
-        .modal-content {
+        .modal-escolha.active {
+            display: flex;
+            animation: modalFadeIn 0.5s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(10px);
+            }
+        }
+
+        .modal-escolha-content {
             background: white;
             border-radius: 25px;
             padding: 60px 50px;
             max-width: 550px;
             width: 90%;
             text-align: center;
-            animation: modalAppear 0.6s ease;
+            animation: modalSlideUp 0.6s ease;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        @keyframes modalAppear {
+        @keyframes modalSlideUp {
             from {
                 opacity: 0;
-                transform: translateY(-60px) scale(0.95);
+                transform: translateY(60px) scale(0.95);
             }
             to {
                 opacity: 1;
@@ -83,25 +186,25 @@
             }
         }
 
-        .modal-content h1 {
+        .modal-escolha-content h2 {
             color: var(--dark-color);
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
-        .modal-content p {
+        .modal-escolha-content p {
             color: #666;
             font-size: 1.1rem;
             margin-bottom: 50px;
         }
 
-        .btn-tipo-login {
+        .btn-tipo-escolha {
             background: white;
             border: 3px solid;
             color: var(--dark-color);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 28px;
+            border-radius: 18px;
             font-weight: 700;
             font-size: 1.3rem;
             width: 100%;
@@ -112,28 +215,20 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
-            position: relative;
-            overflow: hidden;
         }
 
-        .btn-tipo-login::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: 0.5s;
-        }
-
-        .btn-tipo-login:hover::before {
-            left: 100%;
-        }
-
-        .btn-tipo-login:hover {
+        .btn-tipo-escolha:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-tipo-escolha i {
+            font-size: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-tipo-escolha:hover i {
+            transform: scale(1.2);
         }
 
         .btn-cliente {
@@ -158,91 +253,65 @@
             border-color: #FF6B35;
         }
 
-        .btn-tipo-login i {
-            font-size: 2.2rem;
-            transition: transform 0.3s ease;
+        .alert {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 25px;
+            display: none;
         }
 
-        .btn-tipo-login:hover i {
-            transform: scale(1.2);
-        }
-
-        .btn-tipo-login .texto {
-            text-align: left;
-            flex: 1;
-        }
-
-        .btn-tipo-login .titulo {
-            font-size: 1.6rem;
-            font-weight: 700;
+        .alert.show {
             display: block;
-            margin-bottom: 5px;
+            animation: alertSlide 0.5s ease;
         }
 
-        .btn-tipo-login .descricao {
-            font-size: 0.95rem;
-            font-weight: 400;
-            color: #666;
-            display: block;
+        @keyframes alertSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .btn-tipo-login:hover .descricao {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .link-cadastro {
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #eee;
-        }
-
-        .link-cadastro p {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .link-cadastro a {
-            display: inline-block;
-            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        .user-welcome {
+            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
             color: white;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
-        }
-
-        .link-cadastro a:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
-        }
-
-        .logo-modal {
+            border-radius: 15px;
+            padding: 20px;
             margin-bottom: 30px;
+            display: none;
         }
 
-        .logo-modal img {
-            height: 50px;
+        .user-welcome.show {
+            display: block;
+        }
+
+        .user-welcome h3 {
+            font-size: 1.3rem;
+            margin: 0;
+            font-weight: 600;
         }
 
         @media (max-width: 768px) {
-            .modal-content {
-                padding: 40px 25px;
-            }
-            
-            .btn-tipo-login {
-                padding: 25px 20px;
-                font-size: 1.2rem;
-            }
-            
-            .btn-tipo-login .titulo {
-                font-size: 1.4rem;
+            .card-login {
+                padding: 30px 20px;
+                margin: 10px;
             }
             
             body {
                 padding-top: 70px;
+            }
+            
+            .modal-escolha-content {
+                padding: 40px 25px;
+            }
+            
+            .btn-tipo-escolha {
+                padding: 22px 18px;
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -261,58 +330,112 @@
         </div>
     </nav>
 
-    <!-- Modal ÚNICO de Login -->
-    <div class="modal-login">
-        <div class="modal-content">
-            <div class="logo-modal">
-                <img src="logoscanhub.png" alt="ScanHub">
+    <!-- Card de Login -->
+    <div class="container">
+        <div class="card-login">
+            <h1><i class="fas fa-sign-in-alt me-2"></i>Login ScanHub</h1>
+            
+            <!-- Mensagem de boas-vindas após login -->
+            <div id="userWelcome" class="user-welcome">
+                <h3><i class="fas fa-check-circle me-2"></i>Login realizado com sucesso!</h3>
+                <p class="mb-0 mt-2" style="opacity: 0.9;">Agora escolha como quer acessar:</p>
             </div>
             
-            <h1>Como você quer acessar?</h1>
-            <p>Escolha seu tipo de acesso para continuar</p>
+            <!-- Alertas -->
+            <div id="alertMessage" class="alert alert-danger" role="alert"></div>
+            <div id="successMessage" class="alert alert-success" role="alert" style="display: none;"></div>
             
-            <!-- Botão CLIENTE - Redireciona DIRETO para dashboard do cliente -->
-            <button class="btn-tipo-login btn-cliente" id="btnClienteLogin">
-                <i class="fas fa-user-tie"></i>
-                <div class="texto">
-                    <span class="titulo">Sou Cliente</span>
-                    <span class="descricao">Quero contratar serviços profissionais</span>
+            <!-- Formulário de Login -->
+            <form id="loginForm">
+                <!-- Email -->
+                <div class="mb-4">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope me-2"></i>E-mail
+                    </label>
+                    <input type="email" class="form-control" id="email" 
+                           placeholder="seu@email.com" required>
                 </div>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-            
-            <!-- Botão PROFISSIONAL - Redireciona DIRETO para dashboard do profissional -->
-            <button class="btn-tipo-login btn-profissional" id="btnProfissionalLogin">
-                <i class="fas fa-tools"></i>
-                <div class="texto">
-                    <span class="titulo">Sou Profissional</span>
-                    <span class="descricao">Quero oferecer meus serviços</span>
+
+                <!-- Senha -->
+                <div class="mb-4">
+                    <label for="senha" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Senha
+                    </label>
+                    <input type="password" class="form-control" id="senha" 
+                           placeholder="Digite sua senha" required>
+                    <div class="d-flex justify-content-between mt-2">
+                        <a href="#" id="esqueciSenha" class="text-primary small" 
+                           style="text-decoration: none;">
+                            <i class="fas fa-key me-1"></i>Esqueci a senha
+                        </a>
+                        <a href="cadastro.html" class="text-primary small" 
+                           style="text-decoration: none;">
+                            <i class="fas fa-user-plus me-1"></i>Criar conta
+                        </a>
+                    </div>
                 </div>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-            
-            <div class="link-cadastro">
-                <p>Primeira vez no ScanHub?</p>
-                <a href="cadastro.html">
-                    <i class="fas fa-user-plus me-2"></i>Cadastre-se Gratuitamente
-                </a>
+
+                <!-- Botão Login -->
+                <button type="submit" class="btn btn-login" id="btnLogin">
+                    <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                </button>
+            </form>
+
+            <div class="cadastro-link">
+                É novo por aqui? <a href="cadastro.html">Crie sua conta gratuitamente</a>
             </div>
         </div>
     </div>
 
-    <!-- Firebase e Script -->
+    <!-- Modal de Escolha Cliente/Profissional (escondido inicialmente) -->
+    <div id="modalEscolha" class="modal-escolha">
+        <div class="modal-escolha-content">
+            <h2>Como você quer acessar?</h2>
+            <p>Escolha o tipo de acesso para continuar</p>
+            
+            <!-- Botão CLIENTE -->
+            <button id="btnEscolherCliente" class="btn-tipo-escolha btn-cliente">
+                <i class="fas fa-user-tie"></i>
+                <div class="text-start">
+                    <div style="font-size: 1.4rem; font-weight: 700;">Sou Cliente</div>
+                    <small style="font-weight: 400;">Quero contratar serviços</small>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            
+            <!-- Botão PROFISSIONAL -->
+            <button id="btnEscolherProfissional" class="btn-tipo-escolha btn-profissional">
+                <i class="fas fa-tools"></i>
+                <div class="text-start">
+                    <div style="font-size: 1.4rem; font-weight: 700;">Sou Profissional</div>
+                    <small style="font-weight: 400;">Quero oferecer serviços</small>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            
+            <div class="mt-4 pt-3 border-top">
+                <p class="text-muted small mb-0">
+                    Você poderá alterar esta escolha depois nas configurações do perfil
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { 
             getAuth, 
-            onAuthStateChanged,
-            signInAnonymously 
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
+            onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
         import { 
             getFirestore, 
             doc, 
-            setDoc 
+            getDoc,
+            updateDoc
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
         // Firebase Config
@@ -333,47 +456,60 @@
         console.log('🔥 Login ScanHub - Sistema carregado');
 
         // Elementos DOM
-        const btnClienteLogin = document.getElementById('btnClienteLogin');
-        const btnProfissionalLogin = document.getElementById('btnProfissionalLogin');
+        const loginForm = document.getElementById('loginForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const modalEscolha = document.getElementById('modalEscolha');
+        const btnEscolherCliente = document.getElementById('btnEscolherCliente');
+        const btnEscolherProfissional = document.getElementById('btnEscolherProfissional');
+        const userWelcome = document.getElementById('userWelcome');
+        const alertMessage = document.getElementById('alertMessage');
+        const successMessage = document.getElementById('successMessage');
+        const esqueciSenha = document.getElementById('esqueciSenha');
 
-        // Função para redirecionar com tipo
-        async function fazerLoginComTipo(tipo) {
-            console.log(`🔐 Fazendo login como: ${tipo}`);
+        // Variáveis
+        let usuarioLogado = null;
+
+        // Mostrar mensagem
+        function mostrarMensagem(tipo, mensagem) {
+            // Esconder todas
+            alertMessage.classList.remove('show');
+            successMessage.classList.remove('show');
             
-            try {
-                // Verificar se já está logado
-                const user = auth.currentUser;
-                
-                if (user) {
-                    // Usuário já logado - apenas redireciona
-                    console.log(`✅ Usuário já logado. Redirecionando para ${tipo}...`);
-                    redirecionarParaDashboard(tipo);
-                } else {
-                    // Criar login anônimo temporário
-                    console.log('🔄 Criando sessão temporária...');
-                    const userCredential = await signInAnonymously(auth);
-                    const newUser = userCredential.user;
-                    
-                    // Salvar tipo na sessão local
-                    localStorage.setItem('scanhub_tipo_usuario', tipo);
-                    localStorage.setItem('scanhub_user_id', newUser.uid);
-                    
-                    console.log(`✅ Sessão criada. Redirecionando para ${tipo}...`);
-                    redirecionarParaDashboard(tipo);
-                }
-                
-            } catch (error) {
-                console.error('❌ Erro no login:', error);
-                
-                // Mesmo com erro, tenta redirecionar
-                localStorage.setItem('scanhub_tipo_usuario', tipo);
-                redirecionarParaDashboard(tipo);
+            // Mostrar a correta
+            if (tipo === 'erro') {
+                alertMessage.textContent = mensagem;
+                alertMessage.classList.add('show');
+            } else if (tipo === 'sucesso') {
+                successMessage.textContent = mensagem;
+                successMessage.classList.add('show');
             }
+            
+            // Auto-esconder após 5 segundos
+            setTimeout(() => {
+                alertMessage.classList.remove('show');
+                successMessage.classList.remove('show');
+            }, 5000);
         }
 
-        // Redirecionar para dashboard correto
+        // Mostrar modal de escolha
+        function mostrarModalEscolha() {
+            console.log('🎯 Mostrando modal de escolha');
+            modalEscolha.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Bloquear scroll
+        }
+
+        // Esconder modal de escolha
+        function esconderModalEscolha() {
+            modalEscolha.classList.remove('active');
+            document.body.style.overflow = ''; // Liberar scroll
+        }
+
+        // Redirecionar para dashboard
         function redirecionarParaDashboard(tipo) {
-            console.log(`🚀 Redirecionando para dashboard do ${tipo.toUpperCase()}`);
+            console.log(`🚀 Redirecionando para dashboard do ${tipo}`);
+            
+            // Salvar tipo na sessão
+            localStorage.setItem('scanhub_tipo_acesso', tipo);
             
             if (tipo === 'cliente') {
                 window.location.href = 'cliente-dashboard.html';
@@ -382,44 +518,192 @@
             }
         }
 
-        // Event Listeners
-        btnClienteLogin.addEventListener('click', () => {
-            console.log('👤 Cliente selecionado');
-            fazerLoginComTipo('cliente');
-        });
+        // Atualizar tipo no Firestore
+        async function atualizarTipoUsuario(uid, tipo) {
+            try {
+                console.log(`💾 Atualizando tipo do usuário ${uid} para: ${tipo}`);
+                const userRef = doc(db, "usuarios", uid);
+                await updateDoc(userRef, {
+                    tipoUsuario: tipo,
+                    ultimoAcesso: new Date().toISOString()
+                }, { merge: true });
+                return true;
+            } catch (error) {
+                console.error('Erro ao atualizar tipo:', error);
+                return false;
+            }
+        }
 
-        btnProfissionalLogin.addEventListener('click', () => {
-            console.log('👷 Profissional selecionado');
-            fazerLoginComTipo('profissional');
-        });
+        // Verificar tipo existente
+        async function verificarTipoUsuario(uid) {
+            try {
+                const userRef = doc(db, "usuarios", uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    return userDoc.data().tipoUsuario;
+                }
+                return null;
+            } catch (error) {
+                console.error('Erro ao verificar tipo:', error);
+                return null;
+            }
+        }
 
-        // Verificar se já tem tipo salvo
-        window.addEventListener('load', () => {
-            const tipoSalvo = localStorage.getItem('scanhub_tipo_usuario');
-            if (tipoSalvo) {
-                console.log(`📌 Tipo salvo encontrado: ${tipoSalvo}`);
+        // Evento: Formulário de Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const senha = document.getElementById('senha').value;
+            
+            if (!email || !senha) {
+                mostrarMensagem('erro', 'Por favor, preencha todos os campos.');
+                return;
             }
             
-            // Verificar se está logado
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    console.log('✅ Usuário autenticado:', user.uid);
+            // Desabilitar botão
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
+            
+            try {
+                console.log(`🔐 Tentando login para: ${email}`);
+                
+                // Fazer login
+                const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+                usuarioLogado = userCredential.user;
+                
+                console.log('✅ Login bem-sucedido. UID:', usuarioLogado.uid);
+                
+                // Mostrar boas-vindas
+                userWelcome.classList.add('show');
+                loginForm.style.display = 'none';
+                
+                // Verificar se já tem tipo definido
+                const tipoExistente = await verificarTipoUsuario(usuarioLogado.uid);
+                
+                if (tipoExistente) {
+                    // Se já tem tipo, redireciona direto
+                    console.log(`📌 Tipo existente: ${tipoExistente}`);
+                    setTimeout(() => {
+                        redirecionarParaDashboard(tipoExistente);
+                    }, 1500);
                 } else {
-                    console.log('🔒 Usuário não autenticado');
+                    // Se não tem tipo, mostra modal de escolha
+                    console.log('🔄 Usuário sem tipo definido. Mostrando modal...');
+                    setTimeout(() => {
+                        mostrarModalEscolha();
+                    }, 1000);
                 }
-            });
-        });
-
-        // Adicionar teclas de atalho (opcional)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '1' || e.key === 'c') {
-                fazerLoginComTipo('cliente');
-            } else if (e.key === '2' || e.key === 'p') {
-                fazerLoginComTipo('profissional');
+                
+            } catch (error) {
+                console.error('❌ Erro no login:', error);
+                
+                let mensagemErro = 'Erro ao fazer login. Verifique suas credenciais.';
+                
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        mensagemErro = 'E-mail não cadastrado.';
+                        break;
+                    case 'auth/wrong-password':
+                        mensagemErro = 'Senha incorreta.';
+                        break;
+                    case 'auth/invalid-email':
+                        mensagemErro = 'E-mail inválido.';
+                        break;
+                    case 'auth/too-many-requests':
+                        mensagemErro = 'Muitas tentativas. Tente novamente mais tarde.';
+                        break;
+                    case 'auth/network-request-failed':
+                        mensagemErro = 'Erro de conexão. Verifique sua internet.';
+                        break;
+                }
+                
+                mostrarMensagem('erro', mensagemErro);
+                
+                // Reabilitar botão
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Entrar';
             }
         });
 
-        console.log('✅ Sistema de login pronto! Pressione C para Cliente, P para Profissional');
+        // Evento: Escolher Cliente
+        btnEscolherCliente.addEventListener('click', async () => {
+            console.log('👤 Cliente escolhido');
+            
+            if (usuarioLogado) {
+                // Atualizar tipo no Firestore
+                await atualizarTipoUsuario(usuarioLogado.uid, 'cliente');
+                // Redirecionar
+                redirecionarParaDashboard('cliente');
+            } else {
+                mostrarMensagem('erro', 'Erro: Usuário não autenticado.');
+            }
+        });
+
+        // Evento: Escolher Profissional
+        btnEscolherProfissional.addEventListener('click', async () => {
+            console.log('👷 Profissional escolhido');
+            
+            if (usuarioLogado) {
+                // Atualizar tipo no Firestore
+                await atualizarTipoUsuario(usuarioLogado.uid, 'profissional');
+                // Redirecionar
+                redirecionarParaDashboard('profissional');
+            } else {
+                mostrarMensagem('erro', 'Erro: Usuário não autenticado.');
+            }
+        });
+
+        // Evento: Esqueci senha
+        esqueciSenha.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email) {
+                mostrarMensagem('erro', 'Digite seu e-mail para redefinir a senha.');
+                return;
+            }
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                mostrarMensagem('sucesso', 'E-mail de redefinição enviado! Verifique sua caixa de entrada.');
+            } catch (error) {
+                console.error('Erro ao enviar email:', error);
+                mostrarMensagem('erro', 'Erro ao enviar e-mail. Verifique o endereço digitado.');
+            }
+        });
+
+        // Verificar se veio de cadastro bem-sucedido
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('cadastro') === 'sucesso') {
+            const email = urlParams.get('email');
+            if (email) {
+                document.getElementById('email').value = email;
+                mostrarMensagem('sucesso', 'Cadastro realizado! Faça login para continuar.');
+            }
+        }
+
+        // Verificar se já está logado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('✅ Usuário já está logado:', user.uid);
+                // Se já está logado, verifica tipo e redireciona
+                verificarTipoUsuario(user.uid).then(tipo => {
+                    if (tipo) {
+                        setTimeout(() => {
+                            redirecionarParaDashboard(tipo);
+                        }, 1000);
+                    }
+                });
+            }
+        });
+
+        // Focar no campo de email
+        document.getElementById('email').focus();
+
+        console.log('✅ Sistema de login pronto!');
     </script>
 </body>
 </html>
