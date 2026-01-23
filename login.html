@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #33c47;
+            --light-color: #e8ecef;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #44689a 0%, #33c47 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #e8ecef 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .navbar-brand img {
+            height: 60px;
+            transform: scale(2.5);
+            transform-origin: left center;
+        }
+
+        .card-login {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+
+        .card-login h1 {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border: none;
+            color: white;
+            padding: 14px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-google {
+            background: white;
+            border: 2px solid #ddd;
+            color: #444;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-google:hover {
+            border-color: #db4437;
+            background: #f8f9fa;
+        }
+
+        .cadastro-link {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+        }
+
+        .cadastro-link a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .cadastro-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Modal de Escolha */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: modalAppear 0.5s ease;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content h2 {
+            color: var(--dark-color);
+            margin-bottom: 40px;
+            font-size: 2rem;
+        }
+
+        .btn-tipo {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 25px 30px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-tipo:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(68, 104, 154, 0.3);
+        }
+
+        .btn-tipo i {
+            font-size: 1.8rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .alert {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .voltar-login {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        .voltar-login:hover {
+            text-decoration: underline;
+        }
+
+        .tipo-selecionado {
+            background-color: #f0f7ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .card-login {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            body {
+                padding-top: 70px;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+            
+            .btn-tipo {
+                padding: 20px 15px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de Escolha Inicial -->
+    <div id="modalEscolha" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Como você quer acessar?</h2>
+            
+            <button id="btnCliente" class="btn-tipo">
+                <i class="fas fa-user"></i>
+                <div>
+                    <div style="font-size: 1.4rem; font-weight: 700;">Sou Cliente</div>
+                    <small>Quero contratar serviços</small>
+                </div>
+            </button>
+            
+            <button id="btnProfissional" class="btn-tipo">
+                <i class="fas fa-tools"></i>
+                <div>
+                    <div style="font-size: 1.4rem; font-weight: 700;">Sou Profissional</div>
+                    <small>Quero oferecer serviços</small>
+                </div>
+            </button>
+            
+            <p class="mt-4 text-muted">
+                Você poderá alterar esta escolha depois nas configurações do perfil
+            </p>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="logoscanhub.png" alt="ScanHub">
+            </a>
+            <div class="d-flex">
+                <a href="cadastro.html" class="btn btn-outline-primary me-2">Cadastre-se</a>
+                <a href="index.html" class="btn btn-primary">Voltar</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Container (inicialmente escondido) -->
+    <div class="container">
+        <div id="cardLogin" class="card-login hidden">
+            <h1 id="tituloLogin">
+                <i class="fas fa-sign-in-alt me-2"></i>Login no ScanHub
+            </h1>
+            
+            <div id="tipoInfo" class="tipo-selecionado hidden">
+                <div>
+                    <strong id="tipoTexto"></strong>
+                    <div class="text-muted" style="font-size: 0.9rem;" id="tipoDescricao"></div>
+                </div>
+                <button id="btnTrocarTipo" class="btn btn-sm btn-outline-primary">
+                    Trocar
+                </button>
+            </div>
+            
+            <div id="alertMessage" class="alert alert-danger" role="alert"></div>
+            
+            <!-- Formulário de Login -->
+            <form id="loginForm">
+                <!-- Email -->
+                <div class="mb-4">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope me-2"></i>E-mail
+                    </label>
+                    <input type="email" class="form-control" id="email" 
+                           placeholder="seu@email.com" required>
+                </div>
+
+                <!-- Senha -->
+                <div class="mb-4">
+                    <label for="senha" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Senha
+                    </label>
+                    <input type="password" class="form-control" id="senha" 
+                           placeholder="Digite sua senha" required>
+                    <div class="d-flex justify-content-end mt-2">
+                        <a href="#" id="esqueciSenha" class="text-primary small" 
+                           style="text-decoration: none;">
+                            <i class="fas fa-key me-1"></i>Esqueci a senha
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Botão Login -->
+                <button type="submit" class="btn btn-login" id="btnLogin">
+                    <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                </button>
+
+                <!-- Divisor -->
+                <div class="d-flex align-items-center my-4">
+                    <hr class="flex-grow-1">
+                    <span class="mx-3 text-muted">ou</span>
+                    <hr class="flex-grow-1">
+                </div>
+
+                <!-- Login com Google -->
+                <button type="button" class="btn btn-google" id="btnGoogle">
+                    <i class="fab fa-google me-2"></i>Entrar com Google
+                </button>
+            </form>
+
+            <div class="cadastro-link">
+                Não tem uma conta? <a href="cadastro.html">Cadastre-se gratuitamente</a>
+            </div>
+            
+            <a href="#" id="voltarModal" class="voltar-login hidden">
+                <i class="fas fa-arrow-left me-2"></i>Voltar para seleção
+            </a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            signInWithPopup,
+            GoogleAuthProvider,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Variáveis globais
+        let tipoUsuarioSelecionado = null; // 'cliente' ou 'profissional'
+
+        // Elementos DOM
+        const modalEscolha = document.getElementById('modalEscolha');
+        const cardLogin = document.getElementById('cardLogin');
+        const btnCliente = document.getElementById('btnCliente');
+        const btnProfissional = document.getElementById('btnProfissional');
+        const btnTrocarTipo = document.getElementById('btnTrocarTipo');
+        const voltarModal = document.getElementById('voltarModal');
+        const tipoInfo = document.getElementById('tipoInfo');
+        const tipoTexto = document.getElementById('tipoTexto');
+        const tipoDescricao = document.getElementById('tipoDescricao');
+        const tituloLogin = document.getElementById('tituloLogin');
+        const loginForm = document.getElementById('loginForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnGoogle = document.getElementById('btnGoogle');
+        const esqueciSenha = document.getElementById('esqueciSenha');
+
+        // Mostrar mensagem de erro
+        function mostrarErro(mensagem) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = mensagem;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Redirecionar para dashboard correto
+        function redirecionarParaDashboard(tipo) {
+            if (tipo === 'cliente') {
+                window.location.href = 'cliente-dashboard.html';
+            } else if (tipo === 'profissional') {
+                window.location.href = 'profissional-dashboard.html';
+            } else {
+                // Se não tem tipo definido, vai para escolha de tipo
+                window.location.href = 'escolher-tipo.html';
+            }
+        }
+
+        // Atualizar tipo no Firestore (se necessário)
+        async function atualizarTipoUsuario(uid, tipo) {
+            try {
+                const userRef = doc(db, "usuarios", uid);
+                await updateDoc(userRef, {
+                    tipoUsuario: tipo,
+                    dataAtualizacao: new Date().toISOString()
+                });
+                return true;
+            } catch (error) {
+                console.error('Erro ao atualizar tipo:', error);
+                return false;
+            }
+        }
+
+        // Verificar se usuário já tem tipo definido
+        async function verificarTipoUsuario(uid) {
+            try {
+                const userRef = doc(db, "usuarios", uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    return userDoc.data().tipoUsuario; // 'cliente', 'profissional' ou null
+                }
+                return null;
+            } catch (error) {
+                console.error('Erro ao verificar tipo:', error);
+                return null;
+            }
+        }
+
+        // Configurar interface baseada no tipo selecionado
+        function configurarInterface(tipo) {
+            tipoUsuarioSelecionado = tipo;
+            
+            if (tipo === 'cliente') {
+                tipoTexto.textContent = 'Acessando como Cliente';
+                tipoDescricao.textContent = 'Você poderá contratar serviços';
+            } else {
+                tipoTexto.textContent = 'Acessando como Profissional';
+                tipoDescricao.textContent = 'Você poderá oferecer serviços';
+            }
+            
+            tipoInfo.classList.remove('hidden');
+        }
+
+        // Event Listeners
+
+        // Cliente selecionado
+        btnCliente.addEventListener('click', () => {
+            configurarInterface('cliente');
+            modalEscolha.classList.add('hidden');
+            cardLogin.classList.remove('hidden');
+            voltarModal.classList.remove('hidden');
+        });
+
+        // Profissional selecionado
+        btnProfissional.addEventListener('click', () => {
+            configurarInterface('profissional');
+            modalEscolha.classList.add('hidden');
+            cardLogin.classList.remove('hidden');
+            voltarModal.classList.remove('hidden');
+        });
+
+        // Trocar tipo
+        btnTrocarTipo.addEventListener('click', () => {
+            cardLogin.classList.add('hidden');
+            voltarModal.classList.add('hidden');
+            tipoInfo.classList.add('hidden');
+            modalEscolha.classList.remove('hidden');
+            tipoUsuarioSelecionado = null;
+        });
+
+        // Voltar para modal
+        voltarModal.addEventListener('click', (e) => {
+            e.preventDefault();
+            cardLogin.classList.add('hidden');
+            voltarModal.classList.add('hidden');
+            tipoInfo.classList.add('hidden');
+            modalEscolha.classList.remove('hidden');
+            tipoUsuarioSelecionado = null;
+        });
+
+        // Login com email/senha
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+            
+            if (!email || !senha) {
+                mostrarErro('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            if (!tipoUsuarioSelecionado) {
+                mostrarErro('Por favor, selecione um tipo de acesso.');
+                return;
+            }
+            
+            // Desabilitar botão durante login
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
+            
+            try {
+                // 1. Fazer login
+                const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
+                
+                // 2. Verificar se já tem tipo definido
+                const tipoExistente = await verificarTipoUsuario(user.uid);
+                
+                if (tipoExistente) {
+                    // Se já tem tipo, usa o que já estava salvo
+                    redirecionarParaDashboard(tipoExistente);
+                } else {
+                    // Se não tem tipo, salva o selecionado agora
+                    const atualizado = await atualizarTipoUsuario(user.uid, tipoUsuarioSelecionado);
+                    
+                    if (atualizado) {
+                        redirecionarParaDashboard(tipoUsuarioSelecionado);
+                    } else {
+                        mostrarErro('Erro ao configurar sua conta. Tente novamente.');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erro no login:', error);
+                
+                // Mensagens de erro amigáveis
+                let mensagemErro = 'Erro ao fazer login. Verifique suas credenciais.';
+                
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                        mensagemErro = 'E-mail não cadastrado.';
+                        break;
+                    case 'auth/wrong-password':
+                        mensagemErro = 'Senha incorreta.';
+                        break;
+                    case 'auth/invalid-email':
+                        mensagemErro = 'E-mail inválido.';
+                        break;
+                    case 'auth/user-disabled':
+                        mensagemErro = 'Esta conta foi desativada.';
+                        break;
+                    case 'auth/too-many-requests':
+                        mensagemErro = 'Muitas tentativas. Tente novamente mais tarde.';
+                        break;
+                    case 'auth/network-request-failed':
+                        mensagemErro = 'Erro de conexão. Verifique sua internet.';
+                        break;
+                }
+                
+                mostrarErro(mensagemErro);
+                
+                // Reabilitar botão
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Entrar';
+            }
+        });
+
+        // Login com Google
+        btnGoogle.addEventListener('click', async () => {
+            if (!tipoUsuarioSelecionado) {
+                mostrarErro('Por favor, selecione um tipo de acesso primeiro.');
+                return;
+            }
+            
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Verificar se é novo usuário (cadastro com Google)
+                const isNewUser = result._tokenResponse?.isNewUser;
+                
+                if (isNewUser) {
+                    // Novo usuário - criar registro no Firestore
+                    const userRef = doc(db, "usuarios", user.uid);
+                    
+                    // Gerar ID de 7 dígitos
+                    function gerarIdUnico() {
+                        return Math.floor(1000000 + Math.random() * 9000000).toString();
+                    }
+                    
+                    await updateDoc(userRef, {
+                        idScanHub: gerarIdUnico(),
+                        nomeCompleto: user.displayName || '',
+                        apelido: user.displayName || '',
+                        email: user.email,
+                        tipoUsuario: tipoUsuarioSelecionado,
+                        dataCadastro: new Date().toISOString(),
+                        uid: user.uid,
+                        provider: 'google'
+                    }, { merge: true });
+                    
+                    redirecionarParaDashboard(tipoUsuarioSelecionado);
+                } else {
+                    // Usuário existente - verificar tipo
+                    const tipoExistente = await verificarTipoUsuario(user.uid);
+                    
+                    if (tipoExistente) {
+                        redirecionarParaDashboard(tipoExistente);
+                    } else {
+                        // Se não tem tipo, salva o selecionado agora
+                        await atualizarTipoUsuario(user.uid, tipoUsuarioSelecionado);
+                        redirecionarParaDashboard(tipoUsuarioSelecionado);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erro login Google:', error);
+                mostrarErro('Erro ao fazer login com Google. Tente novamente.');
+            }
+        });
+
+        // Esqueci senha
+        esqueciSenha.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email) {
+                mostrarErro('Por favor, digite seu e-mail para redefinir a senha.');
+                return;
+            }
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                mostrarErro('E-mail de redefinição enviado! Verifique sua caixa de entrada.');
+            } catch (error) {
+                console.error('Erro ao enviar email:', error);
+                mostrarErro('Erro ao enviar e-mail de redefinição. Verifique o e-mail digitado.');
+            }
+        });
+
+        // Verificar se veio de cadastro bem-sucedido
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('cadastro') === 'sucesso') {
+            mostrarErro('Cadastro realizado com sucesso! Faça login para continuar.');
+        }
+
+        console.log('Sistema de login ScanHub carregado!');
+    </script>
+</body>
+</html>
