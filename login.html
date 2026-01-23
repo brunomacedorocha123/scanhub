@@ -423,287 +423,193 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            signInWithEmailAndPassword,
-            sendPasswordResetEmail,
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            updateDoc
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword,
+        sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        updateDoc
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        console.log('🔥 Login ScanHub - Sistema carregado');
+    // Elementos DOM
+    const loginForm = document.getElementById('loginForm');
+    const btnLogin = document.getElementById('btnLogin');
+    const modalEscolha = document.getElementById('modalEscolha');
+    const btnEscolherCliente = document.getElementById('btnEscolherCliente');
+    const btnEscolherProfissional = document.getElementById('btnEscolherProfissional');
+    const userWelcome = document.getElementById('userWelcome');
+    const alertMessage = document.getElementById('alertMessage');
+    const successMessage = document.getElementById('successMessage');
+    const esqueciSenha = document.getElementById('esqueciSenha');
 
-        // Elementos DOM
-        const loginForm = document.getElementById('loginForm');
-        const btnLogin = document.getElementById('btnLogin');
-        const modalEscolha = document.getElementById('modalEscolha');
-        const btnEscolherCliente = document.getElementById('btnEscolherCliente');
-        const btnEscolherProfissional = document.getElementById('btnEscolherProfissional');
-        const userWelcome = document.getElementById('userWelcome');
-        const alertMessage = document.getElementById('alertMessage');
-        const successMessage = document.getElementById('successMessage');
-        const esqueciSenha = document.getElementById('esqueciSenha');
+    // Variável para usuário logado
+    let usuarioLogado = null;
 
-        // Variáveis
-        let usuarioLogado = null;
-
-        // Mostrar mensagem
-        function mostrarMensagem(tipo, mensagem) {
-            // Esconder todas
+    // Mostrar mensagem
+    function mostrarMensagem(tipo, mensagem) {
+        // Esconder todas
+        alertMessage.classList.remove('show');
+        successMessage.classList.remove('show');
+        
+        // Mostrar a correta
+        if (tipo === 'erro') {
+            alertMessage.textContent = mensagem;
+            alertMessage.classList.add('show');
+        } else if (tipo === 'sucesso') {
+            successMessage.textContent = mensagem;
+            successMessage.classList.add('show');
+        }
+        
+        // Auto-esconder
+        setTimeout(() => {
             alertMessage.classList.remove('show');
             successMessage.classList.remove('show');
+        }, 5000);
+    }
+
+    // Mostrar modal de escolha
+    function mostrarModalEscolha() {
+        modalEscolha.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Esconder modal de escolha
+    function esconderModalEscolha() {
+        modalEscolha.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Redirecionar para página de escolha
+    function redirecionarParaEscolha() {
+        window.location.href = 'escolher-tipo.html';
+    }
+
+    // Verificar tipo existente
+    async function verificarTipoUsuario(uid) {
+        try {
+            const userRef = doc(db, "usuarios", uid);
+            const userDoc = await getDoc(userRef);
             
-            // Mostrar a correta
-            if (tipo === 'erro') {
-                alertMessage.textContent = mensagem;
-                alertMessage.classList.add('show');
-            } else if (tipo === 'sucesso') {
-                successMessage.textContent = mensagem;
-                successMessage.classList.add('show');
+            if (userDoc.exists()) {
+                return userDoc.data().tipoUsuario;
             }
+            return null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    // Evento: Formulário de Login
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const senha = document.getElementById('senha').value;
+        
+        if (!email || !senha) {
+            mostrarMensagem('erro', 'Por favor, preencha todos os campos.');
+            return;
+        }
+        
+        // Desabilitar botão
+        btnLogin.disabled = true;
+        btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
+        
+        try {
+            // Fazer login
+            const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+            usuarioLogado = userCredential.user;
             
-            // Auto-esconder após 5 segundos
+            // Mostrar boas-vindas
+            userWelcome.classList.add('show');
+            loginForm.style.display = 'none';
+            
+            // Redirecionar SEMPRE para página de escolha
             setTimeout(() => {
-                alertMessage.classList.remove('show');
-                successMessage.classList.remove('show');
-            }, 5000);
+                redirecionarParaEscolha();
+            }, 1500);
+            
+        } catch (error) {
+            let mensagemErro = 'Erro ao fazer login. Verifique suas credenciais.';
+            
+            switch(error.code) {
+                case 'auth/user-not-found':
+                    mensagemErro = 'E-mail não cadastrado.';
+                    break;
+                case 'auth/wrong-password':
+                    mensagemErro = 'Senha incorreta.';
+                    break;
+                case 'auth/invalid-email':
+                    mensagemErro = 'E-mail inválido.';
+                    break;
+                case 'auth/too-many-requests':
+                    mensagemErro = 'Muitas tentativas. Tente novamente mais tarde.';
+                    break;
+                case 'auth/network-request-failed':
+                    mensagemErro = 'Erro de conexão. Verifique sua internet.';
+                    break;
+            }
+            
+            mostrarMensagem('erro', mensagemErro);
+            
+            // Reabilitar botão
+            btnLogin.disabled = false;
+            btnLogin.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Entrar';
         }
+    });
 
-        // Mostrar modal de escolha
-        function mostrarModalEscolha() {
-            console.log('🎯 Mostrando modal de escolha');
-            modalEscolha.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Bloquear scroll
+    // Evento: Esqueci senha
+    esqueciSenha.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        
+        if (!email) {
+            mostrarMensagem('erro', 'Digite seu e-mail para redefinir a senha.');
+            return;
         }
-
-        // Esconder modal de escolha
-        function esconderModalEscolha() {
-            modalEscolha.classList.remove('active');
-            document.body.style.overflow = ''; // Liberar scroll
+        
+        try {
+            await sendPasswordResetEmail(auth, email);
+            mostrarMensagem('sucesso', 'E-mail de redefinição enviado! Verifique sua caixa de entrada.');
+        } catch (error) {
+            mostrarMensagem('erro', 'Erro ao enviar e-mail. Verifique o endereço digitado.');
         }
+    });
 
-        // Redirecionar para dashboard
-        function redirecionarParaDashboard(tipo) {
-            console.log(`🚀 Redirecionando para dashboard do ${tipo}`);
-            
-            // Salvar tipo na sessão
-            localStorage.setItem('scanhub_tipo_acesso', tipo);
-            
-            if (tipo === 'cliente') {
-                window.location.href = 'cliente-dashboard.html';
-            } else if (tipo === 'profissional') {
-                window.location.href = 'profissional-dashboard.html';
-            }
+    // Verificar se veio de cadastro bem-sucedido
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('cadastro') === 'sucesso') {
+        const email = urlParams.get('email');
+        if (email) {
+            document.getElementById('email').value = email;
+            mostrarMensagem('sucesso', 'Cadastro realizado! Faça login para continuar.');
         }
+    }
 
-        // Atualizar tipo no Firestore
-        async function atualizarTipoUsuario(uid, tipo) {
-            try {
-                console.log(`💾 Atualizando tipo do usuário ${uid} para: ${tipo}`);
-                const userRef = doc(db, "usuarios", uid);
-                await updateDoc(userRef, {
-                    tipoUsuario: tipo,
-                    ultimoAcesso: new Date().toISOString()
-                }, { merge: true });
-                return true;
-            } catch (error) {
-                console.error('Erro ao atualizar tipo:', error);
-                return false;
-            }
-        }
-
-        // Verificar tipo existente
-        async function verificarTipoUsuario(uid) {
-            try {
-                const userRef = doc(db, "usuarios", uid);
-                const userDoc = await getDoc(userRef);
-                
-                if (userDoc.exists()) {
-                    return userDoc.data().tipoUsuario;
-                }
-                return null;
-            } catch (error) {
-                console.error('Erro ao verificar tipo:', error);
-                return null;
-            }
-        }
-
-        // Evento: Formulário de Login
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            const senha = document.getElementById('senha').value;
-            
-            if (!email || !senha) {
-                mostrarMensagem('erro', 'Por favor, preencha todos os campos.');
-                return;
-            }
-            
-            // Desabilitar botão
-            btnLogin.disabled = true;
-            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Entrando...';
-            
-            try {
-                console.log(`🔐 Tentando login para: ${email}`);
-                
-                // Fazer login
-                const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-                usuarioLogado = userCredential.user;
-                
-                console.log('✅ Login bem-sucedido. UID:', usuarioLogado.uid);
-                
-                // Mostrar boas-vindas
-                userWelcome.classList.add('show');
-                loginForm.style.display = 'none';
-                
-                // Verificar se já tem tipo definido
-                const tipoExistente = await verificarTipoUsuario(usuarioLogado.uid);
-                
-                if (tipoExistente) {
-                    // Se já tem tipo, redireciona direto
-                    console.log(`📌 Tipo existente: ${tipoExistente}`);
-                    setTimeout(() => {
-                        redirecionarParaDashboard(tipoExistente);
-                    }, 1500);
-                } else {
-                    // Se não tem tipo, mostra modal de escolha
-                    console.log('🔄 Usuário sem tipo definido. Mostrando modal...');
-                    setTimeout(() => {
-                        mostrarModalEscolha();
-                    }, 1000);
-                }
-                
-            } catch (error) {
-                console.error('❌ Erro no login:', error);
-                
-                let mensagemErro = 'Erro ao fazer login. Verifique suas credenciais.';
-                
-                switch(error.code) {
-                    case 'auth/user-not-found':
-                        mensagemErro = 'E-mail não cadastrado.';
-                        break;
-                    case 'auth/wrong-password':
-                        mensagemErro = 'Senha incorreta.';
-                        break;
-                    case 'auth/invalid-email':
-                        mensagemErro = 'E-mail inválido.';
-                        break;
-                    case 'auth/too-many-requests':
-                        mensagemErro = 'Muitas tentativas. Tente novamente mais tarde.';
-                        break;
-                    case 'auth/network-request-failed':
-                        mensagemErro = 'Erro de conexão. Verifique sua internet.';
-                        break;
-                }
-                
-                mostrarMensagem('erro', mensagemErro);
-                
-                // Reabilitar botão
-                btnLogin.disabled = false;
-                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Entrar';
-            }
-        });
-
-        // Evento: Escolher Cliente
-        btnEscolherCliente.addEventListener('click', async () => {
-            console.log('👤 Cliente escolhido');
-            
-            if (usuarioLogado) {
-                // Atualizar tipo no Firestore
-                await atualizarTipoUsuario(usuarioLogado.uid, 'cliente');
-                // Redirecionar
-                redirecionarParaDashboard('cliente');
-            } else {
-                mostrarMensagem('erro', 'Erro: Usuário não autenticado.');
-            }
-        });
-
-        // Evento: Escolher Profissional
-        btnEscolherProfissional.addEventListener('click', async () => {
-            console.log('👷 Profissional escolhido');
-            
-            if (usuarioLogado) {
-                // Atualizar tipo no Firestore
-                await atualizarTipoUsuario(usuarioLogado.uid, 'profissional');
-                // Redirecionar
-                redirecionarParaDashboard('profissional');
-            } else {
-                mostrarMensagem('erro', 'Erro: Usuário não autenticado.');
-            }
-        });
-
-        // Evento: Esqueci senha
-        esqueciSenha.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email) {
-                mostrarMensagem('erro', 'Digite seu e-mail para redefinir a senha.');
-                return;
-            }
-            
-            try {
-                await sendPasswordResetEmail(auth, email);
-                mostrarMensagem('sucesso', 'E-mail de redefinição enviado! Verifique sua caixa de entrada.');
-            } catch (error) {
-                console.error('Erro ao enviar email:', error);
-                mostrarMensagem('erro', 'Erro ao enviar e-mail. Verifique o endereço digitado.');
-            }
-        });
-
-        // Verificar se veio de cadastro bem-sucedido
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('cadastro') === 'sucesso') {
-            const email = urlParams.get('email');
-            if (email) {
-                document.getElementById('email').value = email;
-                mostrarMensagem('sucesso', 'Cadastro realizado! Faça login para continuar.');
-            }
-        }
-
-        // Verificar se já está logado
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log('✅ Usuário já está logado:', user.uid);
-                // Se já está logado, verifica tipo e redireciona
-                verificarTipoUsuario(user.uid).then(tipo => {
-                    if (tipo) {
-                        setTimeout(() => {
-                            redirecionarParaDashboard(tipo);
-                        }, 1000);
-                    }
-                });
-            }
-        });
-
-        // Focar no campo de email
-        document.getElementById('email').focus();
-
-        console.log('✅ Sistema de login pronto!');
-    </script>
+    // Focar no campo de email
+    document.getElementById('email').focus();
+</script>
 </body>
 </html>
