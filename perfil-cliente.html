@@ -600,7 +600,8 @@
         getFirestore, 
         doc, 
         getDoc,
-        updateDoc 
+        updateDoc,
+        setDoc
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { 
         getStorage,
@@ -663,6 +664,28 @@
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                     carregarDadosUsuario(userData);
+                } else {
+                    // Criar documento se não existir
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        email: user.email,
+                        nomeCompleto: '',
+                        apelido: '',
+                        celular: '',
+                        dataNascimento: '',
+                        idScanHub: '',
+                        fotoPerfil: '',
+                        cpfCnpj: '',
+                        endereco: {},
+                        configuracoes: {
+                            mostrarContato: true
+                        },
+                        verificacao: {
+                            status: 'nao_verificado'
+                        },
+                        dataCriacao: new Date().toISOString(),
+                        ultimaAtualizacao: new Date().toISOString()
+                    });
                 }
             } catch (error) {
                 console.log("Erro ao carregar dados");
@@ -680,25 +703,30 @@
         dataNascimento.value = data.dataNascimento || '';
         idScanHub.value = data.idScanHub || '';
         
-        userName.textContent = data.apelido || 'Usuário';
+        userName.textContent = data.apelido || data.nomeCompleto || 'Usuário';
         userEmail.textContent = data.email || '';
         
-        if (data.fotoPerfil) {
+        // Carregar foto de perfil - MÉTODO CORRIGIDO
+        if (data.fotoPerfil && data.fotoPerfil.trim() !== '') {
             const img = new Image();
-            img.onload = () => {
+            img.onload = function() {
                 avatarDisplay.innerHTML = '';
-                avatarDisplay.appendChild(img);
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '50%';
+                const imgElement = document.createElement('img');
+                imgElement.src = data.fotoPerfil;
+                imgElement.alt = 'Foto de perfil';
+                imgElement.style.width = '100%';
+                imgElement.style.height = '100%';
+                imgElement.style.objectFit = 'cover';
+                imgElement.style.borderRadius = '50%';
+                avatarDisplay.appendChild(imgElement);
             };
-            img.onerror = () => {
-                avatarDisplay.innerHTML = '<i class="fas fa-user"></i>';
+            img.onerror = function() {
+                // Se a imagem não carregar, mostrar inicial ou ícone
+                mostrarAvatarFallback(data);
             };
             img.src = data.fotoPerfil;
-        } else if (data.apelido) {
-            avatarDisplay.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; background: #44689a; color: white; border-radius: 50%;">${data.apelido.charAt(0).toUpperCase()}</div>`;
+        } else {
+            mostrarAvatarFallback(data);
         }
         
         if (data.cpfCnpj) cpfCnpj.value = data.cpfCnpj;
@@ -718,6 +746,18 @@
         
         if (data.verificacao) {
             atualizarStatusVerificacao(data.verificacao);
+        }
+    }
+
+    function mostrarAvatarFallback(data) {
+        if (data.apelido && data.apelido.trim() !== '') {
+            const inicial = data.apelido.charAt(0).toUpperCase();
+            avatarDisplay.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; background: linear-gradient(135deg, #44689a, #33c47); color: white; border-radius: 50%;">${inicial}</div>`;
+        } else if (data.nomeCompleto && data.nomeCompleto.trim() !== '') {
+            const inicial = data.nomeCompleto.charAt(0).toUpperCase();
+            avatarDisplay.innerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; background: linear-gradient(135deg, #44689a, #33c47); color: white; border-radius: 50%;">${inicial}</div>`;
+        } else {
+            avatarDisplay.innerHTML = '<i class="fas fa-user fa-3x" style="color: #666;"></i>';
         }
     }
 
@@ -742,7 +782,7 @@
         }
     }
 
-    // UPLOAD DA FOTO DE PERFIL CORRIGIDO
+    // UPLOAD DA FOTO DE PERFIL - CORRIGIDO PARA SALVAR PERMANENTEMENTE
     avatarInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -759,7 +799,7 @@
         
         // Salvar estado original
         const originalContent = avatarDisplay.innerHTML;
-        avatarDisplay.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+        avatarDisplay.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 50%;"><i class="fas fa-spinner fa-spin fa-2x" style="color: #44689a;"></i></div>';
         
         try {
             const user = auth.currentUser;
@@ -774,23 +814,32 @@
             reader.onload = function(e) {
                 const tempImg = new Image();
                 tempImg.onload = () => {
-                    avatarDisplay.innerHTML = '';
                     const canvas = document.createElement('canvas');
-                    canvas.width = 120;
-                    canvas.height = 120;
+                    canvas.width = 400;
+                    canvas.height = 400;
                     const ctx = canvas.getContext('2d');
                     
-                    // Desenhar círculo
+                    // Criar clipping circular
                     ctx.beginPath();
-                    ctx.arc(60, 60, 60, 0, Math.PI * 2);
+                    ctx.arc(200, 200, 200, 0, Math.PI * 2);
                     ctx.closePath();
                     ctx.clip();
                     
-                    // Desenhar imagem
-                    ctx.drawImage(tempImg, 0, 0, 120, 120);
+                    // Desenhar imagem redimensionada
+                    ctx.drawImage(tempImg, 0, 0, 400, 400);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-                    avatarDisplay.innerHTML = `<img src="${dataUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="Preview">`;
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Atualizar preview
+                    avatarDisplay.innerHTML = '';
+                    const previewImg = document.createElement('img');
+                    previewImg.src = dataUrl;
+                    previewImg.alt = 'Preview da foto';
+                    previewImg.style.width = '100%';
+                    previewImg.style.height = '100%';
+                    previewImg.style.objectFit = 'cover';
+                    previewImg.style.borderRadius = '50%';
+                    avatarDisplay.appendChild(previewImg);
                 };
                 tempImg.src = e.target.result;
             };
@@ -798,42 +847,55 @@
             
             // Preparar arquivo para upload
             const timestamp = Date.now();
-            const fileExtension = file.name.split('.').pop();
-            const fileName = `perfil_${timestamp}.${fileExtension}`;
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            const fileName = `perfil_${user.uid}_${timestamp}.${fileExtension}`;
             
             // Criar referência no Storage
             const storageRef = ref(storage, `usuarios/${user.uid}/perfil/${fileName}`);
             
-            // Fazer upload
+            // Fazer upload do arquivo original
             await uploadBytes(storageRef, file);
             
-            // Obter URL pública
+            // Obter URL pública permanente
             const downloadURL = await getDownloadURL(storageRef);
             
-            // Atualizar no Firestore
+            // Atualizar no Firestore - GARANTIR QUE SALVA
             const userRef = doc(db, "usuarios", user.uid);
             await updateDoc(userRef, {
                 fotoPerfil: downloadURL,
                 ultimaAtualizacao: new Date().toISOString()
             });
             
-            // Atualizar visual com a imagem final
-            const finalImg = new Image();
-            finalImg.onload = () => {
-                avatarDisplay.innerHTML = '';
-                avatarDisplay.appendChild(finalImg);
-                finalImg.style.width = '100%';
-                finalImg.style.height = '100%';
-                finalImg.style.objectFit = 'cover';
-                finalImg.style.borderRadius = '50%';
-            };
-            finalImg.src = downloadURL;
+            // Atualizar localmente
+            userData.fotoPerfil = downloadURL;
             
-            alert('Foto de perfil atualizada com sucesso!');
+            // Atualizar visual com a imagem do Firebase
+            setTimeout(() => {
+                const finalImg = new Image();
+                finalImg.onload = () => {
+                    avatarDisplay.innerHTML = '';
+                    const imgElement = document.createElement('img');
+                    imgElement.src = downloadURL;
+                    imgElement.alt = 'Foto de perfil';
+                    imgElement.style.width = '100%';
+                    imgElement.style.height = '100%';
+                    imgElement.style.objectFit = 'cover';
+                    imgElement.style.borderRadius = '50%';
+                    avatarDisplay.appendChild(imgElement);
+                };
+                finalImg.onerror = () => {
+                    // Se falhar, manter o preview
+                    console.log('Imagem do Firebase não carregou, mantendo preview');
+                };
+                finalImg.src = downloadURL + '?t=' + timestamp; // Forçar cache busting
+            }, 500);
+            
+            alert('✅ Foto de perfil salva com sucesso! Ela será mantida mesmo após sair da conta.');
             
         } catch (error) {
-            avatarDisplay.innerHTML = '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user fa-2x"></i></div>';
-            alert('Erro ao fazer upload da foto. Tente novamente.');
+            console.error('Erro no upload:', error);
+            avatarDisplay.innerHTML = originalContent;
+            alert('❌ Erro ao salvar a foto. Tente novamente.');
         }
     });
 
@@ -864,6 +926,9 @@
             imagePreview.style.maxWidth = '100%';
             imagePreview.style.maxHeight = '200px';
             imagePreview.style.objectFit = 'contain';
+            imagePreview.style.borderRadius = '10px';
+            imagePreview.style.margin = '15px auto';
+            imagePreview.style.display = 'block';
         };
         reader.readAsDataURL(file);
         
@@ -876,14 +941,15 @@
             return;
         }
         
+        const originalContent = btnEnviarVerificacao.innerHTML;
         btnEnviarVerificacao.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
         btnEnviarVerificacao.disabled = true;
         
         try {
             const user = auth.currentUser;
             const timestamp = Date.now();
-            const fileExtension = selectedFile.name.split('.').pop();
-            const fileName = `verificacao_${timestamp}.${fileExtension}`;
+            const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+            const fileName = `verificacao_${user.uid}_${timestamp}.${fileExtension}`;
             
             const storageRef = ref(storage, `usuarios/${user.uid}/verificacao/${fileName}`);
             await uploadBytes(storageRef, selectedFile);
@@ -895,28 +961,29 @@
                     status: 'pendente',
                     dataEnvio: new Date().toISOString(),
                     arquivoUrl: downloadURL,
-                    nomeArquivo: fileName
+                    nomeArquivo: fileName,
+                    dataAprovacao: null,
+                    aprovadoPor: null
                 },
                 ultimaAtualizacao: new Date().toISOString()
             });
             
-            verificationStatus.className = 'verification-status status-pending';
-            verificationStatus.innerHTML = '<i class="fas fa-clock me-2"></i>AGUARDANDO VALIDAÇÃO';
-            uploadArea.style.display = 'none';
-            btnEnviarVerificacao.style.display = 'none';
-            imagePreview.style.display = 'none';
+            // Atualizar dados locais
+            userData.verificacao = {
+                status: 'pendente',
+                dataEnvio: new Date().toISOString(),
+                arquivoUrl: downloadURL,
+                nomeArquivo: fileName
+            };
             
-            document.querySelector('.warning-box').innerHTML = `
-                <i class="fas fa-check-circle text-success"></i>
-                <strong>Documentação enviada com sucesso!</strong> Nossa equipe tem até 48 horas úteis para validar.
-            `;
+            atualizarStatusVerificacao(userData.verificacao);
             
-            alert('Documentação enviada com sucesso!');
+            alert('✅ Documentação enviada com sucesso! Aguarde a validação.');
             
         } catch (error) {
-            btnEnviarVerificacao.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar para Verificação';
+            btnEnviarVerificacao.innerHTML = originalContent;
             btnEnviarVerificacao.disabled = false;
-            alert('Erro ao enviar documentação');
+            alert('❌ Erro ao enviar documentação');
         }
     });
 
@@ -927,8 +994,12 @@
             return;
         }
         
+        const originalValue = logradouro.value;
         logradouro.value = 'Buscando...';
         logradouro.disabled = true;
+        bairro.disabled = true;
+        cidade.disabled = true;
+        estado.disabled = true;
         
         try {
             const response = await fetch(`https://viacep.com.br/ws/${cepValue}/json/`);
@@ -936,7 +1007,7 @@
             
             if (data.erro) {
                 alert('CEP não encontrado');
-                logradouro.value = '';
+                logradouro.value = originalValue;
                 return;
             }
             
@@ -945,13 +1016,16 @@
             cidade.value = data.localidade || '';
             estado.value = data.uf || '';
             
-            numero.focus();
+            setTimeout(() => numero.focus(), 100);
             
         } catch (error) {
             alert('Erro ao buscar CEP');
-            logradouro.value = '';
+            logradouro.value = originalValue;
         } finally {
             logradouro.disabled = false;
+            bairro.disabled = false;
+            cidade.disabled = false;
+            estado.disabled = false;
         }
     });
 
@@ -983,6 +1057,7 @@
             estado: estado.value
         };
         
+        const originalContent = btnSalvarTudo.innerHTML;
         btnSalvarTudo.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
         btnSalvarTudo.disabled = true;
         
@@ -997,12 +1072,19 @@
                 ultimaAtualizacao: new Date().toISOString()
             });
             
-            alert('Dados salvos com sucesso!');
+            // Atualizar dados locais
+            userData.cpfCnpj = cpfCnpj.value || null;
+            userData.endereco = enderecoData;
+            userData.configuracoes = {
+                mostrarContato: mostrarContato.checked
+            };
+            
+            alert('✅ Dados salvos com sucesso!');
             
         } catch (error) {
-            alert('Erro ao salvar dados');
+            alert('❌ Erro ao salvar dados');
         } finally {
-            btnSalvarTudo.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Todas as Alterações';
+            btnSalvarTudo.innerHTML = originalContent;
             btnSalvarTudo.disabled = false;
         }
     });
