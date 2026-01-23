@@ -257,14 +257,15 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK - SCRIPT COMPLETO E CORRIGIDO -->
     <script type="module">
         // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { 
             getAuth, 
             createUserWithEmailAndPassword,
-            updateProfile
+            updateProfile,
+            signOut
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
         import { 
             getFirestore, 
@@ -291,24 +292,43 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        console.log('Firebase inicializado com sucesso!');
+
+        // ========== FUNÇÕES AUXILIARES ==========
+
         // Gerar ID de 7 dígitos único
         async function gerarIdUnico() {
             let idUnico;
+            let tentativas = 0;
+            const maxTentativas = 10;
             let idExiste = true;
             
-            while (idExiste) {
+            while (idExiste && tentativas < maxTentativas) {
                 // Gera número de 7 dígitos (1000000 a 9999999)
                 idUnico = Math.floor(1000000 + Math.random() * 9000000).toString();
                 
                 // Verifica se ID já existe no Firestore
-                const usuariosRef = collection(db, "usuarios");
-                const q = query(usuariosRef, where("idScanHub", "==", idUnico));
-                const querySnapshot = await getDocs(q);
-                
-                idExiste = !querySnapshot.empty;
+                try {
+                    const usuariosRef = collection(db, "usuarios");
+                    const q = query(usuariosRef, where("idScanHub", "==", idUnico));
+                    const querySnapshot = await getDocs(q);
+                    
+                    idExiste = !querySnapshot.empty;
+                    tentativas++;
+                    
+                    if (!idExiste) {
+                        console.log('ID único gerado:', idUnico, '(tentativas:', tentativas, ')');
+                        return idUnico;
+                    }
+                } catch (error) {
+                    console.warn('Erro ao verificar ID único, usando timestamp:', error);
+                    // Em caso de erro, usa timestamp como fallback
+                    return Date.now().toString().slice(-7);
+                }
             }
             
-            return idUnico;
+            // Fallback se não conseguir gerar único
+            return Date.now().toString().slice(-7);
         }
 
         // Validar senha forte
@@ -378,10 +398,29 @@
         }
 
         // Mostrar sucesso
-        function mostrarSucesso() {
-            document.getElementById('successMessage').style.display = 'block';
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = 'block';
             document.getElementById('cadastroForm').style.display = 'none';
         }
+
+        // Validar idade mínima (18 anos)
+        function validarIdade(dataNascimento) {
+            const dataNasc = new Date(dataNascimento);
+            const hoje = new Date();
+            
+            let idade = hoje.getFullYear() - dataNasc.getFullYear();
+            const mes = hoje.getMonth() - dataNasc.getMonth();
+            
+            if (mes < 0 || (mes === 0 && hoje.getDate() < dataNasc.getDate())) {
+                idade--;
+            }
+            
+            return idade >= 18;
+        }
+
+        // ========== EVENT LISTENERS ==========
 
         // Event Listener para senha
         document.getElementById('senha').addEventListener('input', function(e) {
@@ -393,7 +432,8 @@
             e.target.value = formatarCelular(e.target.value);
         });
 
-        // Event Listener para formulário
+        // ========== CADASTRO REAL ==========
+
         document.getElementById('cadastroForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -402,36 +442,44 @@
             const apelido = document.getElementById('apelido').value.trim();
             const dataNascimento = document.getElementById('dataNascimento').value;
             const celular = document.getElementById('celular').value;
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const senha = document.getElementById('senha').value;
             const confirmarSenha = document.getElementById('confirmarSenha').value;
             
-            // Validações
+            // ========== VALIDAÇÕES ==========
+            
+            // 1. Campos obrigatórios
             if (!nomeCompleto || !apelido || !dataNascimento || !celular || !email || !senha) {
                 mostrarErro('Por favor, preencha todos os campos.');
                 return;
             }
             
+            // 2. Senhas conferem
             if (senha !== confirmarSenha) {
                 mostrarErro('As senhas não conferem.');
                 return;
             }
             
+            // 3. Senha forte
             if (!validarSenha(senha)) {
                 mostrarErro('A senha deve ter mínimo 8 caracteres, com letra maiúscula, minúscula e número.');
                 return;
             }
             
-            // Verificar idade mínima (18 anos)
-            const dataNasc = new Date(dataNascimento);
-            const hoje = new Date();
-            const idade = hoje.getFullYear() - dataNasc.getFullYear();
-            const mes = hoje.getMonth() - dataNasc.getMonth();
-            
-            if (idade < 18 || (idade === 18 && mes < 0)) {
+            // 4. Idade mínima
+            if (!validarIdade(dataNascimento)) {
                 mostrarErro('Você deve ter pelo menos 18 anos para se cadastrar.');
                 return;
             }
+            
+            // 5. Celular válido
+            const celularNumeros = celular.replace(/\D/g, '');
+            if (celularNumeros.length < 10 || celularNumeros.length > 11) {
+                mostrarErro('Digite um número de celular válido com DDD.');
+                return;
+            }
+            
+            // ========== PROCESSO DE CADASTRO ==========
             
             // Desabilitar botão durante cadastro
             const btnCadastrar = document.getElementById('btnCadastrar');
@@ -439,47 +487,91 @@
             btnCadastrar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cadastrando...';
             
             try {
-                // 1. Criar usuário no Authentication
+                console.log('🚀 Iniciando cadastro para:', email);
+                
+                // ========== PASSO 1: CRIAR NO AUTHENTICATION ==========
                 const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
                 const user = userCredential.user;
                 
-                // 2. Atualizar nome no perfil do Auth
+                console.log('✅ Usuário criado no Auth. UID:', user.uid);
+                
+                // ========== PASSO 2: ATUALIZAR PERFIL NO AUTH ==========
                 await updateProfile(user, {
                     displayName: apelido
                 });
                 
-                // 3. Gerar ID único de 7 dígitos
+                console.log('✅ Perfil atualizado no Auth');
+                
+                // ========== PASSO 3: GERAR ID ÚNICO ==========
                 const idScanHub = await gerarIdUnico();
+                console.log('✅ ID ScanHub gerado:', idScanHub);
                 
-                // 4. Salvar dados extras no Firestore
-                const userRef = doc(db, "usuarios", user.uid);
-                
-                await setDoc(userRef, {
+                // ========== PASSO 4: PREPARAR DADOS PARA FIRESTORE ==========
+                const userData = {
                     idScanHub: idScanHub,
                     nomeCompleto: nomeCompleto,
                     apelido: apelido,
                     dataNascimento: dataNascimento,
                     celular: celular,
                     email: email,
-                    tipoUsuario: null, // Vazio inicialmente
+                    tipoUsuario: null, // Será definido no primeiro login
                     dataCadastro: new Date().toISOString(),
-                    uid: user.uid
-                });
+                    uid: user.uid,
+                    status: 'ativo',
+                    verificado: false,
+                    ultimaAtualizacao: new Date().toISOString()
+                };
                 
-                // 5. Mostrar sucesso
-                mostrarSucesso();
+                console.log('📦 Dados preparados para Firestore:', userData);
                 
-                // 6. Redirecionar (você decide para onde)
-                setTimeout(() => {
-                    // Por enquanto redireciona para login
-                    // Depois você pode mudar para dashboard ou outra página
-                    window.location.href = 'login.html?cadastro=sucesso';
-                }, 2000);
+                // ========== PASSO 5: SALVAR NO FIRESTORE ==========
+                const userRef = doc(db, "usuarios", user.uid);
+                
+                try {
+                    await setDoc(userRef, userData);
+                    console.log('✅ Dados salvos no Firestore com sucesso!');
+                    
+                    // ========== PASSO 6: SUCESSO ==========
+                    mostrarSucesso('🎉 Cadastro realizado com sucesso! Redirecionando para login...');
+                    
+                    // Pequeno delay para mostrar mensagem
+                    setTimeout(() => {
+                        window.location.href = `login.html?cadastro=sucesso&email=${encodeURIComponent(email)}`;
+                    }, 2000);
+                    
+                } catch (firestoreError) {
+                    console.error('❌ Erro ao salvar no Firestore:', firestoreError);
+                    
+                    // ========== FALLBACK: SE DER ERRO NO FIRESTORE ==========
+                    
+                    // 1. Tentar logout para limpar
+                    try {
+                        await signOut(auth);
+                    } catch (logoutError) {
+                        console.warn('Erro ao fazer logout:', logoutError);
+                    }
+                    
+                    // 2. Informar usuário
+                    mostrarErro('Cadastro parcialmente realizado. Houve um erro ao salvar dados adicionais. Por favor, tente fazer login e complete seu cadastro.');
+                    
+                    // 3. Reabilitar botão
+                    btnCadastrar.disabled = false;
+                    btnCadastrar.innerHTML = '<i class="fas fa-user-plus me-2"></i>Criar Conta';
+                    
+                    // 4. Redirecionar para login
+                    setTimeout(() => {
+                        window.location.href = `login.html?cadastro=parcial&email=${encodeURIComponent(email)}`;
+                    }, 3000);
+                    
+                    return;
+                }
                 
             } catch (error) {
-                console.error('Erro no cadastro:', error);
+                console.error('❌ Erro completo no cadastro:', error);
+                console.error('Código:', error.code);
+                console.error('Mensagem:', error.message);
                 
-                // Mensagens de erro amigáveis
+                // ========== TRATAMENTO DE ERROS ESPECÍFICOS ==========
                 let mensagemErro = 'Erro ao cadastrar. Tente novamente.';
                 
                 switch(error.code) {
@@ -492,9 +584,17 @@
                     case 'auth/weak-password':
                         mensagemErro = 'A senha é muito fraca. Use uma senha mais forte.';
                         break;
+                    case 'auth/operation-not-allowed':
+                        mensagemErro = 'Cadastro por email/senha não está habilitado.';
+                        break;
                     case 'auth/network-request-failed':
                         mensagemErro = 'Erro de conexão. Verifique sua internet.';
                         break;
+                    case 'auth/too-many-requests':
+                        mensagemErro = 'Muitas tentativas. Tente novamente mais tarde.';
+                        break;
+                    default:
+                        mensagemErro = `Erro: ${error.message}`;
                 }
                 
                 mostrarErro(mensagemErro);
@@ -505,10 +605,27 @@
             }
         });
 
-        // Inicializar máscara de celular
-        document.getElementById('celular').value = formatarCelular(document.getElementById('celular').value);
+        // ========== INICIALIZAÇÃO ==========
 
-        console.log('Sistema de cadastro ScanHub carregado!');
+        // Inicializar máscara de celular
+        const celularInput = document.getElementById('celular');
+        if (celularInput.value) {
+            celularInput.value = formatarCelular(celularInput.value);
+        }
+
+        // Configurar data máxima (hoje - 18 anos)
+        const dataInput = document.getElementById('dataNascimento');
+        const hoje = new Date();
+        const dataMinima = new Date(hoje.getFullYear() - 100, hoje.getMonth(), hoje.getDate());
+        const dataMaxima = new Date(hoje.getFullYear() - 18, hoje.getMonth(), hoje.getDate());
+        
+        dataInput.min = dataMinima.toISOString().split('T')[0];
+        dataInput.max = dataMaxima.toISOString().split('T')[0];
+        
+        // Focar no primeiro campo
+        document.getElementById('nomeCompleto').focus();
+
+        console.log('✅ Sistema de cadastro ScanHub carregado e pronto!');
     </script>
 </body>
 </html>
