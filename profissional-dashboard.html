@@ -35,75 +35,120 @@
             line-height: 1.6;
             color: #333;
             background: #f8f9fa;
+            padding-top: 80px;
         }
 
-        /* Navbar Dashboard */
-        .navbar-dashboard {
-            background: white;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            padding: 15px 0;
-        }
-
+        /* Logo Grande */
         .navbar-brand-dashboard {
             display: flex;
             align-items: center;
-            transform: scale(1.8);
+            transform: scale(2.5);
             transform-origin: left center;
-            margin-right: 80px;
+            margin-right: 40px;
         }
 
         .navbar-brand-dashboard img {
-            height: 50px;
+            height: 60px;
             width: auto;
+            object-fit: contain;
         }
 
-        /* Sidebar */
-        .sidebar {
+        /* Navbar Dashboard - Menu no Topo */
+        .navbar-dashboard {
             background: white;
-            min-height: calc(100vh - 80px);
-            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
             position: fixed;
-            width: 250px;
-            padding-top: 30px;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
 
-        .sidebar-menu {
+        /* Menu Principal no Topo */
+        .dashboard-menu {
             list-style: none;
-            padding: 0;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 5px;
-        }
-
-        .sidebar-menu a {
             display: flex;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-menu li {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dashboard-menu a {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 15px 25px;
+            padding: 15px 10px;
             color: var(--dark-color);
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
-            border-left: 4px solid transparent;
+            border-radius: 10px;
+            background: transparent;
+            text-align: center;
         }
 
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: rgba(68, 104, 154, 0.05);
+        .dashboard-menu a:hover,
+        .dashboard-menu a.active {
+            background: rgba(68, 104, 154, 0.1);
             color: var(--primary-color);
-            border-left: 4px solid var(--primary-color);
+            transform: translateY(-2px);
         }
 
-        .sidebar-menu i {
-            width: 25px;
-            margin-right: 15px;
+        .dashboard-menu i {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-menu span {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        /* User Info Compacto */
+        .user-info-mobile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.2rem;
+            font-weight: 600;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-details h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-details small {
+            color: #666;
+            font-size: 0.75rem;
         }
 
         /* Main Content */
         .main-content {
-            margin-left: 250px;
-            padding: 30px;
+            padding: 20px;
             min-height: calc(100vh - 80px);
         }
 
@@ -111,157 +156,394 @@
             background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             color: white;
             border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 25px;
+            margin-bottom: 25px;
             box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
         }
 
         .welcome-card h1 {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             margin-bottom: 10px;
         }
 
         .welcome-card p {
             opacity: 0.9;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            margin-bottom: 0;
         }
 
         /* Content Areas */
         .content-area {
             background: white;
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .content-area.active {
             display: block;
         }
 
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            color: #FF6B35;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Botões de Ação */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary-action {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+        }
+
+        .btn-secondary-action {
+            background: #f8f9fa;
+            color: var(--dark-color);
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Placeholder Content */
         .content-placeholder {
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
             color: #666;
         }
 
         .content-placeholder i {
-            font-size: 4rem;
+            font-size: 3rem;
             color: #ddd;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        .content-placeholder h3 {
+        .content-placeholder h4 {
             color: #999;
             font-weight: 400;
             margin-bottom: 10px;
         }
 
-        /* User Info */
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #FF6B35;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Botão Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
             font-size: 1.5rem;
-            font-weight: 600;
+            color: var(--dark-color);
+            padding: 5px 10px;
         }
 
-        .user-details h5 {
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .user-details small {
-            color: #666;
-        }
-
-        /* Responsivo */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 70px;
-                padding-top: 20px;
-            }
-            
-            .sidebar-menu span {
-                display: none;
-            }
-            
-            .sidebar-menu i {
-                margin-right: 0;
-                font-size: 1.4rem;
-            }
-            
-            .sidebar-menu a {
-                padding: 20px;
-                justify-content: center;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-            }
-            
+        /* Responsivo - MOBILE FIRST */
+        @media (max-width: 1200px) {
             .navbar-brand-dashboard {
-                transform: scale(1.5);
+                transform: scale(2);
+            }
+            
+            .dashboard-menu a {
+                font-size: 0.8rem;
+                padding: 12px 8px;
+            }
+            
+            .dashboard-menu i {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.8);
+                margin-right: 20px;
+            }
+            
+            .dashboard-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 20px 20px;
+                display: none;
+                z-index: 999;
+            }
+            
+            .dashboard-menu.show {
+                display: flex;
+            }
+            
+            .dashboard-menu li {
+                width: 100%;
+            }
+            
+            .dashboard-menu a {
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 15px;
+                font-size: 1rem;
+                text-align: left;
+            }
+            
+            .dashboard-menu i {
+                margin-right: 15px;
+                margin-bottom: 0;
+                width: 25px;
+                text-align: center;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .user-info-mobile {
+                margin-left: 0;
             }
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                display: none;
+            body {
+                padding-top: 70px;
+            }
+            
+            .navbar-brand-dashboard {
+                transform: scale(1.6);
             }
             
             .main-content {
-                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .welcome-card {
                 padding: 20px;
             }
             
             .welcome-card h1 {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
+            
+            .content-area {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.4);
+            }
+            
+            .welcome-card h1 {
+                font-size: 1.4rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .content-area {
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-action {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.2);
+            }
+            
+            .user-details h5 {
+                font-size: 0.8rem;
+            }
+            
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Loading */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #FF6B35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Status Indicators */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+        }
+
+        .status-pending {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar Dashboard -->
+    <!-- Loading -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar Dashboard com Menu no Topo -->
     <nav class="navbar navbar-dashboard">
         <div class="container-fluid">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center w-100">
+                <!-- Logo Grande -->
                 <a class="navbar-brand-dashboard" href="#">
                     <img src="logoscanhub.png" alt="ScanHub">
                 </a>
-                
-                <div class="user-info ms-4">
+
+                <!-- Botão Menu Mobile -->
+                <button class="mobile-menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- User Info Mobile -->
+                <div class="user-info-mobile">
                     <div class="user-avatar" id="userAvatar">?</div>
-                    <div class="user-details">
+                    <div class="user-details d-none d-md-block">
                         <h5 id="userName">Carregando...</h5>
                         <small>ID: <span id="userId">---</span></small>
                     </div>
                 </div>
-            </div>
-            
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-danger" id="btnLogout">
-                    <i class="fas fa-sign-out-alt me-2"></i>Sair
+
+                <!-- Botão Logout -->
+                <button class="btn btn-outline-danger btn-sm ms-3" id="btnLogout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-md-inline">Sair</span>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <ul class="sidebar-menu">
+    <!-- Menu Dashboard Horizontal -->
+    <div class="container-fluid">
+        <ul class="dashboard-menu" id="dashboardMenu">
             <li>
                 <a href="#" class="active" data-page="dashboard">
                     <i class="fas fa-home"></i>
@@ -271,13 +553,13 @@
             <li>
                 <a href="#" data-page="perfil">
                     <i class="fas fa-user"></i>
-                    <span>Meu Perfil Profissional</span>
+                    <span>Perfil</span>
                 </a>
             </li>
             <li>
                 <a href="#" data-page="clientes">
                     <i class="fas fa-users"></i>
-                    <span>Meus Clientes</span>
+                    <span>Clientes</span>
                 </a>
             </li>
             <li>
@@ -293,9 +575,9 @@
                 </a>
             </li>
             <li>
-                <a href="#" data-page="assinatura">
-                    <i class="fas fa-crown"></i>
-                    <span>Assinatura</span>
+                <a href="#" data-page="servicos">
+                    <i class="fas fa-tools"></i>
+                    <span>Serviços</span>
                 </a>
             </li>
             <li>
@@ -305,15 +587,9 @@
                 </a>
             </li>
             <li>
-                <a href="#" data-page="servicos">
-                    <i class="fas fa-tools"></i>
-                    <span>Meus Serviços</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="clausulas">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Cláusulas/Termos</span>
+                <a href="#" data-page="assinatura">
+                    <i class="fas fa-crown"></i>
+                    <span>Assinatura</span>
                 </a>
             </li>
             <li>
@@ -330,96 +606,140 @@
         <!-- Welcome Card -->
         <div class="welcome-card">
             <h1 id="welcomeName">Bem-vindo, Profissional! 👷</h1>
-            <p>Área do profissional - Gerencie seus serviços, clientes e finanças.</p>
+            <p id="welcomeMessage">Área do profissional - Gerencie seus serviços, clientes e finanças.</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-clipboard-check"></i>
+                <h3 id="totalPedidos">0</h3>
+                <p>Pedidos Ativos</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <h3 id="totalClientes">0</h3>
+                <p>Clientes</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-star"></i>
+                <h3 id="avaliacaoMedia">0.0</h3>
+                <p>Avaliação</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-wallet"></i>
+                <h3 id="receitaTotal">R$ 0</h3>
+                <p>Receita</p>
+            </div>
+        </div>
+
+        <!-- Botões de Ação Rápidos -->
+        <div class="action-buttons">
+            <button class="btn-action btn-primary-action" id="btnNovoServico">
+                <i class="fas fa-plus"></i>
+                Novo Serviço
+            </button>
+            <button class="btn-action btn-secondary-action" id="btnVerAgenda">
+                <i class="fas fa-calendar-alt"></i>
+                Ver Agenda
+            </button>
+            <button class="btn-action btn-secondary-action" id="btnFinanceiro">
+                <i class="fas fa-chart-line"></i>
+                Financeiro
+            </button>
         </div>
 
         <!-- Dashboard Content -->
         <div id="pageDashboard" class="content-area active">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0">Atividade Recente</h4>
+                <span class="status-badge status-active" id="statusProfissional">Ativo</span>
+            </div>
+            
             <div class="content-placeholder">
                 <i class="fas fa-tools"></i>
-                <h3>Dashboard do Profissional</h3>
-                <p>Seu painel de controle. Aqui aparecerão seus indicadores e atividades recentes.</p>
+                <h4>Dashboard do Profissional</h4>
+                <p class="text-muted">Aqui aparecerão seus indicadores e atividades recentes</p>
             </div>
         </div>
 
         <!-- Perfil Profissional -->
         <div id="pagePerfil" class="content-area">
+            <h4 class="mb-4">Perfil Profissional</h4>
             <div class="content-placeholder">
-                <i class="fas fa-user"></i>
-                <h3>Meu Perfil Profissional</h3>
-                <p>Configure seu perfil profissional, especialidades e portfólio.</p>
+                <i class="fas fa-user-circle"></i>
+                <h4>Configure seu perfil</h4>
+                <p class="text-muted">Adicione especialidades, portfólio e informações profissionais</p>
             </div>
         </div>
 
         <!-- Meus Clientes -->
         <div id="pageClientes" class="content-area">
+            <h4 class="mb-4">Meus Clientes</h4>
             <div class="content-placeholder">
                 <i class="fas fa-users"></i>
-                <h3>Meus Clientes</h3>
-                <p>Gerencie sua lista de clientes e histórico de atendimentos.</p>
+                <h4>Gerencie seus clientes</h4>
+                <p class="text-muted">Visualize e gerencie sua base de clientes</p>
             </div>
         </div>
 
         <!-- Financeiro -->
         <div id="pageFinanceiro" class="content-area">
+            <h4 class="mb-4">Financeiro</h4>
             <div class="content-placeholder">
                 <i class="fas fa-chart-line"></i>
-                <h3>Financeiro</h3>
-                <p>Controle suas finanças, pagamentos e relatórios.</p>
+                <h4>Controle financeiro</h4>
+                <p class="text-muted">Acompanhe suas finanças e relatórios</p>
             </div>
         </div>
 
         <!-- Agenda -->
         <div id="pageAgenda" class="content-area">
+            <h4 class="mb-4">Agenda</h4>
             <div class="content-placeholder">
                 <i class="fas fa-calendar-alt"></i>
-                <h3>Agenda</h3>
-                <p>Gerencie seus agendamentos e disponibilidade.</p>
-            </div>
-        </div>
-
-        <!-- Assinatura -->
-        <div id="pageAssinatura" class="content-area">
-            <div class="content-placeholder">
-                <i class="fas fa-crown"></i>
-                <h3>Sistema de Assinatura</h3>
-                <p>Gerencie sua assinatura e benefícios da plataforma.</p>
-            </div>
-        </div>
-
-        <!-- Pedidos -->
-        <div id="pagePedidos" class="content-area">
-            <div class="content-placeholder">
-                <i class="fas fa-clipboard-list"></i>
-                <h3>Pedidos</h3>
-                <p>Visualize e gerencie seus pedidos de serviço.</p>
+                <h4>Gerencie sua agenda</h4>
+                <p class="text-muted">Organize seus agendamentos e disponibilidade</p>
             </div>
         </div>
 
         <!-- Meus Serviços -->
         <div id="pageServicos" class="content-area">
+            <h4 class="mb-4">Meus Serviços</h4>
             <div class="content-placeholder">
                 <i class="fas fa-tools"></i>
-                <h3>Meus Serviços</h3>
-                <p>Cadastre e gerencie os serviços que você oferece.</p>
+                <h4>Serviços oferecidos</h4>
+                <p class="text-muted">Cadastre e gerencie os serviços que você oferece</p>
             </div>
         </div>
 
-        <!-- Cláusulas/Termos -->
-        <div id="pageClausulas" class="content-area">
+        <!-- Pedidos -->
+        <div id="pagePedidos" class="content-area">
+            <h4 class="mb-4">Pedidos</h4>
             <div class="content-placeholder">
-                <i class="fas fa-file-contract"></i>
-                <h3>Cláusulas e Termos</h3>
-                <p>Configure seus termos de serviço e cláusulas contratuais.</p>
+                <i class="fas fa-clipboard-list"></i>
+                <h4>Pedidos de serviço</h4>
+                <p class="text-muted">Visualize e gerencie seus pedidos</p>
+            </div>
+        </div>
+
+        <!-- Assinatura -->
+        <div id="pageAssinatura" class="content-area">
+            <h4 class="mb-4">Assinatura</h4>
+            <div class="content-placeholder">
+                <i class="fas fa-crown"></i>
+                <h4>Sistema de assinatura</h4>
+                <p class="text-muted">Gerencie sua assinatura na plataforma</p>
             </div>
         </div>
 
         <!-- Configurações -->
         <div id="pageConfiguracoes" class="content-area">
+            <h4 class="mb-4">Configurações</h4>
             <div class="content-placeholder">
                 <i class="fas fa-cog"></i>
-                <h3>Configurações</h3>
-                <p>Configure suas preferências e notificações.</p>
+                <h4>Configurações da conta</h4>
+                <p class="text-muted">Personalize suas preferências e notificações</p>
             </div>
         </div>
     </div>
@@ -459,9 +779,28 @@
         const userAvatar = document.getElementById('userAvatar');
         const userId = document.getElementById('userId');
         const welcomeName = document.getElementById('welcomeName');
+        const welcomeMessage = document.getElementById('welcomeMessage');
         const btnLogout = document.getElementById('btnLogout');
-        const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+        const menuToggle = document.getElementById('menuToggle');
+        const dashboardMenu = document.getElementById('dashboardMenu');
+        const menuLinks = document.querySelectorAll('.dashboard-menu a');
         const contentAreas = document.querySelectorAll('.content-area');
+        const loader = document.getElementById('loader');
+
+        // Elementos de estatísticas
+        const totalPedidos = document.getElementById('totalPedidos');
+        const totalClientes = document.getElementById('totalClientes');
+        const avaliacaoMedia = document.getElementById('avaliacaoMedia');
+        const receitaTotal = document.getElementById('receitaTotal');
+        const statusProfissional = document.getElementById('statusProfissional');
+
+        // Botões de ação
+        const btnNovoServico = document.getElementById('btnNovoServico');
+        const btnVerAgenda = document.getElementById('btnVerAgenda');
+        const btnFinanceiro = document.getElementById('btnFinanceiro');
+
+        // Estado da aplicação
+        let userData = null;
 
         // Carregar dados do usuário
         onAuthStateChanged(auth, async (user) => {
@@ -472,28 +811,49 @@
                     const userDoc = await getDoc(userRef);
                     
                     if (userDoc.exists()) {
-                        const userData = userDoc.data();
+                        userData = userDoc.data();
+                        atualizarInterfaceUsuario(userData);
                         
-                        // Atualizar interface
-                        userName.textContent = `Olá, ${userData.apelido || 'Profissional'}`;
-                        welcomeName.textContent = `Bem-vindo, ${userData.apelido || 'Profissional'}! 👷`;
-                        userId.textContent = userData.idScanHub || '---';
+                        // Esconder loader
+                        setTimeout(() => {
+                            loader.classList.add('hide');
+                        }, 500);
                         
-                        // Inicial do apelido no avatar
-                        if (userData.apelido) {
-                            userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
-                        }
                     } else {
-                        console.log('Documento do usuário não encontrado');
+                        loader.classList.add('hide');
                     }
                 } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
+                    loader.classList.add('hide');
                 }
             } else {
-                // Usuário não logado, redirecionar para login
                 window.location.href = 'login.html';
             }
         });
+
+        // Atualizar interface com dados do usuário
+        function atualizarInterfaceUsuario(data) {
+            if (data.apelido) {
+                userName.textContent = `Olá, ${data.apelido}`;
+                welcomeName.textContent = `Bem-vindo, ${data.apelido}! 👷`;
+                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+            }
+            
+            if (data.idScanHub) {
+                userId.textContent = data.idScanHub;
+            }
+            
+            // Atualizar status profissional se existir
+            if (data.status) {
+                statusProfissional.textContent = data.status;
+                statusProfissional.className = 'status-badge status-active';
+                
+                if (data.status === 'Inativo' || data.status === 'Suspenso') {
+                    statusProfissional.className = 'status-badge status-inactive';
+                } else if (data.status === 'Pendente') {
+                    statusProfissional.className = 'status-badge status-pending';
+                }
+            }
+        }
 
         // Logout
         btnLogout.addEventListener('click', async () => {
@@ -501,18 +861,40 @@
                 await signOut(auth);
                 window.location.href = 'login.html';
             } catch (error) {
-                console.error('Erro ao fazer logout:', error);
                 alert('Erro ao sair. Tente novamente.');
             }
         });
 
+        // Toggle Menu Mobile
+        menuToggle.addEventListener('click', () => {
+            dashboardMenu.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (dashboardMenu.classList.contains('show')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Fechar menu ao clicar fora (mobile)
+        document.addEventListener('click', (e) => {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
         // Navegação entre páginas
-        sidebarLinks.forEach(link => {
+        menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 
                 // Remover active de todos
-                sidebarLinks.forEach(l => l.classList.remove('active'));
+                menuLinks.forEach(l => l.classList.remove('active'));
                 contentAreas.forEach(area => area.classList.remove('active'));
                 
                 // Adicionar active no clicado
@@ -520,11 +902,46 @@
                 
                 // Mostrar conteúdo correspondente
                 const page = link.getAttribute('data-page');
-                document.getElementById(`page${page.charAt(0).toUpperCase() + page.slice(1)}`).classList.add('active');
+                const pageId = `page${page.charAt(0).toUpperCase() + page.slice(1)}`;
+                const targetPage = document.getElementById(pageId);
+                
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+                
+                // Fechar menu no mobile
+                if (window.innerWidth <= 992) {
+                    dashboardMenu.classList.remove('show');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
             });
         });
 
-        console.log('Dashboard Profissional carregado!');
+        // Botões de ação rápida
+        btnNovoServico.addEventListener('click', () => {
+            document.querySelector('[data-page="servicos"]').click();
+        });
+
+        btnVerAgenda.addEventListener('click', () => {
+            document.querySelector('[data-page="agenda"]').click();
+        });
+
+        btnFinanceiro.addEventListener('click', () => {
+            document.querySelector('[data-page="financeiro"]').click();
+        });
+
+        // Inicializar estatísticas como vazias
+        function inicializarEstatisticas() {
+            totalPedidos.textContent = '0';
+            totalClientes.textContent = '0';
+            avaliacaoMedia.textContent = '0.0';
+            receitaTotal.textContent = 'R$ 0';
+        }
+
+        // Chamar inicialização
+        inicializarEstatisticas();
     </script>
 </body>
 </html>
