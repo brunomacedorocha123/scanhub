@@ -97,6 +97,23 @@
             background: #f0f7ff;
         }
 
+        .btn-remove-avatar {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-remove-avatar:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
         .section-card {
             background: white;
             border-radius: 15px;
@@ -291,6 +308,34 @@
             display: none;
         }
 
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #44689a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .container-main {
                 padding: 0 15px;
@@ -320,6 +365,11 @@
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg bg-white shadow-sm">
         <div class="container">
@@ -350,6 +400,9 @@
                     <i class="fas fa-camera me-2"></i>Alterar Foto
                     <input type="file" id="avatarInput" accept="image/*" style="display: none;">
                 </label>
+                <button class="btn-remove-avatar" id="btnRemoverFoto" style="display: none;">
+                    <i class="fas fa-trash me-2"></i>Remover Foto
+                </button>
             </div>
         </div>
 
@@ -623,6 +676,7 @@
         // Elementos DOM
         const avatarDisplay = document.getElementById('avatarDisplay');
         const avatarInput = document.getElementById('avatarInput');
+        const btnRemoverFoto = document.getElementById('btnRemoverFoto');
         const userName = document.getElementById('userName');
         const userEmail = document.getElementById('userEmail');
         const nomeCompleto = document.getElementById('nomeCompleto');
@@ -646,74 +700,59 @@
         const verificationStatus = document.getElementById('verificationStatus');
         const btnEnviarVerificacao = document.getElementById('btnEnviarVerificacao');
         const btnSalvarTudo = document.getElementById('btnSalvarTudo');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         let userData = null;
         let selectedFile = null;
-        let fotoAnteriorBase64 = null;
 
-        // ========== FUNÇÃO PARA PROCESSAR IMAGEM ==========
+        // ========== FUNÇÕES UTILITÁRIAS ==========
 
-        function processarImagemParaBase64(arquivo) {
-            return new Promise((resolve, reject) => {
-                if (!arquivo || !arquivo.type.startsWith('image/')) {
-                    reject('Por favor, selecione uma imagem válida (JPG, PNG, etc)');
-                    return;
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showAlert(mensagem, tipo = 'info') {
+            alert(mensagem);
+        }
+
+        // ========== FUNÇÃO DE UPLOAD PARA POSTIMAGES ==========
+
+        async function uploadParaPostImages(arquivo) {
+            showLoading();
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', arquivo);
+                
+                // Enviar para PostImages (NÃO PRECISA DE CONTA)
+                const resposta = await fetch('https://postimages.org/json/rr', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!resposta.ok) {
+                    throw new Error('Erro ao enviar imagem');
                 }
-
-                if (arquivo.size > 2 * 1024 * 1024) {
-                    reject('A imagem é muito grande. Tamanho máximo: 2MB');
-                    return;
+                
+                const dados = await resposta.json();
+                
+                if (!dados.url) {
+                    throw new Error('URL não recebida do servidor');
                 }
-
-                const leitor = new FileReader();
                 
-                leitor.onload = function(evento) {
-                    // Comprimir a imagem
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Redimensionar para máximo 400x400
-                        const tamanhoMaximo = 400;
-                        let largura = img.width;
-                        let altura = img.height;
-                        
-                        if (largura > altura) {
-                            if (largura > tamanhoMaximo) {
-                                altura *= tamanhoMaximo / largura;
-                                largura = tamanhoMaximo;
-                            }
-                        } else {
-                            if (altura > tamanhoMaximo) {
-                                largura *= tamanhoMaximo / altura;
-                                altura = tamanhoMaximo;
-                            }
-                        }
-                        
-                        canvas.width = largura;
-                        canvas.height = altura;
-                        ctx.drawImage(img, 0, 0, largura, altura);
-                        
-                        // Converter para JPEG com 80% de qualidade
-                        const base64Comprimido = canvas.toDataURL('image/jpeg', 0.8);
-                        resolve(base64Comprimido);
-                    };
-                    
-                    img.onerror = function() {
-                        // Se não conseguir comprimir, usar o original
-                        resolve(evento.target.result);
-                    };
-                    
-                    img.src = evento.target.result;
-                };
+                console.log('✅ Upload bem-sucedido:', dados.url);
+                return dados.url;
                 
-                leitor.onerror = function() {
-                    reject('Erro ao ler a imagem');
-                };
-                
-                leitor.readAsDataURL(arquivo);
-            });
+            } catch (erro) {
+                console.error('❌ Erro no upload:', erro);
+                throw new Error('Falha ao enviar imagem para o servidor');
+            } finally {
+                hideLoading();
+            }
         }
 
         // ========== CARREGAR DADOS DO USUÁRIO ==========
@@ -721,16 +760,18 @@
         onAuthStateChanged(auth, async (usuario) => {
             if (usuario) {
                 try {
+                    showLoading();
                     const userRef = doc(db, "usuarios", usuario.uid);
                     const userDoc = await getDoc(userRef);
                     
                     if (userDoc.exists()) {
                         userData = userDoc.data();
-                        fotoAnteriorBase64 = userData.fotoPerfil || null;
                         mostrarDadosUsuario(userData);
                     }
                 } catch (erro) {
                     console.error("Erro ao carregar dados:", erro);
+                } finally {
+                    hideLoading();
                 }
             } else {
                 window.location.href = 'login.html';
@@ -749,8 +790,8 @@
             userName.textContent = dados.apelido || dados.nomeCompleto?.split(' ')[0] || 'Usuário';
             userEmail.textContent = dados.email || '';
             
-            // Carregar foto de perfil
-            if (dados.fotoPerfil && dados.fotoPerfil.startsWith('data:image')) {
+            // Carregar foto de perfil (AGORA É APENAS URL)
+            if (dados.fotoPerfil && dados.fotoPerfil.startsWith('http')) {
                 avatarDisplay.innerHTML = '';
                 const img = document.createElement('img');
                 img.src = dados.fotoPerfil;
@@ -759,9 +800,21 @@
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
                 img.style.borderRadius = '50%';
+                
+                img.onload = () => {
+                    console.log('Foto carregada do PostImages');
+                };
+                
+                img.onerror = () => {
+                    console.log('Erro ao carregar foto do PostImages');
+                    mostrarAvatarPadrao(dados);
+                };
+                
                 avatarDisplay.appendChild(img);
+                btnRemoverFoto.style.display = 'inline-block';
             } else {
                 mostrarAvatarPadrao(dados);
+                btnRemoverFoto.style.display = 'none';
             }
             
             // Dados complementares
@@ -839,67 +892,106 @@
             const arquivo = e.target.files[0];
             if (!arquivo) return;
             
-            // Guardar o estado atual antes de alterar
+            // Validações
+            if (!arquivo.type.startsWith('image/')) {
+                showAlert('Selecione uma imagem válida (JPG, PNG, etc)', 'error');
+                return;
+            }
+            
+            if (arquivo.size > 10 * 1024 * 1024) {
+                showAlert('A imagem deve ter no máximo 10MB', 'error');
+                return;
+            }
+            
+            // Salvar estado atual
             const estadoAtual = avatarDisplay.innerHTML;
             
+            // Mostrar preview local (rápido)
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                avatarDisplay.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Preview';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+                avatarDisplay.appendChild(img);
+            };
+            leitor.readAsDataURL(arquivo);
+            
             try {
-                // Mostrar preview imediato
-                const leitorPreview = new FileReader();
-                leitorPreview.onload = function(evento) {
-                    avatarDisplay.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = evento.target.result;
-                    img.alt = 'Preview';
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '50%';
-                    avatarDisplay.appendChild(img);
-                };
-                leitorPreview.readAsDataURL(arquivo);
-                
                 const usuario = auth.currentUser;
                 if (!usuario) {
-                    alert('Usuário não autenticado');
+                    showAlert('Usuário não autenticado', 'error');
                     avatarDisplay.innerHTML = estadoAtual;
                     return;
                 }
                 
-                // Processar imagem para base64
-                const base64Imagem = await processarImagemParaBase64(arquivo);
+                // 1. Upload para PostImages
+                const imageUrl = await uploadParaPostImages(arquivo);
                 
-                // Salvar no Firestore
+                // 2. Salvar APENAS A URL no Firestore (poucos bytes!)
                 const userRef = doc(db, "usuarios", usuario.uid);
                 await updateDoc(userRef, {
-                    fotoPerfil: base64Imagem,
+                    fotoPerfil: imageUrl,
                     ultimaAtualizacao: new Date().toISOString()
                 });
                 
-                // Atualizar localmente
-                userData.fotoPerfil = base64Imagem;
-                fotoAnteriorBase64 = base64Imagem;
+                // 3. Atualizar localmente
+                userData.fotoPerfil = imageUrl;
+                btnRemoverFoto.style.display = 'inline-block';
                 
-                alert('✅ Foto de perfil salva com sucesso!');
+                showAlert('✅ Foto de perfil salva com sucesso!', 'success');
                 
             } catch (erro) {
                 console.error('Erro ao salvar foto:', erro);
                 
                 // Restaurar estado anterior
-                if (fotoAnteriorBase64) {
-                    avatarDisplay.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = fotoAnteriorBase64;
-                    img.alt = 'Foto anterior';
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '50%';
-                    avatarDisplay.appendChild(img);
-                } else {
-                    avatarDisplay.innerHTML = estadoAtual;
+                avatarDisplay.innerHTML = estadoAtual;
+                
+                showAlert('❌ Erro ao salvar a foto: ' + erro.message, 'error');
+            }
+        });
+
+        // ========== REMOVER FOTO DE PERFIL ==========
+
+        btnRemoverFoto.addEventListener('click', async () => {
+            if (!confirm('Tem certeza que deseja remover sua foto de perfil?')) {
+                return;
+            }
+            
+            try {
+                const usuario = auth.currentUser;
+                if (!usuario) {
+                    showAlert('Usuário não autenticado', 'error');
+                    return;
                 }
                 
-                alert('❌ ' + erro);
+                showLoading();
+                
+                // 1. Remover URL do Firestore
+                const userRef = doc(db, "usuarios", usuario.uid);
+                await updateDoc(userRef, {
+                    fotoPerfil: null,
+                    ultimaAtualizacao: new Date().toISOString()
+                });
+                
+                // 2. Atualizar localmente
+                userData.fotoPerfil = null;
+                
+                // 3. Mostrar avatar padrão
+                mostrarAvatarPadrao(userData);
+                btnRemoverFoto.style.display = 'none';
+                
+                showAlert('✅ Foto de perfil removida com sucesso!', 'success');
+                
+            } catch (erro) {
+                console.error('Erro ao remover foto:', erro);
+                showAlert('❌ Erro ao remover foto', 'error');
+            } finally {
+                hideLoading();
             }
         });
 
@@ -909,24 +1001,22 @@
             documentPhoto.click();
         });
 
-        documentPhoto.addEventListener('change', async (e) => {
+        documentPhoto.addEventListener('change', (e) => {
             const arquivo = e.target.files[0];
             if (!arquivo) return;
             
-            // Validações
             if (!arquivo.type.startsWith('image/')) {
-                alert('Por favor, selecione uma imagem');
+                showAlert('Selecione uma imagem válida', 'error');
                 return;
             }
             
-            if (arquivo.size > 2 * 1024 * 1024) {
-                alert('A imagem deve ter no máximo 2MB');
+            if (arquivo.size > 10 * 1024 * 1024) {
+                showAlert('A imagem deve ter no máximo 10MB', 'error');
                 return;
             }
             
             selectedFile = arquivo;
             
-            // Mostrar preview
             const leitor = new FileReader();
             leitor.onload = (e) => {
                 imagePreview.src = e.target.result;
@@ -944,7 +1034,7 @@
 
         btnEnviarVerificacao.addEventListener('click', async () => {
             if (!selectedFile) {
-                alert('Selecione uma foto primeiro');
+                showAlert('Selecione uma foto primeiro', 'error');
                 return;
             }
             
@@ -954,33 +1044,33 @@
             try {
                 const usuario = auth.currentUser;
                 
-                // Converter imagem para base64
-                const base64Documento = await processarImagemParaBase64(selectedFile);
+                // 1. Upload para PostImages
+                const imageUrl = await uploadParaPostImages(selectedFile);
                 
-                // Salvar no Firestore
+                // 2. Salvar APENAS A URL no Firestore
                 const userRef = doc(db, "usuarios", usuario.uid);
                 await updateDoc(userRef, {
                     verificacao: {
                         status: 'pendente',
                         dataEnvio: new Date().toISOString(),
-                        arquivoBase64: base64Documento
+                        arquivoUrl: imageUrl // APENAS URL!
                     },
                     ultimaAtualizacao: new Date().toISOString()
                 });
                 
-                // Atualizar localmente
+                // 3. Atualizar localmente
                 userData.verificacao = {
                     status: 'pendente',
                     dataEnvio: new Date().toISOString(),
-                    arquivoBase64: base64Documento
+                    arquivoUrl: imageUrl
                 };
                 
                 atualizarStatusVerificacao(userData.verificacao);
-                alert('✅ Documentação enviada para verificação!');
+                showAlert('✅ Documentação enviada para verificação!', 'success');
                 
             } catch (erro) {
                 console.error('Erro ao enviar verificação:', erro);
-                alert('❌ ' + erro);
+                showAlert('❌ Erro ao enviar documentação: ' + erro.message, 'error');
                 btnEnviarVerificacao.disabled = false;
                 btnEnviarVerificacao.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar para Verificação';
             }
@@ -990,26 +1080,27 @@
 
         btnSalvarTudo.addEventListener('click', async () => {
             if (!auth.currentUser) {
-                alert('Você precisa estar logado para salvar');
+                showAlert('Você precisa estar logado para salvar', 'error');
                 return;
             }
             
             // Validação de CPF/CNPJ
             const valorDoc = cpfCnpj.value.replace(/\D/g, '');
             if (valorDoc && (valorDoc.length !== 11 && valorDoc.length !== 14)) {
-                alert('CPF deve ter 11 dígitos ou CNPJ 14 dígitos');
+                showAlert('CPF deve ter 11 dígitos ou CNPJ 14 dígitos', 'error');
                 cpfCnpj.focus();
                 return;
             }
             
             // Validação de endereço
             if (!cep.value || !logradouro.value || !numero.value || !cidade.value || !estado.value) {
-                alert('Preencha todos os campos obrigatórios do endereço');
+                showAlert('Preencha todos os campos obrigatórios do endereço', 'error');
                 return;
             }
             
-            btnSalvarTudo.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+            showLoading();
             btnSalvarTudo.disabled = true;
+            btnSalvarTudo.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
             
             try {
                 const dadosEndereco = {
@@ -1039,14 +1130,15 @@
                     mostrarContato: mostrarContato.checked
                 };
                 
-                alert('✅ Dados salvos com sucesso!');
+                showAlert('✅ Dados salvos com sucesso!', 'success');
                 
             } catch (erro) {
                 console.error('Erro ao salvar dados:', erro);
-                alert('❌ Erro ao salvar dados');
+                showAlert('❌ Erro ao salvar dados', 'error');
             } finally {
-                btnSalvarTudo.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Todas as Alterações';
+                hideLoading();
                 btnSalvarTudo.disabled = false;
+                btnSalvarTudo.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Todas as Alterações';
             }
         });
 
@@ -1056,16 +1148,14 @@
             const cepValor = cep.value.replace(/\D/g, '');
             if (cepValor.length !== 8) return;
             
-            logradouro.value = 'Buscando...';
-            logradouro.disabled = true;
+            showLoading();
             
             try {
                 const resposta = await fetch(`https://viacep.com.br/ws/${cepValor}/json/`);
                 const dados = await resposta.json();
                 
                 if (dados.erro) {
-                    alert('CEP não encontrado');
-                    logradouro.value = '';
+                    showAlert('CEP não encontrado', 'error');
                     return;
                 }
                 
@@ -1077,10 +1167,9 @@
                 numero.focus();
                 
             } catch (erro) {
-                alert('Erro ao buscar CEP');
-                logradouro.value = '';
+                showAlert('Erro ao buscar CEP', 'error');
             } finally {
-                logradouro.disabled = false;
+                hideLoading();
             }
         });
 
@@ -1138,6 +1227,35 @@
                 documentPhoto.dispatchEvent(changeEvent);
             }
         });
+
+        // ========== TESTE DO POSTIMAGES ==========
+
+        window.testarPostImages = async function() {
+            // Criar imagem de teste
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#44689a';
+            ctx.fillRect(0, 0, 100, 100);
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText('OK', 30, 55);
+            
+            canvas.toBlob(async (blob) => {
+                const testFile = new File([blob], 'teste.png', { type: 'image/png' });
+                
+                try {
+                    console.log('Testando PostImages...');
+                    const url = await uploadParaPostImages(testFile);
+                    console.log('✅ PostImages funcionando! URL:', url);
+                    alert('✅ PostImages funcionando!\nURL: ' + url);
+                } catch (error) {
+                    console.error('❌ Erro:', error);
+                    alert('❌ Erro no PostImages: ' + error.message);
+                }
+            }, 'image/png');
+        };
     </script>
 </body>
 </html>
