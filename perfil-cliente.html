@@ -719,40 +719,82 @@
             alert(mensagem);
         }
 
-        // ========== FUNÇÃO DE UPLOAD PARA POSTIMAGES ==========
+        function converterParaBase64(arquivo) {
+            return new Promise((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onload = (e) => resolve(e.target.result);
+                leitor.onerror = reject;
+                leitor.readAsDataURL(arquivo);
+            });
+        }
 
-        async function uploadParaPostImages(arquivo) {
+        // ========== FUNÇÃO DE UPLOAD PARA IMGUR ==========
+
+        async function uploadParaImgur(arquivo) {
             showLoading();
             
             try {
-                const formData = new FormData();
-                formData.append('file', arquivo);
+                // Converter para base64
+                const base64 = await converterParaBase64(arquivo);
                 
-                // Enviar para PostImages (NÃO PRECISA DE CONTA)
-                const resposta = await fetch('https://postimages.org/json/rr', {
+                // API Client ID do Imgur (funciona sem conta)
+                const CLIENT_ID = '546c25a59c58ad7';
+                const formData = new FormData();
+                formData.append('image', base64.split(',')[1]); // Remove "data:image/..."
+                formData.append('type', 'base64');
+                
+                // Enviar para Imgur
+                const resposta = await fetch('https://api.imgur.com/3/image', {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Client-ID ${CLIENT_ID}`
+                    },
                     body: formData
                 });
                 
                 if (!resposta.ok) {
-                    throw new Error('Erro ao enviar imagem');
+                    throw new Error(`Erro ${resposta.status} do Imgur`);
                 }
                 
                 const dados = await resposta.json();
                 
-                if (!dados.url) {
-                    throw new Error('URL não recebida do servidor');
+                if (!dados.success) {
+                    throw new Error(dados.data?.error || 'Erro no upload');
                 }
                 
-                console.log('✅ Upload bem-sucedido:', dados.url);
-                return dados.url;
+                console.log('✅ Upload bem-sucedido para Imgur:', dados.data.link);
+                return dados.data.link;
                 
             } catch (erro) {
-                console.error('❌ Erro no upload:', erro);
-                throw new Error('Falha ao enviar imagem para o servidor');
+                console.error('❌ Erro no Imgur:', erro);
+                
+                // Tentar método alternativo se o primeiro falhar
+                try {
+                    console.log('🔄 Tentando método alternativo...');
+                    return await uploadAlternativo(arquivo);
+                } catch (erro2) {
+                    throw new Error('Falha ao enviar imagem: ' + erro.message);
+                }
+                
             } finally {
                 hideLoading();
             }
+        }
+
+        // Método alternativo de upload (fallback)
+        async function uploadAlternativo(arquivo) {
+            const formData = new FormData();
+            formData.append('file', arquivo);
+            
+            const resposta = await fetch('https://tmpfiles.org/api/v1/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!resposta.ok) throw new Error('Erro no upload alternativo');
+            
+            const dados = await resposta.json();
+            return dados.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
         }
 
         // ========== CARREGAR DADOS DO USUÁRIO ==========
@@ -790,7 +832,7 @@
             userName.textContent = dados.apelido || dados.nomeCompleto?.split(' ')[0] || 'Usuário';
             userEmail.textContent = dados.email || '';
             
-            // Carregar foto de perfil (AGORA É APENAS URL)
+            // Carregar foto de perfil (APENAS URL)
             if (dados.fotoPerfil && dados.fotoPerfil.startsWith('http')) {
                 avatarDisplay.innerHTML = '';
                 const img = document.createElement('img');
@@ -802,16 +844,17 @@
                 img.style.borderRadius = '50%';
                 
                 img.onload = () => {
-                    console.log('Foto carregada do PostImages');
+                    console.log('Foto carregada:', dados.fotoPerfil);
+                    btnRemoverFoto.style.display = 'inline-block';
                 };
                 
                 img.onerror = () => {
-                    console.log('Erro ao carregar foto do PostImages');
+                    console.log('Erro ao carregar foto');
                     mostrarAvatarPadrao(dados);
+                    btnRemoverFoto.style.display = 'none';
                 };
                 
                 avatarDisplay.appendChild(img);
-                btnRemoverFoto.style.display = 'inline-block';
             } else {
                 mostrarAvatarPadrao(dados);
                 btnRemoverFoto.style.display = 'none';
@@ -929,8 +972,8 @@
                     return;
                 }
                 
-                // 1. Upload para PostImages
-                const imageUrl = await uploadParaPostImages(arquivo);
+                // 1. Upload para Imgur
+                const imageUrl = await uploadParaImgur(arquivo);
                 
                 // 2. Salvar APENAS A URL no Firestore (poucos bytes!)
                 const userRef = doc(db, "usuarios", usuario.uid);
@@ -1044,8 +1087,8 @@
             try {
                 const usuario = auth.currentUser;
                 
-                // 1. Upload para PostImages
-                const imageUrl = await uploadParaPostImages(selectedFile);
+                // 1. Upload para Imgur
+                const imageUrl = await uploadParaImgur(selectedFile);
                 
                 // 2. Salvar APENAS A URL no Firestore
                 const userRef = doc(db, "usuarios", usuario.uid);
@@ -1228,9 +1271,9 @@
             }
         });
 
-        // ========== TESTE DO POSTIMAGES ==========
+        // ========== TESTE DO IMGUR ==========
 
-        window.testarPostImages = async function() {
+        window.testarUpload = async function() {
             // Criar imagem de teste
             const canvas = document.createElement('canvas');
             canvas.width = 100;
@@ -1246,16 +1289,20 @@
                 const testFile = new File([blob], 'teste.png', { type: 'image/png' });
                 
                 try {
-                    console.log('Testando PostImages...');
-                    const url = await uploadParaPostImages(testFile);
-                    console.log('✅ PostImages funcionando! URL:', url);
-                    alert('✅ PostImages funcionando!\nURL: ' + url);
+                    console.log('Testando upload para Imgur...');
+                    const url = await uploadParaImgur(testFile);
+                    console.log('✅ Imgur funcionando! URL:', url);
+                    alert('✅ Upload funcionando!\nURL: ' + url);
                 } catch (error) {
                     console.error('❌ Erro:', error);
-                    alert('❌ Erro no PostImages: ' + error.message);
+                    alert('❌ Erro no upload: ' + error.message);
                 }
             }, 'image/png');
         };
+
+        // Teste automático ao carregar
+        console.log('✅ Script carregado com sucesso!');
+        console.log('Para testar o upload, execute no console: testarUpload()');
     </script>
 </body>
 </html>
