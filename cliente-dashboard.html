@@ -35,7 +35,7 @@
             line-height: 1.6;
             color: #333;
             background: #f8f9fa;
-            padding-top: 80px; /* Espaço para navbar fixa */
+            padding-top: 80px;
         }
 
         /* Logo Grande */
@@ -231,47 +231,44 @@
             margin: 0;
         }
 
-        /* Recent Activity - REMOVIDO DADOS FICTÍCIOS */
-        .activity-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .activity-item {
+        /* Botões de Ação */
+        .action-buttons {
             display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s ease;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        .activity-item:hover {
-            background: #f8f9fa;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: rgba(68, 104, 154, 0.1);
+        .btn-action {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
-            color: var(--primary-color);
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
         }
 
-        .activity-content h6 {
-            margin: 0;
-            font-weight: 600;
+        .btn-primary-action {
+            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
+            color: white;
         }
 
-        .activity-content small {
-            color: #666;
+        .btn-secondary-action {
+            background: #f8f9fa;
+            color: var(--dark-color);
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         /* Botão Mobile Menu Toggle */
@@ -282,6 +279,7 @@
             font-size: 1.5rem;
             color: var(--dark-color);
             padding: 5px 10px;
+            cursor: pointer;
         }
 
         /* Responsivo - MOBILE FIRST */
@@ -380,6 +378,14 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-action {
+                width: 100%;
+            }
         }
 
         @media (max-width: 576px) {
@@ -418,45 +424,6 @@
                 height: 35px;
                 font-size: 1rem;
             }
-        }
-
-        /* Botões de Ação */
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            flex: 1;
-            min-width: 150px;
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .btn-primary-action {
-            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
-            color: white;
-        }
-
-        .btn-secondary-action {
-            background: #f8f9fa;
-            color: var(--dark-color);
-            border: 2px solid #e0e0e0;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         /* Loading */
@@ -506,9 +473,16 @@
             margin-bottom: 15px;
         }
 
+        .empty-message h5 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
         .empty-message p {
             font-size: 1rem;
             margin-bottom: 5px;
+            color: #777;
         }
     </style>
 </head>
@@ -550,7 +524,7 @@
         </div>
     </nav>
 
-    <!-- Menu Dashboard Horizontal -->
+    <!-- Menu Dashboard Horizontal - CORRIGIDO -->
     <div class="container-fluid">
         <ul class="dashboard-menu" id="dashboardMenu">
             <li>
@@ -560,8 +534,8 @@
                 </a>
             </li>
             <li>
-                <!-- BOTÃO PERFIL AGORA REDIRECIONA -->
-                <a href="perfil-cliente.html">
+                <!-- LINK DIRETO PARA PERFIL -->
+                <a href="perfil-cliente.html" id="linkPerfil">
                     <i class="fas fa-user"></i>
                     <span>Meu Perfil</span>
                 </a>
@@ -610,10 +584,10 @@
         <!-- Welcome Card -->
         <div class="welcome-card">
             <h1 id="welcomeName">Bem-vindo ao ScanHub! 👋</h1>
-            <p>Gerencie seus serviços e encontre os melhores profissionais</p>
+            <p id="welcomeText">Gerencie seus serviços e encontre os melhores profissionais</p>
         </div>
 
-        <!-- Stats Overview - AGORA SEM DADOS FICTÍCIOS -->
+        <!-- Stats Overview -->
         <div class="stats-grid">
             <div class="stat-card">
                 <i class="fas fa-clipboard-check"></i>
@@ -639,79 +613,83 @@
 
         <!-- Botões de Ação Rápidos -->
         <div class="action-buttons">
-            <a href="#" class="btn-action btn-primary-action" id="btnBuscarProfissionais">
+            <button class="btn-action btn-primary-action" id="btnBuscarProfissionais">
                 <i class="fas fa-search"></i>
                 Buscar Profissionais
-            </a>
-            <a href="#" class="btn-action btn-secondary-action" id="btnNovoPedido">
+            </button>
+            <button class="btn-action btn-secondary-action" id="btnNovoPedido">
                 <i class="fas fa-plus"></i>
                 Novo Pedido
-            </a>
-            <a href="#" class="btn-action btn-secondary-action" id="btnVerNotificacoes">
+            </button>
+            <button class="btn-action btn-secondary-action" id="btnVerNotificacoes">
                 <i class="fas fa-bell"></i>
                 Notificações
-            </a>
+            </button>
         </div>
 
-        <!-- Dashboard Content - SEM DADOS FICTÍCIOS -->
+        <!-- Dashboard Content -->
         <div id="pageDashboard" class="content-area active">
             <h4 class="mb-4">Atividade Recente</h4>
             <div id="activityContainer">
-                <!-- Atividade será carregada dinamicamente ou mostrará mensagem -->
                 <div class="empty-message" id="emptyActivity">
                     <i class="fas fa-inbox"></i>
-                    <p>Nenhuma atividade recente</p>
-                    <small class="text-muted">Seus pedidos e mensagens aparecerão aqui</small>
+                    <h5>Nenhuma atividade recente</h5>
+                    <p>Seus pedidos e mensagens aparecerão aqui</p>
                 </div>
             </div>
         </div>
 
-        <!-- Outras Páginas - APENAS PLACEHOLDERS -->
+        <!-- Página Buscar -->
         <div id="pageBuscar" class="content-area">
             <div class="empty-message">
                 <i class="fas fa-search"></i>
                 <h5>Buscar Profissionais</h5>
-                <p class="text-muted">Em breve você poderá buscar por profissionais qualificados</p>
+                <p>Em breve você poderá buscar por profissionais qualificados</p>
             </div>
         </div>
 
+        <!-- Página Pedidos -->
         <div id="pagePedidos" class="content-area">
             <div class="empty-message">
                 <i class="fas fa-clipboard-list"></i>
                 <h5>Meus Pedidos</h5>
-                <p class="text-muted">Acompanhe seus pedidos e serviços solicitados</p>
+                <p>Acompanhe seus pedidos e serviços solicitados</p>
             </div>
         </div>
 
+        <!-- Página Notificações -->
         <div id="pageNotificacoes" class="content-area">
             <div class="empty-message">
                 <i class="fas fa-bell"></i>
                 <h5>Notificações</h5>
-                <p class="text-muted">Suas notificações aparecerão aqui</p>
+                <p>Suas notificações aparecerão aqui</p>
             </div>
         </div>
 
+        <!-- Página Favoritos -->
         <div id="pageFavoritos" class="content-area">
             <div class="empty-message">
                 <i class="fas fa-heart"></i>
                 <h5>Favoritos</h5>
-                <p class="text-muted">Profissionais e serviços favoritados</p>
+                <p>Profissionais e serviços favoritados</p>
             </div>
         </div>
 
+        <!-- Página Configurações -->
         <div id="pageConfiguracoes" class="content-area">
             <div class="empty-message">
                 <i class="fas fa-cog"></i>
                 <h5>Configurações</h5>
-                <p class="text-muted">Configure suas preferências</p>
+                <p>Configure suas preferências</p>
             </div>
         </div>
 
+        <!-- Página Ajuda -->
         <div id="pageAjuda" class="content-area">
             <div class="empty-message">
                 <i class="fas fa-question-circle"></i>
                 <h5>Ajuda & Suporte</h5>
-                <p class="text-muted">Dúvidas frequentes e suporte</p>
+                <p>Dúvidas frequentes e suporte</p>
             </div>
         </div>
     </div>
@@ -728,11 +706,7 @@
         import { 
             getFirestore, 
             doc, 
-            getDoc,
-            collection,
-            query,
-            where,
-            getDocs
+            getDoc
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
         // Firebase Config
@@ -755,10 +729,11 @@
         const userAvatar = document.getElementById('userAvatar');
         const userId = document.getElementById('userId');
         const welcomeName = document.getElementById('welcomeName');
+        const welcomeText = document.getElementById('welcomeText');
         const btnLogout = document.getElementById('btnLogout');
         const menuToggle = document.getElementById('menuToggle');
         const dashboardMenu = document.getElementById('dashboardMenu');
-        const menuLinks = document.querySelectorAll('.dashboard-menu a:not([href="perfil-cliente.html"])');
+        const menuLinks = document.querySelectorAll('.dashboard-menu a[data-page]');
         const contentAreas = document.querySelectorAll('.content-area');
         const loader = document.getElementById('loader');
 
@@ -773,11 +748,13 @@
         const btnNovoPedido = document.getElementById('btnNovoPedido');
         const btnVerNotificacoes = document.getElementById('btnVerNotificacoes');
 
+        // Link do perfil
+        const linkPerfil = document.getElementById('linkPerfil');
+
         // Carregar dados do usuário
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    // Buscar dados do Firestore
                     const userRef = doc(db, "usuarios", user.uid);
                     const userDoc = await getDoc(userRef);
                     
@@ -789,13 +766,13 @@
                         welcomeName.textContent = `Bem-vindo, ${userData.apelido || 'Usuário'}! 👋`;
                         userId.textContent = userData.idScanHub || '---';
                         
-                        // Inicial do apelido no avatar
+                        // Avatar
                         if (userData.apelido) {
                             userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
                         }
 
-                        // Carregar estatísticas REAIS
-                        await carregarEstatisticas(user.uid, userData);
+                        // Inicializar estatísticas
+                        inicializarEstatisticas();
                         
                         // Esconder loader
                         setTimeout(() => {
@@ -809,39 +786,16 @@
                     loader.classList.add('hide');
                 }
             } else {
-                // Usuário não logado, redirecionar para login
                 window.location.href = 'login.html';
             }
         });
 
-        // Função para carregar estatísticas REAIS
-        async function carregarEstatisticas(userId, userData) {
-            try {
-                // Buscar pedidos do usuário (se existir a collection)
-                const pedidosRef = collection(db, "pedidos");
-                const q = query(pedidosRef, where("clienteId", "==", userId));
-                const querySnapshot = await getDocs(q);
-                
-                totalPedidos.textContent = querySnapshot.size;
-                
-                // Dados reais do usuário
-                totalFavoritos.textContent = userData.favoritos || 0;
-                totalNotificacoes.textContent = userData.notificacoes || 0;
-                
-                // Avaliação média (se existir)
-                if (userData.avaliacaoMedia) {
-                    avaliacaoMedia.textContent = userData.avaliacaoMedia.toFixed(1);
-                } else {
-                    avaliacaoMedia.textContent = '-';
-                }
-                
-            } catch (error) {
-                // Se collection não existir ainda, mantém zeros
-                totalPedidos.textContent = '0';
-                totalFavoritos.textContent = '0';
-                totalNotificacoes.textContent = '0';
-                avaliacaoMedia.textContent = '-';
-            }
+        // Inicializar estatísticas
+        function inicializarEstatisticas() {
+            totalPedidos.textContent = '0';
+            avaliacaoMedia.textContent = '-';
+            totalFavoritos.textContent = '0';
+            totalNotificacoes.textContent = '0';
         }
 
         // Logout
@@ -877,7 +831,7 @@
             }
         });
 
-        // Navegação entre páginas (exceto perfil que redireciona)
+        // Navegação entre páginas
         menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -909,19 +863,22 @@
         });
 
         // Botões de ação rápida
-        btnBuscarProfissionais.addEventListener('click', (e) => {
-            e.preventDefault();
+        btnBuscarProfissionais.addEventListener('click', () => {
             document.querySelector('[data-page="buscar"]').click();
         });
 
-        btnNovoPedido.addEventListener('click', (e) => {
-            e.preventDefault();
+        btnNovoPedido.addEventListener('click', () => {
             alert('Funcionalidade de novo pedido em desenvolvimento!');
         });
 
-        btnVerNotificacoes.addEventListener('click', (e) => {
-            e.preventDefault();
+        btnVerNotificacoes.addEventListener('click', () => {
             document.querySelector('[data-page="notificacoes"]').click();
+        });
+
+        // Forçar redirecionamento do perfil se houver problema
+        linkPerfil.addEventListener('click', (e) => {
+            // Força o redirecionamento mesmo se houver erro
+            window.location.href = 'perfil-cliente.html';
         });
     </script>
 </body>
