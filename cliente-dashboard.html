@@ -231,7 +231,7 @@
             margin: 0;
         }
 
-        /* Recent Activity */
+        /* Recent Activity - REMOVIDO DADOS FICTÍCIOS */
         .activity-list {
             list-style: none;
             padding: 0;
@@ -492,6 +492,24 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Mensagem de atividade vazia */
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-message i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .empty-message p {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -542,7 +560,8 @@
                 </a>
             </li>
             <li>
-                <a href="#" data-page="perfil">
+                <!-- BOTÃO PERFIL AGORA REDIRECIONA -->
+                <a href="perfil-cliente.html">
                     <i class="fas fa-user"></i>
                     <span>Meu Perfil</span>
                 </a>
@@ -594,7 +613,7 @@
             <p>Gerencie seus serviços e encontre os melhores profissionais</p>
         </div>
 
-        <!-- Stats Overview -->
+        <!-- Stats Overview - AGORA SEM DADOS FICTÍCIOS -->
         <div class="stats-grid">
             <div class="stat-card">
                 <i class="fas fa-clipboard-check"></i>
@@ -603,8 +622,8 @@
             </div>
             <div class="stat-card">
                 <i class="fas fa-star"></i>
-                <h3 id="avaliacaoMedia">5.0</h3>
-                <p>Avaliação Média</p>
+                <h3 id="avaliacaoMedia">-</h3>
+                <p>Avaliação</p>
             </div>
             <div class="stat-card">
                 <i class="fas fa-heart"></i>
@@ -634,109 +653,64 @@
             </a>
         </div>
 
-        <!-- Dashboard Content -->
+        <!-- Dashboard Content - SEM DADOS FICTÍCIOS -->
         <div id="pageDashboard" class="content-area active">
             <h4 class="mb-4">Atividade Recente</h4>
-            <ul class="activity-list">
-                <li class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h6>Busca iniciada</h6>
-                        <small>Você buscou por "eletricista" - 2 horas atrás</small>
-                    </div>
-                </li>
-                <li class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-comment"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h6>Mensagem recebida</h6>
-                        <small>João Silva respondeu seu orçamento - Ontem</small>
-                    </div>
-                </li>
-                <li class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h6>Avaliação recebida</h6>
-                        <small>Maria Oliveira avaliou seu serviço - 2 dias atrás</small>
-                    </div>
-                </li>
-                <li class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <h6>Serviço concluído</h6>
-                        <small>Reparo de celular finalizado - 3 dias atrás</small>
-                    </div>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Outras Páginas -->
-        <div id="pagePerfil" class="content-area">
-            <h4 class="mb-4">Meu Perfil</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-user-circle fa-4x text-muted mb-3"></i>
-                <h5>Gerencie suas informações</h5>
-                <p class="text-muted">Atualize seus dados pessoais e preferências</p>
+            <div id="activityContainer">
+                <!-- Atividade será carregada dinamicamente ou mostrará mensagem -->
+                <div class="empty-message" id="emptyActivity">
+                    <i class="fas fa-inbox"></i>
+                    <p>Nenhuma atividade recente</p>
+                    <small class="text-muted">Seus pedidos e mensagens aparecerão aqui</small>
+                </div>
             </div>
         </div>
 
+        <!-- Outras Páginas - APENAS PLACEHOLDERS -->
         <div id="pageBuscar" class="content-area">
-            <h4 class="mb-4">Buscar Profissionais</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-search fa-4x text-muted mb-3"></i>
-                <h5>Encontre profissionais qualificados</h5>
-                <p class="text-muted">Busque por categoria, localização ou especialidade</p>
+            <div class="empty-message">
+                <i class="fas fa-search"></i>
+                <h5>Buscar Profissionais</h5>
+                <p class="text-muted">Em breve você poderá buscar por profissionais qualificados</p>
             </div>
         </div>
 
         <div id="pagePedidos" class="content-area">
-            <h4 class="mb-4">Meus Pedidos</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-clipboard-list fa-4x text-muted mb-3"></i>
-                <h5>Acompanhe seus pedidos</h5>
-                <p class="text-muted">Veja o status de todos os seus serviços</p>
+            <div class="empty-message">
+                <i class="fas fa-clipboard-list"></i>
+                <h5>Meus Pedidos</h5>
+                <p class="text-muted">Acompanhe seus pedidos e serviços solicitados</p>
             </div>
         </div>
 
         <div id="pageNotificacoes" class="content-area">
-            <h4 class="mb-4">Notificações</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-bell fa-4x text-muted mb-3"></i>
-                <h5>Suas notificações</h5>
-                <p class="text-muted">Mensagens, atualizações e lembretes</p>
+            <div class="empty-message">
+                <i class="fas fa-bell"></i>
+                <h5>Notificações</h5>
+                <p class="text-muted">Suas notificações aparecerão aqui</p>
             </div>
         </div>
 
         <div id="pageFavoritos" class="content-area">
-            <h4 class="mb-4">Favoritos</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-heart fa-4x text-muted mb-3"></i>
-                <h5>Profissionais favoritos</h5>
-                <p class="text-muted">Guarde seus profissionais preferidos</p>
+            <div class="empty-message">
+                <i class="fas fa-heart"></i>
+                <h5>Favoritos</h5>
+                <p class="text-muted">Profissionais e serviços favoritados</p>
             </div>
         </div>
 
         <div id="pageConfiguracoes" class="content-area">
-            <h4 class="mb-4">Configurações</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-cog fa-4x text-muted mb-3"></i>
-                <h5>Configurações da conta</h5>
-                <p class="text-muted">Personalize sua experiência</p>
+            <div class="empty-message">
+                <i class="fas fa-cog"></i>
+                <h5>Configurações</h5>
+                <p class="text-muted">Configure suas preferências</p>
             </div>
         </div>
 
         <div id="pageAjuda" class="content-area">
-            <h4 class="mb-4">Ajuda & Suporte</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-question-circle fa-4x text-muted mb-3"></i>
-                <h5>Como podemos ajudar?</h5>
+            <div class="empty-message">
+                <i class="fas fa-question-circle"></i>
+                <h5>Ajuda & Suporte</h5>
                 <p class="text-muted">Dúvidas frequentes e suporte</p>
             </div>
         </div>
@@ -784,7 +758,7 @@
         const btnLogout = document.getElementById('btnLogout');
         const menuToggle = document.getElementById('menuToggle');
         const dashboardMenu = document.getElementById('dashboardMenu');
-        const menuLinks = document.querySelectorAll('.dashboard-menu a');
+        const menuLinks = document.querySelectorAll('.dashboard-menu a:not([href="perfil-cliente.html"])');
         const contentAreas = document.querySelectorAll('.content-area');
         const loader = document.getElementById('loader');
 
@@ -820,7 +794,7 @@
                             userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
                         }
 
-                        // Carregar estatísticas
+                        // Carregar estatísticas REAIS
                         await carregarEstatisticas(user.uid, userData);
                         
                         // Esconder loader
@@ -829,11 +803,9 @@
                         }, 500);
                         
                     } else {
-                        console.log('Documento do usuário não encontrado');
                         loader.classList.add('hide');
                     }
                 } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
                     loader.classList.add('hide');
                 }
             } else {
@@ -842,29 +814,33 @@
             }
         });
 
-        // Função para carregar estatísticas
+        // Função para carregar estatísticas REAIS
         async function carregarEstatisticas(userId, userData) {
             try {
-                // Buscar pedidos do usuário
+                // Buscar pedidos do usuário (se existir a collection)
                 const pedidosRef = collection(db, "pedidos");
                 const q = query(pedidosRef, where("clienteId", "==", userId));
                 const querySnapshot = await getDocs(q);
                 
                 totalPedidos.textContent = querySnapshot.size;
                 
-                // Simular dados (substituir por dados reais do Firestore)
+                // Dados reais do usuário
                 totalFavoritos.textContent = userData.favoritos || 0;
                 totalNotificacoes.textContent = userData.notificacoes || 0;
                 
-                // Se tiver avaliações, calcular média
-                if (userData.avaliacoes && userData.avaliacoes.length > 0) {
-                    const soma = userData.avaliacoes.reduce((a, b) => a + b, 0);
-                    const media = (soma / userData.avaliacoes.length).toFixed(1);
-                    avaliacaoMedia.textContent = media;
+                // Avaliação média (se existir)
+                if (userData.avaliacaoMedia) {
+                    avaliacaoMedia.textContent = userData.avaliacaoMedia.toFixed(1);
+                } else {
+                    avaliacaoMedia.textContent = '-';
                 }
                 
             } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
+                // Se collection não existir ainda, mantém zeros
+                totalPedidos.textContent = '0';
+                totalFavoritos.textContent = '0';
+                totalNotificacoes.textContent = '0';
+                avaliacaoMedia.textContent = '-';
             }
         }
 
@@ -874,7 +850,6 @@
                 await signOut(auth);
                 window.location.href = 'login.html';
             } catch (error) {
-                console.error('Erro ao fazer logout:', error);
                 alert('Erro ao sair. Tente novamente.');
             }
         });
@@ -902,7 +877,7 @@
             }
         });
 
-        // Navegação entre páginas
+        // Navegação entre páginas (exceto perfil que redireciona)
         menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -948,18 +923,6 @@
             e.preventDefault();
             document.querySelector('[data-page="notificacoes"]').click();
         });
-
-        // Atualizar estatísticas periodicamente (simulação)
-        setInterval(() => {
-            // Em um sistema real, buscaria dados atualizados do Firebase
-            // Aqui é apenas uma simulação
-            const pedidosAtuais = parseInt(totalPedidos.textContent);
-            if (pedidosAtuais < 10) {
-                totalPedidos.textContent = pedidosAtuais + 1;
-            }
-        }, 30000); // A cada 30 segundos
-
-        console.log('Dashboard Cliente Mobile carregado!');
     </script>
 </body>
 </html>
