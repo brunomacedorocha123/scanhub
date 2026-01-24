@@ -919,7 +919,7 @@
     </div>
 
     <!-- Firebase e Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -939,7 +939,8 @@
         getDocs,
         query,
         where,
-        orderBy
+        orderBy,
+        serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     // Firebase Config
@@ -1064,8 +1065,7 @@
         try {
             const q = query(
                 collection(db, "clientes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("dataCadastro", "desc")
+                where("profissionalId", "==", currentUser.uid)
             );
             
             const querySnapshot = await getDocs(q);
@@ -1082,7 +1082,8 @@
             atualizarEstatisticas();
             verificarLimiteClientes();
         } catch (error) {
-            // Silencioso
+            // Se der erro, significa que a coleção ainda não existe
+            // Isso é normal para o primeiro uso
         }
     }
 
@@ -1259,38 +1260,43 @@
         }
         
         try {
+            // Preparar dados do cliente
             const clienteData = {
                 nome: nomeCliente.value.trim(),
                 tipo: tipoFisica.checked ? 'fisica' : 'juridica',
                 cpfCnpj: cpfCnpj.value.trim(),
-                email: emailCliente.value.trim(),
+                email: emailCliente.value.trim().toLowerCase(),
                 telefone: telefoneCliente.value.trim(),
                 status: statusCliente.value,
-                dataNascimento: dataNascimento.value || null,
-                origem: origemCliente.value || null,
-                cep: cepCliente.value || null,
-                cidade: cidadeCliente.value || null,
-                endereco: enderecoCliente.value || null,
-                numero: numeroCliente.value || null,
-                observacoes: observacoes.value || null,
+                dataNascimento: dataNascimento.value || '',
+                origem: origemCliente.value || '',
+                cep: cepCliente.value || '',
+                cidade: cidadeCliente.value || '',
+                endereco: enderecoCliente.value || '',
+                numero: numeroCliente.value || '',
+                observacoes: observacoes.value || '',
                 dataCadastro: dataCadastro.value,
                 profissionalId: currentUser.uid,
+                profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
+                dataCriacao: new Date().toISOString(),
                 dataAtualizacao: new Date().toISOString()
             };
             
             if (clienteId.value) {
+                // Atualizar cliente existente
                 const clienteRef = doc(db, "clientes", clienteId.value);
                 await updateDoc(clienteRef, clienteData);
             } else {
-                clienteData.dataCriacao = new Date().toISOString();
+                // CRIAR NOVO CLIENTE - A coleção será criada automaticamente aqui
                 await addDoc(collection(db, "clientes"), clienteData);
             }
             
             modalCliente.hide();
-            carregarClientes();
+            await carregarClientes(); // Recarrega a lista
             
         } catch (error) {
-            alert('Erro ao salvar cliente. Verifique os dados e tente novamente.');
+            console.error('Erro detalhado:', error); // Temporário para debug
+            alert('Erro ao salvar cliente. Verifique sua conexão e tente novamente.');
         }
     });
 
@@ -1302,10 +1308,10 @@
         modalTitle.textContent = 'Editar Cliente';
         clienteId.value = id;
         
-        nomeCliente.value = cliente.nome;
-        emailCliente.value = cliente.email;
+        nomeCliente.value = cliente.nome || '';
+        emailCliente.value = cliente.email || '';
         telefoneCliente.value = cliente.telefone || '';
-        statusCliente.value = cliente.status;
+        statusCliente.value = cliente.status || 'ativo';
         cpfCnpj.value = cliente.cpfCnpj || '';
         dataNascimento.value = cliente.dataNascimento || '';
         origemCliente.value = cliente.origem || '';
@@ -1426,6 +1432,26 @@
         setTimeout(() => {
             nomeCliente.focus();
         }, 300);
+    });
+
+    // Testar conexão com Firestore
+    async function testarFirestore() {
+        try {
+            // Tenta acessar uma coleção existente
+            const testRef = collection(db, "usuarios");
+            const testQuery = await getDocs(testRef);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // Inicializar
+    window.addEventListener('DOMContentLoaded', async () => {
+        const firestoreOk = await testarFirestore();
+        if (!firestoreOk) {
+            alert('Erro na conexão com o banco de dados. Verifique sua internet.');
+        }
     });
 </script>
 </body>
