@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil Profissional - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #33c47;
+            --light-color: #f8f9fa;
+            --dark-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .navbar-brand img {
+            height: 60px;
+            transform: scale(2);
+            transform-origin: left center;
+        }
+
+        .container-main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: #666;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-upload-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+
+        .avatar-upload-btn:hover {
+            transform: scale(1.1);
+            background: #365a8a;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(68, 104, 154, 0.1);
+        }
+
+        /* Tags Input */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            min-height: 45px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .tag {
+            background: #e3f2fd;
+            color: var(--primary-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .tag-remove:hover {
+            opacity: 1;
+        }
+
+        .tags-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            padding: 5px;
+        }
+
+        /* Portfolio Gallery */
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #f8f9fa;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-item-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-item:hover .gallery-item-remove {
+            opacity: 1;
+        }
+
+        /* Video Links */
+        .video-link-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-link-platform {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .btn-remove-video {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #44689a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Save Button */
+        .btn-save {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-main {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+            
+            .profile-header, .section-card {
+                padding: 20px;
+            }
+            
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard-profissional.html">
+                <img src="logoscanhub.png" alt="ScanHub">
+            </a>
+            <div class="d-flex">
+                <a href="dashboard-profissional.html" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-main">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="avatarDisplay">
+                <i class="fas fa-user"></i>
+                <label class="avatar-upload-btn">
+                    <i class="fas fa-camera"></i>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                </label>
+            </div>
+            
+            <h2 id="userName">Seu Nome Profissional</h2>
+            <p class="text-muted" id="userSpecialty">Especialidade Principal</p>
+        </div>
+
+        <!-- Seção 1: Dados Profissionais -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-id-badge"></i>Dados Profissionais
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-user-tie"></i>Nome Profissional/Marca
+                        </label>
+                        <input type="text" class="form-control" id="nomeProfissional" 
+                               placeholder="Como você quer ser chamado">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-quote-left"></i>Slogan/Tagline
+                        </label>
+                        <input type="text" class="form-control" id="slogan" 
+                               placeholder="Frase curta de impacto">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-file-alt"></i>Descrição Profissional
+                </label>
+                <textarea class="form-control" id="descricao" rows="4" 
+                          placeholder="Conte sobre sua experiência, formação e abordagem..."></textarea>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-star"></i>Especialidade Principal
+                        </label>
+                        <select class="form-select" id="especialidadePrincipal">
+                            <option value="">Selecione sua especialidade</option>
+                            <option value="eletrica">Elétrica</option>
+                            <option value="hidraulica">Hidráulica</option>
+                            <option value="construcao">Construção Civil</option>
+                            <option value="pintura">Pintura</option>
+                            <option value="reforma">Reformas</option>
+                            <option value="limpeza">Limpeza</option>
+                            <option value="jardinagem">Jardinagem</option>
+                            <option value="ti">TI & Informática</option>
+                            <option value="design">Design</option>
+                            <option value="consultoria">Consultoria</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt"></i>Anos de Experiência
+                        </label>
+                        <select class="form-select" id="anosExperiencia">
+                            <option value="">Selecione</option>
+                            <option value="1">Menos de 1 ano</option>
+                            <option value="1-3">1-3 anos</option>
+                            <option value="3-5">3-5 anos</option>
+                            <option value="5-10">5-10 anos</option>
+                            <option value="10+">Mais de 10 anos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-tags"></i>Sub-especialidades (Tags)
+                </label>
+                <div class="tags-container" id="tagsContainer">
+                    <input type="text" class="tags-input" id="tagInput" 
+                           placeholder="Digite uma especialidade e pressione Enter">
+                </div>
+                <small class="text-muted">Ex: Instalação, Manutenção, Reparo, Consultoria</small>
+            </div>
+        </div>
+
+        <!-- Seção 2: Área de Atendimento -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-map-marker-alt"></i>Área de Atendimento
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-ruler"></i>Raio de Atendimento
+                        </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="raioKm" 
+                                   placeholder="Ex: 50" min="1" max="500">
+                            <span class="input-group-text">km</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-city"></i>Cidade Base
+                        </label>
+                        <input type="text" class="form-control" id="cidadeBase" 
+                               placeholder="Sua cidade principal">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-map-pin"></i>Cidades Atendidas
+                </label>
+                <div class="tags-container" id="cidadesContainer">
+                    <input type="text" class="tags-input" id="cidadeInput" 
+                           placeholder="Digite uma cidade e pressione Enter">
+                </div>
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="atendeDomicilio" checked>
+                <label class="form-check-label" for="atendeDomicilio">
+                    <i class="fas fa-home me-2"></i>Atendo em domicílio
+                </label>
+            </div>
+            
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="atendeOnline" checked>
+                <label class="form-check-label" for="atendeOnline">
+                    <i class="fas fa-laptop me-2"></i>Atendo online/remoto
+                </label>
+            </div>
+        </div>
+
+        <!-- Seção 3: Formas de Trabalho -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-handshake"></i>Formas de Trabalho
+            </h3>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-money-bill-wave"></i>Formas de Pagamento Aceitas
+                </label>
+                <div class="tags-container" id="pagamentosContainer">
+                    <input type="text" class="tags-input" id="pagamentoInput" 
+                           placeholder="Ex: Pix, Cartão, Dinheiro...">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-clock"></i>Tempo Médio de Resposta
+                        </label>
+                        <select class="form-select" id="tempoResposta">
+                            <option value="">Selecione</option>
+                            <option value="1">Até 1 hora</option>
+                            <option value="2">Até 2 horas</option>
+                            <option value="4">Até 4 horas</option>
+                            <option value="24">Até 24 horas</option>
+                            <option value="48">Até 48 horas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check mt-4 pt-4">
+                        <input class="form-check-input" type="checkbox" id="orcamentoGratuito" checked>
+                        <label class="form-check-label" for="orcamentoGratuito">
+                            Orçamento gratuito
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-shield-alt"></i>Garantia Oferecida
+                </label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="garantiaDias" 
+                           placeholder="Ex: 90" min="0" max="365">
+                    <span class="input-group-text">dias</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Portfólio -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-images"></i>Portfólio - Meus Trabalhos
+            </h3>
+            
+            <div class="upload-area" id="portfolioUploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h5>Arraste e solte suas fotos aqui</h5>
+                <p class="text-muted">ou clique para selecionar (máx. 10 fotos)</p>
+                <input type="file" id="portfolioInput" accept="image/*" multiple style="display: none;">
+            </div>
+            
+            <div class="gallery-grid" id="portfolioGallery">
+                <!-- Fotos serão inseridas aqui via JavaScript -->
+            </div>
+            
+            <div class="mt-4">
+                <h5><i class="fas fa-video me-2"></i>Links de Vídeos</h5>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="videoUrl" 
+                           placeholder="Cole o link do YouTube ou Vimeo">
+                    <button class="btn btn-primary" id="btnAddVideo">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+                
+                <div id="videosList">
+                    <!-- Vídeos serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 5: Contato -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-address-book"></i>Contato Profissional
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-whatsapp"></i>WhatsApp Profissional
+                        </label>
+                        <input type="tel" class="form-control" id="whatsapp" 
+                               placeholder="(11) 99999-9999">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-envelope"></i>E-mail Profissional
+                        </label>
+                        <input type="email" class="form-control" id="emailProfissional" 
+                               placeholder="seu@email.com">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-link"></i>Links (Site, Redes Sociais)
+                </label>
+                <div id="linksContainer">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" placeholder="https://seusite.com">
+                        <button class="btn btn-outline-danger" type="button">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary btn-sm mt-2" id="btnAddLink">
+                    <i class="fas fa-plus"></i> Adicionar Link
+                </button>
+            </div>
+        </div>
+
+        <!-- Botão Salvar -->
+        <div class="section-card">
+            <button class="btn btn-save" id="btnSalvarPerfil">
+                <i class="fas fa-save me-2"></i>Salvar Perfil Profissional
+            </button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script Principal -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Config (mesmo do cliente)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.appspot.com",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Elementos DOM
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const avatarDisplay = document.getElementById('avatarDisplay');
+        const avatarInput = document.getElementById('avatarInput');
+        const userName = document.getElementById('userName');
+        const userSpecialty = document.getElementById('userSpecialty');
+        
+        // Dados profissionais
+        const nomeProfissional = document.getElementById('nomeProfissional');
+        const slogan = document.getElementById('slogan');
+        const descricao = document.getElementById('descricao');
+        const especialidadePrincipal = document.getElementById('especialidadePrincipal');
+        const anosExperiencia = document.getElementById('anosExperiencia');
+        
+        // Tags
+        const tagsContainer = document.getElementById('tagsContainer');
+        const tagInput = document.getElementById('tagInput');
+        
+        // Área de atendimento
+        const raioKm = document.getElementById('raioKm');
+        const cidadeBase = document.getElementById('cidadeBase');
+        const cidadesContainer = document.getElementById('cidadesContainer');
+        const cidadeInput = document.getElementById('cidadeInput');
+        const atendeDomicilio = document.getElementById('atendeDomicilio');
+        const atendeOnline = document.getElementById('atendeOnline');
+        
+        // Formas de trabalho
+        const pagamentosContainer = document.getElementById('pagamentosContainer');
+        const pagamentoInput = document.getElementById('pagamentoInput');
+        const tempoResposta = document.getElementById('tempoResposta');
+        const orcamentoGratuito = document.getElementById('orcamentoGratuito');
+        const garantiaDias = document.getElementById('garantiaDias');
+        
+        // Portfólio
+        const portfolioUploadArea = document.getElementById('portfolioUploadArea');
+        const portfolioInput = document.getElementById('portfolioInput');
+        const portfolioGallery = document.getElementById('portfolioGallery');
+        const videoUrl = document.getElementById('videoUrl');
+        const btnAddVideo = document.getElementById('btnAddVideo');
+        const videosList = document.getElementById('videosList');
+        
+        // Contato
+        const whatsapp = document.getElementById('whatsapp');
+        const emailProfissional = document.getElementById('emailProfissional');
+        const linksContainer = document.getElementById('linksContainer');
+        const btnAddLink = document.getElementById('btnAddLink');
+        
+        // Botão salvar
+        const btnSalvarPerfil = document.getElementById('btnSalvarPerfil');
+
+        let userData = null;
+        let portfolioFotos = [];
+        let videos = [];
+        let links = [];
+
+        // ========== FUNÇÕES UTILITÁRIAS ==========
+
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showAlert(mensagem, tipo = 'success') {
+            alert(mensagem);
+        }
+
+        // Função de upload para Imgur (MESMA do cliente)
+        async function uploadParaImgur(arquivo) {
+            showLoading();
+            
+            try {
+                // Converter para base64
+                const base64 = await converterParaBase64(arquivo);
+                
+                // API Client ID do Imgur
+                const CLIENT_ID = '546c25a59c58ad7';
+                const formData = new FormData();
+                formData.append('image', base64.split(',')[1]);
+                formData.append('type', 'base64');
+                
+                const resposta = await fetch('https://api.imgur.com/3/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Client-ID ${CLIENT_ID}`
+                    },
+                    body: formData
+                });
+                
+                if (!resposta.ok) {
+                    throw new Error(`Erro ${resposta.status} do Imgur`);
+                }
+                
+                const dados = await resposta.json();
+                
+                if (!dados.success) {
+                    throw new Error(dados.data?.error || 'Erro no upload');
+                }
+                
+                console.log('✅ Upload para Imgur:', dados.data.link);
+                return dados.data.link;
+                
+            } catch (erro) {
+                console.error('❌ Erro no Imgur:', erro);
+                throw new Error('Falha ao enviar imagem: ' + erro.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function converterParaBase64(arquivo) {
+            return new Promise((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onload = (e) => resolve(e.target.result);
+                leitor.onerror = reject;
+                leitor.readAsDataURL(arquivo);
+            });
+        }
+
+        // ========== SISTEMA DE TAGS ==========
+
+        function criarTag(texto, container) {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `
+                ${texto}
+                <span class="tag-remove" onclick="this.parentElement.remove()">×</span>
+            `;
+            container.insertBefore(tag, container.querySelector('.tags-input'));
+        }
+
+        function inicializarTags(container, inputElement, dadosIniciais = []) {
+            dadosIniciais.forEach(tag => {
+                criarTag(tag, container);
+            });
+            
+            inputElement.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && inputElement.value.trim()) {
+                    e.preventDefault();
+                    criarTag(inputElement.value.trim(), container);
+                    inputElement.value = '';
+                }
+            });
+        }
+
+        function getTags(container) {
+            const tags = [];
+            container.querySelectorAll('.tag').forEach(tag => {
+                tags.push(tag.firstChild.textContent.trim());
+            });
+            return tags;
+        }
+
+        // ========== PORTFÓLIO ==========
+
+        portfolioUploadArea.addEventListener('click', () => {
+            portfolioInput.click();
+        });
+
+        portfolioInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            
+            if (portfolioFotos.length + files.length > 10) {
+                showAlert('Máximo de 10 fotos no portfólio', 'error');
+                return;
+            }
+            
+            for (const file of files) {
+                try {
+                    showLoading();
+                    const imageUrl = await uploadParaImgur(file);
+                    portfolioFotos.push(imageUrl);
+                    adicionarFotoPortfolio(imageUrl);
+                } catch (erro) {
+                    showAlert('Erro ao enviar foto: ' + erro.message, 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        });
+
+        function adicionarFotoPortfolio(url) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${url}" alt="Portfólio">
+                <div class="gallery-item-remove" onclick="removerFotoPortfolio('${url}', this)">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            portfolioGallery.appendChild(item);
+        }
+
+        window.removerFotoPortfolio = function(url, element) {
+            if (confirm('Remover esta foto do portfólio?')) {
+                portfolioFotos = portfolioFotos.filter(foto => foto !== url);
+                element.parentElement.remove();
+            }
+        };
+
+        // ========== VÍDEOS ==========
+
+        btnAddVideo.addEventListener('click', () => {
+            const url = videoUrl.value.trim();
+            if (!url) return;
+            
+            if (!url.includes('youtube.com') && !url.includes('youtu.be') && !url.includes('vimeo.com')) {
+                showAlert('Insira um link válido do YouTube ou Vimeo', 'error');
+                return;
+            }
+            
+            videos.push(url);
+            adicionarVideoLista(url);
+            videoUrl.value = '';
+        });
+
+        function adicionarVideoLista(url) {
+            const plataforma = url.includes('youtube') ? 'YouTube' : 'Vimeo';
+            const item = document.createElement('div');
+            item.className = 'video-link-item';
+            item.innerHTML = `
+                <div>
+                    <span class="video-link-platform">${plataforma}</span>
+                    <br>
+                    <small class="text-muted">${url}</small>
+                </div>
+                <button class="btn-remove-video" onclick="removerVideo('${url}', this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            videosList.appendChild(item);
+        }
+
+        window.removerVideo = function(url, element) {
+            videos = videos.filter(video => video !== url);
+            element.parentElement.remove();
+        };
+
+        // ========== LINKS ==========
+
+        btnAddLink.addEventListener('click', () => {
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group mb-2';
+            inputGroup.innerHTML = `
+                <input type="text" class="form-control" placeholder="https://seusite.com">
+                <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            linksContainer.appendChild(inputGroup);
+        });
+
+        // ========== CARREGAR DADOS ==========
+
+        onAuthStateChanged(auth, async (usuario) => {
+            if (usuario) {
+                try {
+                    showLoading();
+                    const userRef = doc(db, "usuarios", usuario.uid);
+                    const userDoc = await getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                        carregarDadosUsuario(userData);
+                    }
+                } catch (erro) {
+                    console.error("Erro ao carregar dados:", erro);
+                } finally {
+                    hideLoading();
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function carregarDadosUsuario(dados) {
+            // Dados pessoais (do cadastro base)
+            if (dados.apelido) {
+                userName.textContent = dados.apelido;
+            }
+            
+            // Dados profissionais
+            if (dados.profissional) {
+                const prof = dados.profissional;
+                
+                nomeProfissional.value = prof.nomeProfissional || '';
+                slogan.value = prof.slogan || '';
+                descricao.value = prof.descricao || '';
+                especialidadePrincipal.value = prof.especialidadePrincipal || '';
+                anosExperiencia.value = prof.anosExperiencia || '';
+                
+                if (prof.especialidades) {
+                    inicializarTags(tagsContainer, tagInput, prof.especialidades);
+                }
+                
+                if (prof.cidadeBase) {
+                    cidadeBase.value = prof.cidadeBase;
+                    userSpecialty.textContent = prof.especialidadePrincipal || 'Profissional';
+                }
+                
+                // Área de atendimento
+                raioKm.value = prof.raioKm || '';
+                if (prof.cidadesAtendidas) {
+                    inicializarTags(cidadesContainer, cidadeInput, prof.cidadesAtendidas);
+                }
+                atendeDomicilio.checked = prof.atendeDomicilio !== false;
+                atendeOnline.checked = prof.atendeOnline !== false;
+                
+                // Formas de trabalho
+                if (prof.formasPagamento) {
+                    inicializarTags(pagamentosContainer, pagamentoInput, prof.formasPagamento);
+                }
+                tempoResposta.value = prof.tempoResposta || '';
+                orcamentoGratuito.checked = prof.orcamentoGratuito !== false;
+                garantiaDias.value = prof.garantiaDias || '';
+                
+                // Portfólio
+                if (prof.portfolioFotos) {
+                    portfolioFotos = prof.portfolioFotos;
+                    portfolioFotos.forEach(foto => adicionarFotoPortfolio(foto));
+                }
+                
+                if (prof.videos) {
+                    videos = prof.videos;
+                    videos.forEach(video => adicionarVideoLista(video));
+                }
+                
+                // Contato
+                whatsapp.value = prof.whatsapp || '';
+                emailProfissional.value = prof.emailProfissional || '';
+                
+                // Foto do perfil (usando mesmo campo do cliente)
+                if (dados.fotoPerfil && dados.fotoPerfil.startsWith('http')) {
+                    avatarDisplay.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = dados.fotoPerfil;
+                    img.alt = 'Foto de perfil';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '50%';
+                    avatarDisplay.appendChild(img);
+                    
+                    const uploadBtn = document.createElement('label');
+                    uploadBtn.className = 'avatar-upload-btn';
+                    uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.style.display = 'none';
+                    input.addEventListener('change', handleAvatarUpload);
+                    uploadBtn.appendChild(input);
+                    avatarDisplay.appendChild(uploadBtn);
+                }
+            }
+        }
+
+        // ========== UPLOAD FOTO PERFIL ==========
+
+        async function handleAvatarUpload(e) {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            
+            try {
+                showLoading();
+                const imageUrl = await uploadParaImgur(arquivo);
+                
+                const usuario = auth.currentUser;
+                if (!usuario) return;
+                
+                const userRef = doc(db, "usuarios", usuario.uid);
+                await updateDoc(userRef, {
+                    fotoPerfil: imageUrl,
+                    ultimaAtualizacao: new Date().toISOString()
+                });
+                
+                // Atualizar visualmente
+                const img = avatarDisplay.querySelector('img');
+                if (img) {
+                    img.src = imageUrl;
+                } else {
+                    avatarDisplay.innerHTML = '';
+                    const newImg = document.createElement('img');
+                    newImg.src = imageUrl;
+                    newImg.alt = 'Foto de perfil';
+                    newImg.style.width = '100%';
+                    newImg.style.height = '100%';
+                    newImg.style.objectFit = 'cover';
+                    newImg.style.borderRadius = '50%';
+                    avatarDisplay.appendChild(newImg);
+                    
+                    const uploadBtn = document.createElement('label');
+                    uploadBtn.className = 'avatar-upload-btn';
+                    uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.style.display = 'none';
+                    input.addEventListener('change', handleAvatarUpload);
+                    uploadBtn.appendChild(input);
+                    avatarDisplay.appendChild(uploadBtn);
+                }
+                
+                showAlert('✅ Foto atualizada com sucesso!', 'success');
+                
+            } catch (erro) {
+                console.error('Erro ao atualizar foto:', erro);
+                showAlert('❌ Erro ao atualizar foto', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Configurar upload da foto
+        const avatarUploadBtn = avatarDisplay.querySelector('.avatar-upload-btn');
+        if (avatarUploadBtn) {
+            const input = avatarUploadBtn.querySelector('input');
+            input.addEventListener('change', handleAvatarUpload);
+        }
+
+        // ========== SALVAR PERFIL COMPLETO ==========
+
+        btnSalvarPerfil.addEventListener('click', async () => {
+            if (!auth.currentUser) {
+                showAlert('Você precisa estar logado', 'error');
+                return;
+            }
+            
+            showLoading();
+            btnSalvarPerfil.disabled = true;
+            btnSalvarPerfil.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+            
+            try {
+                const dadosProfissional = {
+                    // Dados profissionais
+                    nomeProfissional: nomeProfissional.value,
+                    slogan: slogan.value,
+                    descricao: descricao.value,
+                    especialidadePrincipal: especialidadePrincipal.value,
+                    anosExperiencia: anosExperiencia.value,
+                    especialidades: getTags(tagsContainer),
+                    
+                    // Área de atendimento
+                    raioKm: parseInt(raioKm.value) || null,
+                    cidadeBase: cidadeBase.value,
+                    cidadesAtendidas: getTags(cidadesContainer),
+                    atendeDomicilio: atendeDomicilio.checked,
+                    atendeOnline: atendeOnline.checked,
+                    
+                    // Formas de trabalho
+                    formasPagamento: getTags(pagamentosContainer),
+                    tempoResposta: tempoResposta.value,
+                    orcamentoGratuito: orcamentoGratuito.checked,
+                    garantiaDias: parseInt(garantiaDias.value) || null,
+                    
+                    // Portfólio
+                    portfolioFotos: portfolioFotos,
+                    videos: videos,
+                    
+                    // Contato
+                    whatsapp: whatsapp.value,
+                    emailProfissional: emailProfissional.value,
+                    links: Array.from(linksContainer.querySelectorAll('input')).map(input => input.value),
+                    
+                    // Metadata
+                    perfilCompleto: true,
+                    ultimaAtualizacao: new Date().toISOString()
+                };
+                
+                const userRef = doc(db, "usuarios", auth.currentUser.uid);
+                await updateDoc(userRef, {
+                    profissional: dadosProfissional,
+                    tipoUsuario: 'profissional',
+                    ultimaAtualizacao: new Date().toISOString()
+                });
+                
+                // Atualizar nome na tela
+                userName.textContent = dadosProfissional.nomeProfissional || userData.apelido;
+                userSpecialty.textContent = dadosProfissional.especialidadePrincipal || 'Profissional';
+                
+                showAlert('✅ Perfil profissional salvo com sucesso!', 'success');
+                
+            } catch (erro) {
+                console.error('Erro ao salvar perfil:', erro);
+                showAlert('❌ Erro ao salvar perfil', 'error');
+            } finally {
+                hideLoading();
+                btnSalvarPerfil.disabled = false;
+                btnSalvarPerfil.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Perfil Profissional';
+            }
+        });
+
+        // ========== INICIALIZAÇÃO ==========
+
+        // Inicializar sistemas de tags
+        inicializarTags(tagsContainer, tagInput);
+        inicializarTags(cidadesContainer, cidadeInput);
+        inicializarTags(pagamentosContainer, pagamentoInput);
+
+        console.log('✅ Perfil Profissional carregado!');
+    </script>
+</body>
+</html>

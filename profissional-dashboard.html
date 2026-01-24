@@ -542,65 +542,65 @@
     </nav>
 
     <!-- Menu Dashboard Horizontal -->
-    <div class="container-fluid">
-        <ul class="dashboard-menu" id="dashboardMenu">
-            <li>
-                <a href="#" class="active" data-page="dashboard">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="perfil">
-                    <i class="fas fa-user"></i>
-                    <span>Perfil</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="clientes">
-                    <i class="fas fa-users"></i>
-                    <span>Clientes</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="financeiro">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Financeiro</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="agenda">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Agenda</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="servicos">
-                    <i class="fas fa-tools"></i>
-                    <span>Serviços</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="pedidos">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span>Pedidos</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="assinatura">
-                    <i class="fas fa-crown"></i>
-                    <span>Assinatura</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="configuracoes">
-                    <i class="fas fa-cog"></i>
-                    <span>Configurações</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-
+<div class="container-fluid">
+    <ul class="dashboard-menu" id="dashboardMenu">
+        <li>
+            <a href="#" class="active" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <!-- MUDANÇA AQUI: Link para página externa -->
+            <a href="perfil-profissional.html">
+                <i class="fas fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="clientes">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="financeiro">
+                <i class="fas fa-chart-line"></i>
+                <span>Financeiro</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="agenda">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Agenda</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="servicos">
+                <i class="fas fa-tools"></i>
+                <span>Serviços</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="pedidos">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Pedidos</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="assinatura">
+                <i class="fas fa-crown"></i>
+                <span>Assinatura</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-page="configuracoes">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+            </a>
+        </li>
+    </ul>
+</div>
     <!-- Main Content -->
     <div class="main-content">
         <!-- Welcome Card -->
@@ -744,204 +744,209 @@
         </div>
     </div>
 
-    <!-- Firebase e Scripts -->
-    <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+   <!-- Firebase e Scripts -->
+<script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Elementos DOM
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const userId = document.getElementById('userId');
-        const welcomeName = document.getElementById('welcomeName');
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        const menuLinks = document.querySelectorAll('.dashboard-menu a');
-        const contentAreas = document.querySelectorAll('.content-area');
-        const loader = document.getElementById('loader');
+    // Elementos DOM
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userId = document.getElementById('userId');
+    const welcomeName = document.getElementById('welcomeName');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    const menuLinks = document.querySelectorAll('.dashboard-menu a');
+    const contentAreas = document.querySelectorAll('.content-area');
+    const loader = document.getElementById('loader');
 
-        // Elementos de estatísticas
-        const totalPedidos = document.getElementById('totalPedidos');
-        const totalClientes = document.getElementById('totalClientes');
-        const avaliacaoMedia = document.getElementById('avaliacaoMedia');
-        const receitaTotal = document.getElementById('receitaTotal');
-        const statusProfissional = document.getElementById('statusProfissional');
+    // Elementos de estatísticas
+    const totalPedidos = document.getElementById('totalPedidos');
+    const totalClientes = document.getElementById('totalClientes');
+    const avaliacaoMedia = document.getElementById('avaliacaoMedia');
+    const receitaTotal = document.getElementById('receitaTotal');
+    const statusProfissional = document.getElementById('statusProfissional');
 
-        // Botões de ação
-        const btnNovoServico = document.getElementById('btnNovoServico');
-        const btnVerAgenda = document.getElementById('btnVerAgenda');
-        const btnFinanceiro = document.getElementById('btnFinanceiro');
+    // Botões de ação
+    const btnNovoServico = document.getElementById('btnNovoServico');
+    const btnVerAgenda = document.getElementById('btnVerAgenda');
+    const btnFinanceiro = document.getElementById('btnFinanceiro');
 
-        // Estado da aplicação
-        let userData = null;
+    // Estado da aplicação
+    let userData = null;
 
-        // Carregar dados do usuário
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                try {
-                    // Buscar dados do Firestore
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
+    // Carregar dados do usuário
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            try {
+                // Buscar dados do Firestore
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    atualizarInterfaceUsuario(userData);
                     
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        
-                        // Esconder loader
-                        setTimeout(() => {
-                            loader.classList.add('hide');
-                        }, 500);
-                        
-                    } else {
+                    // Esconder loader
+                    setTimeout(() => {
                         loader.classList.add('hide');
-                    }
-                } catch (error) {
+                    }, 500);
+                    
+                } else {
                     loader.classList.add('hide');
                 }
-            } else {
-                window.location.href = 'login.html';
+            } catch (error) {
+                loader.classList.add('hide');
             }
-        });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
 
-        // Atualizar interface com dados do usuário
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                welcomeName.textContent = `Bem-vindo, ${data.apelido}! 👷`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-            }
+    // Atualizar interface com dados do usuário
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            welcomeName.textContent = `Bem-vindo, ${data.apelido}! 👷`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+        }
+        
+        if (data.idScanHub) {
+            userId.textContent = data.idScanHub;
+        }
+        
+        // Atualizar status profissional se existir
+        if (data.status) {
+            statusProfissional.textContent = data.status;
+            statusProfissional.className = 'status-badge status-active';
             
-            if (data.idScanHub) {
-                userId.textContent = data.idScanHub;
-            }
-            
-            // Atualizar status profissional se existir
-            if (data.status) {
-                statusProfissional.textContent = data.status;
-                statusProfissional.className = 'status-badge status-active';
-                
-                if (data.status === 'Inativo' || data.status === 'Suspenso') {
-                    statusProfissional.className = 'status-badge status-inactive';
-                } else if (data.status === 'Pendente') {
-                    statusProfissional.className = 'status-badge status-pending';
-                }
+            if (data.status === 'Inativo' || data.status === 'Suspenso') {
+                statusProfissional.className = 'status-badge status-inactive';
+            } else if (data.status === 'Pendente') {
+                statusProfissional.className = 'status-badge status-pending';
             }
         }
+    }
 
-        // Logout
-        btnLogout.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                alert('Erro ao sair. Tente novamente.');
-            }
-        });
+    // Logout
+    btnLogout.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        } catch (error) {
+            alert('Erro ao sair. Tente novamente.');
+        }
+    });
 
-        // Toggle Menu Mobile
-        menuToggle.addEventListener('click', () => {
-            dashboardMenu.classList.toggle('show');
+    // Toggle Menu Mobile
+    menuToggle.addEventListener('click', () => {
+        dashboardMenu.classList.toggle('show');
+        const icon = menuToggle.querySelector('i');
+        if (dashboardMenu.classList.contains('show')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    // Fechar menu ao clicar fora (mobile)
+    document.addEventListener('click', (e) => {
+        if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            dashboardMenu.classList.remove('show');
             const icon = menuToggle.querySelector('i');
-            if (dashboardMenu.classList.contains('show')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
 
-        // Fechar menu ao clicar fora (mobile)
-        document.addEventListener('click', (e) => {
-            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+    // Navegação entre páginas - ATUALIZADA
+    menuLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Se o link não tem data-page (é link externo), deixa seguir normalmente
+            if (!link.hasAttribute('data-page')) {
+                return; // Segue para href normal (como perfil-profissional.html)
+            }
+            
+            e.preventDefault();
+            
+            // Remover active de todos
+            menuLinks.forEach(l => l.classList.remove('active'));
+            contentAreas.forEach(area => area.classList.remove('active'));
+            
+            // Adicionar active no clicado
+            link.classList.add('active');
+            
+            // Mostrar conteúdo correspondente
+            const page = link.getAttribute('data-page');
+            const pageId = `page${page.charAt(0).toUpperCase() + page.slice(1)}`;
+            const targetPage = document.getElementById(pageId);
+            
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+            
+            // Fechar menu no mobile
+            if (window.innerWidth <= 992) {
                 dashboardMenu.classList.remove('show');
                 const icon = menuToggle.querySelector('i');
                 icon.classList.remove('fa-times');
                 icon.classList.add('fa-bars');
             }
         });
+    });
 
-        // Navegação entre páginas
-        menuLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Remover active de todos
-                menuLinks.forEach(l => l.classList.remove('active'));
-                contentAreas.forEach(area => area.classList.remove('active'));
-                
-                // Adicionar active no clicado
-                link.classList.add('active');
-                
-                // Mostrar conteúdo correspondente
-                const page = link.getAttribute('data-page');
-                const pageId = `page${page.charAt(0).toUpperCase() + page.slice(1)}`;
-                const targetPage = document.getElementById(pageId);
-                
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                }
-                
-                // Fechar menu no mobile
-                if (window.innerWidth <= 992) {
-                    dashboardMenu.classList.remove('show');
-                    const icon = menuToggle.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                }
-            });
-        });
+    // Botões de ação rápida
+    btnNovoServico.addEventListener('click', () => {
+        document.querySelector('[data-page="servicos"]').click();
+    });
 
-        // Botões de ação rápida
-        btnNovoServico.addEventListener('click', () => {
-            document.querySelector('[data-page="servicos"]').click();
-        });
+    btnVerAgenda.addEventListener('click', () => {
+        document.querySelector('[data-page="agenda"]').click();
+    });
 
-        btnVerAgenda.addEventListener('click', () => {
-            document.querySelector('[data-page="agenda"]').click();
-        });
+    btnFinanceiro.addEventListener('click', () => {
+        document.querySelector('[data-page="financeiro"]').click();
+    });
 
-        btnFinanceiro.addEventListener('click', () => {
-            document.querySelector('[data-page="financeiro"]').click();
-        });
+    // Inicializar estatísticas como vazias
+    function inicializarEstatisticas() {
+        totalPedidos.textContent = '0';
+        totalClientes.textContent = '0';
+        avaliacaoMedia.textContent = '0.0';
+        receitaTotal.textContent = 'R$ 0';
+    }
 
-        // Inicializar estatísticas como vazias
-        function inicializarEstatisticas() {
-            totalPedidos.textContent = '0';
-            totalClientes.textContent = '0';
-            avaliacaoMedia.textContent = '0.0';
-            receitaTotal.textContent = 'R$ 0';
-        }
-
-        // Chamar inicialização
-        inicializarEstatisticas();
-    </script>
+    // Chamar inicialização
+    inicializarEstatisticas();
+</script>
 </body>
 </html>
