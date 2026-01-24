@@ -1017,7 +1017,7 @@
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
                     verificarPlanoUsuario();
-                    carregarClientes();
+                    await carregarClientes(); // Aguardar carregar
                 }
             } catch (error) {
                 window.location.href = 'login.html';
@@ -1082,7 +1082,34 @@
             atualizarEstatisticas();
             verificarLimiteClientes();
         } catch (error) {
-            // Silencioso - apenas não carrega os clientes
+            // Se der erro (falta de índice), carrega sem ordenação
+            try {
+                const q = query(
+                    collection(db, "clientes"),
+                    where("profissionalId", "==", currentUser.uid)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                clientes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    clientes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Ordena localmente por dataCriacao
+                clientes.sort((a, b) => {
+                    return new Date(b.dataCriacao || 0) - new Date(a.dataCriacao || 0);
+                });
+                
+                atualizarTabelaClientes();
+                atualizarEstatisticas();
+                verificarLimiteClientes();
+            } catch (error2) {
+                // Ainda com erro, mostra vazio
+            }
         }
     }
 
@@ -1107,7 +1134,18 @@
         clientesTable.innerHTML = '';
         
         if (clientesFiltrados.length === 0) {
-            clientesTable.appendChild(emptyState.cloneNode(true));
+            // Mostrar estado vazio
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="7" class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum cliente encontrado</h5>
+                    <p class="text-muted mb-0">${clientes.length === 0 ? 
+                        'Clique em "Novo Cliente" para adicionar seu primeiro cliente' : 
+                        'Nenhum cliente corresponde aos filtros aplicados'}</p>
+                </td>
+            `;
+            clientesTable.appendChild(emptyRow);
             return;
         }
         
@@ -1162,6 +1200,14 @@
         totalClientesCount.textContent = clientes.length;
         const ativos = clientes.filter(c => c.status === 'ativo').length;
         clientesAtivos.textContent = ativos;
+        
+        // Atualizar título da página se tiver clientes
+        if (clientes.length > 0) {
+            const welcomeTitle = document.querySelector('.welcome-card h1');
+            if (welcomeTitle) {
+                welcomeTitle.innerHTML = `Meus Clientes 📋 <small class="opacity-75">(${clientes.length} cadastrados)</small>`;
+            }
+        }
     }
 
     // Verificar limite de clientes
@@ -1290,9 +1336,12 @@
             }
             
             modalCliente.hide();
+            
+            // FORÇAR recarregamento completo
             await carregarClientes();
             
         } catch (error) {
+            console.error('Erro ao salvar:', error);
             alert('Erro ao salvar cliente. Tente novamente.');
         }
     });
@@ -1337,7 +1386,7 @@
         
         try {
             await deleteDoc(doc(db, "clientes", id));
-            carregarClientes();
+            await carregarClientes(); // Recarrega após excluir
         } catch (error) {
             alert('Erro ao excluir cliente. Tente novamente.');
         }
@@ -1431,6 +1480,13 @@
         setTimeout(() => {
             nomeCliente.focus();
         }, 300);
+    });
+
+    // Recarregar ao voltar para a página
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            carregarClientes();
+        }
     });
 </script>
 </body>
