@@ -14,6 +14,10 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- jsPDF para exportação PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         :root {
             --primary-color: #44689a;
@@ -218,6 +222,7 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease;
             border: 1px solid #e8ecef;
+            cursor: pointer;
         }
 
         .action-card:hover {
@@ -426,6 +431,114 @@
         .alert-limit i {
             font-size: 1.5rem;
             margin-right: 10px;
+        }
+
+        /* Lista de Aniversariantes */
+        .aniversariantes-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .aniversariante-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s;
+        }
+
+        .aniversariante-item:hover {
+            background: #f8f9fa;
+        }
+
+        .aniversariante-data {
+            background: #FF6B35;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .aniversariante-data .dia {
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .aniversariante-data .mes {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .aniversariante-info h6 {
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        .aniversariante-info small {
+            color: #666;
+        }
+
+        /* Tags de Segmentação */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag-item {
+            background: #e8ecef;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag-item i {
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .tag-item i:hover {
+            opacity: 1;
+        }
+
+        /* Botões de Exportação */
+        .export-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .export-option {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #e8ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .export-option:hover {
+            border-color: #FF6B35;
+            background: #fff9f6;
+        }
+
+        .export-option i {
+            font-size: 2rem;
+            color: #FF6B35;
+            margin-bottom: 10px;
         }
 
         /* Responsivo */
@@ -719,31 +832,29 @@
 
         <!-- Cards de Ação Rápida -->
         <div class="action-cards">
-            <div class="action-card">
+            <div class="action-card" id="cardSegmentacao" data-bs-toggle="modal" data-bs-target="#modalSegmentacao">
                 <i class="fas fa-user-tag"></i>
                 <h4>Segmentação</h4>
                 <p>Organize seus clientes por categorias para campanhas específicas</p>
-                <button class="btn btn-secondary-action w-100">
-                    <i class="fas fa-filter"></i> Criar Segmentos
-                </button>
+                <div class="tags-container" id="tagsPreview">
+                    <!-- Tags aparecerão aqui -->
+                </div>
             </div>
             
-            <div class="action-card">
+            <div class="action-card" id="cardAniversariantes" data-bs-toggle="modal" data-bs-target="#modalAniversariantes">
                 <i class="fas fa-birthday-cake"></i>
                 <h4>Aniversariantes</h4>
                 <p>Veja os aniversários deste mês e programe surpresas</p>
-                <button class="btn btn-secondary-action w-100">
-                    <i class="fas fa-calendar"></i> Ver Aniversários
-                </button>
+                <div class="aniversariantes-preview" id="aniversariantesPreview">
+                    <small class="text-muted">Carregando aniversariantes...</small>
+                </div>
             </div>
             
-            <div class="action-card">
+            <div class="action-card" id="cardExportar" data-bs-toggle="modal" data-bs-target="#modalExportar">
                 <i class="fas fa-file-export"></i>
                 <h4>Exportar Dados</h4>
-                <p>Exporte sua lista de clientes para Excel ou PDF</p>
-                <button class="btn btn-secondary-action w-100">
-                    <i class="fas fa-download"></i> Exportar Lista
-                </button>
+                <p>Exporte sua lista de clientes para PDF</p>
+                <small class="text-muted">Clique para exportar sua lista completa</small>
             </div>
         </div>
 
@@ -918,9 +1029,110 @@
         </div>
     </div>
 
-    <!-- Firebase e Scripts -->
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module">
+    <!-- Modal Segmentação -->
+    <div class="modal fade" id="modalSegmentacao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Segmentação de Clientes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4">Crie tags para organizar seus clientes em grupos específicos</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Adicionar Nova Tag</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="novaTag" placeholder="Ex: VIP, Reclamações, Anual">
+                            <button class="btn btn-primary-action" type="button" id="btnAdicionarTag">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3">Tags Atuais:</h6>
+                    <div class="tags-container mb-4" id="tagsLista">
+                        <!-- Tags serão adicionadas aqui -->
+                    </div>
+                    
+                    <h6 class="mb-3">Clientes por Segmento:</h6>
+                    <div id="segmentosLista">
+                        <!-- Segmentos serão listados aqui -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary-action" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aniversariantes -->
+    <div class="modal fade" id="modalAniversariantes" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Aniversariantes do Mês</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h4 id="mesAtual"></h4>
+                        <p class="text-muted" id="totalAniversariantes">Carregando...</p>
+                    </div>
+                    
+                    <div class="aniversariantes-list" id="listaAniversariantes">
+                        <!-- Aniversariantes serão listados aqui -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary-action" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Exportação -->
+    <div class="modal fade" id="modalExportar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Exportar Dados</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4">Exporte sua lista de clientes para PDF</p>
+                    
+                    <div class="export-options">
+                        <div class="export-option" id="exportarTodos">
+                            <i class="fas fa-users"></i>
+                            <h6>Todos os Clientes</h6>
+                            <small>Exportar lista completa</small>
+                        </div>
+                        
+                        <div class="export-option" id="exportarAtivos">
+                            <i class="fas fa-check-circle"></i>
+                            <h6>Clientes Ativos</h6>
+                            <small>Apenas clientes ativos</small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        O arquivo será gerado em PDF com todos os dados dos clientes.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary-action" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap e Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+   <script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
@@ -999,11 +1211,32 @@
     const dataCadastro = document.getElementById('dataCadastro');
     const btnSalvarCliente = document.getElementById('btnSalvarCliente');
 
+    // Elementos das NOVAS funcionalidades
+    const cardSegmentacao = document.getElementById('cardSegmentacao');
+    const cardAniversariantes = document.getElementById('cardAniversariantes');
+    const cardExportar = document.getElementById('cardExportar');
+    const tagsPreview = document.getElementById('tagsPreview');
+    const aniversariantesPreview = document.getElementById('aniversariantesPreview');
+    const modalSegmentacao = new bootstrap.Modal(document.getElementById('modalSegmentacao'));
+    const modalAniversariantes = new bootstrap.Modal(document.getElementById('modalAniversariantes'));
+    const modalExportar = new bootstrap.Modal(document.getElementById('modalExportar'));
+    const novaTag = document.getElementById('novaTag');
+    const btnAdicionarTag = document.getElementById('btnAdicionarTag');
+    const tagsLista = document.getElementById('tagsLista');
+    const segmentosLista = document.getElementById('segmentosLista');
+    const mesAtual = document.getElementById('mesAtual');
+    const totalAniversariantes = document.getElementById('totalAniversariantes');
+    const listaAniversariantes = document.getElementById('listaAniversariantes');
+    const exportarTodos = document.getElementById('exportarTodos');
+    const exportarAtivos = document.getElementById('exportarAtivos');
+
     // Estado da aplicação
     let currentUser = null;
     let userData = null;
     let clientes = [];
     let planoLimite = 50;
+    let tags = ['VIP', 'Recorrente', 'Novo', 'Potencial']; // Tags padrão
+    let segmentosSalvos = []; // Segmentos salvos localmente
 
     // Carregar dados do usuário
     onAuthStateChanged(auth, async (user) => {
@@ -1017,7 +1250,8 @@
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
                     verificarPlanoUsuario();
-                    await carregarClientes(); // Aguardar carregar
+                    await carregarClientes();
+                    atualizarPreviewCards(); // Atualiza os cards
                 }
             } catch (error) {
                 window.location.href = 'login.html';
@@ -1064,8 +1298,7 @@
         try {
             const q = query(
                 collection(db, "clientes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("dataCriacao", "desc")
+                where("profissionalId", "==", currentUser.uid)
             );
             
             const querySnapshot = await getDocs(q);
@@ -1078,38 +1311,16 @@
                 });
             });
             
+            // Ordena por data de criação (mais recente primeiro)
+            clientes.sort((a, b) => {
+                return new Date(b.dataCriacao || 0) - new Date(a.dataCriacao || 0);
+            });
+            
             atualizarTabelaClientes();
             atualizarEstatisticas();
             verificarLimiteClientes();
         } catch (error) {
-            // Se der erro (falta de índice), carrega sem ordenação
-            try {
-                const q = query(
-                    collection(db, "clientes"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                clientes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    clientes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                // Ordena localmente por dataCriacao
-                clientes.sort((a, b) => {
-                    return new Date(b.dataCriacao || 0) - new Date(a.dataCriacao || 0);
-                });
-                
-                atualizarTabelaClientes();
-                atualizarEstatisticas();
-                verificarLimiteClientes();
-            } catch (error2) {
-                // Ainda com erro, mostra vazio
-            }
+            // Silencioso
         }
     }
 
@@ -1134,15 +1345,16 @@
         clientesTable.innerHTML = '';
         
         if (clientesFiltrados.length === 0) {
-            // Mostrar estado vazio
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `
                 <td colspan="7" class="text-center py-5">
                     <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Nenhum cliente encontrado</h5>
+                    <h5 class="text-muted">${clientes.length === 0 ? 
+                        'Nenhum cliente cadastrado' : 
+                        'Nenhum cliente corresponde aos filtros'}</h5>
                     <p class="text-muted mb-0">${clientes.length === 0 ? 
                         'Clique em "Novo Cliente" para adicionar seu primeiro cliente' : 
-                        'Nenhum cliente corresponde aos filtros aplicados'}</p>
+                        'Tente ajustar os filtros de busca'}</p>
                 </td>
             `;
             clientesTable.appendChild(emptyRow);
@@ -1201,7 +1413,6 @@
         const ativos = clientes.filter(c => c.status === 'ativo').length;
         clientesAtivos.textContent = ativos;
         
-        // Atualizar título da página se tiver clientes
         if (clientes.length > 0) {
             const welcomeTitle = document.querySelector('.welcome-card h1');
             if (welcomeTitle) {
@@ -1232,6 +1443,259 @@
         const date = new Date(dataString);
         return date.toLocaleDateString('pt-BR');
     }
+
+    // ================== NOVAS FUNCIONALIDADES ==================
+
+    // Atualizar preview dos cards
+    function atualizarPreviewCards() {
+        // Preview das tags
+        atualizarPreviewTags();
+        
+        // Preview dos aniversariantes
+        atualizarPreviewAniversariantes();
+    }
+
+    // 1. FUNCIONALIDADE DE SEGMENTAÇÃO
+    function atualizarPreviewTags() {
+        tagsPreview.innerHTML = '';
+        const tagsExibicao = tags.slice(0, 3); // Mostra apenas 3 tags no preview
+        
+        tagsExibicao.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag-item';
+            tagElement.textContent = tag;
+            tagsPreview.appendChild(tagElement);
+        });
+        
+        if (tags.length > 3) {
+            const maisTags = document.createElement('span');
+            maisTags.className = 'tag-item';
+            maisTags.textContent = `+${tags.length - 3}`;
+            tagsPreview.appendChild(maisTags);
+        }
+    }
+
+    function atualizarListaTags() {
+        tagsLista.innerHTML = '';
+        tags.forEach((tag, index) => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag-item';
+            tagElement.innerHTML = `
+                ${tag}
+                <i class="fas fa-times" onclick="removerTag(${index})"></i>
+            `;
+            tagsLista.appendChild(tagElement);
+        });
+        
+        atualizarSegmentos();
+    }
+
+    window.removerTag = function(index) {
+        tags.splice(index, 1);
+        atualizarListaTags();
+        atualizarPreviewTags();
+    };
+
+    // Adicionar nova tag
+    btnAdicionarTag.addEventListener('click', () => {
+        const tag = novaTag.value.trim();
+        if (tag && !tags.includes(tag)) {
+            tags.push(tag);
+            novaTag.value = '';
+            atualizarListaTags();
+            atualizarPreviewTags();
+        }
+    });
+
+    novaTag.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            btnAdicionarTag.click();
+        }
+    });
+
+    // Atualizar segmentos
+    function atualizarSegmentos() {
+        segmentosLista.innerHTML = '';
+        
+        const segmentos = [
+            { nome: 'Clientes Ativos', filtro: (c) => c.status === 'ativo' },
+            { nome: 'Clientes Inativos', filtro: (c) => c.status === 'inativo' },
+            { nome: 'Pessoa Física', filtro: (c) => c.tipo === 'fisica' },
+            { nome: 'Pessoa Jurídica', filtro: (c) => c.tipo === 'juridica' }
+        ];
+        
+        segmentos.forEach(segmento => {
+            const quantidade = clientes.filter(segmento.filtro).length;
+            if (quantidade > 0) {
+                const div = document.createElement('div');
+                div.className = 'd-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+                div.innerHTML = `
+                    <span>${segmento.nome}</span>
+                    <span class="badge bg-primary">${quantidade} clientes</span>
+                `;
+                segmentosLista.appendChild(div);
+            }
+        });
+    }
+
+    // 2. FUNCIONALIDADE DE ANIVERSARIANTES
+    function atualizarPreviewAniversariantes() {
+        const aniversariantes = clientes.filter(cliente => {
+            if (!cliente.dataNascimento) return false;
+            const hoje = new Date();
+            const dataNasc = new Date(cliente.dataNascimento);
+            return dataNasc.getMonth() === hoje.getMonth();
+        });
+        
+        aniversariantesPreview.innerHTML = '';
+        
+        if (aniversariantes.length === 0) {
+            aniversariantesPreview.innerHTML = '<small class="text-muted">Nenhum aniversariante este mês</small>';
+            return;
+        }
+        
+        const preview = aniversariantes.slice(0, 2); // Mostra 2 no preview
+        preview.forEach(cliente => {
+            const data = new Date(cliente.dataNascimento);
+            const div = document.createElement('div');
+            div.className = 'mb-2';
+            div.innerHTML = `
+                <small><strong>${cliente.nome.split(' ')[0]}</strong> - ${data.getDate()}/${data.getMonth() + 1}</small>
+            `;
+            aniversariantesPreview.appendChild(div);
+        });
+        
+        if (aniversariantes.length > 2) {
+            const mais = document.createElement('small');
+            mais.className = 'text-muted';
+            mais.textContent = `+ ${aniversariantes.length - 2} mais`;
+            aniversariantesPreview.appendChild(mais);
+        }
+    }
+
+    function atualizarModalAniversariantes() {
+        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const hoje = new Date();
+        const mes = hoje.getMonth();
+        
+        mesAtual.textContent = `Aniversariantes de ${meses[mes]}`;
+        
+        const aniversariantes = clientes.filter(cliente => {
+            if (!cliente.dataNascimento) return false;
+            const dataNasc = new Date(cliente.dataNascimento);
+            return dataNasc.getMonth() === mes;
+        });
+        
+        totalAniversariantes.textContent = `${aniversariantes.length} aniversariante(s) este mês`;
+        listaAniversariantes.innerHTML = '';
+        
+        if (aniversariantes.length === 0) {
+            listaAniversariantes.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-birthday-cake fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Nenhum aniversariante este mês</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Ordena por dia do mês
+        aniversariantes.sort((a, b) => {
+            const diaA = new Date(a.dataNascimento).getDate();
+            const diaB = new Date(b.dataNascimento).getDate();
+            return diaA - diaB;
+        });
+        
+        aniversariantes.forEach(cliente => {
+            const dataNasc = new Date(cliente.dataNascimento);
+            const dia = dataNasc.getDate();
+            const mesNome = meses[dataNasc.getMonth()].substring(0, 3);
+            
+            const item = document.createElement('div');
+            item.className = 'aniversariante-item';
+            item.innerHTML = `
+                <div class="aniversariante-data">
+                    <div class="dia">${dia}</div>
+                    <div class="mes">${mesNome}</div>
+                </div>
+                <div class="aniversariante-info">
+                    <h6 class="mb-1">${cliente.nome}</h6>
+                    <small class="text-muted">${cliente.email}</small><br>
+                    <small class="text-muted">${cliente.telefone || 'Sem telefone'}</small>
+                </div>
+            `;
+            listaAniversariantes.appendChild(item);
+        });
+    }
+
+    // Evento para abrir modal de aniversariantes
+    cardAniversariantes.addEventListener('click', () => {
+        atualizarModalAniversariantes();
+    });
+
+    // 3. FUNCIONALIDADE DE EXPORTAÇÃO PDF
+    exportarTodos.addEventListener('click', () => {
+        exportarParaPDF(clientes, 'todos-clientes');
+        modalExportar.hide();
+    });
+
+    exportarAtivos.addEventListener('click', () => {
+        const ativos = clientes.filter(c => c.status === 'ativo');
+        exportarParaPDF(ativos, 'clientes-ativos');
+        modalExportar.hide();
+    });
+
+    function exportarParaPDF(clientesExportar, nomeArquivo) {
+        if (clientesExportar.length === 0) {
+            alert('Não há clientes para exportar.');
+            return;
+        }
+        
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cabeçalho
+            doc.setFontSize(20);
+            doc.text('Relatório de Clientes - ScanHub', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 22, { align: 'center' });
+            doc.text(`Total de clientes: ${clientesExportar.length}`, 105, 27, { align: 'center' });
+            
+            // Preparar dados da tabela
+            const tableData = clientesExportar.map(cliente => [
+                cliente.nome.substring(0, 30),
+                cliente.email.substring(0, 25),
+                cliente.telefone || '--',
+                cliente.tipo === 'fisica' ? 'Pessoa Física' : 'Pessoa Jurídica',
+                cliente.status === 'ativo' ? 'Ativo' : 'Inativo',
+                formatarData(cliente.dataCadastro)
+            ]);
+            
+            // Criar tabela
+            doc.autoTable({
+                head: [['Nome', 'E-mail', 'Telefone', 'Tipo', 'Status', 'Cadastro']],
+                body: tableData,
+                startY: 35,
+                theme: 'grid',
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [255, 107, 53] }
+            });
+            
+            // Salvar PDF
+            doc.save(`${nomeArquivo}-${new Date().toISOString().split('T')[0]}.pdf`);
+            
+            alert('PDF gerado com sucesso! O download começará automaticamente.');
+            
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+            alert('Erro ao gerar PDF. Tente novamente.');
+        }
+    }
+
+    // ================== FUNÇÕES ORIGINAIS (mantidas) ==================
 
     // Novo cliente
     btnNovoCliente.addEventListener('click', () => {
@@ -1273,7 +1737,6 @@
 
     // Salvar cliente
     btnSalvarCliente.addEventListener('click', async () => {
-        // Validar campos obrigatórios
         if (!nomeCliente.value.trim()) {
             alert('Por favor, insira o nome do cliente.');
             nomeCliente.focus();
@@ -1327,21 +1790,17 @@
             };
             
             if (clienteId.value) {
-                // Atualizar cliente existente
                 const clienteRef = doc(db, "clientes", clienteId.value);
                 await updateDoc(clienteRef, clienteData);
             } else {
-                // Criar novo cliente
                 await addDoc(collection(db, "clientes"), clienteData);
             }
             
             modalCliente.hide();
-            
-            // FORÇAR recarregamento completo
             await carregarClientes();
+            atualizarPreviewCards(); // Atualiza os cards após salvar
             
         } catch (error) {
-            console.error('Erro ao salvar:', error);
             alert('Erro ao salvar cliente. Tente novamente.');
         }
     });
@@ -1354,7 +1813,6 @@
         modalTitle.textContent = 'Editar Cliente';
         clienteId.value = id;
         
-        // Preencher formulário
         nomeCliente.value = cliente.nome || '';
         emailCliente.value = cliente.email || '';
         telefoneCliente.value = cliente.telefone || '';
@@ -1369,7 +1827,6 @@
         observacoes.value = cliente.observacoes || '';
         dataCadastro.value = cliente.dataCadastro || '';
         
-        // Definir tipo
         if (cliente.tipo === 'fisica') {
             tipoFisica.checked = true;
         } else {
@@ -1386,7 +1843,8 @@
         
         try {
             await deleteDoc(doc(db, "clientes", id));
-            await carregarClientes(); // Recarrega após excluir
+            await carregarClientes();
+            atualizarPreviewCards(); // Atualiza os cards após excluir
         } catch (error) {
             alert('Erro ao excluir cliente. Tente novamente.');
         }
@@ -1480,6 +1938,11 @@
         setTimeout(() => {
             nomeCliente.focus();
         }, 300);
+    });
+
+    // Inicializar tags ao carregar
+    window.addEventListener('DOMContentLoaded', () => {
+        atualizarListaTags();
     });
 
     // Recarregar ao voltar para a página
