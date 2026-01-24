@@ -939,8 +939,7 @@
         getDocs,
         query,
         where,
-        orderBy,
-        serverTimestamp
+        orderBy
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     // Firebase Config
@@ -1065,7 +1064,8 @@
         try {
             const q = query(
                 collection(db, "clientes"),
-                where("profissionalId", "==", currentUser.uid)
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("dataCriacao", "desc")
             );
             
             const querySnapshot = await getDocs(q);
@@ -1082,8 +1082,7 @@
             atualizarEstatisticas();
             verificarLimiteClientes();
         } catch (error) {
-            // Se der erro, significa que a coleção ainda não existe
-            // Isso é normal para o primeiro uso
+            // Silencioso - apenas não carrega os clientes
         }
     }
 
@@ -1226,7 +1225,7 @@
         }
     }
 
-    // Salvar cliente - CORREÇÃO AQUI
+    // Salvar cliente
     btnSalvarCliente.addEventListener('click', async () => {
         // Validar campos obrigatórios
         if (!nomeCliente.value.trim()) {
@@ -1260,21 +1259,20 @@
         }
         
         try {
-            // Preparar dados do cliente
             const clienteData = {
                 nome: nomeCliente.value.trim(),
                 tipo: tipoFisica.checked ? 'fisica' : 'juridica',
                 cpfCnpj: cpfCnpj.value.trim(),
-                email: emailCliente.value.trim().toLowerCase(),
+                email: emailCliente.value.trim(),
                 telefone: telefoneCliente.value.trim(),
                 status: statusCliente.value,
-                dataNascimento: dataNascimento.value || '',
-                origem: origemCliente.value || '',
-                cep: cepCliente.value || '',
-                cidade: cidadeCliente.value || '',
-                endereco: enderecoCliente.value || '',
-                numero: numeroCliente.value || '',
-                observacoes: observacoes.value || '',
+                dataNascimento: dataNascimento.value || null,
+                origem: origemCliente.value || null,
+                cep: cepCliente.value || null,
+                cidade: cidadeCliente.value || null,
+                endereco: enderecoCliente.value || null,
+                numero: numeroCliente.value || null,
+                observacoes: observacoes.value || null,
                 dataCadastro: dataCadastro.value,
                 profissionalId: currentUser.uid,
                 profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
@@ -1287,16 +1285,15 @@
                 const clienteRef = doc(db, "clientes", clienteId.value);
                 await updateDoc(clienteRef, clienteData);
             } else {
-                // CRIAR NOVO CLIENTE - A coleção será criada automaticamente aqui
+                // Criar novo cliente
                 await addDoc(collection(db, "clientes"), clienteData);
             }
             
             modalCliente.hide();
-            await carregarClientes(); // Recarrega a lista
+            await carregarClientes();
             
         } catch (error) {
-            console.error('Erro detalhado:', error); // Temporário para debug
-            alert('Erro ao salvar cliente. Verifique sua conexão e tente novamente.');
+            alert('Erro ao salvar cliente. Tente novamente.');
         }
     });
 
@@ -1308,6 +1305,7 @@
         modalTitle.textContent = 'Editar Cliente';
         clienteId.value = id;
         
+        // Preencher formulário
         nomeCliente.value = cliente.nome || '';
         emailCliente.value = cliente.email || '';
         telefoneCliente.value = cliente.telefone || '';
@@ -1322,6 +1320,7 @@
         observacoes.value = cliente.observacoes || '';
         dataCadastro.value = cliente.dataCadastro || '';
         
+        // Definir tipo
         if (cliente.tipo === 'fisica') {
             tipoFisica.checked = true;
         } else {
@@ -1432,26 +1431,6 @@
         setTimeout(() => {
             nomeCliente.focus();
         }, 300);
-    });
-
-    // Testar conexão com Firestore
-    async function testarFirestore() {
-        try {
-            // Tenta acessar uma coleção existente
-            const testRef = collection(db, "usuarios");
-            const testQuery = await getDocs(testRef);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-
-    // Inicializar
-    window.addEventListener('DOMContentLoaded', async () => {
-        const firestoreOk = await testarFirestore();
-        if (!firestoreOk) {
-            alert('Erro na conexão com o banco de dados. Verifique sua internet.');
-        }
     });
 </script>
 </body>
