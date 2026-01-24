@@ -919,481 +919,501 @@
     </div>
 
     <!-- Firebase e Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            getDocs,
-            query,
-            where,
-            orderBy
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        getDocs,
+        query,
+        where,
+        orderBy
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Elementos DOM
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const userId = document.getElementById('userId');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        const totalClientesCount = document.getElementById('totalClientesCount');
-        const clientesAtivos = document.getElementById('clientesAtivos');
-        const limiteClientes = document.getElementById('limiteClientes');
-        const alertLimite = document.getElementById('alertLimite');
-        const percentualUso = document.getElementById('percentualUso');
-        const searchClientes = document.getElementById('searchClientes');
-        const filterStatus = document.getElementById('filterStatus');
-        const filterTipo = document.getElementById('filterTipo');
-        const clientesTable = document.getElementById('clientesTable');
-        const emptyState = document.getElementById('emptyState');
-        const btnNovoCliente = document.getElementById('btnNovoCliente');
-        const modalCliente = new bootstrap.Modal(document.getElementById('modalCliente'));
-        const formCliente = document.getElementById('formCliente');
-        const modalTitle = document.getElementById('modalTitle');
-        const clienteId = document.getElementById('clienteId');
-        const tipoFisica = document.getElementById('tipoFisica');
-        const tipoJuridica = document.getElementById('tipoJuridica');
-        const statusCliente = document.getElementById('statusCliente');
-        const nomeCliente = document.getElementById('nomeCliente');
-        const labelNome = document.getElementById('labelNome');
-        const cpfCnpj = document.getElementById('cpfCnpj');
-        const labelCpfCnpj = document.getElementById('labelCpfCnpj');
-        const dataNascimento = document.getElementById('dataNascimento');
-        const labelDataNasc = document.getElementById('labelDataNasc');
-        const emailCliente = document.getElementById('emailCliente');
-        const telefoneCliente = document.getElementById('telefoneCliente');
-        const origemCliente = document.getElementById('origemCliente');
-        const cepCliente = document.getElementById('cepCliente');
-        const cidadeCliente = document.getElementById('cidadeCliente');
-        const enderecoCliente = document.getElementById('enderecoCliente');
-        const numeroCliente = document.getElementById('numeroCliente');
-        const observacoes = document.getElementById('observacoes');
-        const dataCadastro = document.getElementById('dataCadastro');
-        const btnSalvarCliente = document.getElementById('btnSalvarCliente');
+    // Elementos DOM
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userId = document.getElementById('userId');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    const totalClientesCount = document.getElementById('totalClientesCount');
+    const clientesAtivos = document.getElementById('clientesAtivos');
+    const limiteClientes = document.getElementById('limiteClientes');
+    const alertLimite = document.getElementById('alertLimite');
+    const percentualUso = document.getElementById('percentualUso');
+    const searchClientes = document.getElementById('searchClientes');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterTipo = document.getElementById('filterTipo');
+    const clientesTable = document.getElementById('clientesTable');
+    const emptyState = document.getElementById('emptyState');
+    const btnNovoCliente = document.getElementById('btnNovoCliente');
+    const modalCliente = new bootstrap.Modal(document.getElementById('modalCliente'));
+    const formCliente = document.getElementById('formCliente');
+    const modalTitle = document.getElementById('modalTitle');
+    const clienteId = document.getElementById('clienteId');
+    const tipoFisica = document.getElementById('tipoFisica');
+    const tipoJuridica = document.getElementById('tipoJuridica');
+    const statusCliente = document.getElementById('statusCliente');
+    const nomeCliente = document.getElementById('nomeCliente');
+    const labelNome = document.getElementById('labelNome');
+    const cpfCnpj = document.getElementById('cpfCnpj');
+    const labelCpfCnpj = document.getElementById('labelCpfCnpj');
+    const dataNascimento = document.getElementById('dataNascimento');
+    const labelDataNasc = document.getElementById('labelDataNasc');
+    const emailCliente = document.getElementById('emailCliente');
+    const telefoneCliente = document.getElementById('telefoneCliente');
+    const origemCliente = document.getElementById('origemCliente');
+    const cepCliente = document.getElementById('cepCliente');
+    const cidadeCliente = document.getElementById('cidadeCliente');
+    const enderecoCliente = document.getElementById('enderecoCliente');
+    const numeroCliente = document.getElementById('numeroCliente');
+    const observacoes = document.getElementById('observacoes');
+    const dataCadastro = document.getElementById('dataCadastro');
+    const btnSalvarCliente = document.getElementById('btnSalvarCliente');
 
-        // Estado da aplicação
-        let currentUser = null;
-        let userData = null;
-        let clientes = [];
-        let planoLimite = 50; // Plano básico: 50 clientes
+    // Estado da aplicação
+    let currentUser = null;
+    let userData = null;
+    let clientes = [];
+    let planoLimite = 50; // Plano básico: 50 clientes
 
-        // Carregar dados do usuário
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    // Buscar dados do Firestore
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
+    // Carregar dados do usuário
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                // Buscar dados do Firestore
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    atualizarInterfaceUsuario(userData);
                     
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        
-                        // Verificar plano do usuário
-                        verificarPlanoUsuario();
-                        
-                        // Carregar clientes
-                        carregarClientes();
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
+                    // Verificar plano do usuário
+                    verificarPlanoUsuario();
+                    
+                    // Carregar clientes
+                    carregarClientes();
                 }
-            } else {
+            } catch (error) {
                 window.location.href = 'login.html';
             }
-        });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
 
-        // Atualizar interface com dados do usuário
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+    // Atualizar interface com dados do usuário
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+        }
+        
+        if (data.idScanHub) {
+            userId.textContent = data.idScanHub;
+        }
+    }
+
+    // Verificar plano do usuário
+    function verificarPlanoUsuario() {
+        if (userData && userData.plano) {
+            switch(userData.plano) {
+                case 'premium':
+                    planoLimite = 1000;
+                    limiteClientes.textContent = 'Ilimitado';
+                    break;
+                case 'pro':
+                    planoLimite = 200;
+                    limiteClientes.textContent = '200';
+                    break;
+                case 'basico':
+                default:
+                    planoLimite = 50;
+                    limiteClientes.textContent = '50';
             }
+        }
+    }
+
+    // Carregar clientes do Firestore
+    async function carregarClientes() {
+        try {
+            const q = query(
+                collection(db, "clientes"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("dataCadastro", "desc")
+            );
             
-            if (data.idScanHub) {
-                userId.textContent = data.idScanHub;
-            }
-        }
-
-        // Verificar plano do usuário
-        function verificarPlanoUsuario() {
-            if (userData && userData.plano) {
-                switch(userData.plano) {
-                    case 'premium':
-                        planoLimite = 1000; // Ilimitado prático
-                        limiteClientes.textContent = 'Ilimitado';
-                        break;
-                    case 'pro':
-                        planoLimite = 200;
-                        limiteClientes.textContent = '200';
-                        break;
-                    case 'basico':
-                    default:
-                        planoLimite = 50;
-                        limiteClientes.textContent = '50';
-                }
-            }
-        }
-
-        // Carregar clientes do Firestore
-        async function carregarClientes() {
-            try {
-                const q = query(
-                    collection(db, "clientes"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("dataCadastro", "desc")
-                );
-                
-                const querySnapshot = await getDocs(q);
-                clientes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    clientes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
+            const querySnapshot = await getDocs(q);
+            clientes = [];
+            
+            querySnapshot.forEach((doc) => {
+                clientes.push({
+                    id: doc.id,
+                    ...doc.data()
                 });
-                
-                atualizarTabelaClientes();
-                atualizarEstatisticas();
-                verificarLimiteClientes();
-            } catch (error) {
-                console.error('Erro ao carregar clientes:', error);
-            }
-        }
-
-        // Atualizar tabela de clientes
-        function atualizarTabelaClientes() {
-            const searchTerm = searchClientes.value.toLowerCase();
-            const statusFilter = filterStatus.value;
-            const tipoFilter = filterTipo.value;
-            
-            // Filtrar clientes
-            let clientesFiltrados = clientes.filter(cliente => {
-                const matchSearch = !searchTerm || 
-                    cliente.nome.toLowerCase().includes(searchTerm) ||
-                    cliente.email.toLowerCase().includes(searchTerm) ||
-                    (cliente.telefone && cliente.telefone.includes(searchTerm));
-                
-                const matchStatus = !statusFilter || cliente.status === statusFilter;
-                const matchTipo = !tipoFilter || cliente.tipo === tipoFilter;
-                
-                return matchSearch && matchStatus && matchTipo;
             });
             
-            // Limpar tabela
-            clientesTable.innerHTML = '';
+            atualizarTabelaClientes();
+            atualizarEstatisticas();
+            verificarLimiteClientes();
+        } catch (error) {
+            // Silencioso - apenas não carrega os clientes
+        }
+    }
+
+    // Atualizar tabela de clientes
+    function atualizarTabelaClientes() {
+        const searchTerm = searchClientes.value.toLowerCase();
+        const statusFilter = filterStatus.value;
+        const tipoFilter = filterTipo.value;
+        
+        // Filtrar clientes
+        let clientesFiltrados = clientes.filter(cliente => {
+            const matchSearch = !searchTerm || 
+                cliente.nome.toLowerCase().includes(searchTerm) ||
+                cliente.email.toLowerCase().includes(searchTerm) ||
+                (cliente.telefone && cliente.telefone.includes(searchTerm));
             
-            if (clientesFiltrados.length === 0) {
-                clientesTable.appendChild(emptyState.cloneNode(true));
-                return;
+            const matchStatus = !statusFilter || cliente.status === statusFilter;
+            const matchTipo = !tipoFilter || cliente.tipo === tipoFilter;
+            
+            return matchSearch && matchStatus && matchTipo;
+        });
+        
+        // Limpar tabela
+        clientesTable.innerHTML = '';
+        
+        if (clientesFiltrados.length === 0) {
+            clientesTable.appendChild(emptyState.cloneNode(true));
+            return;
+        }
+        
+        // Adicionar clientes filtrados
+        clientesFiltrados.forEach(cliente => {
+            const row = document.createElement('tr');
+            
+            // Criar botões de ação
+            const btnEdit = document.createElement('button');
+            btnEdit.className = 'btn btn-action-sm btn-edit';
+            btnEdit.innerHTML = '<i class="fas fa-edit"></i>';
+            btnEdit.onclick = () => editarCliente(cliente.id);
+            
+            const btnDelete = document.createElement('button');
+            btnDelete.className = 'btn btn-action-sm btn-delete';
+            btnDelete.innerHTML = '<i class="fas fa-trash"></i>';
+            btnDelete.onclick = () => excluirCliente(cliente.id);
+            
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'action-buttons';
+            actionDiv.appendChild(btnEdit);
+            actionDiv.appendChild(btnDelete);
+            
+            row.innerHTML = `
+                <td>
+                    <strong>${cliente.nome}</strong>
+                    ${cliente.cpfCnpj ? `<br><small class="text-muted">${cliente.cpfCnpj}</small>` : ''}
+                </td>
+                <td>${cliente.email}</td>
+                <td>${cliente.telefone || '--'}</td>
+                <td>
+                    <span class="badge ${cliente.tipo === 'fisica' ? 'bg-info' : 'bg-warning'}">
+                        ${cliente.tipo === 'fisica' ? 'Pessoa Física' : 'Pessoa Jurídica'}
+                    </span>
+                </td>
+                <td>
+                    <span class="cliente-status ${cliente.status === 'ativo' ? 'status-ativo' : 'status-inativo'}">
+                        ${cliente.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                    </span>
+                </td>
+                <td>${formatarData(cliente.dataCadastro)}</td>
+            `;
+            
+            const tdActions = document.createElement('td');
+            tdActions.appendChild(actionDiv);
+            row.appendChild(tdActions);
+            
+            clientesTable.appendChild(row);
+        });
+    }
+
+    // Atualizar estatísticas
+    function atualizarEstatisticas() {
+        totalClientesCount.textContent = clientes.length;
+        
+        const ativos = clientes.filter(c => c.status === 'ativo').length;
+        clientesAtivos.textContent = ativos;
+    }
+
+    // Verificar limite de clientes
+    function verificarLimiteClientes() {
+        const percentual = Math.round((clientes.length / planoLimite) * 100);
+        
+        if (planoLimite !== 1000 && percentual >= 80) {
+            percentualUso.textContent = `${percentual}%`;
+            alertLimite.classList.remove('d-none');
+            
+            if (percentual >= 95) {
+                alertLimite.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
             }
-            
-            // Adicionar clientes filtrados
-            clientesFiltrados.forEach(cliente => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <strong>${cliente.nome}</strong>
-                        ${cliente.cpfCnpj ? `<br><small class="text-muted">${cliente.cpfCnpj}</small>` : ''}
-                    </td>
-                    <td>${cliente.email}</td>
-                    <td>${cliente.telefone || '--'}</td>
-                    <td>
-                        <span class="badge ${cliente.tipo === 'fisica' ? 'bg-info' : 'bg-warning'}">
-                            ${cliente.tipo === 'fisica' ? 'Pessoa Física' : 'Pessoa Jurídica'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="cliente-status ${cliente.status === 'ativo' ? 'status-ativo' : 'status-inativo'}">
-                            ${cliente.status === 'ativo' ? 'Ativo' : 'Inativo'}
-                        </span>
-                    </td>
-                    <td>${formatarData(cliente.dataCadastro)}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn btn-action-sm btn-edit" onclick="editarCliente('${cliente.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-action-sm btn-delete" onclick="excluirCliente('${cliente.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                clientesTable.appendChild(row);
-            });
+        } else {
+            alertLimite.classList.add('d-none');
         }
+    }
 
-        // Atualizar estatísticas
-        function atualizarEstatisticas() {
-            totalClientesCount.textContent = clientes.length;
-            
-            const ativos = clientes.filter(c => c.status === 'ativo').length;
-            clientesAtivos.textContent = ativos;
+    // Formatar data
+    function formatarData(dataString) {
+        if (!dataString) return '--';
+        const date = new Date(dataString);
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    // Novo cliente
+    btnNovoCliente.addEventListener('click', () => {
+        // Verificar limite
+        if (planoLimite !== 1000 && clientes.length >= planoLimite) {
+            alert('Você atingiu o limite de clientes do seu plano. Atualize para cadastrar mais clientes.');
+            return;
         }
+        
+        modalTitle.textContent = 'Novo Cliente';
+        formCliente.reset();
+        clienteId.value = '';
+        
+        // Definir data atual
+        const hoje = new Date().toISOString().split('T')[0];
+        dataCadastro.value = hoje;
+        
+        // Configurar para pessoa física por padrão
+        tipoFisica.checked = true;
+        alterarTipoCliente();
+        
+        modalCliente.show();
+    });
 
-        // Verificar limite de clientes
-        function verificarLimiteClientes() {
-            const percentual = Math.round((clientes.length / planoLimite) * 100);
+    // Alterar tipo de cliente
+    tipoFisica.addEventListener('change', alterarTipoCliente);
+    tipoJuridica.addEventListener('change', alterarTipoCliente);
+
+    function alterarTipoCliente() {
+        if (tipoFisica.checked) {
+            labelNome.textContent = 'Nome Completo *';
+            labelCpfCnpj.textContent = 'CPF *';
+            labelDataNasc.textContent = 'Data de Nascimento';
+            cpfCnpj.placeholder = '000.000.000-00';
+        } else {
+            labelNome.textContent = 'Razão Social *';
+            labelCpfCnpj.textContent = 'CNPJ *';
+            labelDataNasc.textContent = 'Data de Fundação';
+            cpfCnpj.placeholder = '00.000.000/0000-00';
+        }
+    }
+
+    // Salvar cliente
+    btnSalvarCliente.addEventListener('click', async () => {
+        if (!formCliente.checkValidity()) {
+            formCliente.classList.add('was-validated');
+            return;
+        }
+        
+        try {
+            const clienteData = {
+                nome: nomeCliente.value,
+                tipo: tipoFisica.checked ? 'fisica' : 'juridica',
+                cpfCnpj: cpfCnpj.value,
+                email: emailCliente.value,
+                telefone: telefoneCliente.value,
+                status: statusCliente.value,
+                dataNascimento: dataNascimento.value || null,
+                origem: origemCliente.value || null,
+                cep: cepCliente.value || null,
+                cidade: cidadeCliente.value || null,
+                endereco: enderecoCliente.value || null,
+                numero: numeroCliente.value || null,
+                observacoes: observacoes.value || null,
+                dataCadastro: dataCadastro.value,
+                profissionalId: currentUser.uid,
+                dataAtualizacao: new Date().toISOString()
+            };
             
-            if (planoLimite !== 1000 && percentual >= 80) {
-                percentualUso.textContent = `${percentual}%`;
-                alertLimite.classList.remove('d-none');
-                
-                if (percentual >= 95) {
-                    alertLimite.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                }
+            if (clienteId.value) {
+                // Atualizar cliente existente
+                const clienteRef = doc(db, "clientes", clienteId.value);
+                await updateDoc(clienteRef, clienteData);
             } else {
-                alertLimite.classList.add('d-none');
-            }
-        }
-
-        // Formatar data
-        function formatarData(dataString) {
-            if (!dataString) return '--';
-            const date = new Date(dataString);
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        // Novo cliente
-        btnNovoCliente.addEventListener('click', () => {
-            // Verificar limite
-            if (planoLimite !== 1000 && clientes.length >= planoLimite) {
-                alert('Você atingiu o limite de clientes do seu plano. Atualize para cadastrar mais clientes.');
-                return;
+                // Criar novo cliente
+                clienteData.dataCriacao = new Date().toISOString();
+                await addDoc(collection(db, "clientes"), clienteData);
             }
             
-            modalTitle.textContent = 'Novo Cliente';
-            formCliente.reset();
-            clienteId.value = '';
+            modalCliente.hide();
+            carregarClientes();
             
-            // Definir data atual
-            const hoje = new Date().toISOString().split('T')[0];
-            dataCadastro.value = hoje;
-            
-            // Configurar para pessoa física por padrão
+        } catch (error) {
+            alert('Erro ao salvar cliente. Tente novamente.');
+        }
+    });
+
+    // Editar cliente
+    async function editarCliente(id) {
+        const cliente = clientes.find(c => c.id === id);
+        if (!cliente) return;
+        
+        modalTitle.textContent = 'Editar Cliente';
+        clienteId.value = id;
+        
+        // Preencher formulário
+        nomeCliente.value = cliente.nome;
+        emailCliente.value = cliente.email;
+        telefoneCliente.value = cliente.telefone || '';
+        statusCliente.value = cliente.status;
+        cpfCnpj.value = cliente.cpfCnpj || '';
+        dataNascimento.value = cliente.dataNascimento || '';
+        origemCliente.value = cliente.origem || '';
+        cepCliente.value = cliente.cep || '';
+        cidadeCliente.value = cliente.cidade || '';
+        enderecoCliente.value = cliente.endereco || '';
+        numeroCliente.value = cliente.numero || '';
+        observacoes.value = cliente.observacoes || '';
+        dataCadastro.value = cliente.dataCadastro || '';
+        
+        // Definir tipo
+        if (cliente.tipo === 'fisica') {
             tipoFisica.checked = true;
-            alterarTipoCliente();
-            
-            modalCliente.show();
-        });
+        } else {
+            tipoJuridica.checked = true;
+        }
+        alterarTipoCliente();
+        
+        modalCliente.show();
+    }
 
-        // Alterar tipo de cliente
-        tipoFisica.addEventListener('change', alterarTipoCliente);
-        tipoJuridica.addEventListener('change', alterarTipoCliente);
+    // Excluir cliente
+    async function excluirCliente(id) {
+        if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+        
+        try {
+            await deleteDoc(doc(db, "clientes", id));
+            carregarClientes();
+        } catch (error) {
+            alert('Erro ao excluir cliente. Tente novamente.');
+        }
+    }
 
-        function alterarTipoCliente() {
-            if (tipoFisica.checked) {
-                labelNome.textContent = 'Nome Completo *';
-                labelCpfCnpj.textContent = 'CPF *';
-                labelDataNasc.textContent = 'Data de Nascimento';
-                cpfCnpj.placeholder = '000.000.000-00';
-            } else {
-                labelNome.textContent = 'Razão Social *';
-                labelCpfCnpj.textContent = 'CNPJ *';
-                labelDataNasc.textContent = 'Data de Fundação';
-                cpfCnpj.placeholder = '00.000.000/0000-00';
+    // Filtros e busca
+    searchClientes.addEventListener('input', atualizarTabelaClientes);
+    filterStatus.addEventListener('change', atualizarTabelaClientes);
+    filterTipo.addEventListener('change', atualizarTabelaClientes);
+
+    // Menu mobile
+    menuToggle.addEventListener('click', () => {
+        dashboardMenu.classList.toggle('show');
+        const icon = menuToggle.querySelector('i');
+        if (dashboardMenu.classList.contains('show')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            dashboardMenu.classList.remove('show');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    // Logout
+    btnLogout.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        } catch (error) {
+            alert('Erro ao sair. Tente novamente.');
+        }
+    });
+
+    // Máscaras para CPF/CNPJ e Telefone
+    cpfCnpj.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (tipoFisica.checked) {
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            }
+        } else {
+            if (value.length <= 14) {
+                value = value.replace(/(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
             }
         }
+        
+        e.target.value = value;
+    });
 
-        // Salvar cliente
-        btnSalvarCliente.addEventListener('click', async () => {
-            if (!formCliente.checkValidity()) {
-                formCliente.classList.add('was-validated');
-                return;
-            }
-            
-            try {
-                const clienteData = {
-                    nome: nomeCliente.value,
-                    tipo: tipoFisica.checked ? 'fisica' : 'juridica',
-                    cpfCnpj: cpfCnpj.value,
-                    email: emailCliente.value,
-                    telefone: telefoneCliente.value,
-                    status: statusCliente.value,
-                    dataNascimento: dataNascimento.value || null,
-                    origem: origemCliente.value || null,
-                    cep: cepCliente.value || null,
-                    cidade: cidadeCliente.value || null,
-                    endereco: enderecoCliente.value || null,
-                    numero: numeroCliente.value || null,
-                    observacoes: observacoes.value || null,
-                    dataCadastro: dataCadastro.value,
-                    profissionalId: currentUser.uid,
-                    dataAtualizacao: new Date().toISOString()
-                };
-                
-                if (clienteId.value) {
-                    // Atualizar cliente existente
-                    const clienteRef = doc(db, "clientes", clienteId.value);
-                    await updateDoc(clienteRef, clienteData);
-                } else {
-                    // Criar novo cliente
-                    clienteData.dataCriacao = new Date().toISOString();
-                    await addDoc(collection(db, "clientes"), clienteData);
-                }
-                
-                modalCliente.hide();
-                carregarClientes();
-                
-            } catch (error) {
-                console.error('Erro ao salvar cliente:', error);
-                alert('Erro ao salvar cliente. Tente novamente.');
-            }
-        });
+    telefoneCliente.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length > 10) {
+            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (value.length > 6) {
+            value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+        } else if (value.length > 2) {
+            value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+        } else if (value.length > 0) {
+            value = value.replace(/(\d{0,2})/, '($1');
+        }
+        
+        e.target.value = value;
+    });
 
-        // Editar cliente
-        window.editarCliente = async (id) => {
-            const cliente = clientes.find(c => c.id === id);
-            if (!cliente) return;
-            
-            modalTitle.textContent = 'Editar Cliente';
-            clienteId.value = id;
-            
-            // Preencher formulário
-            nomeCliente.value = cliente.nome;
-            emailCliente.value = cliente.email;
-            telefoneCliente.value = cliente.telefone || '';
-            statusCliente.value = cliente.status;
-            cpfCnpj.value = cliente.cpfCnpj || '';
-            dataNascimento.value = cliente.dataNascimento || '';
-            origemCliente.value = cliente.origem || '';
-            cepCliente.value = cliente.cep || '';
-            cidadeCliente.value = cliente.cidade || '';
-            enderecoCliente.value = cliente.endereco || '';
-            numeroCliente.value = cliente.numero || '';
-            observacoes.value = cliente.observacoes || '';
-            dataCadastro.value = cliente.dataCadastro || '';
-            
-            // Definir tipo
-            if (cliente.tipo === 'fisica') {
-                tipoFisica.checked = true;
-            } else {
-                tipoJuridica.checked = true;
-            }
-            alterarTipoCliente();
-            
-            modalCliente.show();
-        };
+    // Adicionar validação para campos obrigatórios
+    formCliente.addEventListener('submit', (e) => {
+        e.preventDefault();
+    });
 
-        // Excluir cliente
-        window.excluirCliente = async (id) => {
-            if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
-            
-            try {
-                await deleteDoc(doc(db, "clientes", id));
-                carregarClientes();
-            } catch (error) {
-                console.error('Erro ao excluir cliente:', error);
-                alert('Erro ao excluir cliente. Tente novamente.');
-            }
-        };
-
-        // Filtros e busca
-        searchClientes.addEventListener('input', atualizarTabelaClientes);
-        filterStatus.addEventListener('change', atualizarTabelaClientes);
-        filterTipo.addEventListener('change', atualizarTabelaClientes);
-
-        // Menu mobile
-        menuToggle.addEventListener('click', () => {
-            dashboardMenu.classList.toggle('show');
-            const icon = menuToggle.querySelector('i');
-            if (dashboardMenu.classList.contains('show')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        // Fechar menu ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                dashboardMenu.classList.remove('show');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        // Logout
-        btnLogout.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                alert('Erro ao sair. Tente novamente.');
-            }
-        });
-
-        // Máscaras para CPF/CNPJ e Telefone
-        cpfCnpj.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            
-            if (tipoFisica.checked) {
-                if (value.length <= 11) {
-                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                }
-            } else {
-                if (value.length <= 14) {
-                    value = value.replace(/(\d{2})(\d)/, '$1.$2');
-                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                    value = value.replace(/(\d{3})(\d)/, '$1/$2');
-                    value = value.replace(/(\d{4})(\d)/, '$1-$2');
-                }
-            }
-            
-            e.target.value = value;
-        });
-
-        telefoneCliente.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            
-            if (value.length > 10) {
-                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-            } else if (value.length > 6) {
-                value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-            } else if (value.length > 2) {
-                value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
-            } else if (value.length > 0) {
-                value = value.replace(/(\d{0,2})/, '($1');
-            }
-            
-            e.target.value = value;
-        });
-    </script>
+    // Focar no campo nome quando abrir o modal
+    document.getElementById('modalCliente').addEventListener('shown.bs.modal', () => {
+        nomeCliente.focus();
+    });
+</script>
 </body>
 </html>
