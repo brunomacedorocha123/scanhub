@@ -919,7 +919,7 @@
     </div>
 
     <!-- Firebase e Scripts -->
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -1003,25 +1003,20 @@
     let currentUser = null;
     let userData = null;
     let clientes = [];
-    let planoLimite = 50; // Plano básico: 50 clientes
+    let planoLimite = 50;
 
     // Carregar dados do usuário
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             try {
-                // Buscar dados do Firestore
                 const userRef = doc(db, "usuarios", user.uid);
                 const userDoc = await getDoc(userRef);
                 
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
-                    
-                    // Verificar plano do usuário
                     verificarPlanoUsuario();
-                    
-                    // Carregar clientes
                     carregarClientes();
                 }
             } catch (error) {
@@ -1087,7 +1082,7 @@
             atualizarEstatisticas();
             verificarLimiteClientes();
         } catch (error) {
-            // Silencioso - apenas não carrega os clientes
+            // Silencioso
         }
     }
 
@@ -1097,7 +1092,6 @@
         const statusFilter = filterStatus.value;
         const tipoFilter = filterTipo.value;
         
-        // Filtrar clientes
         let clientesFiltrados = clientes.filter(cliente => {
             const matchSearch = !searchTerm || 
                 cliente.nome.toLowerCase().includes(searchTerm) ||
@@ -1110,7 +1104,6 @@
             return matchSearch && matchStatus && matchTipo;
         });
         
-        // Limpar tabela
         clientesTable.innerHTML = '';
         
         if (clientesFiltrados.length === 0) {
@@ -1118,11 +1111,9 @@
             return;
         }
         
-        // Adicionar clientes filtrados
         clientesFiltrados.forEach(cliente => {
             const row = document.createElement('tr');
             
-            // Criar botões de ação
             const btnEdit = document.createElement('button');
             btnEdit.className = 'btn btn-action-sm btn-edit';
             btnEdit.innerHTML = '<i class="fas fa-edit"></i>';
@@ -1169,7 +1160,6 @@
     // Atualizar estatísticas
     function atualizarEstatisticas() {
         totalClientesCount.textContent = clientes.length;
-        
         const ativos = clientes.filter(c => c.status === 'ativo').length;
         clientesAtivos.textContent = ativos;
     }
@@ -1199,7 +1189,6 @@
 
     // Novo cliente
     btnNovoCliente.addEventListener('click', () => {
-        // Verificar limite
         if (planoLimite !== 1000 && clientes.length >= planoLimite) {
             alert('Você atingiu o limite de clientes do seu plano. Atualize para cadastrar mais clientes.');
             return;
@@ -1209,11 +1198,9 @@
         formCliente.reset();
         clienteId.value = '';
         
-        // Definir data atual
         const hoje = new Date().toISOString().split('T')[0];
         dataCadastro.value = hoje;
         
-        // Configurar para pessoa física por padrão
         tipoFisica.checked = true;
         alterarTipoCliente();
         
@@ -1238,20 +1225,46 @@
         }
     }
 
-    // Salvar cliente
+    // Salvar cliente - CORREÇÃO AQUI
     btnSalvarCliente.addEventListener('click', async () => {
-        if (!formCliente.checkValidity()) {
-            formCliente.classList.add('was-validated');
+        // Validar campos obrigatórios
+        if (!nomeCliente.value.trim()) {
+            alert('Por favor, insira o nome do cliente.');
+            nomeCliente.focus();
+            return;
+        }
+        
+        if (!emailCliente.value.trim()) {
+            alert('Por favor, insira o e-mail do cliente.');
+            emailCliente.focus();
+            return;
+        }
+        
+        if (!telefoneCliente.value.trim()) {
+            alert('Por favor, insira o telefone do cliente.');
+            telefoneCliente.focus();
+            return;
+        }
+        
+        if (!cpfCnpj.value.trim()) {
+            alert('Por favor, insira o CPF/CNPJ do cliente.');
+            cpfCnpj.focus();
+            return;
+        }
+        
+        if (!dataCadastro.value) {
+            alert('Por favor, insira a data de cadastro.');
+            dataCadastro.focus();
             return;
         }
         
         try {
             const clienteData = {
-                nome: nomeCliente.value,
+                nome: nomeCliente.value.trim(),
                 tipo: tipoFisica.checked ? 'fisica' : 'juridica',
-                cpfCnpj: cpfCnpj.value,
-                email: emailCliente.value,
-                telefone: telefoneCliente.value,
+                cpfCnpj: cpfCnpj.value.trim(),
+                email: emailCliente.value.trim(),
+                telefone: telefoneCliente.value.trim(),
                 status: statusCliente.value,
                 dataNascimento: dataNascimento.value || null,
                 origem: origemCliente.value || null,
@@ -1266,11 +1279,9 @@
             };
             
             if (clienteId.value) {
-                // Atualizar cliente existente
                 const clienteRef = doc(db, "clientes", clienteId.value);
                 await updateDoc(clienteRef, clienteData);
             } else {
-                // Criar novo cliente
                 clienteData.dataCriacao = new Date().toISOString();
                 await addDoc(collection(db, "clientes"), clienteData);
             }
@@ -1279,7 +1290,7 @@
             carregarClientes();
             
         } catch (error) {
-            alert('Erro ao salvar cliente. Tente novamente.');
+            alert('Erro ao salvar cliente. Verifique os dados e tente novamente.');
         }
     });
 
@@ -1291,7 +1302,6 @@
         modalTitle.textContent = 'Editar Cliente';
         clienteId.value = id;
         
-        // Preencher formulário
         nomeCliente.value = cliente.nome;
         emailCliente.value = cliente.email;
         telefoneCliente.value = cliente.telefone || '';
@@ -1306,7 +1316,6 @@
         observacoes.value = cliente.observacoes || '';
         dataCadastro.value = cliente.dataCadastro || '';
         
-        // Definir tipo
         if (cliente.tipo === 'fisica') {
             tipoFisica.checked = true;
         } else {
@@ -1367,7 +1376,7 @@
         }
     });
 
-    // Máscaras para CPF/CNPJ e Telefone
+    // Máscaras para CPF/CNPJ
     cpfCnpj.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
         
@@ -1389,6 +1398,7 @@
         e.target.value = value;
     });
 
+    // Máscara para telefone
     telefoneCliente.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
         
@@ -1405,14 +1415,17 @@
         e.target.value = value;
     });
 
-    // Adicionar validação para campos obrigatórios
+    // Prevenir submit do formulário
     formCliente.addEventListener('submit', (e) => {
         e.preventDefault();
+        return false;
     });
 
     // Focar no campo nome quando abrir o modal
     document.getElementById('modalCliente').addEventListener('shown.bs.modal', () => {
-        nomeCliente.focus();
+        setTimeout(() => {
+            nomeCliente.focus();
+        }, 300);
     });
 </script>
 </body>
