@@ -813,534 +813,473 @@
     
     <!-- Script Principal -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            updateDoc
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config (mesmo do cliente)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.appspot.com",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.appspot.com",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Elementos DOM
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const avatarDisplay = document.getElementById('avatarDisplay');
-        const avatarInput = document.getElementById('avatarInput');
-        const userName = document.getElementById('userName');
-        const userSpecialty = document.getElementById('userSpecialty');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const avatarDisplay = document.getElementById('avatarDisplay');
+    const avatarInput = document.getElementById('avatarInput');
+    const userName = document.getElementById('userName');
+    const userSpecialty = document.getElementById('userSpecialty');
+    const nomeProfissional = document.getElementById('nomeProfissional');
+    const slogan = document.getElementById('slogan');
+    const descricao = document.getElementById('descricao');
+    const especialidadePrincipal = document.getElementById('especialidadePrincipal');
+    const anosExperiencia = document.getElementById('anosExperiencia');
+    const tagsContainer = document.getElementById('tagsContainer');
+    const tagInput = document.getElementById('tagInput');
+    const raioKm = document.getElementById('raioKm');
+    const cidadeBase = document.getElementById('cidadeBase');
+    const cidadesContainer = document.getElementById('cidadesContainer');
+    const cidadeInput = document.getElementById('cidadeInput');
+    const atendeDomicilio = document.getElementById('atendeDomicilio');
+    const atendeOnline = document.getElementById('atendeOnline');
+    const pagamentosContainer = document.getElementById('pagamentosContainer');
+    const pagamentoInput = document.getElementById('pagamentoInput');
+    const tempoResposta = document.getElementById('tempoResposta');
+    const orcamentoGratuito = document.getElementById('orcamentoGratuito');
+    const garantiaDias = document.getElementById('garantiaDias');
+    const portfolioUploadArea = document.getElementById('portfolioUploadArea');
+    const portfolioInput = document.getElementById('portfolioInput');
+    const portfolioGallery = document.getElementById('portfolioGallery');
+    const videoUrl = document.getElementById('videoUrl');
+    const btnAddVideo = document.getElementById('btnAddVideo');
+    const videosList = document.getElementById('videosList');
+    const whatsapp = document.getElementById('whatsapp');
+    const emailProfissional = document.getElementById('emailProfissional');
+    const linksContainer = document.getElementById('linksContainer');
+    const btnAddLink = document.getElementById('btnAddLink');
+    const btnSalvarPerfil = document.getElementById('btnSalvarPerfil');
+
+    let userData = null;
+    let portfolioFotos = [];
+    let videos = [];
+    let links = [];
+
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
+
+    function showAlert(mensagem, tipo = 'success') {
+        alert(mensagem);
+    }
+
+    async function uploadParaImgur(arquivo) {
+        showLoading();
         
-        // Dados profissionais
-        const nomeProfissional = document.getElementById('nomeProfissional');
-        const slogan = document.getElementById('slogan');
-        const descricao = document.getElementById('descricao');
-        const especialidadePrincipal = document.getElementById('especialidadePrincipal');
-        const anosExperiencia = document.getElementById('anosExperiencia');
-        
-        // Tags
-        const tagsContainer = document.getElementById('tagsContainer');
-        const tagInput = document.getElementById('tagInput');
-        
-        // Área de atendimento
-        const raioKm = document.getElementById('raioKm');
-        const cidadeBase = document.getElementById('cidadeBase');
-        const cidadesContainer = document.getElementById('cidadesContainer');
-        const cidadeInput = document.getElementById('cidadeInput');
-        const atendeDomicilio = document.getElementById('atendeDomicilio');
-        const atendeOnline = document.getElementById('atendeOnline');
-        
-        // Formas de trabalho
-        const pagamentosContainer = document.getElementById('pagamentosContainer');
-        const pagamentoInput = document.getElementById('pagamentoInput');
-        const tempoResposta = document.getElementById('tempoResposta');
-        const orcamentoGratuito = document.getElementById('orcamentoGratuito');
-        const garantiaDias = document.getElementById('garantiaDias');
-        
-        // Portfólio
-        const portfolioUploadArea = document.getElementById('portfolioUploadArea');
-        const portfolioInput = document.getElementById('portfolioInput');
-        const portfolioGallery = document.getElementById('portfolioGallery');
-        const videoUrl = document.getElementById('videoUrl');
-        const btnAddVideo = document.getElementById('btnAddVideo');
-        const videosList = document.getElementById('videosList');
-        
-        // Contato
-        const whatsapp = document.getElementById('whatsapp');
-        const emailProfissional = document.getElementById('emailProfissional');
-        const linksContainer = document.getElementById('linksContainer');
-        const btnAddLink = document.getElementById('btnAddLink');
-        
-        // Botão salvar
-        const btnSalvarPerfil = document.getElementById('btnSalvarPerfil');
-
-        let userData = null;
-        let portfolioFotos = [];
-        let videos = [];
-        let links = [];
-
-        // ========== FUNÇÕES UTILITÁRIAS ==========
-
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-
-        function showAlert(mensagem, tipo = 'success') {
-            alert(mensagem);
-        }
-
-        // Função de upload para Imgur (MESMA do cliente)
-        async function uploadParaImgur(arquivo) {
-            showLoading();
+        try {
+            const base64 = await converterParaBase64(arquivo);
+            const CLIENT_ID = '546c25a59c58ad7';
+            const formData = new FormData();
+            formData.append('image', base64.split(',')[1]);
+            formData.append('type', 'base64');
             
-            try {
-                // Converter para base64
-                const base64 = await converterParaBase64(arquivo);
-                
-                // API Client ID do Imgur
-                const CLIENT_ID = '546c25a59c58ad7';
-                const formData = new FormData();
-                formData.append('image', base64.split(',')[1]);
-                formData.append('type', 'base64');
-                
-                const resposta = await fetch('https://api.imgur.com/3/image', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Client-ID ${CLIENT_ID}`
-                    },
-                    body: formData
-                });
-                
-                if (!resposta.ok) {
-                    throw new Error(`Erro ${resposta.status} do Imgur`);
-                }
-                
-                const dados = await resposta.json();
-                
-                if (!dados.success) {
-                    throw new Error(dados.data?.error || 'Erro no upload');
-                }
-                
-                console.log('✅ Upload para Imgur:', dados.data.link);
-                return dados.data.link;
-                
-            } catch (erro) {
-                console.error('❌ Erro no Imgur:', erro);
-                throw new Error('Falha ao enviar imagem: ' + erro.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function converterParaBase64(arquivo) {
-            return new Promise((resolve, reject) => {
-                const leitor = new FileReader();
-                leitor.onload = (e) => resolve(e.target.result);
-                leitor.onerror = reject;
-                leitor.readAsDataURL(arquivo);
-            });
-        }
-
-        // ========== SISTEMA DE TAGS ==========
-
-        function criarTag(texto, container) {
-            const tag = document.createElement('div');
-            tag.className = 'tag';
-            tag.innerHTML = `
-                ${texto}
-                <span class="tag-remove" onclick="this.parentElement.remove()">×</span>
-            `;
-            container.insertBefore(tag, container.querySelector('.tags-input'));
-        }
-
-        function inicializarTags(container, inputElement, dadosIniciais = []) {
-            dadosIniciais.forEach(tag => {
-                criarTag(tag, container);
+            const resposta = await fetch('https://api.imgur.com/3/image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Client-ID ${CLIENT_ID}`
+                },
+                body: formData
             });
             
-            inputElement.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && inputElement.value.trim()) {
-                    e.preventDefault();
-                    criarTag(inputElement.value.trim(), container);
-                    inputElement.value = '';
-                }
-            });
-        }
-
-        function getTags(container) {
-            const tags = [];
-            container.querySelectorAll('.tag').forEach(tag => {
-                tags.push(tag.firstChild.textContent.trim());
-            });
-            return tags;
-        }
-
-        // ========== PORTFÓLIO ==========
-
-        portfolioUploadArea.addEventListener('click', () => {
-            portfolioInput.click();
-        });
-
-        portfolioInput.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files);
-            
-            if (portfolioFotos.length + files.length > 10) {
-                showAlert('Máximo de 10 fotos no portfólio', 'error');
-                return;
+            if (!resposta.ok) {
+                throw new Error(`Erro do Imgur`);
             }
             
-            for (const file of files) {
-                try {
-                    showLoading();
-                    const imageUrl = await uploadParaImgur(file);
-                    portfolioFotos.push(imageUrl);
-                    adicionarFotoPortfolio(imageUrl);
-                } catch (erro) {
-                    showAlert('Erro ao enviar foto: ' + erro.message, 'error');
-                } finally {
-                    hideLoading();
-                }
-            }
-        });
-
-        function adicionarFotoPortfolio(url) {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <img src="${url}" alt="Portfólio">
-                <div class="gallery-item-remove" onclick="removerFotoPortfolio('${url}', this)">
-                    <i class="fas fa-times"></i>
-                </div>
-            `;
-            portfolioGallery.appendChild(item);
-        }
-
-        window.removerFotoPortfolio = function(url, element) {
-            if (confirm('Remover esta foto do portfólio?')) {
-                portfolioFotos = portfolioFotos.filter(foto => foto !== url);
-                element.parentElement.remove();
-            }
-        };
-
-        // ========== VÍDEOS ==========
-
-        btnAddVideo.addEventListener('click', () => {
-            const url = videoUrl.value.trim();
-            if (!url) return;
+            const dados = await resposta.json();
             
-            if (!url.includes('youtube.com') && !url.includes('youtu.be') && !url.includes('vimeo.com')) {
-                showAlert('Insira um link válido do YouTube ou Vimeo', 'error');
-                return;
+            if (!dados.success) {
+                throw new Error('Erro no upload');
             }
             
-            videos.push(url);
-            adicionarVideoLista(url);
-            videoUrl.value = '';
-        });
-
-        function adicionarVideoLista(url) {
-            const plataforma = url.includes('youtube') ? 'YouTube' : 'Vimeo';
-            const item = document.createElement('div');
-            item.className = 'video-link-item';
-            item.innerHTML = `
-                <div>
-                    <span class="video-link-platform">${plataforma}</span>
-                    <br>
-                    <small class="text-muted">${url}</small>
-                </div>
-                <button class="btn-remove-video" onclick="removerVideo('${url}', this)">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            videosList.appendChild(item);
+            return dados.data.link;
+            
+        } catch (erro) {
+            throw new Error('Falha ao enviar imagem');
+        } finally {
+            hideLoading();
         }
+    }
 
-        window.removerVideo = function(url, element) {
-            videos = videos.filter(video => video !== url);
-            element.parentElement.remove();
-        };
-
-        // ========== LINKS ==========
-
-        btnAddLink.addEventListener('click', () => {
-            const inputGroup = document.createElement('div');
-            inputGroup.className = 'input-group mb-2';
-            inputGroup.innerHTML = `
-                <input type="text" class="form-control" placeholder="https://seusite.com">
-                <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            linksContainer.appendChild(inputGroup);
+    function converterParaBase64(arquivo) {
+        return new Promise((resolve, reject) => {
+            const leitor = new FileReader();
+            leitor.onload = (e) => resolve(e.target.result);
+            leitor.onerror = reject;
+            leitor.readAsDataURL(arquivo);
         });
+    }
 
-        // ========== CARREGAR DADOS ==========
+    function criarTag(texto, container) {
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `
+            ${texto}
+            <span class="tag-remove" onclick="this.parentElement.remove()">×</span>
+        `;
+        container.insertBefore(tag, container.querySelector('.tags-input'));
+    }
 
-        onAuthStateChanged(auth, async (usuario) => {
-            if (usuario) {
-                try {
-                    showLoading();
-                    const userRef = doc(db, "usuarios", usuario.uid);
-                    const userDoc = await getDoc(userRef);
-                    
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        carregarDadosUsuario(userData);
-                    }
-                } catch (erro) {
-                    console.error("Erro ao carregar dados:", erro);
-                } finally {
-                    hideLoading();
-                }
-            } else {
-                window.location.href = 'login.html';
+    function inicializarTags(container, inputElement, dadosIniciais = []) {
+        dadosIniciais.forEach(tag => {
+            criarTag(tag, container);
+        });
+        
+        inputElement.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && inputElement.value.trim()) {
+                e.preventDefault();
+                criarTag(inputElement.value.trim(), container);
+                inputElement.value = '';
             }
         });
+    }
 
-        function carregarDadosUsuario(dados) {
-            // Dados pessoais (do cadastro base)
-            if (dados.apelido) {
-                userName.textContent = dados.apelido;
-            }
-            
-            // Dados profissionais
-            if (dados.profissional) {
-                const prof = dados.profissional;
-                
-                nomeProfissional.value = prof.nomeProfissional || '';
-                slogan.value = prof.slogan || '';
-                descricao.value = prof.descricao || '';
-                especialidadePrincipal.value = prof.especialidadePrincipal || '';
-                anosExperiencia.value = prof.anosExperiencia || '';
-                
-                if (prof.especialidades) {
-                    inicializarTags(tagsContainer, tagInput, prof.especialidades);
-                }
-                
-                if (prof.cidadeBase) {
-                    cidadeBase.value = prof.cidadeBase;
-                    userSpecialty.textContent = prof.especialidadePrincipal || 'Profissional';
-                }
-                
-                // Área de atendimento
-                raioKm.value = prof.raioKm || '';
-                if (prof.cidadesAtendidas) {
-                    inicializarTags(cidadesContainer, cidadeInput, prof.cidadesAtendidas);
-                }
-                atendeDomicilio.checked = prof.atendeDomicilio !== false;
-                atendeOnline.checked = prof.atendeOnline !== false;
-                
-                // Formas de trabalho
-                if (prof.formasPagamento) {
-                    inicializarTags(pagamentosContainer, pagamentoInput, prof.formasPagamento);
-                }
-                tempoResposta.value = prof.tempoResposta || '';
-                orcamentoGratuito.checked = prof.orcamentoGratuito !== false;
-                garantiaDias.value = prof.garantiaDias || '';
-                
-                // Portfólio
-                if (prof.portfolioFotos) {
-                    portfolioFotos = prof.portfolioFotos;
-                    portfolioFotos.forEach(foto => adicionarFotoPortfolio(foto));
-                }
-                
-                if (prof.videos) {
-                    videos = prof.videos;
-                    videos.forEach(video => adicionarVideoLista(video));
-                }
-                
-                // Contato
-                whatsapp.value = prof.whatsapp || '';
-                emailProfissional.value = prof.emailProfissional || '';
-                
-                // Foto do perfil (usando mesmo campo do cliente)
-                if (dados.fotoPerfil && dados.fotoPerfil.startsWith('http')) {
-                    avatarDisplay.innerHTML = '';
-                    const img = document.createElement('img');
-                    img.src = dados.fotoPerfil;
-                    img.alt = 'Foto de perfil';
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '50%';
-                    avatarDisplay.appendChild(img);
-                    
-                    const uploadBtn = document.createElement('label');
-                    uploadBtn.className = 'avatar-upload-btn';
-                    uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.style.display = 'none';
-                    input.addEventListener('change', handleAvatarUpload);
-                    uploadBtn.appendChild(input);
-                    avatarDisplay.appendChild(uploadBtn);
-                }
-            }
+    function getTags(container) {
+        const tags = [];
+        container.querySelectorAll('.tag').forEach(tag => {
+            tags.push(tag.firstChild.textContent.trim());
+        });
+        return tags;
+    }
+
+    portfolioUploadArea.addEventListener('click', () => {
+        portfolioInput.click();
+    });
+
+    portfolioInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        
+        if (portfolioFotos.length + files.length > 10) {
+            showAlert('Máximo de 10 fotos no portfólio', 'error');
+            return;
         }
-
-        // ========== UPLOAD FOTO PERFIL ==========
-
-        async function handleAvatarUpload(e) {
-            const arquivo = e.target.files[0];
-            if (!arquivo) return;
-            
+        
+        for (const file of files) {
             try {
                 showLoading();
-                const imageUrl = await uploadParaImgur(arquivo);
-                
-                const usuario = auth.currentUser;
-                if (!usuario) return;
-                
-                const userRef = doc(db, "usuarios", usuario.uid);
-                await updateDoc(userRef, {
-                    fotoPerfil: imageUrl,
-                    ultimaAtualizacao: new Date().toISOString()
-                });
-                
-                // Atualizar visualmente
-                const img = avatarDisplay.querySelector('img');
-                if (img) {
-                    img.src = imageUrl;
-                } else {
-                    avatarDisplay.innerHTML = '';
-                    const newImg = document.createElement('img');
-                    newImg.src = imageUrl;
-                    newImg.alt = 'Foto de perfil';
-                    newImg.style.width = '100%';
-                    newImg.style.height = '100%';
-                    newImg.style.objectFit = 'cover';
-                    newImg.style.borderRadius = '50%';
-                    avatarDisplay.appendChild(newImg);
-                    
-                    const uploadBtn = document.createElement('label');
-                    uploadBtn.className = 'avatar-upload-btn';
-                    uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.style.display = 'none';
-                    input.addEventListener('change', handleAvatarUpload);
-                    uploadBtn.appendChild(input);
-                    avatarDisplay.appendChild(uploadBtn);
-                }
-                
-                showAlert('✅ Foto atualizada com sucesso!', 'success');
-                
+                const imageUrl = await uploadParaImgur(file);
+                portfolioFotos.push(imageUrl);
+                adicionarFotoPortfolio(imageUrl);
             } catch (erro) {
-                console.error('Erro ao atualizar foto:', erro);
-                showAlert('❌ Erro ao atualizar foto', 'error');
+                showAlert('Erro ao enviar foto', 'error');
             } finally {
                 hideLoading();
             }
         }
+    });
 
-        // Configurar upload da foto
-        const avatarUploadBtn = avatarDisplay.querySelector('.avatar-upload-btn');
-        if (avatarUploadBtn) {
-            const input = avatarUploadBtn.querySelector('input');
-            input.addEventListener('change', handleAvatarUpload);
+    function adicionarFotoPortfolio(url) {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `
+            <img src="${url}" alt="Portfólio">
+            <div class="gallery-item-remove" onclick="removerFotoPortfolio('${url}', this)">
+                <i class="fas fa-times"></i>
+            </div>
+        `;
+        portfolioGallery.appendChild(item);
+    }
+
+    window.removerFotoPortfolio = function(url, element) {
+        if (confirm('Remover esta foto do portfólio?')) {
+            portfolioFotos = portfolioFotos.filter(foto => foto !== url);
+            element.parentElement.remove();
         }
+    };
 
-        // ========== SALVAR PERFIL COMPLETO ==========
+    btnAddVideo.addEventListener('click', () => {
+        const url = videoUrl.value.trim();
+        if (!url) return;
+        
+        if (!url.includes('youtube.com') && !url.includes('youtu.be') && !url.includes('vimeo.com')) {
+            showAlert('Insira um link válido do YouTube ou Vimeo', 'error');
+            return;
+        }
+        
+        videos.push(url);
+        adicionarVideoLista(url);
+        videoUrl.value = '';
+    });
 
-        btnSalvarPerfil.addEventListener('click', async () => {
-            if (!auth.currentUser) {
-                showAlert('Você precisa estar logado', 'error');
-                return;
-            }
-            
-            showLoading();
-            btnSalvarPerfil.disabled = true;
-            btnSalvarPerfil.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
-            
+    function adicionarVideoLista(url) {
+        const plataforma = url.includes('youtube') ? 'YouTube' : 'Vimeo';
+        const item = document.createElement('div');
+        item.className = 'video-link-item';
+        item.innerHTML = `
+            <div>
+                <span class="video-link-platform">${plataforma}</span>
+                <br>
+                <small class="text-muted">${url}</small>
+            </div>
+            <button class="btn-remove-video" onclick="removerVideo('${url}', this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        videosList.appendChild(item);
+    }
+
+    window.removerVideo = function(url, element) {
+        videos = videos.filter(video => video !== url);
+        element.parentElement.remove();
+    };
+
+    btnAddLink.addEventListener('click', () => {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group mb-2';
+        inputGroup.innerHTML = `
+            <input type="text" class="form-control" placeholder="https://seusite.com">
+            <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        linksContainer.appendChild(inputGroup);
+    });
+
+    onAuthStateChanged(auth, async (usuario) => {
+        if (usuario) {
             try {
-                const dadosProfissional = {
-                    // Dados profissionais
-                    nomeProfissional: nomeProfissional.value,
-                    slogan: slogan.value,
-                    descricao: descricao.value,
-                    especialidadePrincipal: especialidadePrincipal.value,
-                    anosExperiencia: anosExperiencia.value,
-                    especialidades: getTags(tagsContainer),
-                    
-                    // Área de atendimento
-                    raioKm: parseInt(raioKm.value) || null,
-                    cidadeBase: cidadeBase.value,
-                    cidadesAtendidas: getTags(cidadesContainer),
-                    atendeDomicilio: atendeDomicilio.checked,
-                    atendeOnline: atendeOnline.checked,
-                    
-                    // Formas de trabalho
-                    formasPagamento: getTags(pagamentosContainer),
-                    tempoResposta: tempoResposta.value,
-                    orcamentoGratuito: orcamentoGratuito.checked,
-                    garantiaDias: parseInt(garantiaDias.value) || null,
-                    
-                    // Portfólio
-                    portfolioFotos: portfolioFotos,
-                    videos: videos,
-                    
-                    // Contato
-                    whatsapp: whatsapp.value,
-                    emailProfissional: emailProfissional.value,
-                    links: Array.from(linksContainer.querySelectorAll('input')).map(input => input.value),
-                    
-                    // Metadata
-                    perfilCompleto: true,
-                    ultimaAtualizacao: new Date().toISOString()
-                };
+                showLoading();
+                const userRef = doc(db, "usuarios", usuario.uid);
+                const userDoc = await getDoc(userRef);
                 
-                const userRef = doc(db, "usuarios", auth.currentUser.uid);
-                await updateDoc(userRef, {
-                    profissional: dadosProfissional,
-                    tipoUsuario: 'profissional',
-                    ultimaAtualizacao: new Date().toISOString()
-                });
-                
-                // Atualizar nome na tela
-                userName.textContent = dadosProfissional.nomeProfissional || userData.apelido;
-                userSpecialty.textContent = dadosProfissional.especialidadePrincipal || 'Profissional';
-                
-                showAlert('✅ Perfil profissional salvo com sucesso!', 'success');
-                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    carregarDadosUsuario(userData);
+                }
             } catch (erro) {
-                console.error('Erro ao salvar perfil:', erro);
-                showAlert('❌ Erro ao salvar perfil', 'error');
+                showAlert("Erro ao carregar dados", 'error');
             } finally {
                 hideLoading();
-                btnSalvarPerfil.disabled = false;
-                btnSalvarPerfil.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Perfil Profissional';
             }
-        });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
 
-        // ========== INICIALIZAÇÃO ==========
+    function carregarDadosUsuario(dados) {
+        if (dados.apelido) {
+            userName.textContent = dados.apelido;
+        }
+        
+        if (dados.profissional) {
+            const prof = dados.profissional;
+            
+            nomeProfissional.value = prof.nomeProfissional || '';
+            slogan.value = prof.slogan || '';
+            descricao.value = prof.descricao || '';
+            especialidadePrincipal.value = prof.especialidadePrincipal || '';
+            anosExperiencia.value = prof.anosExperiencia || '';
+            
+            if (prof.especialidades) {
+                inicializarTags(tagsContainer, tagInput, prof.especialidades);
+            }
+            
+            if (prof.cidadeBase) {
+                cidadeBase.value = prof.cidadeBase;
+                userSpecialty.textContent = prof.especialidadePrincipal || 'Profissional';
+            }
+            
+            raioKm.value = prof.raioKm || '';
+            if (prof.cidadesAtendidas) {
+                inicializarTags(cidadesContainer, cidadeInput, prof.cidadesAtendidas);
+            }
+            atendeDomicilio.checked = prof.atendeDomicilio !== false;
+            atendeOnline.checked = prof.atendeOnline !== false;
+            
+            if (prof.formasPagamento) {
+                inicializarTags(pagamentosContainer, pagamentoInput, prof.formasPagamento);
+            }
+            tempoResposta.value = prof.tempoResposta || '';
+            orcamentoGratuito.checked = prof.orcamentoGratuito !== false;
+            garantiaDias.value = prof.garantiaDias || '';
+            
+            if (prof.portfolioFotos) {
+                portfolioFotos = prof.portfolioFotos;
+                portfolioFotos.forEach(foto => adicionarFotoPortfolio(foto));
+            }
+            
+            if (prof.videos) {
+                videos = prof.videos;
+                videos.forEach(video => adicionarVideoLista(video));
+            }
+            
+            whatsapp.value = prof.whatsapp || '';
+            emailProfissional.value = prof.emailProfissional || '';
+            
+            // PRIMEIRA ALTERAÇÃO: Carregar foto do profissional (campo separado)
+            const fotoParaCarregar = dados.fotoPerfilProfissional || dados.fotoPerfil;
+            
+            if (fotoParaCarregar && fotoParaCarregar.startsWith('http')) {
+                avatarDisplay.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = fotoParaCarregar;
+                img.alt = 'Foto de perfil';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+                avatarDisplay.appendChild(img);
+                
+                const uploadBtn = document.createElement('label');
+                uploadBtn.className = 'avatar-upload-btn';
+                uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.style.display = 'none';
+                input.addEventListener('change', handleAvatarUpload);
+                uploadBtn.appendChild(input);
+                avatarDisplay.appendChild(uploadBtn);
+            }
+        }
+    }
 
-        // Inicializar sistemas de tags
-        inicializarTags(tagsContainer, tagInput);
-        inicializarTags(cidadesContainer, cidadeInput);
-        inicializarTags(pagamentosContainer, pagamentoInput);
+    async function handleAvatarUpload(e) {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
+        
+        try {
+            showLoading();
+            const imageUrl = await uploadParaImgur(arquivo);
+            
+            const usuario = auth.currentUser;
+            if (!usuario) return;
+            
+            const userRef = doc(db, "usuarios", usuario.uid);
+            
+            // SEGUNDA ALTERAÇÃO: Salvar em campo separado
+            await updateDoc(userRef, {
+                fotoPerfilProfissional: imageUrl,
+                ultimaAtualizacao: new Date().toISOString()
+            });
+            
+            const img = avatarDisplay.querySelector('img');
+            if (img) {
+                img.src = imageUrl;
+            } else {
+                avatarDisplay.innerHTML = '';
+                const newImg = document.createElement('img');
+                newImg.src = imageUrl;
+                newImg.alt = 'Foto de perfil';
+                newImg.style.width = '100%';
+                newImg.style.height = '100%';
+                newImg.style.objectFit = 'cover';
+                newImg.style.borderRadius = '50%';
+                avatarDisplay.appendChild(newImg);
+                
+                const uploadBtn = document.createElement('label');
+                uploadBtn.className = 'avatar-upload-btn';
+                uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.style.display = 'none';
+                input.addEventListener('change', handleAvatarUpload);
+                uploadBtn.appendChild(input);
+                avatarDisplay.appendChild(uploadBtn);
+            }
+            
+            showAlert('Foto atualizada com sucesso!', 'success');
+            
+        } catch (erro) {
+            showAlert('Erro ao atualizar foto', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
 
-        console.log('✅ Perfil Profissional carregado!');
-    </script>
+    const avatarUploadBtn = avatarDisplay.querySelector('.avatar-upload-btn');
+    if (avatarUploadBtn) {
+        const input = avatarUploadBtn.querySelector('input');
+        input.addEventListener('change', handleAvatarUpload);
+    }
+
+    btnSalvarPerfil.addEventListener('click', async () => {
+        if (!auth.currentUser) {
+            showAlert('Você precisa estar logado', 'error');
+            return;
+        }
+        
+        showLoading();
+        btnSalvarPerfil.disabled = true;
+        btnSalvarPerfil.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+        
+        try {
+            const dadosProfissional = {
+                nomeProfissional: nomeProfissional.value,
+                slogan: slogan.value,
+                descricao: descricao.value,
+                especialidadePrincipal: especialidadePrincipal.value,
+                anosExperiencia: anosExperiencia.value,
+                especialidades: getTags(tagsContainer),
+                raioKm: parseInt(raioKm.value) || null,
+                cidadeBase: cidadeBase.value,
+                cidadesAtendidas: getTags(cidadesContainer),
+                atendeDomicilio: atendeDomicilio.checked,
+                atendeOnline: atendeOnline.checked,
+                formasPagamento: getTags(pagamentosContainer),
+                tempoResposta: tempoResposta.value,
+                orcamentoGratuito: orcamentoGratuito.checked,
+                garantiaDias: parseInt(garantiaDias.value) || null,
+                portfolioFotos: portfolioFotos,
+                videos: videos,
+                whatsapp: whatsapp.value,
+                emailProfissional: emailProfissional.value,
+                links: Array.from(linksContainer.querySelectorAll('input')).map(input => input.value),
+                perfilCompleto: true,
+                ultimaAtualizacao: new Date().toISOString()
+            };
+            
+            const userRef = doc(db, "usuarios", auth.currentUser.uid);
+            await updateDoc(userRef, {
+                profissional: dadosProfissional,
+                tipoUsuario: 'profissional',
+                ultimaAtualizacao: new Date().toISOString()
+            });
+            
+            userName.textContent = dadosProfissional.nomeProfissional || userData.apelido;
+            userSpecialty.textContent = dadosProfissional.especialidadePrincipal || 'Profissional';
+            
+            showAlert('Perfil profissional salvo com sucesso!', 'success');
+            
+        } catch (erro) {
+            showAlert('Erro ao salvar perfil', 'error');
+        } finally {
+            hideLoading();
+            btnSalvarPerfil.disabled = false;
+            btnSalvarPerfil.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Perfil Profissional';
+        }
+    });
+
+    inicializarTags(tagsContainer, tagInput);
+    inicializarTags(cidadesContainer, cidadeInput);
+    inicializarTags(pagamentosContainer, pagamentoInput);
+</script>
 </body>
 </html>
