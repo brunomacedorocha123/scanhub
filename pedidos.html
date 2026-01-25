@@ -818,7 +818,8 @@
         query,
         where,
         orderBy,
-        serverTimestamp
+        serverTimestamp,
+        onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     // Firebase Config
@@ -891,6 +892,7 @@
     let servicosDisponiveis = [];
     let proximoNumeroPedido = 1;
     let servicosNoPedido = [];
+    let unsubscribePedidos = null;
 
     // Carregar dados do usuário
     onAuthStateChanged(auth, async (user) => {
@@ -930,10 +932,10 @@
         try {
             await Promise.all([
                 carregarClientes(),
-                carregarServicosDisponiveis(),
-                carregarPedidos()
+                carregarServicosDisponiveis()
             ]);
             atualizarFiltroClientes();
+            configurarListenerPedidos(); // Configurar listener em tempo real
         } catch (error) {
             console.error('Erro ao carregar dados:', error);
         }
@@ -984,16 +986,19 @@
         }
     }
 
-    // Carregar pedidos
-    async function carregarPedidos() {
-        try {
-            const q = query(
-                collection(db, "pedidos"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("dataPedido", "desc")
-            );
-            
-            const querySnapshot = await getDocs(q);
+    // Configurar listener em tempo real para pedidos
+    function configurarListenerPedidos() {
+        if (unsubscribePedidos) {
+            unsubscribePedidos(); // Limpar listener anterior se existir
+        }
+        
+        const q = query(
+            collection(db, "pedidos"),
+            where("profissionalId", "==", currentUser.uid),
+            orderBy("dataPedido", "desc")
+        );
+        
+        unsubscribePedidos = onSnapshot(q, (querySnapshot) => {
             pedidos = [];
             let maxNumero = 0;
             
@@ -1013,13 +1018,13 @@
             
             proximoNumeroPedido = maxNumero + 1;
             atualizarTabelaPedidos();
-            atualizarEstatisticas();
-        } catch (error) {
-            console.error('Erro ao carregar pedidos:', error);
-        }
+            atualizarEstatisticas(); // ATUALIZA OS CARDS AQUI
+        }, (error) => {
+            console.error('Erro no listener de pedidos:', error);
+        });
     }
 
-    // Atualizar estatísticas
+    // Atualizar estatísticas - FUNÇÃO CORRIGIDA
     function atualizarEstatisticas() {
         if (pedidos.length === 0) {
             totalPedidos.textContent = '0';
@@ -1035,7 +1040,7 @@
         const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
         const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
         
-        // Calcular valor a receber
+        // Calcular valor a receber - CORRIGIDO
         let aReceber = 0;
         pedidos.forEach(p => {
             if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial') {
@@ -1043,6 +1048,9 @@
                 if (valorPendente > 0) {
                     aReceber += valorPendente;
                 }
+            } else if (p.statusPagamento === 'atrasado') {
+                // Se está atrasado, todo o valor está pendente
+                aReceber += p.valorTotal - (p.valorPago || 0);
             }
         });
         
@@ -1399,6 +1407,9 @@
                         <button class="btn-action-sm btn-recibo" onclick="gerarReciboDetalhado('${pedido.id}')">
                             <i class="fas fa-file-pdf"></i>
                         </button>
+                        <button class="btn-action-sm btn-excluir" onclick="excluirPedido('${pedido.id}')" style="background: #e74c3c; color: white;">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -1676,7 +1687,7 @@
                 tipoPagamento: tipoPagamento.value,
                 
                 valorPago: valorPagoValue,
-                valorPendente: valorPendente,
+                valorPendente: valorPendente > 0 ? valorPendente : 0,
                 
                 observacoes: observacoes.value || null,
                 
@@ -1696,15 +1707,34 @@
                 await addDoc(collection(db, "pedidos"), pedidoData);
             }
             
-            // Fechar modal e atualizar dados
+            // Fechar modal e limpar formulário
             modalPedido.hide();
-            await carregarPedidos(); // ISSO ATUALIZA OS CARDS AUTOMATICAMENTE
+            formPedido.reset();
+            
+            // Os cards serão atualizados automaticamente pelo listener em tempo real
             
         } catch (error) {
             console.error('Erro ao salvar pedido:', error);
             alert('Erro ao salvar pedido. Por favor, tente novamente.');
         }
     }
+
+    // Excluir pedido
+    window.excluirPedido = async function(id) {
+        if (!confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) {
+            return;
+        }
+        
+        try {
+            const pedidoRef = doc(db, "pedidos", id);
+            await deleteDoc(pedidoRef);
+            
+            // Os cards serão atualizados automaticamente pelo listener em tempo real
+        } catch (error) {
+            console.error('Erro ao excluir pedido:', error);
+            alert('Erro ao excluir pedido. Por favor, tente novamente.');
+        }
+    };
 
     // Gerar recibo PDF detalhado
     window.gerarReciboDetalhado = async function(id) {
@@ -1995,6 +2025,10 @@
     // Logout
     btnLogout.addEventListener('click', async () => {
         try {
+            // Remover listener antes de sair
+            if (unsubscribePedidos) {
+                unsubscribePedidos();
+            }
             await signOut(auth);
             window.location.href = 'login.html';
         } catch (error) {
@@ -2007,6 +2041,13 @@
         if (!dataPedido.value) {
             const hoje = new Date().toISOString().split('T')[0];
             dataPedido.value = hoje;
+        }
+    });
+
+    // Limpar listener quando a página for fechada
+    window.addEventListener('beforeunload', () => {
+        if (unsubscribePedidos) {
+            unsubscribePedidos();
         }
     });
 
