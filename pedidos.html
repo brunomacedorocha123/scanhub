@@ -989,8 +989,7 @@
         try {
             const q = query(
                 collection(db, "pedidos"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("dataPedido", "desc")
+                where("profissionalId", "==", currentUser.uid)
             );
             
             const querySnapshot = await getDocs(q);
@@ -1019,7 +1018,7 @@
         }
     }
 
-    // Atualizar estatísticas - FUNÇÃO CORRIGIDA
+    // ATUALIZAR ESTATÍSTICAS - CORRIGIDA
     function atualizarEstatisticas() {
         if (pedidos.length === 0) {
             totalPedidos.textContent = '0';
@@ -1035,14 +1034,14 @@
         const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
         const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
         
-        // Calcular valor a receber - USANDO valorPendente que já existe
+        // Calcular valor a receber - CORRIGIDO
         let aReceber = 0;
         pedidos.forEach(p => {
-            // Se tem valorPendente, usa ele (já está salvo no Firestore)
+            // Se tem valorPendente, usa ele
             if (p.valorPendente !== undefined && p.valorPendente !== null && p.valorPendente > 0) {
                 aReceber += p.valorPendente;
             } 
-            // Se não tem valorPendente, calcula baseado no status
+            // Se não tem, calcula baseado no status
             else if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial' || p.statusPagamento === 'atrasado') {
                 const valorPendente = p.valorTotal - (p.valorPago || 0);
                 if (valorPendente > 0) {
@@ -1600,7 +1599,7 @@
         btnSalvarPedido.onclick = salvarPedido;
     });
 
-    // Salvar pedido - GARANTINDO que profissionalId está sempre presente
+    // Salvar pedido
     async function salvarPedido() {
         // Validações básicas
         if (!clientePedido.value) {
@@ -1660,7 +1659,7 @@
             const valorPagoValue = parseFloat(valorPago.value) || 0;
             const valorPendente = valorTotalValue - valorPagoValue;
             
-            // Preparar dados do pedido - GARANTINDO profissionalId
+            // Preparar dados do pedido
             const pedidoData = {
                 clienteId: clientePedido.value,
                 clienteNome: clienteSelecionado.nome,
@@ -1685,7 +1684,6 @@
                 
                 observacoes: observacoes.value || null,
                 
-                // SEMPRE INCLUIR profissionalId (IMPORTANTE PARA REGRAS)
                 profissionalId: currentUser.uid,
                 profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
                 criadoEm: pedidoId.value ? undefined : serverTimestamp(),
@@ -1704,7 +1702,7 @@
             
             // Fechar modal e atualizar dados
             modalPedido.hide();
-            await carregarPedidos(); // ATUALIZA OS CARDS AUTOMATICAMENTE
+            await carregarPedidos(); // ISSO ATUALIZA OS CARDS AUTOMATICAMENTE
             
         } catch (error) {
             console.error('Erro ao salvar pedido:', error);
