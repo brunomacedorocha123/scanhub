@@ -959,10 +959,9 @@
         }
     }
 
-    // Carregar pedidos - VERSÃO SIMPLIFICADA
+    // Carregar pedidos
     async function carregarPedidos() {
         try {
-            // Primeiro tenta com ordenação
             try {
                 const q = query(
                     collection(db, "pedidos"),
@@ -973,7 +972,6 @@
                 const querySnapshot = await getDocs(q);
                 processarPedidos(querySnapshot);
             } catch (error) {
-                // Se falhar, tenta sem ordenação
                 const q = query(
                     collection(db, "pedidos"),
                     where("profissionalId", "==", currentUser.uid)
@@ -1003,7 +1001,6 @@
             };
             pedidos.push(pedido);
             
-            // Encontrar maior número de pedido
             if (pedido.numeroPedido && pedido.numeroPedido.startsWith('PED-')) {
                 const numStr = pedido.numeroPedido.replace('PED-', '');
                 const num = parseInt(numStr);
@@ -1011,11 +1008,10 @@
             }
         });
         
-        // Ordenar por data manualmente se necessário
         pedidos.sort((a, b) => {
             const dataA = a.dataPedido ? new Date(a.dataPedido).getTime() : 0;
             const dataB = b.dataPedido ? new Date(b.dataPedido).getTime() : 0;
-            return dataB - dataA; // Mais recente primeiro
+            return dataB - dataA;
         });
         
         proximoNumeroPedido = maxNumero + 1;
@@ -1035,11 +1031,9 @@
         
         totalPedidos.textContent = pedidos.length;
         
-        // Filtrar por status do serviço
         const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
         const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
         
-        // Calcular valor a receber
         let aReceber = 0;
         pedidos.forEach(pedido => {
             if (pedido.valorPendente !== undefined && pedido.valorPendente !== null && pedido.valorPendente > 0) {
@@ -1147,7 +1141,6 @@
         
         servicosContainer.appendChild(servicoDiv);
         
-        // Adicionar aos serviços do pedido
         if (servicoData) {
             servicosNoPedido[servicoIndex] = servicoData;
         } else {
@@ -1162,18 +1155,15 @@
             };
         }
         
-        // Adicionar eventos
         const inputs = servicoDiv.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => atualizarServico(servicoIndex));
         });
         
-        // Botão remover
         servicoDiv.querySelector('.btn-remove-servico').addEventListener('click', () => {
             removerServico(servicoIndex);
         });
         
-        // Calcular subtotal inicial
         atualizarSubtotalServico(servicoIndex);
         calcularTotais();
     }
@@ -1212,10 +1202,8 @@
         const descricaoInput = servicoDiv.querySelector('.servico-descricao');
         const unidadeInput = servicoDiv.querySelector('.servico-unidade');
         
-        // Calcular subtotal atualizado
         const subtotalAtual = atualizarSubtotalServico(index);
         
-        // Atualizar no array
         servicosNoPedido[index] = {
             nome: nomeInput.value,
             descricao: descricaoInput.value,
@@ -1233,11 +1221,9 @@
     function removerServico(index) {
         servicosNoPedido.splice(index, 1);
         
-        // Remover do DOM
         const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
         if (servicoDiv) servicoDiv.remove();
         
-        // Renumerar itens restantes
         const servicosDivs = servicosContainer.querySelectorAll('.servico-item');
         servicosDivs.forEach((div, newIndex) => {
             div.querySelector('.servico-header h6').textContent = `Item ${newIndex + 1}`;
@@ -1248,7 +1234,6 @@
             });
         });
         
-        // Reindexar array
         const tempServicos = [...servicosNoPedido];
         servicosNoPedido = [];
         servicosDivs.forEach((div, newIndex) => {
@@ -1381,6 +1366,9 @@
                         <button class="btn-action-sm btn-recibo" onclick="gerarReciboDetalhado('${pedido.id}')">
                             <i class="fas fa-file-pdf"></i>
                         </button>
+                        <button class="btn-action-sm btn-excluir" onclick="excluirPedido('${pedido.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </td>
             `;
@@ -1402,7 +1390,7 @@
     // Helper: Badge de status pagamento
     function getStatusPagamentoBadge(status) {
         const badges = {
-            'a_receber': '<span class="badge-status status-a-receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
+            'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
             'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
             'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
             'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
@@ -1563,7 +1551,7 @@
         btnSalvarPedido.onclick = salvarPedido;
     });
 
-    // Salvar pedido - VERSÃO REVISADA
+    // Salvar pedido
     async function salvarPedido() {
         if (!clientePedido.value) {
             alert('Por favor, selecione um cliente.');
@@ -1645,12 +1633,10 @@
                 pedidoData.criadoEm = serverTimestamp();
             }
             
-            // Salvar no Firestore
             if (pedidoId.value) {
                 const pedidoRef = doc(db, "pedidos", pedidoId.value);
                 await updateDoc(pedidoRef, pedidoData);
                 
-                // Atualizar localmente
                 const index = pedidos.findIndex(p => p.id === pedidoId.value);
                 if (index !== -1) {
                     pedidos[index] = { ...pedidos[index], ...pedidoData };
@@ -1664,7 +1650,6 @@
             
             modalPedido.hide();
             
-            // Atualizar a tela
             atualizarTabelaPedidos();
             atualizarEstatisticas();
             
@@ -1887,6 +1872,40 @@
         } catch (error) {
             console.error('Erro ao gerar recibo:', error);
             alert('Erro ao gerar recibo. Por favor, tente novamente.');
+        }
+    };
+
+    // Função para excluir pedido
+    window.excluirPedido = async function(id) {
+        if (!confirm('Tem certeza que deseja excluir este pedido?\nEsta ação não pode ser desfeita.')) {
+            return;
+        }
+        
+        try {
+            const pedido = pedidos.find(p => p.id === id);
+            if (!pedido) {
+                alert('Pedido não encontrado.');
+                return;
+            }
+            
+            const pedidoRef = doc(db, "pedidos", id);
+            await deleteDoc(pedidoRef);
+            
+            const index = pedidos.findIndex(p => p.id === id);
+            if (index !== -1) {
+                pedidos.splice(index, 1);
+            }
+            
+            atualizarTabelaPedidos();
+            atualizarEstatisticas();
+            
+            setTimeout(() => {
+                alert(`Pedido ${pedido.numeroPedido || ''} excluído com sucesso!`);
+            }, 300);
+            
+        } catch (error) {
+            console.error('Erro ao excluir pedido:', error);
+            alert('Erro ao excluir pedido. Por favor, tente novamente.');
         }
     };
 
