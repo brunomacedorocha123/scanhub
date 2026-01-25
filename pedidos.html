@@ -1014,7 +1014,19 @@
     const db = getFirestore(app);
 
     // ============================================
-    // PASSO 1: ELEMENTOS DAS ABAS
+    // VARIÁVEIS GLOBAIS
+    // ============================================
+    let currentUser = null;
+    let userData = null;
+    let pedidos = [];
+    let clientes = [];
+    let proximoNumeroPedido = 1;
+    let itensNoPedido = [];
+    let tipoAtualPedido = 'todos';
+    let modoVisualizacao = false;
+
+    // ============================================
+    // ELEMENTOS DOM
     // ============================================
     
     // Elementos das abas
@@ -1024,18 +1036,15 @@
     const badgeServicos = document.getElementById('badgeServicos');
     const badgeProdutos = document.getElementById('badgeProdutos');
     
-    // Elementos do modal (novos)
+    // Elementos do modal
     const seletorTipoPedido = document.getElementById('seletorTipoPedido');
+    const tipoPedidoBtns = document.querySelectorAll('.tipo-pedido-btn');
     const tipoPedidoInput = document.getElementById('tipoPedido');
     const tituloItens = document.getElementById('tituloItens');
     const btnAddItem = document.getElementById('btnAddItem');
     const itensContainer = document.getElementById('itensContainer');
     
-    // ============================================
-    // ELEMENTOS EXISTENTES (mantidos do seu código)
-    // ============================================
-    
-    // Elementos DOM
+    // Elementos existentes
     const userName = document.getElementById('userName');
     const userAvatar = document.getElementById('userAvatar');
     const userId = document.getElementById('userId');
@@ -1079,54 +1088,11 @@
     const labelValorPago = document.getElementById('labelValorPago');
     const helpValorPago = document.getElementById('helpValorPago');
 
-    // Estado da aplicação
-    let currentUser = null;
-    let userData = null;
-    let pedidos = [];
-    let clientes = [];
-    let proximoNumeroPedido = 1;
-    let itensNoPedido = [];
-    let tipoAtualPedido = 'todos'; // 'todos', 'servicos', 'produtos'
-
     // ============================================
-    // PASSO 1: FUNÇÕES DAS ABAS
+    // INICIALIZAÇÃO DO SISTEMA
     // ============================================
 
-    // Inicializar sistema de abas
-    function inicializarAbas() {
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Remover active de todos
-                tabButtons.forEach(b => b.classList.remove('active'));
-                
-                // Adicionar active ao clicado
-                this.classList.add('active');
-                
-                // Atualizar tipo atual
-                tipoAtualPedido = this.getAttribute('data-tipo');
-                
-                // Atualizar tabela
-                atualizarTabelaPedidos();
-            });
-        });
-    }
-
-    // Atualizar contadores das abas
-    function atualizarContadoresAbas() {
-        const total = pedidos.length;
-        const servicosCount = pedidos.filter(p => p.tipoPedido === 'servico').length;
-        const produtosCount = pedidos.filter(p => p.tipoPedido === 'produto').length;
-        
-        badgeTodos.textContent = total;
-        badgeServicos.textContent = servicosCount;
-        badgeProdutos.textContent = produtosCount;
-    }
-
-    // ============================================
-    // FUNÇÕES EXISTENTES (adaptadas)
-    // ============================================
-
-    // Carregar dados do usuário
+    // Monitorar autenticação
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
@@ -1138,19 +1104,22 @@
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
                     await carregarDadosIniciais();
-                    
-                    // Inicializar abas
-                    inicializarAbas();
+                    inicializarSistema();
                 }
             } catch (error) {
-                console.error('Erro ao carregar usuário:', error);
+                alert('Erro ao carregar dados do usuário');
             }
         } else {
             window.location.href = 'login.html';
         }
     });
 
-    // Atualizar interface com dados do usuário
+    function inicializarSistema() {
+        inicializarAbas();
+        inicializarEventListeners();
+        inicializarSeletorTipo();
+    }
+
     function atualizarInterfaceUsuario(data) {
         if (data.apelido) {
             userName.textContent = `Olá, ${data.apelido}`;
@@ -1162,21 +1131,17 @@
         }
     }
 
-    // Carregar todos os dados iniciais
+    // ============================================
+    // CARREGAMENTO DE DADOS
+    // ============================================
+
     async function carregarDadosIniciais() {
-        try {
-            await carregarClientes();
-            await carregarPedidos();
-            atualizarFiltroClientes();
-            
-            // Atualizar contadores das abas
-            atualizarContadoresAbas();
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-        }
+        await carregarClientes();
+        await carregarPedidos();
+        atualizarFiltroClientes();
+        atualizarContadoresAbas();
     }
 
-    // Carregar clientes
     async function carregarClientes() {
         try {
             const q = query(
@@ -1195,40 +1160,31 @@
                 });
             });
         } catch (error) {
-            console.error('Erro ao carregar clientes:', error);
+            alert('Erro ao carregar clientes');
         }
     }
 
-    // Carregar pedidos
     async function carregarPedidos() {
         try {
-            try {
-                const q = query(
-                    collection(db, "pedidos"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("dataPedido", "desc")
-                );
-                
-                const querySnapshot = await getDocs(q);
-                processarPedidos(querySnapshot);
-            } catch (error) {
-                const q = query(
-                    collection(db, "pedidos"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                processarPedidos(querySnapshot);
-            }
+            const q = query(
+                collection(db, "pedidos"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("dataPedido", "desc")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            processarPedidos(querySnapshot);
         } catch (error) {
-            console.error('Erro ao carregar pedidos:', error);
-            pedidos = [];
-            atualizarTabelaPedidos();
-            atualizarEstatisticas();
+            const q = query(
+                collection(db, "pedidos"),
+                where("profissionalId", "==", currentUser.uid)
+            );
+            
+            const querySnapshot = await getDocs(q);
+            processarPedidos(querySnapshot);
         }
     }
 
-    // Processar pedidos carregados
     function processarPedidos(querySnapshot) {
         pedidos = [];
         let maxNumero = 0;
@@ -1248,51 +1204,12 @@
             }
         });
         
-        pedidos.sort((a, b) => {
-            const dataA = a.dataPedido ? new Date(a.dataPedido).getTime() : 0;
-            const dataB = b.dataPedido ? new Date(b.dataPedido).getTime() : 0;
-            return dataB - dataA;
-        });
-        
         proximoNumeroPedido = maxNumero + 1;
         atualizarTabelaPedidos();
         atualizarEstatisticas();
-        atualizarContadoresAbas(); // Atualizar abas também
+        atualizarContadoresAbas();
     }
 
-    // Atualizar estatísticas
-    function atualizarEstatisticas() {
-        if (pedidos.length === 0) {
-            totalPedidos.textContent = '0';
-            pedidosAndamento.textContent = '0';
-            pedidosConcluidos.textContent = '0';
-            valorAReceber.textContent = 'R$ 0,00';
-            return;
-        }
-        
-        totalPedidos.textContent = pedidos.length;
-        
-        const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
-        const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
-        
-        let aReceber = 0;
-        pedidos.forEach(pedido => {
-            if (pedido.valorPendente !== undefined && pedido.valorPendente !== null && pedido.valorPendente > 0) {
-                aReceber += pedido.valorPendente;
-            } else if (pedido.statusPagamento === 'a_receber' || pedido.statusPagamento === 'parcial' || pedido.statusPagamento === 'atrasado') {
-                const valorPendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
-                if (valorPendente > 0) {
-                    aReceber += valorPendente;
-                }
-            }
-        });
-        
-        pedidosAndamento.textContent = emAndamento;
-        pedidosConcluidos.textContent = concluidos;
-        valorAReceber.textContent = `R$ ${aReceber.toFixed(2)}`;
-    }
-
-    // Atualizar filtro de clientes
     function atualizarFiltroClientes() {
         filterCliente.innerHTML = '<option value="">Todos clientes</option>';
         clientePedido.innerHTML = '<option value="">Selecione um cliente</option>';
@@ -1307,172 +1224,56 @@
     }
 
     // ============================================
-    // PASSO 1: ATUALIZAR TABELA COM FILTRO DE TIPO
+    // SISTEMA DE ABAS
     // ============================================
 
-    // Atualizar tabela de pedidos com filtro por tipo
-    function atualizarTabelaPedidos() {
-        const searchTerm = searchPedidos.value.toLowerCase();
-        const statusServicoFilter = filterStatusServico.value;
-        const statusPagamentoFilter = filterStatusPagamento.value;
-        const mesFilter = filterMes.value;
-        const clienteFilter = filterCliente.value;
-        
-        // Filtrar por tipo (nova funcionalidade)
-        let pedidosFiltradosPorTipo = pedidos;
-        if (tipoAtualPedido === 'servicos') {
-            pedidosFiltradosPorTipo = pedidos.filter(p => p.tipoPedido === 'servico');
-        } else if (tipoAtualPedido === 'produtos') {
-            pedidosFiltradosPorTipo = pedidos.filter(p => p.tipoPedido === 'produto');
-        }
-        // Se for 'todos', mantém todos
-        
-        let pedidosFiltrados = pedidosFiltradosPorTipo.filter(pedido => {
-            const matchSearch = !searchTerm || 
-                (pedido.clienteNome && pedido.clienteNome.toLowerCase().includes(searchTerm)) ||
-                (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
-                (pedido.itens && Array.isArray(pedido.itens) && 
-                 pedido.itens.some(s => s.nome && s.nome.toLowerCase().includes(searchTerm)));
-            
-            const matchStatusServico = !statusServicoFilter || pedido.statusPedido === statusServicoFilter;
-            const matchStatusPagamento = !statusPagamentoFilter || pedido.statusPagamento === statusPagamentoFilter;
-            const matchCliente = !clienteFilter || pedido.clienteId === clienteFilter;
-            
-            let matchMes = true;
-            if (mesFilter && pedido.dataPedido) {
-                const data = new Date(pedido.dataPedido);
-                const mes = data.getMonth() + 1;
-                matchMes = mes.toString() === mesFilter;
-            }
-            
-            return matchSearch && matchStatusServico && matchStatusPagamento && matchMes && matchCliente;
+    function inicializarAbas() {
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                tipoAtualPedido = this.getAttribute('data-tipo');
+                atualizarTabelaPedidos();
+            });
         });
+    }
+
+    function atualizarContadoresAbas() {
+        const total = pedidos.length;
+        const servicosCount = pedidos.filter(p => p.tipoPedido === 'servico').length;
+        const produtosCount = pedidos.filter(p => p.tipoPedido === 'produto').length;
         
-        pedidosTable.innerHTML = '';
-        
-        if (pedidosFiltrados.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td colspan="9" class="text-center py-5">
-                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">${pedidos.length === 0 ? 
-                        'Nenhum pedido cadastrado' : 
-                        'Nenhum pedido corresponde aos filtros'}</h5>
-                    <p class="text-muted mb-0">${pedidos.length === 0 ? 
-                        'Clique em "Novo Pedido" para criar seu primeiro pedido' : 
-                        'Tente ajustar os filtros de busca'}</p>
-                </td>
-            `;
-            pedidosTable.appendChild(emptyRow);
-            return;
-        }
-        
-        pedidosFiltrados.forEach(pedido => {
-            const row = document.createElement('tr');
-            
-            let itensText = '';
-            if (Array.isArray(pedido.itens)) {
-                itensText = pedido.itens.slice(0, 2).map(s => 
-                    `${s.quantidade}x ${s.nome}`).join(', ');
-                if (pedido.itens.length > 2) {
-                    itensText += ` +${pedido.itens.length - 2} mais`;
+        badgeTodos.textContent = total;
+        badgeServicos.textContent = servicosCount;
+        badgeProdutos.textContent = produtosCount;
+    }
+
+    // ============================================
+    // SELEÇÃO DE TIPO NO MODAL
+    // ============================================
+
+    function inicializarSeletorTipo() {
+        tipoPedidoBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tipoPedidoBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const novoTipo = this.getAttribute('data-tipo');
+                tipoPedidoInput.value = novoTipo;
+                atualizarTituloItens(novoTipo);
+                
+                // Se já tem itens, perguntar se quer limpar
+                if (itensNoPedido.length > 0 && !modoVisualizacao) {
+                    if (confirm(`Deseja limpar os itens atuais e adicionar um novo item do tipo ${novoTipo === 'servico' ? 'Serviço' : novoTipo === 'produto' ? 'Produto' : 'Misto'}?`)) {
+                        itensContainer.innerHTML = '';
+                        itensNoPedido = [];
+                        adicionarItem(novoTipo);
+                    }
                 }
-            } else if (pedido.itens) {
-                itensText = `${pedido.itens.quantidade || 1}x ${pedido.itens.nome || 'Item'}`;
-            }
-            
-            // Determinar tipo do pedido
-            const tipoPedido = pedido.tipoPedido || 'servico';
-            const tipoBadge = getTipoPedidoBadge(tipoPedido);
-            
-            const statusBadge = getStatusPedidoBadge(pedido.statusPedido);
-            const statusPagamentoBadge = getStatusPagamentoBadge(pedido.statusPagamento);
-            const dataFormatada = formatarData(pedido.dataPedido);
-            const valorTotalFormatado = `R$ ${(pedido.valorTotal || 0).toFixed(2)}`;
-            
-            row.innerHTML = `
-                <td><strong>${pedido.numeroPedido || `PED-${pedidos.indexOf(pedido) + 1}`}</strong></td>
-                <td>${tipoBadge}</td>
-                <td>${pedido.clienteNome || 'Cliente não encontrado'}</td>
-                <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
-                <td><strong>${valorTotalFormatado}</strong></td>
-                <td>${statusBadge}</td>
-                <td>${statusPagamentoBadge}</td>
-                <td>${dataFormatada}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn-action-sm btn-ver" onclick="verPedido('${pedido.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-action-sm btn-editar" onclick="editarPedido('${pedido.id}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action-sm btn-recibo" onclick="gerarReciboDetalhado('${pedido.id}')">
-                            <i class="fas fa-file-pdf"></i>
-                        </button>
-                        <button class="btn-action-sm btn-excluir" onclick="excluirPedido('${pedido.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            
-            pedidosTable.appendChild(row);
+            });
         });
     }
 
-    // ============================================
-    // NOVAS FUNÇÕES DE SUPORTE
-    // ============================================
-
-    // Helper: Badge de tipo de pedido
-    function getTipoPedidoBadge(tipo) {
-        const badges = {
-            'servico': '<span class="badge-status" style="background: rgba(52, 152, 219, 0.1); color: #2980b9;"><i class="fas fa-tools me-1"></i> Serviço</span>',
-            'produto': '<span class="badge-status" style="background: rgba(46, 204, 113, 0.1); color: #27ae60;"><i class="fas fa-box me-1"></i> Produto</span>',
-            'misto': '<span class="badge-status" style="background: rgba(155, 89, 182, 0.1); color: #8e44ad;"><i class="fas fa-random me-1"></i> Misto</span>'
-        };
-        return badges[tipo] || '<span class="badge-status">Desconhecido</span>';
-    }
-
-    // Helper: Badge de status do pedido
-    function getStatusPedidoBadge(status) {
-        const badges = {
-            'pendente': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> Pendente</span>',
-            'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
-            'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
-            'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
-        };
-        return badges[status] || '<span class="badge-status">Desconhecido</span>';
-    }
-
-    // Helper: Badge de status pagamento
-    function getStatusPagamentoBadge(status) {
-        const badges = {
-            'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
-            'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
-            'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
-            'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
-        };
-        return badges[status] || '<span class="badge-status">Desconhecido</span>';
-    }
-
-    // ============================================
-    // PASSO 1: FUNÇÕES DO MODAL (simplificadas)
-    // ============================================
-
-    // Abrir modal para novo pedido
-    window.abrirModalPedido = function(tipo = 'servico') {
-        modalTitle.textContent = 'Novo Pedido';
-        pedidoId.value = '';
-        
-        // Mostrar seletor de tipo
-        seletorTipoPedido.style.display = 'block';
-        
-        // Definir tipo
-        tipoPedidoInput.value = tipo;
-        
-        // Atualizar título dos itens
+    function atualizarTituloItens(tipo) {
         if (tipo === 'servico') {
             tituloItens.textContent = 'Serviços do Pedido';
         } else if (tipo === 'produto') {
@@ -1480,36 +1281,79 @@
         } else {
             tituloItens.textContent = 'Itens do Pedido (Serviços + Produtos)';
         }
-        
-        // Resetar formulário
-        formPedido.reset();
-        
-        const hoje = new Date().toISOString().split('T')[0];
-        dataPedido.value = hoje;
-        
-        // Limpar itens
-        itensContainer.innerHTML = '';
-        itensNoPedido = [];
-        
-        // Adicionar primeiro item
-        adicionarItem(tipo);
-        
-        // Configurar botão salvar
-        btnSalvarPedido.textContent = 'Salvar Pedido';
-        btnSalvarPedido.onclick = salvarPedido;
-        
-        modalPedido.show();
-    };
+    }
 
-    // Adicionar item ao pedido
+    // ============================================
+    // ADICIONAR ITEM AO PEDIDO
+    // ============================================
+
     function adicionarItem(tipo) {
         const itemIndex = itensNoPedido.length;
+        const isMisto = tipo === 'misto';
         
+        // Criar campos específicos baseados no tipo
+        let camposEspecificos = '';
+        
+        if (tipo === 'servico') {
+            camposEspecificos = `
+                <div class="col-md-6">
+                    <label class="form-label">Duração Estimada</label>
+                    <input type="text" class="form-control item-duracao" 
+                           data-index="${itemIndex}" 
+                           placeholder="Ex: 2 horas, 1 dia">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Agendamento</label>
+                    <input type="datetime-local" class="form-control item-agendamento" 
+                           data-index="${itemIndex}">
+                </div>
+            `;
+        } else if (tipo === 'produto') {
+            camposEspecificos = `
+                <div class="col-md-4">
+                    <label class="form-label">Código/SKU</label>
+                    <input type="text" class="form-control item-sku" 
+                           data-index="${itemIndex}" 
+                           placeholder="Ex: PROD-001">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Estoque Atual</label>
+                    <input type="number" class="form-control item-estoque" 
+                           data-index="${itemIndex}" min="0" step="1" 
+                           placeholder="Qtd em estoque">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Unidade de Medida</label>
+                    <input type="text" class="form-control item-unidade-medida" 
+                           data-index="${itemIndex}" 
+                           placeholder="Ex: unidade, kg, litro" 
+                           value="unidade">
+                </div>
+            `;
+        } else if (isMisto) {
+            // Para misto, adicionar seletor de tipo para cada item
+            camposEspecificos = `
+                <div class="col-md-4">
+                    <label class="form-label">Tipo do Item *</label>
+                    <select class="form-select item-tipo-especifico" data-index="${itemIndex}" required>
+                        <option value="servico">Serviço</option>
+                        <option value="produto">Produto</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Detalhe Específico</label>
+                    <input type="text" class="form-control item-detalhe" 
+                           data-index="${itemIndex}" 
+                           placeholder="Ex: Duração, SKU, etc">
+                </div>
+            `;
+        }
+
         const itemDiv = document.createElement('div');
         itemDiv.className = 'servico-item';
         itemDiv.innerHTML = `
             <div class="servico-header">
-                <h6>Item ${itemIndex + 1}</h6>
+                <h6>Item ${itemIndex + 1} <small class="text-muted">${tipo === 'servico' ? '🛠️ Serviço' : tipo === 'produto' ? '📦 Produto' : '🔄 Misto'}</small></h6>
                 <button type="button" class="btn-remove-servico" data-index="${itemIndex}">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1517,74 +1361,82 @@
             
             <div class="row g-3">
                 <div class="col-md-12">
-                    <label class="form-label">Descrição do Item *</label>
+                    <label class="form-label">Descrição *</label>
                     <input type="text" class="form-control item-nome" 
                            data-index="${itemIndex}" 
                            value="" 
-                           placeholder="${tipo === 'servico' ? 'Ex: Sessão de terapia, Instalação' : 'Ex: Produto X, Material Y'}"
+                           placeholder="${tipo === 'servico' ? 'Ex: Instalação de ar-condicionado' : 'Ex: Filtro original'}"
                            required>
                 </div>
                 
-                <div class="col-md-4">
+                ${camposEspecificos}
+                
+                <div class="col-md-3">
                     <label class="form-label">Quantidade *</label>
                     <input type="number" class="form-control item-quantidade" 
                            data-index="${itemIndex}" min="1" step="1" 
                            value="1" required>
                 </div>
                 
-                <div class="col-md-4">
-                    <label class="form-label">Unidade</label>
-                    <input type="text" class="form-control item-unidade" 
-                           data-index="${itemIndex}" 
-                           value="${tipo === 'servico' ? 'sessão' : 'unidade'}" 
-                           placeholder="sessão, hora, unidade, pacote">
-                </div>
-                
-                <div class="col-md-4">
-                    <label class="form-label">Preço Unitário (R$) *</label>
+                <div class="col-md-3">
+                    <label class="form-label">Preço Unitário *</label>
                     <input type="number" class="form-control item-preco" 
                            data-index="${itemIndex}" min="0" step="0.01" 
                            value="0" required>
                 </div>
                 
-                <div class="col-md-12">
-                    <label class="form-label">Detalhamento/Especificações</label>
-                    <textarea class="form-control item-descricao" 
-                              data-index="${itemIndex}" rows="2" 
-                              placeholder="Descreva detalhadamente o item..."></textarea>
-                </div>
-                
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <label class="form-label">Desconto (R$)</label>
                     <input type="number" class="form-control item-desconto" 
                            data-index="${itemIndex}" min="0" step="0.01" 
                            value="0">
                 </div>
                 
-                <div class="col-md-6">
-                    <label class="form-label">Subtotal deste item</label>
+                <div class="col-md-3">
+                    <label class="form-label">Subtotal</label>
                     <div class="form-control item-subtotal" data-index="${itemIndex}" 
                          style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
                         R$ 0,00
                     </div>
+                </div>
+                
+                <div class="col-md-12">
+                    <label class="form-label">Observações</label>
+                    <textarea class="form-control item-descricao" 
+                              data-index="${itemIndex}" rows="2" 
+                              placeholder="Detalhes adicionais..."></textarea>
                 </div>
             </div>
         `;
         
         itensContainer.appendChild(itemDiv);
         
+        // Inicializar objeto do item
         itensNoPedido[itemIndex] = {
+            tipoItem: tipo,
             nome: '',
             descricao: '',
             precoUnitario: 0,
             quantidade: 1,
-            unidade: tipo === 'servico' ? 'sessão' : 'unidade',
             desconto: 0,
             subtotal: 0
         };
         
-        // Adicionar eventos
-        const inputs = itemDiv.querySelectorAll('input, textarea');
+        // Adicionar campos específicos
+        if (tipo === 'servico') {
+            itensNoPedido[itemIndex].duracao = '';
+            itensNoPedido[itemIndex].agendamento = '';
+        } else if (tipo === 'produto') {
+            itensNoPedido[itemIndex].sku = '';
+            itensNoPedido[itemIndex].estoque = '';
+            itensNoPedido[itemIndex].unidadeMedida = 'unidade';
+        } else if (isMisto) {
+            itensNoPedido[itemIndex].tipoEspecifico = 'servico';
+            itensNoPedido[itemIndex].detalhe = '';
+        }
+        
+        // Configurar eventos
+        const inputs = itemDiv.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => atualizarItem(itemIndex));
         });
@@ -1597,7 +1449,53 @@
         calcularTotais();
     }
 
-    // Funções auxiliares do modal (mantidas do seu código, adaptadas)
+    function atualizarItem(index) {
+        const itemDiv = itensContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
+        if (!itemDiv) return;
+        
+        // Coletar dados comuns
+        const nomeInput = itemDiv.querySelector('.item-nome');
+        const quantidadeInput = itemDiv.querySelector('.item-quantidade');
+        const precoInput = itemDiv.querySelector('.item-preco');
+        const descontoInput = itemDiv.querySelector('.item-desconto');
+        const descricaoInput = itemDiv.querySelector('.item-descricao');
+        
+        // Atualizar dados básicos
+        itensNoPedido[index].nome = nomeInput.value;
+        itensNoPedido[index].descricao = descricaoInput.value;
+        itensNoPedido[index].precoUnitario = parseFloat(precoInput.value) || 0;
+        itensNoPedido[index].quantidade = parseFloat(quantidadeInput.value) || 1;
+        itensNoPedido[index].desconto = parseFloat(descontoInput.value) || 0;
+        
+        // Coletar dados específicos
+        const tipoAtual = itensNoPedido[index].tipoItem;
+        
+        if (tipoAtual === 'servico') {
+            const duracaoInput = itemDiv.querySelector('.item-duracao');
+            const agendamentoInput = itemDiv.querySelector('.item-agendamento');
+            itensNoPedido[index].duracao = duracaoInput ? duracaoInput.value : '';
+            itensNoPedido[index].agendamento = agendamentoInput ? agendamentoInput.value : '';
+        } else if (tipoAtual === 'produto') {
+            const skuInput = itemDiv.querySelector('.item-sku');
+            const estoqueInput = itemDiv.querySelector('.item-estoque');
+            const unidadeInput = itemDiv.querySelector('.item-unidade-medida');
+            itensNoPedido[index].sku = skuInput ? skuInput.value : '';
+            itensNoPedido[index].estoque = estoqueInput ? estoqueInput.value : '';
+            itensNoPedido[index].unidadeMedida = unidadeInput ? unidadeInput.value : 'unidade';
+        } else if (tipoAtual === 'misto') {
+            const tipoEspecificoInput = itemDiv.querySelector('.item-tipo-especifico');
+            const detalheInput = itemDiv.querySelector('.item-detalhe');
+            itensNoPedido[index].tipoEspecifico = tipoEspecificoInput ? tipoEspecificoInput.value : 'servico';
+            itensNoPedido[index].detalhe = detalheInput ? detalheInput.value : '';
+        }
+        
+        // Atualizar subtotal
+        const subtotalAtual = atualizarSubtotalItem(index);
+        itensNoPedido[index].subtotal = subtotalAtual;
+        
+        calcularTotais();
+    }
+
     function atualizarSubtotalItem(index) {
         const itemDiv = itensContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
         if (!itemDiv) return 0;
@@ -1617,32 +1515,6 @@
         subtotalDisplay.textContent = `R$ ${subtotalFinal.toFixed(2)}`;
         
         return subtotalFinal;
-    }
-
-    function atualizarItem(index) {
-        const itemDiv = itensContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
-        if (!itemDiv) return;
-        
-        const nomeInput = itemDiv.querySelector('.item-nome');
-        const quantidadeInput = itemDiv.querySelector('.item-quantidade');
-        const precoInput = itemDiv.querySelector('.item-preco');
-        const descontoInput = itemDiv.querySelector('.item-desconto');
-        const descricaoInput = itemDiv.querySelector('.item-descricao');
-        const unidadeInput = itemDiv.querySelector('.item-unidade');
-        
-        const subtotalAtual = atualizarSubtotalItem(index);
-        
-        itensNoPedido[index] = {
-            nome: nomeInput.value,
-            descricao: descricaoInput.value,
-            precoUnitario: parseFloat(precoInput.value) || 0,
-            quantidade: parseFloat(quantidadeInput.value) || 1,
-            unidade: unidadeInput.value || 'unidade',
-            desconto: parseFloat(descontoInput.value) || 0,
-            subtotal: subtotalAtual
-        };
-        
-        calcularTotais();
     }
 
     function removerItem(index) {
@@ -1709,21 +1581,450 @@
     }
 
     // ============================================
-    // FUNÇÕES EXISTENTES DO SEU CÓDIGO (mantidas)
+    // FUNÇÕES PRINCIPAIS
     // ============================================
 
-    // Salvar pedido (adaptada)
+    window.abrirModalPedido = function(tipo = 'servico') {
+        modalTitle.textContent = 'Novo Pedido';
+        pedidoId.value = '';
+        
+        // Mostrar seletor de tipo
+        seletorTipoPedido.style.display = 'block';
+        modoVisualizacao = false;
+        
+        // Ativar botão do tipo selecionado
+        tipoPedidoBtns.forEach(btn => btn.classList.remove('active'));
+        const btnAtivo = document.querySelector(`.tipo-pedido-btn[data-tipo="${tipo}"]`);
+        if (btnAtivo) btnAtivo.classList.add('active');
+        
+        // Definir tipo
+        tipoPedidoInput.value = tipo;
+        atualizarTituloItens(tipo);
+        
+        // Resetar formulário
+        formPedido.reset();
+        
+        const hoje = new Date().toISOString().split('T')[0];
+        dataPedido.value = hoje;
+        
+        // Limpar itens
+        itensContainer.innerHTML = '';
+        itensNoPedido = [];
+        
+        // Adicionar primeiro item
+        adicionarItem(tipo);
+        
+        // Configurar botão salvar
+        btnSalvarPedido.textContent = 'Salvar Pedido';
+        btnSalvarPedido.onclick = salvarPedido;
+        
+        // Habilitar tudo
+        habilitarFormulario(true);
+        btnAddItem.style.display = 'block';
+        
+        modalPedido.show();
+    };
+
+    window.verPedido = async function(id) {
+        const pedido = pedidos.find(p => p.id === id);
+        if (!pedido) {
+            alert('Pedido não encontrado!');
+            return;
+        }
+        
+        modalTitle.textContent = `Pedido ${pedido.numeroPedido} - Detalhado`;
+        pedidoId.value = id;
+        modoVisualizacao = true;
+        
+        // Esconder seletor de tipo
+        seletorTipoPedido.style.display = 'none';
+        
+        // Preencher dados
+        clientePedido.value = pedido.clienteId;
+        dataPedido.value = pedido.dataPedido;
+        statusPedido.value = pedido.statusPedido || pedido.statusServico;
+        statusPagamento.value = pedido.statusPagamento;
+        tipoPagamento.value = pedido.tipoPagamento || 'avista';
+        valorPago.value = pedido.valorPago || 0;
+        observacoes.value = pedido.observacoes || '';
+        tipoPedidoInput.value = pedido.tipoPedido || 'servico';
+        atualizarTituloItens(pedido.tipoPedido || 'servico');
+        
+        // Limpar e carregar itens
+        itensContainer.innerHTML = '';
+        itensNoPedido = [];
+        
+        // Carregar itens (mantendo compatibilidade com versão antiga)
+        const itensParaCarregar = pedido.itens || (pedido.servicos ? [pedido.servicos] : []);
+        
+        if (Array.isArray(itensParaCarregar) && itensParaCarregar.length > 0) {
+            itensParaCarregar.forEach(item => {
+                adicionarItemVisualizacao(item, pedido.tipoPedido || 'servico');
+            });
+        }
+        
+        calcularTotais();
+        
+        // Desabilitar tudo
+        habilitarFormulario(false);
+        btnAddItem.style.display = 'none';
+        
+        // Configurar botão
+        btnSalvarPedido.textContent = 'Fechar';
+        btnSalvarPedido.onclick = () => modalPedido.hide();
+        
+        modalPedido.show();
+    };
+
+    function adicionarItemVisualizacao(item, tipoGeral) {
+        const itemIndex = itensNoPedido.length;
+        const tipoItem = item.tipoItem || tipoGeral;
+        
+        let camposEspecificos = '';
+        let valoresEspecificos = '';
+        
+        if (tipoItem === 'servico' || (tipoGeral === 'servico' && !item.tipoItem)) {
+            camposEspecificos = `
+                <div class="col-md-6">
+                    <label class="form-label">Duração Estimada</label>
+                    <input type="text" class="form-control" value="${item.duracao || ''}" disabled>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Agendamento</label>
+                    <input type="text" class="form-control" value="${item.agendamento || ''}" disabled>
+                </div>
+            `;
+        } else if (tipoItem === 'produto' || (tipoGeral === 'produto' && !item.tipoItem)) {
+            camposEspecificos = `
+                <div class="col-md-4">
+                    <label class="form-label">Código/SKU</label>
+                    <input type="text" class="form-control" value="${item.sku || ''}" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Estoque</label>
+                    <input type="text" class="form-control" value="${item.estoque || ''}" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Unidade</label>
+                    <input type="text" class="form-control" value="${item.unidadeMedida || 'unidade'}" disabled>
+                </div>
+            `;
+        } else if (tipoItem === 'misto' || tipoGeral === 'misto') {
+            camposEspecificos = `
+                <div class="col-md-4">
+                    <label class="form-label">Tipo</label>
+                    <input type="text" class="form-control" value="${item.tipoEspecifico === 'servico' ? 'Serviço' : 'Produto'}" disabled>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Detalhe</label>
+                    <input type="text" class="form-control" value="${item.detalhe || ''}" disabled>
+                </div>
+            `;
+        }
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'servico-item';
+        itemDiv.innerHTML = `
+            <div class="servico-header">
+                <h6>Item ${itemIndex + 1} <small class="text-muted">${tipoItem === 'servico' ? '🛠️ Serviço' : tipoItem === 'produto' ? '📦 Produto' : '🔄 Misto'}</small></h6>
+                <button type="button" class="btn-remove-servico" data-index="${itemIndex}" style="display:none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" value="${item.nome || ''}" disabled>
+                </div>
+                
+                ${camposEspecificos}
+                
+                <div class="col-md-3">
+                    <label class="form-label">Quantidade</label>
+                    <input type="text" class="form-control" value="${item.quantidade || 1}" disabled>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Preço Unitário</label>
+                    <input type="text" class="form-control" value="R$ ${(item.precoUnitario || 0).toFixed(2)}" disabled>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Desconto</label>
+                    <input type="text" class="form-control" value="R$ ${(item.desconto || 0).toFixed(2)}" disabled>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Subtotal</label>
+                    <div class="form-control" style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
+                        R$ ${(item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0)).toFixed(2)}
+                    </div>
+                </div>
+                
+                <div class="col-md-12">
+                    <label class="form-label">Observações</label>
+                    <textarea class="form-control" rows="2" disabled>${item.descricao || ''}</textarea>
+                </div>
+            </div>
+        `;
+        
+        itensContainer.appendChild(itemDiv);
+        itensNoPedido[itemIndex] = item;
+    }
+
+    window.editarPedido = async function(id) {
+        const pedido = pedidos.find(p => p.id === id);
+        if (!pedido) {
+            alert('Pedido não encontrado!');
+            return;
+        }
+        
+        modalTitle.textContent = `Editar Pedido ${pedido.numeroPedido}`;
+        pedidoId.value = id;
+        modoVisualizacao = false;
+        
+        // Esconder seletor de tipo (já definido)
+        seletorTipoPedido.style.display = 'none';
+        
+        // Preencher dados
+        clientePedido.value = pedido.clienteId;
+        dataPedido.value = pedido.dataPedido;
+        statusPedido.value = pedido.statusPedido || pedido.statusServico;
+        statusPagamento.value = pedido.statusPagamento;
+        tipoPagamento.value = pedido.tipoPagamento || 'avista';
+        valorPago.value = pedido.valorPago || 0;
+        observacoes.value = pedido.observacoes || '';
+        tipoPedidoInput.value = pedido.tipoPedido || 'servico';
+        atualizarTituloItens(pedido.tipoPedido || 'servico');
+        
+        // Limpar e carregar itens para edição
+        itensContainer.innerHTML = '';
+        itensNoPedido = [];
+        
+        const itensParaCarregar = pedido.itens || (pedido.servicos ? [pedido.servicos] : []);
+        
+        if (Array.isArray(itensParaCarregar) && itensParaCarregar.length > 0) {
+            itensParaCarregar.forEach(item => {
+                adicionarItemParaEdicao(item, pedido.tipoPedido || 'servico');
+            });
+        }
+        
+        calcularTotais();
+        
+        // Habilitar tudo
+        habilitarFormulario(true);
+        btnAddItem.style.display = 'block';
+        
+        btnSalvarPedido.textContent = 'Atualizar Pedido';
+        btnSalvarPedido.onclick = salvarPedido;
+        
+        modalPedido.show();
+    };
+
+    function adicionarItemParaEdicao(item, tipoGeral) {
+        const itemIndex = itensNoPedido.length;
+        const tipoItem = item.tipoItem || tipoGeral;
+        
+        let camposEspecificos = '';
+        
+        if (tipoItem === 'servico' || (tipoGeral === 'servico' && !item.tipoItem)) {
+            camposEspecificos = `
+                <div class="col-md-6">
+                    <label class="form-label">Duração Estimada</label>
+                    <input type="text" class="form-control item-duracao" 
+                           data-index="${itemIndex}" 
+                           value="${item.duracao || ''}" 
+                           placeholder="Ex: 2 horas, 1 dia">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Agendamento</label>
+                    <input type="datetime-local" class="form-control item-agendamento" 
+                           data-index="${itemIndex}" 
+                           value="${item.agendamento || ''}">
+                </div>
+            `;
+        } else if (tipoItem === 'produto' || (tipoGeral === 'produto' && !item.tipoItem)) {
+            camposEspecificos = `
+                <div class="col-md-4">
+                    <label class="form-label">Código/SKU</label>
+                    <input type="text" class="form-control item-sku" 
+                           data-index="${itemIndex}" 
+                           value="${item.sku || ''}" 
+                           placeholder="Ex: PROD-001">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Estoque Atual</label>
+                    <input type="number" class="form-control item-estoque" 
+                           data-index="${itemIndex}" min="0" step="1" 
+                           value="${item.estoque || ''}" 
+                           placeholder="Qtd em estoque">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Unidade de Medida</label>
+                    <input type="text" class="form-control item-unidade-medida" 
+                           data-index="${itemIndex}" 
+                           value="${item.unidadeMedida || 'unidade'}" 
+                           placeholder="Ex: unidade, kg, litro">
+                </div>
+            `;
+        } else if (tipoItem === 'misto' || tipoGeral === 'misto') {
+            camposEspecificos = `
+                <div class="col-md-4">
+                    <label class="form-label">Tipo do Item</label>
+                    <select class="form-select item-tipo-especifico" data-index="${itemIndex}">
+                        <option value="servico" ${item.tipoEspecifico === 'servico' ? 'selected' : ''}>Serviço</option>
+                        <option value="produto" ${item.tipoEspecifico === 'produto' ? 'selected' : ''}>Produto</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Detalhe Específico</label>
+                    <input type="text" class="form-control item-detalhe" 
+                           data-index="${itemIndex}" 
+                           value="${item.detalhe || ''}" 
+                           placeholder="Ex: Duração, SKU, etc">
+                </div>
+            `;
+        }
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'servico-item';
+        itemDiv.innerHTML = `
+            <div class="servico-header">
+                <h6>Item ${itemIndex + 1} <small class="text-muted">${tipoItem === 'servico' ? '🛠️ Serviço' : tipoItem === 'produto' ? '📦 Produto' : '🔄 Misto'}</small></h6>
+                <button type="button" class="btn-remove-servico" data-index="${itemIndex}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label">Descrição *</label>
+                    <input type="text" class="form-control item-nome" 
+                           data-index="${itemIndex}" 
+                           value="${item.nome || ''}" 
+                           required>
+                </div>
+                
+                ${camposEspecificos}
+                
+                <div class="col-md-3">
+                    <label class="form-label">Quantidade *</label>
+                    <input type="number" class="form-control item-quantidade" 
+                           data-index="${itemIndex}" min="1" step="1" 
+                           value="${item.quantidade || 1}" required>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Preço Unitário *</label>
+                    <input type="number" class="form-control item-preco" 
+                           data-index="${itemIndex}" min="0" step="0.01" 
+                           value="${item.precoUnitario || 0}" required>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Desconto (R$)</label>
+                    <input type="number" class="form-control item-desconto" 
+                           data-index="${itemIndex}" min="0" step="0.01" 
+                           value="${item.desconto || 0}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Subtotal</label>
+                    <div class="form-control item-subtotal" data-index="${itemIndex}" 
+                         style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
+                        R$ ${(item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0)).toFixed(2)}
+                    </div>
+                </div>
+                
+                <div class="col-md-12">
+                    <label class="form-label">Observações</label>
+                    <textarea class="form-control item-descricao" 
+                              data-index="${itemIndex}" rows="2">${item.descricao || ''}</textarea>
+                </div>
+            </div>
+        `;
+        
+        itensContainer.appendChild(itemDiv);
+        itensNoPedido[itemIndex] = item;
+        itensNoPedido[itemIndex].tipoItem = tipoItem;
+        
+        // Configurar eventos
+        const inputs = itemDiv.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => atualizarItem(itemIndex));
+        });
+        
+        itemDiv.querySelector('.btn-remove-servico').addEventListener('click', () => {
+            removerItem(itemIndex);
+        });
+    }
+
+    function habilitarFormulario(habilitar) {
+        const elementos = [
+            clientePedido, dataPedido, statusPedido, statusPagamento,
+            tipoPagamento, valorPago, observacoes
+        ];
+        
+        elementos.forEach(el => {
+            el.disabled = !habilitar;
+        });
+        
+        // Habilitar/desabilitar inputs dos itens
+        itensContainer.querySelectorAll('input, select, textarea').forEach(input => {
+            input.disabled = !habilitar;
+        });
+        
+        // Mostrar/ocultar botões de remover
+        itensContainer.querySelectorAll('.btn-remove-servico').forEach(btn => {
+            btn.style.display = habilitar ? 'block' : 'none';
+        });
+    }
+
     async function salvarPedido() {
-        // Sua lógica existente de validação aqui...
-        // Vamos manter a mesma estrutura, só adicionar campo tipoPedido
+        // Validação básica
+        if (!clientePedido.value) {
+            alert('Selecione um cliente.');
+            clientePedido.focus();
+            return;
+        }
+        
+        if (itensNoPedido.length === 0) {
+            alert('Adicione pelo menos um item ao pedido.');
+            return;
+        }
+        
+        // Validar itens
+        for (let i = 0; i < itensNoPedido.length; i++) {
+            const item = itensNoPedido[i];
+            if (!item.nome || item.nome.trim() === '') {
+                alert(`Informe a descrição do item ${i + 1}.`);
+                const itemDiv = itensContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                if (itemDiv) itemDiv.querySelector('.item-nome').focus();
+                return;
+            }
+            if (item.precoUnitario <= 0) {
+                alert(`O preço do item ${i + 1} deve ser maior que zero.`);
+                const itemDiv = itensContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                if (itemDiv) itemDiv.querySelector('.item-preco').focus();
+                return;
+            }
+            if (item.quantidade <= 0) {
+                alert(`A quantidade do item ${i + 1} deve ser maior que zero.`);
+                const itemDiv = itensContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                if (itemDiv) itemDiv.querySelector('.item-quantidade').focus();
+                return;
+            }
+        }
         
         try {
             const clienteSelecionado = clientes.find(c => c.id === clientePedido.value);
             if (!clienteSelecionado) {
-                alert('Cliente não encontrado. Por favor, selecione um cliente válido.');
+                alert('Cliente não encontrado.');
                 return;
             }
             
+            // Calcular valores
             let subtotalValue = 0;
             let totalDescontosValue = 0;
             let valorTotalValue = 0;
@@ -1739,33 +2040,55 @@
             const valorPendente = Math.max(0, valorTotalValue - valorPagoValue);
             
             const pedidoData = {
-                tipoPedido: tipoPedidoInput.value || 'servico', // NOVO CAMPO
+                // Identificação
+                tipoPedido: tipoPedidoInput.value || 'servico',
+                
+                // Cliente
                 clienteId: clientePedido.value,
                 clienteNome: clienteSelecionado.nome,
                 clienteEmail: clienteSelecionado.email || '',
                 clienteTelefone: clienteSelecionado.telefone || '',
-                dataPedido: dataPedido.value,
-                itens: itensNoPedido, // Renomeado de 'servicos' para 'itens'
+                
+                // Itens
+                itens: itensNoPedido,
+                
+                // Valores
                 subtotal: subtotalValue,
                 totalDescontos: totalDescontosValue,
                 valorTotal: valorTotalValue,
-                statusPedido: statusPedido.value, // Renomeado de 'statusServico'
-                statusPagamento: statusPagamento.value,
-                tipoPagamento: tipoPagamento.value,
                 valorPago: valorPagoValue,
                 valorPendente: valorPendente,
+                
+                // Status
+                statusPedido: statusPedido.value,
+                statusPagamento: statusPagamento.value,
+                tipoPagamento: tipoPagamento.value,
+                
+                // Observações
                 observacoes: observacoes.value || '',
+                
+                // Profissional
                 profissionalId: currentUser.uid,
-                profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
+                profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
+                
+                // Data
+                dataPedido: dataPedido.value,
                 atualizadoEm: serverTimestamp()
             };
             
             if (!pedidoId.value) {
+                // Novo pedido
                 pedidoData.numeroPedido = `PED-${String(proximoNumeroPedido).padStart(3, '0')}`;
                 pedidoData.criadoEm = serverTimestamp();
-            }
-            
-            if (pedidoId.value) {
+                
+                const docRef = await addDoc(collection(db, "pedidos"), pedidoData);
+                pedidoData.id = docRef.id;
+                pedidos.unshift(pedidoData);
+                proximoNumeroPedido++;
+                
+                alert('Pedido criado com sucesso!');
+            } else {
+                // Atualizar pedido existente
                 const pedidoRef = doc(db, "pedidos", pedidoId.value);
                 await updateDoc(pedidoRef, pedidoData);
                 
@@ -1773,124 +2096,287 @@
                 if (index !== -1) {
                     pedidos[index] = { ...pedidos[index], ...pedidoData };
                 }
-            } else {
-                const docRef = await addDoc(collection(db, "pedidos"), pedidoData);
-                pedidoData.id = docRef.id;
-                pedidos.unshift(pedidoData);
-                proximoNumeroPedido++;
+                
+                alert('Pedido atualizado com sucesso!');
             }
             
             modalPedido.hide();
             
+            // Atualizar interface
             atualizarTabelaPedidos();
             atualizarEstatisticas();
-            atualizarContadoresAbas(); // Atualizar contadores
-            
-            setTimeout(() => {
-                alert(pedidoId.value ? 'Pedido atualizado com sucesso!' : 'Pedido criado com sucesso!');
-            }, 300);
+            atualizarContadoresAbas();
             
         } catch (error) {
-            console.error('Erro ao salvar pedido:', error);
-            alert('Erro ao salvar pedido. Por favor, tente novamente.');
+            alert('Erro ao salvar pedido. Tente novamente.');
         }
     }
 
-    // As outras funções (verPedido, editarPedido, gerarReciboDetalhado, excluirPedido)
-    // serão adaptadas no próximo passo. Por enquanto mantemos as existentes.
-
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-
-    // Event listeners para filtros
-    searchPedidos.addEventListener('input', atualizarTabelaPedidos);
-    filterStatusServico.addEventListener('change', atualizarTabelaPedidos);
-    filterStatusPagamento.addEventListener('change', atualizarTabelaPedidos);
-    filterMes.addEventListener('change', atualizarTabelaPedidos);
-    filterCliente.addEventListener('change', atualizarTabelaPedidos);
-
-    // Event listener para status de pagamento
-    statusPagamento.addEventListener('change', calcularTotais);
-
-    // Menu mobile (mantido)
-    menuToggle.addEventListener('click', () => {
-        dashboardMenu.classList.toggle('show');
-        const icon = menuToggle.querySelector('i');
-        if (dashboardMenu.classList.contains('show')) {
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-times');
-        } else {
-            icon.classList.remove('fa-times');
-            icon.classList.add('fa-bars');
+    window.excluirPedido = async function(id) {
+        if (!confirm('Tem certeza que deseja excluir este pedido?\nEsta ação não pode ser desfeita.')) {
+            return;
         }
-    });
-
-    // Fechar menu ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-            dashboardMenu.classList.remove('show');
-            const icon = menuToggle.querySelector('i');
-            icon.classList.remove('fa-times');
-            icon.classList.add('fa-bars');
-        }
-    });
-
-    // Logout
-    btnLogout.addEventListener('click', async () => {
+        
         try {
-            await signOut(auth);
-            window.location.href = 'login.html';
+            const pedido = pedidos.find(p => p.id === id);
+            if (!pedido) {
+                alert('Pedido não encontrado.');
+                return;
+            }
+            
+            const pedidoRef = doc(db, "pedidos", id);
+            await deleteDoc(pedidoRef);
+            
+            // Remover da lista local
+            const index = pedidos.findIndex(p => p.id === id);
+            if (index !== -1) {
+                pedidos.splice(index, 1);
+            }
+            
+            // Atualizar interface
+            atualizarTabelaPedidos();
+            atualizarEstatisticas();
+            atualizarContadoresAbas();
+            
+            alert(`Pedido ${pedido.numeroPedido || ''} excluído com sucesso!`);
+            
         } catch (error) {
-            alert('Erro ao sair. Tente novamente.');
+            alert('Erro ao excluir pedido. Tente novamente.');
         }
-    });
+    };
 
-    // Inicializar data atual no modal
-    document.getElementById('modalPedido').addEventListener('shown.bs.modal', () => {
-        if (!dataPedido.value) {
-            const hoje = new Date().toISOString().split('T')[0];
-            dataPedido.value = hoje;
+    // ============================================
+    // ATUALIZAÇÃO DA TABELA
+    // ============================================
+
+    function atualizarTabelaPedidos() {
+        const searchTerm = searchPedidos.value.toLowerCase();
+        const statusServicoFilter = filterStatusServico.value;
+        const statusPagamentoFilter = filterStatusPagamento.value;
+        const mesFilter = filterMes.value;
+        const clienteFilter = filterCliente.value;
+        
+        // Filtrar por tipo
+        let pedidosFiltrados = pedidos;
+        if (tipoAtualPedido === 'servicos') {
+            pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'servico');
+        } else if (tipoAtualPedido === 'produtos') {
+            pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'produto');
         }
-    });
+        
+        // Aplicar filtros adicionais
+        pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+            const matchSearch = !searchTerm || 
+                (pedido.clienteNome && pedido.clienteNome.toLowerCase().includes(searchTerm)) ||
+                (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
+                (pedido.itens && Array.isArray(pedido.itens) && 
+                 pedido.itens.some(s => s.nome && s.nome.toLowerCase().includes(searchTerm)));
+            
+            const matchStatus = !statusServicoFilter || (pedido.statusPedido || pedido.statusServico) === statusServicoFilter;
+            const matchStatusPagamento = !statusPagamentoFilter || pedido.statusPagamento === statusPagamentoFilter;
+            const matchCliente = !clienteFilter || pedido.clienteId === clienteFilter;
+            
+            let matchMes = true;
+            if (mesFilter && pedido.dataPedido) {
+                const data = new Date(pedido.dataPedido);
+                const mes = data.getMonth() + 1;
+                matchMes = mes.toString() === mesFilter;
+            }
+            
+            return matchSearch && matchStatus && matchStatusPagamento && matchMes && matchCliente;
+        });
+        
+        // Limpar tabela
+        pedidosTable.innerHTML = '';
+        
+        if (pedidosFiltrados.length === 0) {
+            pedidosTable.appendChild(emptyState.cloneNode(true));
+            return;
+        }
+        
+        // Preencher tabela
+        pedidosFiltrados.forEach(pedido => {
+            const row = document.createElement('tr');
+            
+            // Preparar dados
+            const tipoPedido = pedido.tipoPedido || 'servico';
+            const tipoBadge = getTipoPedidoBadge(tipoPedido);
+            const statusBadge = getStatusPedidoBadge(pedido.statusPedido || pedido.statusServico);
+            const pagamentoBadge = getStatusPagamentoBadge(pedido.statusPagamento);
+            const dataFormatada = formatarData(pedido.dataPedido);
+            
+            let itensText = '';
+            if (Array.isArray(pedido.itens)) {
+                itensText = pedido.itens.slice(0, 2).map(s => 
+                    `${s.quantidade || 1}x ${s.nome || 'Item'}`).join(', ');
+                if (pedido.itens.length > 2) {
+                    itensText += ` +${pedido.itens.length - 2} mais`;
+                }
+            } else if (pedido.servicos) {
+                const servico = pedido.servicos;
+                itensText = `${servico.quantidade || 1}x ${servico.nome || 'Serviço'}`;
+            }
+            
+            row.innerHTML = `
+                <td><strong>${pedido.numeroPedido || `PED-${pedidos.indexOf(pedido) + 1}`}</strong></td>
+                <td>${tipoBadge}</td>
+                <td>${pedido.clienteNome || 'Cliente'}</td>
+                <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
+                <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
+                <td>${statusBadge}</td>
+                <td>${pagamentoBadge}</td>
+                <td>${dataFormatada}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm btn-ver" onclick="verPedido('${pedido.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action-sm btn-editar" onclick="editarPedido('${pedido.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action-sm btn-excluir" onclick="excluirPedido('${pedido.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            pedidosTable.appendChild(row);
+        });
+    }
 
-    // Botão adicionar item
-    btnAddItem.addEventListener('click', () => {
-        const tipo = tipoPedidoInput.value || 'servico';
-        adicionarItem(tipo);
-    });
+    // ============================================
+    // FUNÇÕES AUXILIARES
+    // ============================================
 
-    // Helper: Formatar data (mantida)
+    function getTipoPedidoBadge(tipo) {
+        const badges = {
+            'servico': '<span class="badge-status" style="background: rgba(52, 152, 219, 0.1); color: #2980b9;"><i class="fas fa-tools me-1"></i> Serviço</span>',
+            'produto': '<span class="badge-status" style="background: rgba(46, 204, 113, 0.1); color: #27ae60;"><i class="fas fa-box me-1"></i> Produto</span>',
+            'misto': '<span class="badge-status" style="background: rgba(155, 89, 182, 0.1); color: #8e44ad;"><i class="fas fa-random me-1"></i> Misto</span>'
+        };
+        return badges[tipo] || '<span class="badge-status">Desconhecido</span>';
+    }
+
+    function getStatusPedidoBadge(status) {
+        const badges = {
+            'pendente': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> Pendente</span>',
+            'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
+            'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
+            'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
+        };
+        return badges[status] || '<span class="badge-status">Desconhecido</span>';
+    }
+
+    function getStatusPagamentoBadge(status) {
+        const badges = {
+            'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
+            'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
+            'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
+            'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
+        };
+        return badges[status] || '<span class="badge-status">Desconhecido</span>';
+    }
+
     function formatarData(dataString) {
         if (!dataString) return '--';
         try {
             const date = new Date(dataString);
             if (isNaN(date.getTime())) return '--';
             return date.toLocaleDateString('pt-BR');
-        } catch (e) {
+        } catch {
             return '--';
         }
     }
 
-    // Para evitar erros, definimos funções que serão completadas no próximo passo
-    window.verPedido = async function(id) {
-        alert('Função verPedido será implementada no próximo passo');
-    };
-
-    window.editarPedido = async function(id) {
-        alert('Função editarPedido será implementada no próximo passo');
-    };
-
-    window.gerarReciboDetalhado = async function(id) {
-        alert('Função gerarReciboDetalhado será implementada no próximo passo');
-    };
-
-    window.excluirPedido = async function(id) {
-        if (!confirm('Tem certeza que deseja excluir este pedido?\nEsta ação não pode ser desfeita.')) {
+    function atualizarEstatisticas() {
+        if (pedidos.length === 0) {
+            totalPedidos.textContent = '0';
+            pedidosAndamento.textContent = '0';
+            pedidosConcluidos.textContent = '0';
+            valorAReceber.textContent = 'R$ 0,00';
             return;
         }
-        alert('Função excluirPedido será implementada no próximo passo');
-    };
+        
+        totalPedidos.textContent = pedidos.length;
+        
+        const emAndamento = pedidos.filter(p => (p.statusPedido || p.statusServico) === 'andamento').length;
+        const concluidos = pedidos.filter(p => (p.statusPedido || p.statusServico) === 'concluido').length;
+        
+        let aReceber = 0;
+        pedidos.forEach(pedido => {
+            if (pedido.valorPendente && pedido.valorPendente > 0) {
+                aReceber += pedido.valorPendente;
+            } else if (pedido.statusPagamento === 'a_receber' || pedido.statusPagamento === 'parcial' || pedido.statusPagamento === 'atrasado') {
+                const valorPendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
+                if (valorPendente > 0) {
+                    aReceber += valorPendente;
+                }
+            }
+        });
+        
+        pedidosAndamento.textContent = emAndamento;
+        pedidosConcluidos.textContent = concluidos;
+        valorAReceber.textContent = `R$ ${aReceber.toFixed(2)}`;
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+
+    function inicializarEventListeners() {
+        // Botão adicionar item
+        btnAddItem.addEventListener('click', () => {
+            const tipo = tipoPedidoInput.value || 'servico';
+            adicionarItem(tipo);
+        });
+        
+        // Filtros
+        searchPedidos.addEventListener('input', atualizarTabelaPedidos);
+        filterStatusServico.addEventListener('change', atualizarTabelaPedidos);
+        filterStatusPagamento.addEventListener('change', atualizarTabelaPedidos);
+        filterMes.addEventListener('change', atualizarTabelaPedidos);
+        filterCliente.addEventListener('change', atualizarTabelaPedidos);
+        
+        // Status de pagamento
+        statusPagamento.addEventListener('change', calcularTotais);
+        
+        // Menu mobile
+        menuToggle.addEventListener('click', () => {
+            dashboardMenu.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Logout
+        btnLogout.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch {
+                alert('Erro ao sair. Tente novamente.');
+            }
+        });
+        
+        // Inicializar data no modal
+        document.getElementById('modalPedido').addEventListener('shown.bs.modal', () => {
+            if (!dataPedido.value) {
+                const hoje = new Date().toISOString().split('T')[0];
+                dataPedido.value = hoje;
+            }
+        });
+    }
 
 </script>
 </body>
