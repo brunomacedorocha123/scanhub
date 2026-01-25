@@ -1242,10 +1242,11 @@
         const total = pedidos.length;
         const servicosCount = pedidos.filter(p => p.tipoPedido === 'servico').length;
         const produtosCount = pedidos.filter(p => p.tipoPedido === 'produto').length;
+        const mistoCount = pedidos.filter(p => p.tipoPedido === 'misto').length;
         
         badgeTodos.textContent = total;
         badgeServicos.textContent = servicosCount;
-        badgeProdutos.textContent = produtosCount;
+        badgeProdutos.textContent = produtosCount + mistoCount; // Misto aparece em produtos
     }
 
     // ============================================
@@ -1263,14 +1264,30 @@
                 
                 // Se já tem itens, perguntar se quer limpar
                 if (itensNoPedido.length > 0 && !modoVisualizacao) {
-                    if (confirm(`Deseja limpar os itens atuais e adicionar um novo item do tipo ${novoTipo === 'servico' ? 'Serviço' : novoTipo === 'produto' ? 'Produto' : 'Misto'}?`)) {
+                    if (confirm(`Mudar para ${novoTipo === 'servico' ? 'Serviço' : novoTipo === 'produto' ? 'Produto' : 'Misto'}? Os itens atuais serão removidos.`)) {
                         itensContainer.innerHTML = '';
                         itensNoPedido = [];
-                        adicionarItem(novoTipo);
+                        adicionarPrimeiroItem(novoTipo);
+                    } else {
+                        // Reverter seleção
+                        tipoPedidoBtns.forEach(b => b.classList.remove('active'));
+                        const tipoAnterior = tipoPedidoInput.value;
+                        document.querySelector(`.tipo-pedido-btn[data-tipo="${tipoAnterior}"]`).classList.add('active');
                     }
+                } else {
+                    adicionarPrimeiroItem(novoTipo);
                 }
             });
         });
+    }
+
+    function adicionarPrimeiroItem(tipo) {
+        if (tipo === 'misto') {
+            // Para misto, começa vazio - usuário escolhe o tipo de cada item
+            tituloItens.textContent = 'Itens do Pedido (Serviços + Produtos)';
+        } else {
+            adicionarItem(tipo);
+        }
     }
 
     function atualizarTituloItens(tipo) {
@@ -1284,127 +1301,181 @@
     }
 
     // ============================================
-    // ADICIONAR ITEM AO PEDIDO
+    // SISTEMA DE ITENS (MELHORADO PARA MISTO)
     // ============================================
 
     function adicionarItem(tipo) {
         const itemIndex = itensNoPedido.length;
-        const isMisto = tipo === 'misto';
+        const tipoItem = tipo === 'misto' ? null : tipo; // Misto define tipo por item
         
-        // Criar campos específicos baseados no tipo
+        if (tipo === 'misto') {
+            // Para misto, mostrar modal de escolha
+            mostrarModalEscolhaTipo(itemIndex);
+        } else {
+            // Para serviço ou produto direto
+            criarItem(itemIndex, tipoItem);
+        }
+    }
+
+    function mostrarModalEscolhaTipo(itemIndex) {
+        // Criar modal de escolha
+        const modalHTML = `
+            <div class="modal fade" id="modalEscolhaTipo" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Escolher tipo do item</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <p class="mb-4">Que tipo de item você quer adicionar?</p>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <button class="btn btn-primary w-100 h-100 py-4" onclick="escolherTipoItem(${itemIndex}, 'servico')" data-bs-dismiss="modal">
+                                        <i class="fas fa-tools fa-2x mb-2"></i><br>
+                                        <strong>Serviço</strong><br>
+                                        <small>Mão de obra, instalação</small>
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-success w-100 h-100 py-4" onclick="escolherTipoItem(${itemIndex}, 'produto')" data-bs-dismiss="modal">
+                                        <i class="fas fa-box fa-2x mb-2"></i><br>
+                                        <strong>Produto</strong><br>
+                                        <small>Material, peça, item físico</small>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Adicionar modal ao body
+        const modalDiv = document.createElement('div');
+        modalDiv.innerHTML = modalHTML;
+        document.body.appendChild(modalDiv);
+        
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('modalEscolhaTipo'));
+        modal.show();
+        
+        // Remover modal depois
+        modal._element.addEventListener('hidden.bs.modal', function() {
+            modalDiv.remove();
+        });
+    }
+
+    // Função global para escolha
+    window.escolherTipoItem = function(itemIndex, tipo) {
+        criarItem(itemIndex, tipo);
+    };
+
+    function criarItem(itemIndex, tipoItem) {
         let camposEspecificos = '';
+        let placeholderDescricao = '';
+        let unidadePadrao = 'unidade';
         
-        if (tipo === 'servico') {
+        if (tipoItem === 'servico') {
             camposEspecificos = `
                 <div class="col-md-6">
-                    <label class="form-label">Duração Estimada</label>
+                    <label class="form-label">Duração Estimada *</label>
                     <input type="text" class="form-control item-duracao" 
                            data-index="${itemIndex}" 
-                           placeholder="Ex: 2 horas, 1 dia">
+                           placeholder="Ex: 2 horas, 1 dia"
+                           required>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Agendamento</label>
+                    <label class="form-label">Data/Hora do Serviço</label>
                     <input type="datetime-local" class="form-control item-agendamento" 
                            data-index="${itemIndex}">
                 </div>
             `;
-        } else if (tipo === 'produto') {
+            placeholderDescricao = 'Ex: Troca de tela, Instalação, Reparo';
+            unidadePadrao = 'serviço';
+            
+        } else if (tipoItem === 'produto') {
             camposEspecificos = `
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Código/SKU</label>
                     <input type="text" class="form-control item-sku" 
                            data-index="${itemIndex}" 
                            placeholder="Ex: PROD-001">
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Estoque Atual</label>
+                <div class="col-md-6">
+                    <label class="form-label">Estoque Disponível</label>
                     <input type="number" class="form-control item-estoque" 
                            data-index="${itemIndex}" min="0" step="1" 
-                           placeholder="Qtd em estoque">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Unidade de Medida</label>
-                    <input type="text" class="form-control item-unidade-medida" 
-                           data-index="${itemIndex}" 
-                           placeholder="Ex: unidade, kg, litro" 
-                           value="unidade">
+                           placeholder="Quantidade em estoque">
                 </div>
             `;
-        } else if (isMisto) {
-            // Para misto, adicionar seletor de tipo para cada item
-            camposEspecificos = `
-                <div class="col-md-4">
-                    <label class="form-label">Tipo do Item *</label>
-                    <select class="form-select item-tipo-especifico" data-index="${itemIndex}" required>
-                        <option value="servico">Serviço</option>
-                        <option value="produto">Produto</option>
-                    </select>
-                </div>
-                <div class="col-md-8">
-                    <label class="form-label">Detalhe Específico</label>
-                    <input type="text" class="form-control item-detalhe" 
-                           data-index="${itemIndex}" 
-                           placeholder="Ex: Duração, SKU, etc">
-                </div>
-            `;
+            placeholderDescricao = 'Ex: Tela iPhone 11, Filtro de ar, Peça X';
+            unidadePadrao = 'unidade';
         }
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'servico-item';
         itemDiv.innerHTML = `
             <div class="servico-header">
-                <h6>Item ${itemIndex + 1} <small class="text-muted">${tipo === 'servico' ? '🛠️ Serviço' : tipo === 'produto' ? '📦 Produto' : '🔄 Misto'}</small></h6>
+                <div>
+                    <h6 class="mb-0">Item ${itemIndex + 1}</h6>
+                    <small class="text-muted">
+                        <i class="fas ${tipoItem === 'servico' ? 'fa-tools text-primary' : 'fa-box text-success'} me-1"></i>
+                        ${tipoItem === 'servico' ? 'Serviço' : 'Produto'}
+                    </small>
+                </div>
                 <button type="button" class="btn-remove-servico" data-index="${itemIndex}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="row g-3">
+            <div class="row g-3 mt-2">
                 <div class="col-md-12">
                     <label class="form-label">Descrição *</label>
                     <input type="text" class="form-control item-nome" 
                            data-index="${itemIndex}" 
-                           value="" 
-                           placeholder="${tipo === 'servico' ? 'Ex: Instalação de ar-condicionado' : 'Ex: Filtro original'}"
+                           placeholder="${placeholderDescricao}"
                            required>
                 </div>
                 
                 ${camposEspecificos}
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Quantidade *</label>
-                    <input type="number" class="form-control item-quantidade" 
-                           data-index="${itemIndex}" min="1" step="1" 
-                           value="1" required>
+                    <div class="input-group">
+                        <input type="number" class="form-control item-quantidade" 
+                               data-index="${itemIndex}" min="1" step="1" 
+                               value="1" required>
+                        <span class="input-group-text">${unidadePadrao}</span>
+                    </div>
                 </div>
                 
-                <div class="col-md-3">
-                    <label class="form-label">Preço Unitário *</label>
+                <div class="col-md-4">
+                    <label class="form-label">Preço Unitário (R$) *</label>
                     <input type="number" class="form-control item-preco" 
                            data-index="${itemIndex}" min="0" step="0.01" 
                            value="0" required>
                 </div>
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Desconto (R$)</label>
                     <input type="number" class="form-control item-desconto" 
                            data-index="${itemIndex}" min="0" step="0.01" 
                            value="0">
                 </div>
                 
-                <div class="col-md-3">
-                    <label class="form-label">Subtotal</label>
-                    <div class="form-control item-subtotal" data-index="${itemIndex}" 
-                         style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
-                        R$ 0,00
-                    </div>
-                </div>
-                
                 <div class="col-md-12">
-                    <label class="form-label">Observações</label>
+                    <label class="form-label">Detalhes/Observações</label>
                     <textarea class="form-control item-descricao" 
                               data-index="${itemIndex}" rows="2" 
-                              placeholder="Detalhes adicionais..."></textarea>
+                              placeholder="${tipoItem === 'servico' ? 'Descreva o serviço a ser realizado...' : 'Especificações do produto...'}"></textarea>
+                </div>
+                
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                        <strong>Subtotal deste item:</strong>
+                        <strong class="item-subtotal" data-index="${itemIndex}" style="font-size: 1.1rem;">R$ 0,00</strong>
+                    </div>
                 </div>
             </div>
         `;
@@ -1413,7 +1484,7 @@
         
         // Inicializar objeto do item
         itensNoPedido[itemIndex] = {
-            tipoItem: tipo,
+            tipoItem: tipoItem,
             nome: '',
             descricao: '',
             precoUnitario: 0,
@@ -1423,20 +1494,16 @@
         };
         
         // Adicionar campos específicos
-        if (tipo === 'servico') {
+        if (tipoItem === 'servico') {
             itensNoPedido[itemIndex].duracao = '';
             itensNoPedido[itemIndex].agendamento = '';
-        } else if (tipo === 'produto') {
+        } else if (tipoItem === 'produto') {
             itensNoPedido[itemIndex].sku = '';
             itensNoPedido[itemIndex].estoque = '';
-            itensNoPedido[itemIndex].unidadeMedida = 'unidade';
-        } else if (isMisto) {
-            itensNoPedido[itemIndex].tipoEspecifico = 'servico';
-            itensNoPedido[itemIndex].detalhe = '';
         }
         
         // Configurar eventos
-        const inputs = itemDiv.querySelectorAll('input, select, textarea');
+        const inputs = itemDiv.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => atualizarItem(itemIndex));
         });
@@ -1468,25 +1535,18 @@
         itensNoPedido[index].desconto = parseFloat(descontoInput.value) || 0;
         
         // Coletar dados específicos
-        const tipoAtual = itensNoPedido[index].tipoItem;
+        const tipoItem = itensNoPedido[index].tipoItem;
         
-        if (tipoAtual === 'servico') {
+        if (tipoItem === 'servico') {
             const duracaoInput = itemDiv.querySelector('.item-duracao');
             const agendamentoInput = itemDiv.querySelector('.item-agendamento');
             itensNoPedido[index].duracao = duracaoInput ? duracaoInput.value : '';
             itensNoPedido[index].agendamento = agendamentoInput ? agendamentoInput.value : '';
-        } else if (tipoAtual === 'produto') {
+        } else if (tipoItem === 'produto') {
             const skuInput = itemDiv.querySelector('.item-sku');
             const estoqueInput = itemDiv.querySelector('.item-estoque');
-            const unidadeInput = itemDiv.querySelector('.item-unidade-medida');
             itensNoPedido[index].sku = skuInput ? skuInput.value : '';
             itensNoPedido[index].estoque = estoqueInput ? estoqueInput.value : '';
-            itensNoPedido[index].unidadeMedida = unidadeInput ? unidadeInput.value : 'unidade';
-        } else if (tipoAtual === 'misto') {
-            const tipoEspecificoInput = itemDiv.querySelector('.item-tipo-especifico');
-            const detalheInput = itemDiv.querySelector('.item-detalhe');
-            itensNoPedido[index].tipoEspecifico = tipoEspecificoInput ? tipoEspecificoInput.value : 'servico';
-            itensNoPedido[index].detalhe = detalheInput ? detalheInput.value : '';
         }
         
         // Atualizar subtotal
@@ -1510,9 +1570,11 @@
         const desconto = parseFloat(descontoInput.value) || 0;
         
         const subtotal = (precoUnitario * quantidade) - desconto;
-        const subtotalFinal = subtotal > 0 ? subtotal : 0;
+        const subtotalFinal = Math.max(0, subtotal);
         
-        subtotalDisplay.textContent = `R$ ${subtotalFinal.toFixed(2)}`;
+        if (subtotalDisplay) {
+            subtotalDisplay.textContent = `R$ ${subtotalFinal.toFixed(2)}`;
+        }
         
         return subtotalFinal;
     }
@@ -1562,6 +1624,7 @@
         totalDescontos.textContent = `R$ ${totalDescontosValue.toFixed(2)}`;
         valorTotal.textContent = `R$ ${valorTotalValue.toFixed(2)}`;
         
+        // Ajustar valor pago baseado no status
         const statusPagamentoValue = statusPagamento.value;
         if (statusPagamentoValue === 'pago') {
             labelValorPago.textContent = 'Valor Pago *';
@@ -1611,8 +1674,10 @@
         itensContainer.innerHTML = '';
         itensNoPedido = [];
         
-        // Adicionar primeiro item
-        adicionarItem(tipo);
+        // Adicionar primeiro item (exceto para misto)
+        if (tipo !== 'misto') {
+            adicionarItem(tipo);
+        }
         
         // Configurar botão salvar
         btnSalvarPedido.textContent = 'Salvar Pedido';
@@ -1654,12 +1719,12 @@
         itensContainer.innerHTML = '';
         itensNoPedido = [];
         
-        // Carregar itens (mantendo compatibilidade com versão antiga)
+        // Carregar itens (compatibilidade com versão antiga)
         const itensParaCarregar = pedido.itens || (pedido.servicos ? [pedido.servicos] : []);
         
         if (Array.isArray(itensParaCarregar) && itensParaCarregar.length > 0) {
             itensParaCarregar.forEach(item => {
-                adicionarItemVisualizacao(item, pedido.tipoPedido || 'servico');
+                adicionarItemVisualizacao(item);
             });
         }
         
@@ -1676,14 +1741,13 @@
         modalPedido.show();
     };
 
-    function adicionarItemVisualizacao(item, tipoGeral) {
+    function adicionarItemVisualizacao(item) {
         const itemIndex = itensNoPedido.length;
-        const tipoItem = item.tipoItem || tipoGeral;
+        const tipoItem = item.tipoItem || (item.duracao ? 'servico' : (item.sku ? 'produto' : 'servico'));
         
         let camposEspecificos = '';
-        let valoresEspecificos = '';
         
-        if (tipoItem === 'servico' || (tipoGeral === 'servico' && !item.tipoItem)) {
+        if (tipoItem === 'servico') {
             camposEspecificos = `
                 <div class="col-md-6">
                     <label class="form-label">Duração Estimada</label>
@@ -1691,33 +1755,18 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Agendamento</label>
-                    <input type="text" class="form-control" value="${item.agendamento || ''}" disabled>
+                    <input type="text" class="form-control" value="${formatarDataHora(item.agendamento) || ''}" disabled>
                 </div>
             `;
-        } else if (tipoItem === 'produto' || (tipoGeral === 'produto' && !item.tipoItem)) {
+        } else if (tipoItem === 'produto') {
             camposEspecificos = `
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Código/SKU</label>
                     <input type="text" class="form-control" value="${item.sku || ''}" disabled>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Estoque</label>
                     <input type="text" class="form-control" value="${item.estoque || ''}" disabled>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Unidade</label>
-                    <input type="text" class="form-control" value="${item.unidadeMedida || 'unidade'}" disabled>
-                </div>
-            `;
-        } else if (tipoItem === 'misto' || tipoGeral === 'misto') {
-            camposEspecificos = `
-                <div class="col-md-4">
-                    <label class="form-label">Tipo</label>
-                    <input type="text" class="form-control" value="${item.tipoEspecifico === 'servico' ? 'Serviço' : 'Produto'}" disabled>
-                </div>
-                <div class="col-md-8">
-                    <label class="form-label">Detalhe</label>
-                    <input type="text" class="form-control" value="${item.detalhe || ''}" disabled>
                 </div>
             `;
         }
@@ -1726,13 +1775,16 @@
         itemDiv.className = 'servico-item';
         itemDiv.innerHTML = `
             <div class="servico-header">
-                <h6>Item ${itemIndex + 1} <small class="text-muted">${tipoItem === 'servico' ? '🛠️ Serviço' : tipoItem === 'produto' ? '📦 Produto' : '🔄 Misto'}</small></h6>
-                <button type="button" class="btn-remove-servico" data-index="${itemIndex}" style="display:none">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div>
+                    <h6 class="mb-0">Item ${itemIndex + 1}</h6>
+                    <small class="text-muted">
+                        <i class="fas ${tipoItem === 'servico' ? 'fa-tools text-primary' : 'fa-box text-success'} me-1"></i>
+                        ${tipoItem === 'servico' ? 'Serviço' : 'Produto'}
+                    </small>
+                </div>
             </div>
             
-            <div class="row g-3">
+            <div class="row g-3 mt-2">
                 <div class="col-md-12">
                     <label class="form-label">Descrição</label>
                     <input type="text" class="form-control" value="${item.nome || ''}" disabled>
@@ -1740,37 +1792,61 @@
                 
                 ${camposEspecificos}
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Quantidade</label>
-                    <input type="text" class="form-control" value="${item.quantidade || 1}" disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="${item.quantidade || 1}" disabled>
+                        <span class="input-group-text">${tipoItem === 'servico' ? 'serviço' : 'unidade'}</span>
+                    </div>
                 </div>
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Preço Unitário</label>
                     <input type="text" class="form-control" value="R$ ${(item.precoUnitario || 0).toFixed(2)}" disabled>
                 </div>
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Desconto</label>
                     <input type="text" class="form-control" value="R$ ${(item.desconto || 0).toFixed(2)}" disabled>
                 </div>
                 
-                <div class="col-md-3">
-                    <label class="form-label">Subtotal</label>
-                    <div class="form-control" style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
-                        R$ ${(item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0)).toFixed(2)}
-                    </div>
+                <div class="col-md-12">
+                    <label class="form-label">Detalhes</label>
+                    <textarea class="form-control" rows="2" disabled>${item.descricao || ''}</textarea>
                 </div>
                 
-                <div class="col-md-12">
-                    <label class="form-label">Observações</label>
-                    <textarea class="form-control" rows="2" disabled>${item.descricao || ''}</textarea>
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                        <strong>Subtotal deste item:</strong>
+                        <strong style="font-size: 1.1rem;">
+                            R$ ${(item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0)).toFixed(2)}
+                        </strong>
+                    </div>
                 </div>
             </div>
         `;
         
         itensContainer.appendChild(itemDiv);
         itensNoPedido[itemIndex] = item;
+    }
+
+    function formatarDataHora(dataString) {
+        if (!dataString) return '';
+        try {
+            const date = new Date(dataString);
+            if (isNaN(date.getTime())) return dataString;
+            
+            // Formatar como dd/mm/aaaa hh:mm
+            const dia = date.getDate().toString().padStart(2, '0');
+            const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+            const ano = date.getFullYear();
+            const horas = date.getHours().toString().padStart(2, '0');
+            const minutos = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+        } catch {
+            return dataString;
+        }
     }
 
     window.editarPedido = async function(id) {
@@ -1806,7 +1882,7 @@
         
         if (Array.isArray(itensParaCarregar) && itensParaCarregar.length > 0) {
             itensParaCarregar.forEach(item => {
-                adicionarItemParaEdicao(item, pedido.tipoPedido || 'servico');
+                adicionarItemParaEdicao(item);
             });
         }
         
@@ -1822,125 +1898,116 @@
         modalPedido.show();
     };
 
-    function adicionarItemParaEdicao(item, tipoGeral) {
+    function adicionarItemParaEdicao(item) {
         const itemIndex = itensNoPedido.length;
-        const tipoItem = item.tipoItem || tipoGeral;
+        const tipoItem = item.tipoItem || (item.duracao ? 'servico' : (item.sku ? 'produto' : 'servico'));
         
         let camposEspecificos = '';
+        let unidadePadrao = 'unidade';
         
-        if (tipoItem === 'servico' || (tipoGeral === 'servico' && !item.tipoItem)) {
+        if (tipoItem === 'servico') {
             camposEspecificos = `
                 <div class="col-md-6">
-                    <label class="form-label">Duração Estimada</label>
+                    <label class="form-label">Duração Estimada *</label>
                     <input type="text" class="form-control item-duracao" 
                            data-index="${itemIndex}" 
-                           value="${item.duracao || ''}" 
-                           placeholder="Ex: 2 horas, 1 dia">
+                           value="${item.duracao || ''}"
+                           placeholder="Ex: 2 horas, 1 dia"
+                           required>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Agendamento</label>
+                    <label class="form-label">Data/Hora do Serviço</label>
                     <input type="datetime-local" class="form-control item-agendamento" 
                            data-index="${itemIndex}" 
                            value="${item.agendamento || ''}">
                 </div>
             `;
-        } else if (tipoItem === 'produto' || (tipoGeral === 'produto' && !item.tipoItem)) {
+            unidadePadrao = 'serviço';
+            
+        } else if (tipoItem === 'produto') {
             camposEspecificos = `
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label">Código/SKU</label>
                     <input type="text" class="form-control item-sku" 
                            data-index="${itemIndex}" 
-                           value="${item.sku || ''}" 
+                           value="${item.sku || ''}"
                            placeholder="Ex: PROD-001">
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Estoque Atual</label>
+                <div class="col-md-6">
+                    <label class="form-label">Estoque Disponível</label>
                     <input type="number" class="form-control item-estoque" 
                            data-index="${itemIndex}" min="0" step="1" 
-                           value="${item.estoque || ''}" 
-                           placeholder="Qtd em estoque">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Unidade de Medida</label>
-                    <input type="text" class="form-control item-unidade-medida" 
-                           data-index="${itemIndex}" 
-                           value="${item.unidadeMedida || 'unidade'}" 
-                           placeholder="Ex: unidade, kg, litro">
+                           value="${item.estoque || ''}"
+                           placeholder="Quantidade em estoque">
                 </div>
             `;
-        } else if (tipoItem === 'misto' || tipoGeral === 'misto') {
-            camposEspecificos = `
-                <div class="col-md-4">
-                    <label class="form-label">Tipo do Item</label>
-                    <select class="form-select item-tipo-especifico" data-index="${itemIndex}">
-                        <option value="servico" ${item.tipoEspecifico === 'servico' ? 'selected' : ''}>Serviço</option>
-                        <option value="produto" ${item.tipoEspecifico === 'produto' ? 'selected' : ''}>Produto</option>
-                    </select>
-                </div>
-                <div class="col-md-8">
-                    <label class="form-label">Detalhe Específico</label>
-                    <input type="text" class="form-control item-detalhe" 
-                           data-index="${itemIndex}" 
-                           value="${item.detalhe || ''}" 
-                           placeholder="Ex: Duração, SKU, etc">
-                </div>
-            `;
+            unidadePadrao = 'unidade';
         }
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'servico-item';
         itemDiv.innerHTML = `
             <div class="servico-header">
-                <h6>Item ${itemIndex + 1} <small class="text-muted">${tipoItem === 'servico' ? '🛠️ Serviço' : tipoItem === 'produto' ? '📦 Produto' : '🔄 Misto'}</small></h6>
+                <div>
+                    <h6 class="mb-0">Item ${itemIndex + 1}</h6>
+                    <small class="text-muted">
+                        <i class="fas ${tipoItem === 'servico' ? 'fa-tools text-primary' : 'fa-box text-success'} me-1"></i>
+                        ${tipoItem === 'servico' ? 'Serviço' : 'Produto'}
+                    </small>
+                </div>
                 <button type="button" class="btn-remove-servico" data-index="${itemIndex}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="row g-3">
+            <div class="row g-3 mt-2">
                 <div class="col-md-12">
                     <label class="form-label">Descrição *</label>
                     <input type="text" class="form-control item-nome" 
                            data-index="${itemIndex}" 
-                           value="${item.nome || ''}" 
+                           value="${item.nome || ''}"
                            required>
                 </div>
                 
                 ${camposEspecificos}
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Quantidade *</label>
-                    <input type="number" class="form-control item-quantidade" 
-                           data-index="${itemIndex}" min="1" step="1" 
-                           value="${item.quantidade || 1}" required>
+                    <div class="input-group">
+                        <input type="number" class="form-control item-quantidade" 
+                               data-index="${itemIndex}" min="1" step="1" 
+                               value="${item.quantidade || 1}" required>
+                        <span class="input-group-text">${unidadePadrao}</span>
+                    </div>
                 </div>
                 
-                <div class="col-md-3">
-                    <label class="form-label">Preço Unitário *</label>
+                <div class="col-md-4">
+                    <label class="form-label">Preço Unitário (R$) *</label>
                     <input type="number" class="form-control item-preco" 
                            data-index="${itemIndex}" min="0" step="0.01" 
                            value="${item.precoUnitario || 0}" required>
                 </div>
                 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label">Desconto (R$)</label>
                     <input type="number" class="form-control item-desconto" 
                            data-index="${itemIndex}" min="0" step="0.01" 
                            value="${item.desconto || 0}">
                 </div>
                 
-                <div class="col-md-3">
-                    <label class="form-label">Subtotal</label>
-                    <div class="form-control item-subtotal" data-index="${itemIndex}" 
-                         style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
-                        R$ ${(item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0)).toFixed(2)}
-                    </div>
-                </div>
-                
                 <div class="col-md-12">
-                    <label class="form-label">Observações</label>
+                    <label class="form-label">Detalhes/Observações</label>
                     <textarea class="form-control item-descricao" 
                               data-index="${itemIndex}" rows="2">${item.descricao || ''}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                        <strong>Subtotal deste item:</strong>
+                        <strong class="item-subtotal" data-index="${itemIndex}" style="font-size: 1.1rem;">
+                            R$ ${(item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0)).toFixed(2)}
+                        </strong>
+                    </div>
                 </div>
             </div>
         `;
@@ -1950,7 +2017,7 @@
         itensNoPedido[itemIndex].tipoItem = tipoItem;
         
         // Configurar eventos
-        const inputs = itemDiv.querySelectorAll('input, select, textarea');
+        const inputs = itemDiv.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => atualizarItem(itemIndex));
         });
@@ -1958,6 +2025,9 @@
         itemDiv.querySelector('.btn-remove-servico').addEventListener('click', () => {
             removerItem(itemIndex);
         });
+        
+        // Atualizar subtotal inicial
+        atualizarSubtotalItem(itemIndex);
     }
 
     function habilitarFormulario(habilitar) {
@@ -2015,6 +2085,13 @@
                 if (itemDiv) itemDiv.querySelector('.item-quantidade').focus();
                 return;
             }
+            // Validação específica para serviços
+            if (item.tipoItem === 'servico' && (!item.duracao || item.duracao.trim() === '')) {
+                alert(`Informe a duração estimada para o serviço ${i + 1}.`);
+                const itemDiv = itensContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                if (itemDiv) itemDiv.querySelector('.item-duracao').focus();
+                return;
+            }
         }
         
         try {
@@ -2039,9 +2116,24 @@
             const valorPagoValue = parseFloat(valorPago.value) || 0;
             const valorPendente = Math.max(0, valorTotalValue - valorPagoValue);
             
+            // Determinar tipo do pedido baseado nos itens
+            let tipoFinal = tipoPedidoInput.value;
+            if (tipoFinal === 'misto') {
+                // Verificar se realmente tem ambos os tipos
+                const temServico = itensNoPedido.some(item => item.tipoItem === 'servico');
+                const temProduto = itensNoPedido.some(item => item.tipoItem === 'produto');
+                
+                if (!temServico && temProduto) {
+                    tipoFinal = 'produto';
+                } else if (temServico && !temProduto) {
+                    tipoFinal = 'servico';
+                }
+                // Se tem ambos, mantém 'misto'
+            }
+            
             const pedidoData = {
                 // Identificação
-                tipoPedido: tipoPedidoInput.value || 'servico',
+                tipoPedido: tipoFinal,
                 
                 // Cliente
                 clienteId: clientePedido.value,
@@ -2161,7 +2253,8 @@
         if (tipoAtualPedido === 'servicos') {
             pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'servico');
         } else if (tipoAtualPedido === 'produtos') {
-            pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'produto');
+            // Produtos inclui tanto 'produto' puro quanto 'misto'
+            pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'produto' || p.tipoPedido === 'misto');
         }
         
         // Aplicar filtros adicionais
@@ -2205,21 +2298,31 @@
             const pagamentoBadge = getStatusPagamentoBadge(pedido.statusPagamento);
             const dataFormatada = formatarData(pedido.dataPedido);
             
+            // Resumo dos itens
             let itensText = '';
+            let tiposItens = [];
+            
             if (Array.isArray(pedido.itens)) {
+                // Contar tipos de itens
+                const servicosCount = pedido.itens.filter(item => item.tipoItem === 'servico').length;
+                const produtosCount = pedido.itens.filter(item => item.tipoItem === 'produto').length;
+                
+                if (servicosCount > 0) tiposItens.push(`${servicosCount} serviço${servicosCount > 1 ? 's' : ''}`);
+                if (produtosCount > 0) tiposItens.push(`${produtosCount} produto${produtosCount > 1 ? 's' : ''}`);
+                
+                // Primeiros 2 itens
                 itensText = pedido.itens.slice(0, 2).map(s => 
                     `${s.quantidade || 1}x ${s.nome || 'Item'}`).join(', ');
                 if (pedido.itens.length > 2) {
-                    itensText += ` +${pedido.itens.length - 2} mais`;
+                    itensText += ` +${pedido.itens.length - 2} itens`;
                 }
-            } else if (pedido.servicos) {
-                const servico = pedido.servicos;
-                itensText = `${servico.quantidade || 1}x ${servico.nome || 'Serviço'}`;
             }
+            
+            const resumoTipos = tiposItens.length > 0 ? `(${tiposItens.join(' + ')})` : '';
             
             row.innerHTML = `
                 <td><strong>${pedido.numeroPedido || `PED-${pedidos.indexOf(pedido) + 1}`}</strong></td>
-                <td>${tipoBadge}</td>
+                <td>${tipoBadge} ${resumoTipos}</td>
                 <td>${pedido.clienteNome || 'Cliente'}</td>
                 <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
                 <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
