@@ -980,7 +980,6 @@
                 });
             });
         } catch (error) {
-            console.error('Erro ao carregar serviços:', error);
             servicosDisponiveis = [];
         }
     }
@@ -1014,7 +1013,7 @@
             
             proximoNumeroPedido = maxNumero + 1;
             atualizarTabelaPedidos();
-            atualizarEstatisticas(); // Atualizar estatísticas após carregar
+            atualizarEstatisticas();
         } catch (error) {
             console.error('Erro ao carregar pedidos:', error);
         }
@@ -1039,7 +1038,6 @@
         // Calcular valor a receber
         let aReceber = 0;
         pedidos.forEach(p => {
-            // Considera apenas pedidos que não estão totalmente pagos
             if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial') {
                 const valorPendente = p.valorTotal - (p.valorPago || 0);
                 if (valorPendente > 0) {
@@ -1700,7 +1698,7 @@
             
             // Fechar modal e atualizar dados
             modalPedido.hide();
-            await carregarPedidos(); // Isso recarrega os pedidos e atualiza estatísticas automaticamente
+            await carregarPedidos(); // ISSO ATUALIZA OS CARDS AUTOMATICAMENTE
             
         } catch (error) {
             console.error('Erro ao salvar pedido:', error);
