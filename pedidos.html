@@ -1014,10 +1014,43 @@
             
             proximoNumeroPedido = maxNumero + 1;
             atualizarTabelaPedidos();
-            atualizarEstatisticas();
+            atualizarEstatisticas(); // Atualizar estatísticas após carregar
         } catch (error) {
             console.error('Erro ao carregar pedidos:', error);
         }
+    }
+
+    // Atualizar estatísticas
+    function atualizarEstatisticas() {
+        if (pedidos.length === 0) {
+            totalPedidos.textContent = '0';
+            pedidosAndamento.textContent = '0';
+            pedidosConcluidos.textContent = '0';
+            valorAReceber.textContent = 'R$ 0,00';
+            return;
+        }
+        
+        totalPedidos.textContent = pedidos.length;
+        
+        // Filtrar por status do serviço
+        const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
+        const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
+        
+        // Calcular valor a receber
+        let aReceber = 0;
+        pedidos.forEach(p => {
+            // Considera apenas pedidos que não estão totalmente pagos
+            if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial') {
+                const valorPendente = p.valorTotal - (p.valorPago || 0);
+                if (valorPendente > 0) {
+                    aReceber += valorPendente;
+                }
+            }
+        });
+        
+        pedidosAndamento.textContent = emAndamento;
+        pedidosConcluidos.textContent = concluidos;
+        valorAReceber.textContent = `R$ ${aReceber.toFixed(2)}`;
     }
 
     // Atualizar filtro de clientes
@@ -1270,25 +1303,6 @@
             valorPago.value = 0;
             helpValorPago.textContent = 'Deixe 0 se ainda não foi pago';
         }
-    }
-
-    // Atualizar estatísticas
-    function atualizarEstatisticas() {
-        totalPedidos.textContent = pedidos.length;
-        
-        const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
-        const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
-        
-        let aReceber = 0;
-        pedidos.forEach(p => {
-            if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial') {
-                aReceber += (p.valorTotal - (p.valorPago || 0));
-            }
-        });
-        
-        pedidosAndamento.textContent = emAndamento;
-        pedidosConcluidos.textContent = concluidos;
-        valorAReceber.textContent = `R$ ${aReceber.toFixed(2)}`;
     }
 
     // Atualizar tabela de pedidos
@@ -1686,7 +1700,7 @@
             
             // Fechar modal e atualizar dados
             modalPedido.hide();
-            await carregarPedidos();
+            await carregarPedidos(); // Isso recarrega os pedidos e atualiza estatísticas automaticamente
             
         } catch (error) {
             console.error('Erro ao salvar pedido:', error);
