@@ -798,1142 +798,1206 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            getDocs,
-            query,
-            where,
-            orderBy,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+   <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        getDocs,
+        query,
+        where,
+        orderBy,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Elementos DOM
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const userId = document.getElementById('userId');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        
-        // Elementos de estatísticas
-        const totalPedidos = document.getElementById('totalPedidos');
-        const pedidosAndamento = document.getElementById('pedidosAndamento');
-        const pedidosConcluidos = document.getElementById('pedidosConcluidos');
-        const valorAReceber = document.getElementById('valorAReceber');
-        
-        // Elementos de filtro
-        const searchPedidos = document.getElementById('searchPedidos');
-        const filterStatusServico = document.getElementById('filterStatusServico');
-        const filterStatusPagamento = document.getElementById('filterStatusPagamento');
-        const filterMes = document.getElementById('filterMes');
-        const filterCliente = document.getElementById('filterCliente');
-        
-        // Tabela
-        const pedidosTable = document.getElementById('pedidosTable');
-        const emptyState = document.getElementById('emptyState');
-        
-        // Modal
-        const btnNovoPedido = document.getElementById('btnNovoPedido');
-        const modalPedido = new bootstrap.Modal(document.getElementById('modalPedido'));
-        const formPedido = document.getElementById('formPedido');
-        const modalTitle = document.getElementById('modalTitle');
-        const pedidoId = document.getElementById('pedidoId');
-        const clientePedido = document.getElementById('clientePedido');
-        const dataPedido = document.getElementById('dataPedido');
-        const servicosContainer = document.getElementById('servicosContainer');
-        const btnAddServico = document.getElementById('btnAddServico');
-        const subtotal = document.getElementById('subtotal');
-        const totalDescontos = document.getElementById('totalDescontos');
-        const valorTotal = document.getElementById('valorTotal');
-        const statusServico = document.getElementById('statusServico');
-        const statusPagamento = document.getElementById('statusPagamento');
-        const tipoPagamento = document.getElementById('tipoPagamento');
-        const valorPago = document.getElementById('valorPago');
-        const observacoes = document.getElementById('observacoes');
-        const btnSalvarPedido = document.getElementById('btnSalvarPedido');
-        const labelValorPago = document.getElementById('labelValorPago');
-        const helpValorPago = document.getElementById('helpValorPago');
+    // Elementos DOM
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userId = document.getElementById('userId');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Elementos de estatísticas
+    const totalPedidos = document.getElementById('totalPedidos');
+    const pedidosAndamento = document.getElementById('pedidosAndamento');
+    const pedidosConcluidos = document.getElementById('pedidosConcluidos');
+    const valorAReceber = document.getElementById('valorAReceber');
+    
+    // Elementos de filtro
+    const searchPedidos = document.getElementById('searchPedidos');
+    const filterStatusServico = document.getElementById('filterStatusServico');
+    const filterStatusPagamento = document.getElementById('filterStatusPagamento');
+    const filterMes = document.getElementById('filterMes');
+    const filterCliente = document.getElementById('filterCliente');
+    
+    // Tabela
+    const pedidosTable = document.getElementById('pedidosTable');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Modal
+    const btnNovoPedido = document.getElementById('btnNovoPedido');
+    const modalPedido = new bootstrap.Modal(document.getElementById('modalPedido'));
+    const formPedido = document.getElementById('formPedido');
+    const modalTitle = document.getElementById('modalTitle');
+    const pedidoId = document.getElementById('pedidoId');
+    const clientePedido = document.getElementById('clientePedido');
+    const dataPedido = document.getElementById('dataPedido');
+    const servicosContainer = document.getElementById('servicosContainer');
+    const btnAddServico = document.getElementById('btnAddServico');
+    const subtotal = document.getElementById('subtotal');
+    const totalDescontos = document.getElementById('totalDescontos');
+    const valorTotal = document.getElementById('valorTotal');
+    const statusServico = document.getElementById('statusServico');
+    const statusPagamento = document.getElementById('statusPagamento');
+    const tipoPagamento = document.getElementById('tipoPagamento');
+    const valorPago = document.getElementById('valorPago');
+    const observacoes = document.getElementById('observacoes');
+    const btnSalvarPedido = document.getElementById('btnSalvarPedido');
+    const labelValorPago = document.getElementById('labelValorPago');
+    const helpValorPago = document.getElementById('helpValorPago');
 
-        // Estado da aplicação
-        let currentUser = null;
-        let userData = null;
-        let pedidos = [];
-        let clientes = [];
-        let servicos = [];
-        let proximoNumeroPedido = 1;
-        let servicosNoPedido = [];
+    // Estado da aplicação
+    let currentUser = null;
+    let userData = null;
+    let pedidos = [];
+    let clientes = [];
+    let servicosDisponiveis = [];
+    let proximoNumeroPedido = 1;
+    let servicosNoPedido = [];
 
-        // Carregar dados do usuário
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
-                    
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        await carregarDadosIniciais();
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar usuário:', error);
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        // Atualizar interface com dados do usuário
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-            }
-            
-            if (data.idScanHub) {
-                userId.textContent = data.idScanHub;
-            }
-        }
-
-        // Carregar todos os dados iniciais
-        async function carregarDadosIniciais() {
+    // Carregar dados do usuário
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
             try {
-                await Promise.all([
-                    carregarClientes(),
-                    carregarServicos(),
-                    carregarPedidos()
-                ]);
-                atualizarFiltroClientes();
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-            }
-        }
-
-        // Carregar clientes
-        async function carregarClientes() {
-            try {
-                const q = query(
-                    collection(db, "clientes"),
-                    where("profissionalId", "==", currentUser.uid),
-                    where("status", "==", "ativo")
-                );
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
                 
-                const querySnapshot = await getDocs(q);
-                clientes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    clientes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-            } catch (error) {
-                console.error('Erro ao carregar clientes:', error);
-            }
-        }
-
-        // Carregar serviços (se houver cadastro de serviços)
-        async function carregarServicos() {
-            try {
-                // Tentar carregar da coleção de serviços
-                const q = query(
-                    collection(db, "servicos"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                servicos = [];
-                
-                querySnapshot.forEach((doc) => {
-                    servicos.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                // Se não tiver serviços cadastrados, criar alguns padrão
-                if (servicos.length === 0) {
-                    servicos = [
-                        { id: '1', nome: 'Consulta', preco: 150.00, descricao: 'Consulta inicial' },
-                        { id: '2', nome: 'Sessão Terapia', preco: 120.00, descricao: 'Sessão de 50 minutos' },
-                        { id: '3', nome: 'Aula Particular', preco: 80.00, descricao: 'Aula individual' },
-                        { id: '4', nome: 'Manutenção', preco: 200.00, descricao: 'Manutenção preventiva' }
-                    ];
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    atualizarInterfaceUsuario(userData);
+                    await carregarDadosIniciais();
                 }
             } catch (error) {
-                // Se não existir coleção de serviços, criar padrão
-                servicos = [
-                    { id: '1', nome: 'Consulta', preco: 150.00, descricao: 'Consulta inicial' },
-                    { id: '2', nome: 'Sessão Terapia', preco: 120.00, descricao: 'Sessão de 50 minutos' },
-                    { id: '3', nome: 'Aula Particular', preco: 80.00, descricao: 'Aula individual' },
-                    { id: '4', nome: 'Manutenção', preco: 200.00, descricao: 'Manutenção preventiva' }
-                ];
+                console.error('Erro ao carregar usuário:', error);
             }
+        } else {
+            window.location.href = 'login.html';
         }
+    });
 
-        // Carregar pedidos
-        async function carregarPedidos() {
-            try {
-                const q = query(
-                    collection(db, "pedidos"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("dataPedido", "desc")
-                );
-                
-                const querySnapshot = await getDocs(q);
-                pedidos = [];
-                let maxNumero = 0;
-                
-                querySnapshot.forEach((doc) => {
-                    const pedido = {
-                        id: doc.id,
-                        ...doc.data()
-                    };
-                    pedidos.push(pedido);
-                    
-                    // Encontrar maior número de pedido
-                    if (pedido.numeroPedido) {
-                        const num = parseInt(pedido.numeroPedido.replace('PED-', ''));
-                        if (num > maxNumero) maxNumero = num;
-                    }
-                });
-                
-                proximoNumeroPedido = maxNumero + 1;
-                atualizarTabelaPedidos();
-                atualizarEstatisticas();
-            } catch (error) {
-                console.error('Erro ao carregar pedidos:', error);
-            }
+    // Atualizar interface com dados do usuário
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
         }
+        
+        if (data.idScanHub) {
+            userId.textContent = data.idScanHub;
+        }
+    }
 
-        // Atualizar filtro de clientes
-        function atualizarFiltroClientes() {
-            filterCliente.innerHTML = '<option value="">Todos clientes</option>';
-            clientePedido.innerHTML = '<option value="">Selecione um cliente</option>';
+    // Carregar todos os dados iniciais
+    async function carregarDadosIniciais() {
+        try {
+            await Promise.all([
+                carregarClientes(),
+                carregarServicosDisponiveis(),
+                carregarPedidos()
+            ]);
+            atualizarFiltroClientes();
+        } catch (error) {
+            console.error('Erro ao carregar dados:', error);
+        }
+    }
+
+    // Carregar clientes
+    async function carregarClientes() {
+        try {
+            const q = query(
+                collection(db, "clientes"),
+                where("profissionalId", "==", currentUser.uid),
+                where("status", "==", "ativo")
+            );
             
-            clientes.forEach(cliente => {
-                const option = document.createElement('option');
-                option.value = cliente.id;
-                option.textContent = cliente.nome;
-                filterCliente.appendChild(option.cloneNode(true));
-                clientePedido.appendChild(option);
+            const querySnapshot = await getDocs(q);
+            clientes = [];
+            
+            querySnapshot.forEach((doc) => {
+                clientes.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
             });
+        } catch (error) {
+            console.error('Erro ao carregar clientes:', error);
         }
+    }
 
-        // Adicionar serviço ao pedido
-        btnAddServico.addEventListener('click', () => {
-            adicionarServico();
-        });
-
-        function adicionarServico(servicoData = null) {
-            const servicoId = servicoData?.id || servicos[0]?.id || '1';
-            const servicoIndex = servicosNoPedido.length;
+    // Carregar serviços disponíveis (opcional - para sugestão)
+    async function carregarServicosDisponiveis() {
+        try {
+            const q = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", currentUser.uid)
+            );
             
-            const servicoDiv = document.createElement('div');
-            servicoDiv.className = 'servico-item';
-            servicoDiv.innerHTML = `
-                <div class="servico-header">
-                    <h6>Serviço ${servicoIndex + 1}</h6>
-                    <button type="button" class="btn-remove-servico" data-index="${servicoIndex}">
-                        <i class="fas fa-times"></i>
-                    </button>
+            const querySnapshot = await getDocs(q);
+            servicosDisponiveis = [];
+            
+            querySnapshot.forEach((doc) => {
+                servicosDisponiveis.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+        } catch (error) {
+            console.error('Erro ao carregar serviços:', error);
+            servicosDisponiveis = [];
+        }
+    }
+
+    // Carregar pedidos
+    async function carregarPedidos() {
+        try {
+            const q = query(
+                collection(db, "pedidos"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("dataPedido", "desc")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            pedidos = [];
+            let maxNumero = 0;
+            
+            querySnapshot.forEach((doc) => {
+                const pedido = {
+                    id: doc.id,
+                    ...doc.data()
+                };
+                pedidos.push(pedido);
+                
+                // Encontrar maior número de pedido
+                if (pedido.numeroPedido) {
+                    const num = parseInt(pedido.numeroPedido.replace('PED-', ''));
+                    if (num > maxNumero) maxNumero = num;
+                }
+            });
+            
+            proximoNumeroPedido = maxNumero + 1;
+            atualizarTabelaPedidos();
+            atualizarEstatisticas();
+        } catch (error) {
+            console.error('Erro ao carregar pedidos:', error);
+        }
+    }
+
+    // Atualizar filtro de clientes
+    function atualizarFiltroClientes() {
+        filterCliente.innerHTML = '<option value="">Todos clientes</option>';
+        clientePedido.innerHTML = '<option value="">Selecione um cliente</option>';
+        
+        clientes.forEach(cliente => {
+            const option = document.createElement('option');
+            option.value = cliente.id;
+            option.textContent = cliente.nome;
+            filterCliente.appendChild(option.cloneNode(true));
+            clientePedido.appendChild(option);
+        });
+    }
+
+    // Adicionar serviço ao pedido
+    btnAddServico.addEventListener('click', () => {
+        adicionarServico();
+    });
+
+    function adicionarServico(servicoData = null) {
+        const servicoIndex = servicosNoPedido.length;
+        
+        const servicoDiv = document.createElement('div');
+        servicoDiv.className = 'servico-item';
+        servicoDiv.innerHTML = `
+            <div class="servico-header">
+                <h6>Item ${servicoIndex + 1}</h6>
+                <button type="button" class="btn-remove-servico" data-index="${servicoIndex}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label">Descrição do Item/Serviço *</label>
+                    <input type="text" class="form-control servico-nome" 
+                           data-index="${servicoIndex}" 
+                           value="${servicoData?.nome || ''}" 
+                           placeholder="Ex: Sessão de terapia, Material didático, Instalação"
+                           required>
                 </div>
                 
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Serviço *</label>
-                        <select class="form-select servico-select" data-index="${servicoIndex}" required>
-                            <option value="">Selecione um serviço</option>
-                            ${servicos.map(s => 
-                                `<option value="${s.id}" ${servicoData?.servicoId === s.id ? 'selected' : ''}>
-                                    ${s.nome} - R$ ${s.preco.toFixed(2)}
-                                </option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Quantidade *</label>
-                        <input type="number" class="form-control servico-quantidade" 
-                               data-index="${servicoIndex}" min="1" value="${servicoData?.quantidade || 1}" required>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <label class="form-label">Unidade</label>
-                        <input type="text" class="form-control servico-unidade" 
-                               data-index="${servicoIndex}" value="${servicoData?.unidade || 'unidade'}" 
-                               placeholder="sessão, hora, etc">
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">Preço Unitário (R$) *</label>
-                        <input type="number" class="form-control servico-preco" 
-                               data-index="${servicoIndex}" min="0" step="0.01" 
-                               value="${servicoData?.precoUnitario || servicos[0]?.preco || 0}" required>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">Desconto (R$)</label>
-                        <input type="number" class="form-control servico-desconto" 
-                               data-index="${servicoIndex}" min="0" step="0.01" 
-                               value="${servicoData?.desconto || 0}">
-                    </div>
-                    
-                    <div class="col-md-12">
-                        <label class="form-label">Descrição</label>
-                        <textarea class="form-control servico-descricao" 
-                                  data-index="${servicoIndex}" rows="2">${servicoData?.descricao || ''}</textarea>
+                <div class="col-md-4">
+                    <label class="form-label">Quantidade *</label>
+                    <input type="number" class="form-control servico-quantidade" 
+                           data-index="${servicoIndex}" min="1" step="1" 
+                           value="${servicoData?.quantidade || 1}" required>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">Unidade</label>
+                    <input type="text" class="form-control servico-unidade" 
+                           data-index="${servicoIndex}" 
+                           value="${servicoData?.unidade || 'unidade'}" 
+                           placeholder="sessão, hora, unidade, pacote">
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">Preço Unitário (R$) *</label>
+                    <input type="number" class="form-control servico-preco" 
+                           data-index="${servicoIndex}" min="0" step="0.01" 
+                           value="${servicoData?.precoUnitario || 0}" required>
+                </div>
+                
+                <div class="col-md-12">
+                    <label class="form-label">Detalhamento/Especificações</label>
+                    <textarea class="form-control servico-descricao" 
+                              data-index="${servicoIndex}" rows="2" 
+                              placeholder="Descreva detalhadamente o serviço ou item...">${servicoData?.descricao || ''}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Desconto (R$)</label>
+                    <input type="number" class="form-control servico-desconto" 
+                           data-index="${servicoIndex}" min="0" step="0.01" 
+                           value="${servicoData?.desconto || 0}">
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Subtotal deste item</label>
+                    <div class="form-control servico-subtotal" data-index="${servicoIndex}" 
+                         style="background-color: #f8f9fa; font-weight: bold; text-align: right;">
+                        R$ 0,00
                     </div>
                 </div>
+            </div>
+        `;
+        
+        servicosContainer.appendChild(servicoDiv);
+        
+        // Adicionar aos serviços do pedido
+        if (servicoData) {
+            servicosNoPedido[servicoIndex] = servicoData;
+        } else {
+            servicosNoPedido[servicoIndex] = {
+                nome: '',
+                descricao: '',
+                precoUnitario: 0,
+                quantidade: 1,
+                unidade: 'unidade',
+                desconto: 0,
+                subtotal: 0
+            };
+        }
+        
+        // Adicionar eventos
+        const nomeInput = servicoDiv.querySelector('.servico-nome');
+        const quantidadeInput = servicoDiv.querySelector('.servico-quantidade');
+        const precoInput = servicoDiv.querySelector('.servico-preco');
+        const descontoInput = servicoDiv.querySelector('.servico-desconto');
+        const descricaoInput = servicoDiv.querySelector('.servico-descricao');
+        const unidadeInput = servicoDiv.querySelector('.servico-unidade');
+        
+        const inputs = [nomeInput, quantidadeInput, precoInput, descontoInput, descricaoInput, unidadeInput];
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
+        });
+        
+        // Botão remover
+        servicoDiv.querySelector('.btn-remove-servico').addEventListener('click', () => {
+            removerServico(servicoIndex);
+        });
+        
+        // Calcular subtotal inicial
+        atualizarSubtotalServico(servicoIndex);
+        calcularTotais();
+    }
+
+    // Atualizar subtotal de um serviço específico
+    function atualizarSubtotalServico(index) {
+        const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
+        
+        if (!servicoDiv) return;
+        
+        const quantidadeInput = servicoDiv.querySelector('.servico-quantidade');
+        const precoInput = servicoDiv.querySelector('.servico-preco');
+        const descontoInput = servicoDiv.querySelector('.servico-desconto');
+        const subtotalDisplay = servicoDiv.querySelector('.servico-subtotal');
+        
+        const quantidade = parseFloat(quantidadeInput.value) || 1;
+        const precoUnitario = parseFloat(precoInput.value) || 0;
+        const desconto = parseFloat(descontoInput.value) || 0;
+        
+        const subtotal = (precoUnitario * quantidade) - desconto;
+        const subtotalFinal = subtotal > 0 ? subtotal : 0;
+        
+        subtotalDisplay.textContent = `R$ ${subtotalFinal.toFixed(2)}`;
+        
+        return subtotalFinal;
+    }
+
+    // Atualizar serviço
+    function atualizarServico(index, event) {
+        const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
+        
+        const nomeInput = servicoDiv.querySelector('.servico-nome');
+        const quantidadeInput = servicoDiv.querySelector('.servico-quantidade');
+        const precoInput = servicoDiv.querySelector('.servico-preco');
+        const descontoInput = servicoDiv.querySelector('.servico-desconto');
+        const descricaoInput = servicoDiv.querySelector('.servico-descricao');
+        const unidadeInput = servicoDiv.querySelector('.servico-unidade');
+        
+        // Calcular subtotal atualizado
+        const subtotalAtual = atualizarSubtotalServico(index);
+        
+        // Atualizar no array
+        servicosNoPedido[index] = {
+            nome: nomeInput.value,
+            descricao: descricaoInput.value,
+            precoUnitario: parseFloat(precoInput.value) || 0,
+            quantidade: parseFloat(quantidadeInput.value) || 1,
+            unidade: unidadeInput.value || 'unidade',
+            desconto: parseFloat(descontoInput.value) || 0,
+            subtotal: subtotalAtual
+        };
+        
+        calcularTotais();
+    }
+
+    // Remover serviço
+    function removerServico(index) {
+        servicosNoPedido.splice(index, 1);
+        
+        // Remover do DOM
+        const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
+        servicoDiv.remove();
+        
+        // Renumerar itens restantes
+        const servicosDivs = servicosContainer.querySelectorAll('.servico-item');
+        servicosDivs.forEach((div, newIndex) => {
+            div.querySelector('.servico-header h6').textContent = `Item ${newIndex + 1}`;
+            div.querySelector('.btn-remove-servico').dataset.index = newIndex;
+            
+            // Atualizar todos os inputs com novo índice
+            div.querySelectorAll('[data-index]').forEach(input => {
+                input.dataset.index = newIndex;
+            });
+            
+            // Atualizar no array se necessário
+            if (newIndex < servicosNoPedido.length) {
+                const oldServico = servicosNoPedido[newIndex + 1] || servicosNoPedido[newIndex];
+                servicosNoPedido[newIndex] = oldServico;
+            }
+        });
+        
+        // Remover último se necessário
+        if (servicosNoPedido.length > servicosDivs.length) {
+            servicosNoPedido.splice(servicosDivs.length);
+        }
+        
+        calcularTotais();
+    }
+
+    // Calcular totais do pedido com detalhamento
+    function calcularTotais() {
+        let subtotalValue = 0;
+        let totalDescontosValue = 0;
+        let valorTotalValue = 0;
+        
+        // Calcular totais dos serviços
+        servicosNoPedido.forEach(servico => {
+            const valorServico = (servico.precoUnitario * servico.quantidade);
+            subtotalValue += valorServico;
+            totalDescontosValue += servico.desconto;
+            valorTotalValue += servico.subtotal;
+        });
+        
+        // Atualizar exibição
+        subtotal.textContent = `R$ ${subtotalValue.toFixed(2)}`;
+        totalDescontos.textContent = `R$ ${totalDescontosValue.toFixed(2)}`;
+        valorTotal.textContent = `R$ ${valorTotalValue.toFixed(2)}`;
+        
+        // Atualizar label de valor pago
+        const statusPagamentoValue = statusPagamento.value;
+        if (statusPagamentoValue === 'pago') {
+            labelValorPago.textContent = 'Valor Pago *';
+            valorPago.required = true;
+            valorPago.value = valorTotalValue;
+            helpValorPago.textContent = 'Valor total do pedido';
+        } else if (statusPagamentoValue === 'parcial') {
+            labelValorPago.textContent = 'Valor Pago *';
+            valorPago.required = true;
+            helpValorPago.textContent = 'Informe quanto já foi pago';
+        } else {
+            labelValorPago.textContent = 'Valor Pago';
+            valorPago.required = false;
+            valorPago.value = 0;
+            helpValorPago.textContent = 'Deixe 0 se ainda não foi pago';
+        }
+    }
+
+    // Atualizar estatísticas
+    function atualizarEstatisticas() {
+        totalPedidos.textContent = pedidos.length;
+        
+        const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
+        const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
+        
+        let aReceber = 0;
+        pedidos.forEach(p => {
+            if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial') {
+                aReceber += (p.valorTotal - (p.valorPago || 0));
+            }
+        });
+        
+        pedidosAndamento.textContent = emAndamento;
+        pedidosConcluidos.textContent = concluidos;
+        valorAReceber.textContent = `R$ ${aReceber.toFixed(2)}`;
+    }
+
+    // Atualizar tabela de pedidos
+    function atualizarTabelaPedidos() {
+        const searchTerm = searchPedidos.value.toLowerCase();
+        const statusServicoFilter = filterStatusServico.value;
+        const statusPagamentoFilter = filterStatusPagamento.value;
+        const mesFilter = filterMes.value;
+        const clienteFilter = filterCliente.value;
+        
+        let pedidosFiltrados = pedidos.filter(pedido => {
+            // Busca por texto
+            const matchSearch = !searchTerm || 
+                (pedido.clienteNome && pedido.clienteNome.toLowerCase().includes(searchTerm)) ||
+                (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
+                (pedido.servicos && pedido.servicos.some(s => 
+                    s.nome && s.nome.toLowerCase().includes(searchTerm)));
+            
+            // Filtros
+            const matchStatusServico = !statusServicoFilter || pedido.statusServico === statusServicoFilter;
+            const matchStatusPagamento = !statusPagamentoFilter || pedido.statusPagamento === statusPagamentoFilter;
+            const matchCliente = !clienteFilter || pedido.clienteId === clienteFilter;
+            
+            // Filtro por mês
+            let matchMes = true;
+            if (mesFilter) {
+                const data = new Date(pedido.dataPedido);
+                const mes = data.getMonth() + 1;
+                matchMes = mes.toString() === mesFilter;
+            }
+            
+            return matchSearch && matchStatusServico && matchStatusPagamento && matchMes && matchCliente;
+        });
+        
+        pedidosTable.innerHTML = '';
+        
+        if (pedidosFiltrados.length === 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="8" class="text-center py-5">
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">${pedidos.length === 0 ? 
+                        'Nenhum pedido cadastrado' : 
+                        'Nenhum pedido corresponde aos filtros'}</h5>
+                    <p class="text-muted mb-0">${pedidos.length === 0 ? 
+                        'Clique em "Novo Pedido" para criar seu primeiro pedido' : 
+                        'Tente ajustar os filtros de busca'}</p>
+                </td>
+            `;
+            pedidosTable.appendChild(emptyRow);
+            return;
+        }
+        
+        pedidosFiltrados.forEach(pedido => {
+            const row = document.createElement('tr');
+            
+            // Formatar serviços para exibição
+            let servicosText = '';
+            if (Array.isArray(pedido.servicos)) {
+                servicosText = pedido.servicos.slice(0, 2).map(s => 
+                    `${s.quantidade}x ${s.nome}`).join(', ');
+                if (pedido.servicos.length > 2) {
+                    servicosText += ` +${pedido.servicos.length - 2} mais`;
+                }
+            } else if (pedido.servicos) {
+                servicosText = `${pedido.servicos.quantidade || 1}x ${pedido.servicos.nome || 'Serviço'}`;
+            }
+            
+            // Badges de status
+            const statusServicoBadge = getStatusServicoBadge(pedido.statusServico);
+            const statusPagamentoBadge = getStatusPagamentoBadge(pedido.statusPagamento);
+            
+            // Data formatada
+            const dataFormatada = formatarData(pedido.dataPedido);
+            
+            row.innerHTML = `
+                <td>
+                    <strong>${pedido.numeroPedido || `PED-${pedidos.indexOf(pedido) + 1}`}</strong>
+                </td>
+                <td>${pedido.clienteNome || 'Cliente não encontrado'}</td>
+                <td>
+                    <small>${servicosText.substring(0, 50)}${servicosText.length > 50 ? '...' : ''}</small>
+                </td>
+                <td><strong>R$ ${pedido.valorTotal?.toFixed(2) || '0.00'}</strong></td>
+                <td>${statusServicoBadge}</td>
+                <td>${statusPagamentoBadge}</td>
+                <td>${dataFormatada}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm btn-ver" onclick="verPedido('${pedido.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action-sm btn-editar" onclick="editarPedido('${pedido.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action-sm btn-recibo" onclick="gerarReciboDetalhado('${pedido.id}')">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </div>
+                </td>
             `;
             
-            servicosContainer.appendChild(servicoDiv);
-            
-            // Adicionar aos serviços do pedido
-            if (servicoData) {
-                servicosNoPedido[servicoIndex] = servicoData;
-            } else {
-                const servicoSelecionado = servicos.find(s => s.id === servicoId);
-                servicosNoPedido[servicoIndex] = {
-                    servicoId: servicoId,
-                    nome: servicoSelecionado?.nome || 'Serviço',
-                    descricao: servicoSelecionado?.descricao || '',
-                    precoUnitario: servicoSelecionado?.preco || 0,
-                    quantidade: 1,
-                    unidade: 'unidade',
-                    desconto: 0,
-                    valorTotal: servicoSelecionado?.preco || 0
-                };
-            }
-            
-            // Adicionar eventos
-            const select = servicoDiv.querySelector('.servico-select');
-            const quantidade = servicoDiv.querySelector('.servico-quantidade');
-            const preco = servicoDiv.querySelector('.servico-preco');
-            const desconto = servicoDiv.querySelector('.servico-desconto');
-            const descricao = servicoDiv.querySelector('.servico-descricao');
-            const unidade = servicoDiv.querySelector('.servico-unidade');
-            
-            select.addEventListener('change', (e) => atualizarServico(servicoIndex, e));
-            quantidade.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
-            preco.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
-            desconto.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
-            descricao.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
-            unidade.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
-            
-            // Botão remover
-            servicoDiv.querySelector('.btn-remove-servico').addEventListener('click', () => {
-                removerServico(servicoIndex);
+            pedidosTable.appendChild(row);
+        });
+    }
+
+    // Helper: Badge de status serviço
+    function getStatusServicoBadge(status) {
+        const badges = {
+            'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
+            'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
+            'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
+        };
+        return badges[status] || '<span class="badge-status">Desconhecido</span>';
+    }
+
+    // Helper: Badge de status pagamento
+    function getStatusPagamentoBadge(status) {
+        const badges = {
+            'a_receber': '<span class="badge-status status-a-receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
+            'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
+            'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
+            'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
+        };
+        return badges[status] || '<span class="badge-status">Desconhecido</span>';
+    }
+
+    // Helper: Formatar data
+    function formatarData(dataString) {
+        if (!dataString) return '--';
+        const date = new Date(dataString);
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    // Ver pedido
+    window.verPedido = async function(id) {
+        const pedido = pedidos.find(p => p.id === id);
+        if (!pedido) return;
+        
+        // Preencher modal com dados (somente leitura)
+        modalTitle.textContent = `Pedido ${pedido.numeroPedido} - Detalhado`;
+        pedidoId.value = id;
+        
+        // Preencher campos básicos
+        clientePedido.value = pedido.clienteId;
+        dataPedido.value = pedido.dataPedido;
+        statusServico.value = pedido.statusServico;
+        statusPagamento.value = pedido.statusPagamento;
+        tipoPagamento.value = pedido.tipoPagamento;
+        valorPago.value = pedido.valorPago || 0;
+        observacoes.value = pedido.observacoes || '';
+        
+        // Adicionar serviços
+        servicosContainer.innerHTML = '';
+        servicosNoPedido = [];
+        
+        if (Array.isArray(pedido.servicos)) {
+            pedido.servicos.forEach(servico => {
+                adicionarServico(servico);
             });
-            
-            calcularTotais();
+        } else if (pedido.servicos) {
+            adicionarServico(pedido.servicos);
         }
+        
+        // Tornar campos readonly
+        clientePedido.disabled = true;
+        dataPedido.disabled = true;
+        statusServico.disabled = true;
+        statusPagamento.disabled = true;
+        tipoPagamento.disabled = true;
+        valorPago.disabled = true;
+        observacoes.disabled = true;
+        btnAddServico.style.display = 'none';
+        
+        // Tornar todos os inputs de serviços readonly
+        servicosContainer.querySelectorAll('input, select, textarea').forEach(input => {
+            input.disabled = true;
+        });
+        
+        // Esconder botões de remover
+        servicosContainer.querySelectorAll('.btn-remove-servico').forEach(btn => {
+            btn.style.display = 'none';
+        });
+        
+        // Calcular totais
+        calcularTotais();
+        
+        // Mudar botão salvar para "Fechar"
+        btnSalvarPedido.textContent = 'Fechar';
+        btnSalvarPedido.onclick = () => modalPedido.hide();
+        
+        modalPedido.show();
+        
+        // Restaurar após fechar
+        modalPedido._element.addEventListener('hidden.bs.modal', function restore() {
+            clientePedido.disabled = false;
+            dataPedido.disabled = false;
+            statusServico.disabled = false;
+            statusPagamento.disabled = false;
+            tipoPagamento.disabled = false;
+            valorPago.disabled = false;
+            observacoes.disabled = false;
+            btnAddServico.style.display = 'block';
+            btnSalvarPedido.textContent = 'Salvar Pedido';
+            btnSalvarPedido.onclick = salvarPedido;
+            modalPedido._element.removeEventListener('hidden.bs.modal', restore);
+        }, { once: true });
+    };
 
-        // Atualizar serviço
-        function atualizarServico(index, event) {
-            const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
-            
-            const servicoSelect = servicoDiv.querySelector('.servico-select');
-            const quantidadeInput = servicoDiv.querySelector('.servico-quantidade');
-            const precoInput = servicoDiv.querySelector('.servico-preco');
-            const descontoInput = servicoDiv.querySelector('.servico-desconto');
-            const descricaoInput = servicoDiv.querySelector('.servico-descricao');
-            const unidadeInput = servicoDiv.querySelector('.servico-unidade');
-            
-            // Se mudou o serviço selecionado, atualizar preço e descrição
-            if (event.target === servicoSelect) {
-                const servicoId = servicoSelect.value;
-                const servico = servicos.find(s => s.id === servicoId);
-                if (servico) {
-                    precoInput.value = servico.preco;
-                    descricaoInput.value = servico.descricao || '';
-                }
-            }
-            
-            // Calcular valor total do serviço
-            const quantidade = parseFloat(quantidadeInput.value) || 1;
-            const precoUnitario = parseFloat(precoInput.value) || 0;
-            const desconto = parseFloat(descontoInput.value) || 0;
-            
-            const valorServico = (precoUnitario * quantidade) - desconto;
-            
-            // Atualizar no array
-            servicosNoPedido[index] = {
-                servicoId: servicoSelect.value,
-                nome: servicoSelect.options[servicoSelect.selectedIndex]?.text?.split(' - R$')[0] || 'Serviço',
-                descricao: descricaoInput.value,
-                precoUnitario: precoUnitario,
-                quantidade: quantidade,
-                unidade: unidadeInput.value || 'unidade',
-                desconto: desconto,
-                valorTotal: valorServico > 0 ? valorServico : 0
-            };
-            
-            calcularTotais();
-        }
-
-        // Remover serviço
-        function removerServico(index) {
-            servicosNoPedido.splice(index, 1);
-            
-            // Remover do DOM
-            const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
-            servicoDiv.remove();
-            
-            // Renumerar serviços restantes
-            const servicosDivs = servicosContainer.querySelectorAll('.servico-item');
-            servicosDivs.forEach((div, newIndex) => {
-                div.querySelector('.servico-header h6').textContent = `Serviço ${newIndex + 1}`;
-                div.querySelector('.btn-remove-servico').dataset.index = newIndex;
-                
-                // Atualizar todos os inputs com novo índice
-                div.querySelectorAll('[data-index]').forEach(input => {
-                    input.dataset.index = newIndex;
-                });
-                
-                // Atualizar no array se necessário
-                if (newIndex < servicosNoPedido.length) {
-                    const oldServico = servicosNoPedido[newIndex + 1] || servicosNoPedido[newIndex];
-                    servicosNoPedido[newIndex] = oldServico;
-                }
+    // Editar pedido
+    window.editarPedido = async function(id) {
+        const pedido = pedidos.find(p => p.id === id);
+        if (!pedido) return;
+        
+        modalTitle.textContent = `Editar Pedido ${pedido.numeroPedido}`;
+        pedidoId.value = id;
+        
+        // Preencher campos
+        clientePedido.value = pedido.clienteId;
+        dataPedido.value = pedido.dataPedido;
+        statusServico.value = pedido.statusServico;
+        statusPagamento.value = pedido.statusPagamento;
+        tipoPagamento.value = pedido.tipoPagamento;
+        valorPago.value = pedido.valorPago || 0;
+        observacoes.value = pedido.observacoes || '';
+        
+        // Adicionar serviços
+        servicosContainer.innerHTML = '';
+        servicosNoPedido = [];
+        
+        if (Array.isArray(pedido.servicos)) {
+            pedido.servicos.forEach(servico => {
+                adicionarServico(servico);
             });
-            
-            // Remover último se necessário
-            if (servicosNoPedido.length > servicosDivs.length) {
-                servicosNoPedido.splice(servicosDivs.length);
+        } else if (pedido.servicos) {
+            adicionarServico(pedido.servicos);
+        }
+        
+        // Mostrar botão adicionar
+        btnAddServico.style.display = 'block';
+        
+        // Habilitar todos os campos
+        servicosContainer.querySelectorAll('input, select, textarea').forEach(input => {
+            input.disabled = false;
+        });
+        
+        // Mostrar botões de remover
+        servicosContainer.querySelectorAll('.btn-remove-servico').forEach(btn => {
+            btn.style.display = 'block';
+        });
+        
+        // Calcular totais
+        calcularTotais();
+        
+        // Botão salvar normal
+        btnSalvarPedido.textContent = 'Atualizar Pedido';
+        btnSalvarPedido.onclick = salvarPedido;
+        
+        modalPedido.show();
+    };
+
+    // Novo pedido
+    btnNovoPedido.addEventListener('click', () => {
+        modalTitle.textContent = 'Novo Pedido Detalhado';
+        pedidoId.value = '';
+        
+        // Limpar formulário
+        formPedido.reset();
+        
+        // Data atual
+        const hoje = new Date().toISOString().split('T')[0];
+        dataPedido.value = hoje;
+        
+        // Limpar serviços
+        servicosContainer.innerHTML = '';
+        servicosNoPedido = [];
+        
+        // Adicionar um serviço inicial
+        adicionarServico();
+        
+        // Status padrão
+        statusServico.value = 'andamento';
+        statusPagamento.value = 'a_receber';
+        tipoPagamento.value = 'avista';
+        valorPago.value = 0;
+        
+        // Mostrar botão adicionar
+        btnAddServico.style.display = 'block';
+        
+        // Botão salvar normal
+        btnSalvarPedido.textContent = 'Salvar Pedido';
+        btnSalvarPedido.onclick = salvarPedido;
+    });
+
+    // Salvar pedido
+    async function salvarPedido() {
+        // Validações básicas
+        if (!clientePedido.value) {
+            alert('Por favor, selecione um cliente.');
+            clientePedido.focus();
+            return;
+        }
+        
+        if (servicosNoPedido.length === 0) {
+            alert('Por favor, adicione pelo menos um item ao pedido.');
+            return;
+        }
+        
+        // Validar serviços
+        for (let i = 0; i < servicosNoPedido.length; i++) {
+            const servico = servicosNoPedido[i];
+            if (!servico.nome || servico.nome.trim() === '') {
+                alert(`Por favor, informe a descrição do item ${i + 1}.`);
+                const servicoDiv = servicosContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                servicoDiv.querySelector('.servico-nome').focus();
+                return;
+            }
+            if (servico.precoUnitario <= 0) {
+                alert(`O preço do item ${i + 1} deve ser maior que zero.`);
+                const servicoDiv = servicosContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                servicoDiv.querySelector('.servico-preco').focus();
+                return;
+            }
+            if (servico.quantidade <= 0) {
+                alert(`A quantidade do item ${i + 1} deve ser maior que zero.`);
+                const servicoDiv = servicosContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
+                servicoDiv.querySelector('.servico-quantidade').focus();
+                return;
+            }
+        }
+        
+        try {
+            // Encontrar cliente selecionado
+            const clienteSelecionado = clientes.find(c => c.id === clientePedido.value);
+            if (!clienteSelecionado) {
+                alert('Cliente não encontrado. Por favor, selecione um cliente válido.');
+                return;
             }
             
-            calcularTotais();
-        }
-
-        // Calcular totais do pedido
-        function calcularTotais() {
+            // Calcular totais finais
             let subtotalValue = 0;
             let totalDescontosValue = 0;
             let valorTotalValue = 0;
             
             servicosNoPedido.forEach(servico => {
-                const valorServico = (servico.precoUnitario * servico.quantidade);
+                const valorServico = servico.precoUnitario * servico.quantidade;
                 subtotalValue += valorServico;
                 totalDescontosValue += servico.desconto;
-                valorTotalValue += servico.valorTotal;
+                valorTotalValue += servico.subtotal;
             });
             
-            subtotal.textContent = `R$ ${subtotalValue.toFixed(2)}`;
-            totalDescontos.textContent = `R$ ${totalDescontosValue.toFixed(2)}`;
-            valorTotal.textContent = `R$ ${valorTotalValue.toFixed(2)}`;
+            const valorPagoValue = parseFloat(valorPago.value) || 0;
+            const valorPendente = valorTotalValue - valorPagoValue;
             
-            // Atualizar label de valor pago
-            const statusPagamentoValue = statusPagamento.value;
-            if (statusPagamentoValue === 'pago') {
-                labelValorPago.textContent = 'Valor Pago *';
-                valorPago.required = true;
-                valorPago.value = valorTotalValue;
-                helpValorPago.textContent = 'Valor total do pedido';
-            } else if (statusPagamentoValue === 'parcial') {
-                labelValorPago.textContent = 'Valor Pago *';
-                valorPago.required = true;
-                helpValorPago.textContent = 'Informe quanto já foi pago';
+            // Preparar dados do pedido
+            const pedidoData = {
+                clienteId: clientePedido.value,
+                clienteNome: clienteSelecionado.nome,
+                clienteEmail: clienteSelecionado.email,
+                clienteTelefone: clienteSelecionado.telefone,
+                
+                numeroPedido: pedidoId.value ? undefined : `PED-${String(proximoNumeroPedido).padStart(3, '0')}`,
+                dataPedido: dataPedido.value,
+                
+                servicos: servicosNoPedido,
+                
+                subtotal: subtotalValue,
+                totalDescontos: totalDescontosValue,
+                valorTotal: valorTotalValue,
+                
+                statusServico: statusServico.value,
+                statusPagamento: statusPagamento.value,
+                tipoPagamento: tipoPagamento.value,
+                
+                valorPago: valorPagoValue,
+                valorPendente: valorPendente,
+                
+                observacoes: observacoes.value || null,
+                
+                profissionalId: currentUser.uid,
+                profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
+                criadoEm: pedidoId.value ? undefined : serverTimestamp(),
+                atualizadoEm: serverTimestamp()
+            };
+            
+            // Salvar no Firestore
+            if (pedidoId.value) {
+                // Atualizar pedido existente
+                const pedidoRef = doc(db, "pedidos", pedidoId.value);
+                await updateDoc(pedidoRef, pedidoData);
             } else {
-                labelValorPago.textContent = 'Valor Pago';
-                valorPago.required = false;
-                valorPago.value = 0;
-                helpValorPago.textContent = 'Deixe 0 se ainda não foi pago';
-            }
-        }
-
-        // Atualizar estatísticas
-        function atualizarEstatisticas() {
-            totalPedidos.textContent = pedidos.length;
-            
-            const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
-            const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
-            
-            let aReceber = 0;
-            pedidos.forEach(p => {
-                if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial') {
-                    aReceber += (p.valorTotal - (p.valorPago || 0));
-                }
-            });
-            
-            pedidosAndamento.textContent = emAndamento;
-            pedidosConcluidos.textContent = concluidos;
-            valorAReceber.textContent = `R$ ${aReceber.toFixed(2)}`;
-        }
-
-        // Atualizar tabela de pedidos
-        function atualizarTabelaPedidos() {
-            const searchTerm = searchPedidos.value.toLowerCase();
-            const statusServicoFilter = filterStatusServico.value;
-            const statusPagamentoFilter = filterStatusPagamento.value;
-            const mesFilter = filterMes.value;
-            const clienteFilter = filterCliente.value;
-            
-            let pedidosFiltrados = pedidos.filter(pedido => {
-                // Busca por texto
-                const matchSearch = !searchTerm || 
-                    (pedido.clienteNome && pedido.clienteNome.toLowerCase().includes(searchTerm)) ||
-                    (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
-                    (pedido.servicos && pedido.servicos.some(s => 
-                        s.nome && s.nome.toLowerCase().includes(searchTerm)));
-                
-                // Filtros
-                const matchStatusServico = !statusServicoFilter || pedido.statusServico === statusServicoFilter;
-                const matchStatusPagamento = !statusPagamentoFilter || pedido.statusPagamento === statusPagamentoFilter;
-                const matchCliente = !clienteFilter || pedido.clienteId === clienteFilter;
-                
-                // Filtro por mês
-                let matchMes = true;
-                if (mesFilter) {
-                    const data = new Date(pedido.dataPedido);
-                    const mes = data.getMonth() + 1;
-                    matchMes = mes.toString() === mesFilter;
-                }
-                
-                return matchSearch && matchStatusServico && matchStatusPagamento && matchMes && matchCliente;
-            });
-            
-            pedidosTable.innerHTML = '';
-            
-            if (pedidosFiltrados.length === 0) {
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `
-                    <td colspan="8" class="text-center py-5">
-                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">${pedidos.length === 0 ? 
-                            'Nenhum pedido cadastrado' : 
-                            'Nenhum pedido corresponde aos filtros'}</h5>
-                        <p class="text-muted mb-0">${pedidos.length === 0 ? 
-                            'Clique em "Novo Pedido" para criar seu primeiro pedido' : 
-                            'Tente ajustar os filtros de busca'}</p>
-                    </td>
-                `;
-                pedidosTable.appendChild(emptyRow);
-                return;
+                // Criar novo pedido
+                await addDoc(collection(db, "pedidos"), pedidoData);
             }
             
-            pedidosFiltrados.forEach(pedido => {
-                const row = document.createElement('tr');
-                
-                // Formatar serviços para exibição
-                let servicosText = '';
-                if (Array.isArray(pedido.servicos)) {
-                    servicosText = pedido.servicos.map(s => 
-                        `${s.quantidade}x ${s.nome}`).join(', ');
-                } else if (pedido.servicos) {
-                    servicosText = `${pedido.servicos.quantidade || 1}x ${pedido.servicos.nome || 'Serviço'}`;
-                }
-                
-                // Badges de status
-                const statusServicoBadge = getStatusServicoBadge(pedido.statusServico);
-                const statusPagamentoBadge = getStatusPagamentoBadge(pedido.statusPagamento);
-                
-                // Data formatada
-                const dataFormatada = formatarData(pedido.dataPedido);
-                
-                row.innerHTML = `
-                    <td>
-                        <strong>${pedido.numeroPedido || `PED-${pedidos.indexOf(pedido) + 1}`}</strong>
-                    </td>
-                    <td>${pedido.clienteNome || 'Cliente não encontrado'}</td>
-                    <td>
-                        <small>${servicosText.substring(0, 50)}${servicosText.length > 50 ? '...' : ''}</small>
-                    </td>
-                    <td><strong>R$ ${pedido.valorTotal?.toFixed(2) || '0.00'}</strong></td>
-                    <td>${statusServicoBadge}</td>
-                    <td>${statusPagamentoBadge}</td>
-                    <td>${dataFormatada}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-action-sm btn-ver" onclick="verPedido('${pedido.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn-action-sm btn-editar" onclick="editarPedido('${pedido.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action-sm btn-recibo" onclick="gerarRecibo('${pedido.id}')">
-                                <i class="fas fa-file-pdf"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                pedidosTable.appendChild(row);
-            });
-        }
-
-        // Helper: Badge de status serviço
-        function getStatusServicoBadge(status) {
-            const badges = {
-                'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
-                'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
-                'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
-            };
-            return badges[status] || '<span class="badge-status">Desconhecido</span>';
-        }
-
-        // Helper: Badge de status pagamento
-        function getStatusPagamentoBadge(status) {
-            const badges = {
-                'a_receber': '<span class="badge-status status-a-receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
-                'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
-                'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
-                'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
-            };
-            return badges[status] || '<span class="badge-status">Desconhecido</span>';
-        }
-
-        // Helper: Formatar data
-        function formatarData(dataString) {
-            if (!dataString) return '--';
-            const date = new Date(dataString);
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        // Ver pedido
-        window.verPedido = async function(id) {
-            const pedido = pedidos.find(p => p.id === id);
-            if (!pedido) return;
+            // Fechar modal e atualizar dados
+            modalPedido.hide();
+            await carregarPedidos();
             
-            // Preencher modal com dados (somente leitura)
-            modalTitle.textContent = `Pedido ${pedido.numeroPedido}`;
-            pedidoId.value = id;
+        } catch (error) {
+            console.error('Erro ao salvar pedido:', error);
+            alert('Erro ao salvar pedido. Por favor, tente novamente.');
+        }
+    }
+
+    // Gerar recibo PDF detalhado
+    window.gerarReciboDetalhado = async function(id) {
+        const pedido = pedidos.find(p => p.id === id);
+        if (!pedido) {
+            alert('Pedido não encontrado.');
+            return;
+        }
+        
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
             
-            // Preencher campos
-            clientePedido.value = pedido.clienteId;
-            dataPedido.value = pedido.dataPedido;
-            statusServico.value = pedido.statusServico;
-            statusPagamento.value = pedido.statusPagamento;
-            tipoPagamento.value = pedido.tipoPagamento;
-            valorPago.value = pedido.valorPago || 0;
-            observacoes.value = pedido.observacoes || '';
+            // Configurações
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            let y = margin;
             
-            // Adicionar serviços
-            servicosContainer.innerHTML = '';
-            servicosNoPedido = [];
+            // Cabeçalho
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ORÇAMENTO/RECIBO DETALHADO', pageWidth/2, y, { align: 'center' });
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Nº: ${pedido.numeroPedido || 'PEDIDO'}`, margin, y);
+            doc.text(`Data: ${formatarData(pedido.dataPedido)}`, pageWidth - margin, y, { align: 'right' });
+            y += 15;
+            
+            // Linha
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 15;
+            
+            // Dados do Profissional
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('PRESTADOR DO SERVIÇO:', margin, y);
+            y += 7;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(userData?.nomeCompleto || userData?.apelido || 'Profissional', margin, y);
+            doc.text(`ID: ${userData?.idScanHub || '---'}`, margin, y + 5);
+            if (userData?.email) doc.text(`E-mail: ${userData.email}`, margin, y + 10);
+            y += 25;
+            
+            // Dados do Cliente
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CLIENTE:', margin, y);
+            y += 7;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(pedido.clienteNome || 'Cliente', margin, y);
+            if (pedido.clienteEmail) doc.text(`E-mail: ${pedido.clienteEmail}`, margin, y + 5);
+            if (pedido.clienteTelefone) doc.text(`Telefone: ${pedido.clienteTelefone}`, margin, y + 10);
+            y += 25;
+            
+            // Título da tabela de serviços
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DETALHAMENTO DOS ITENS/SERVIÇOS:', margin, y);
+            y += 10;
+            
+            // Cabeçalho da tabela
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Item', margin, y);
+            doc.text('Descrição', margin + 20, y);
+            doc.text('Qtd', pageWidth - 120, y);
+            doc.text('Unit. R$', pageWidth - 90, y);
+            doc.text('Desc. R$', pageWidth - 60, y);
+            doc.text('Total R$', pageWidth - 30, y, { align: 'right' });
+            y += 5;
+            
+            // Linha do cabeçalho
+            doc.setLineWidth(0.3);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 8;
+            
+            // Itens/Serviços
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
             
             if (Array.isArray(pedido.servicos)) {
-                pedido.servicos.forEach(servico => {
-                    adicionarServico(servico);
+                pedido.servicos.forEach((servico, index) => {
+                    // Quebra de página se necessário
+                    if (y > 240) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    
+                    // Número do item
+                    doc.text(`${index + 1}.`, margin, y);
+                    
+                    // Descrição (com quebra de linha)
+                    const descricao = servico.descricao ? `${servico.nome} - ${servico.descricao}` : servico.nome;
+                    const descricaoLines = doc.splitTextToSize(descricao, 80);
+                    
+                    doc.text(descricaoLines[0], margin + 15, y);
+                    
+                    // Se tiver mais de uma linha na descrição
+                    if (descricaoLines.length > 1) {
+                        for (let i = 1; i < descricaoLines.length; i++) {
+                            y += 4;
+                            doc.text(descricaoLines[i], margin + 15, y);
+                        }
+                    }
+                    
+                    // Quantidade, preço, desconto e total
+                    const quantidade = `${servico.quantidade} ${servico.unidade || 'un'}`;
+                    const precoUnitario = `R$ ${servico.precoUnitario?.toFixed(2)}`;
+                    const desconto = servico.desconto > 0 ? `R$ ${servico.desconto?.toFixed(2)}` : '-';
+                    const totalItem = `R$ ${servico.subtotal?.toFixed(2) || (servico.precoUnitario * servico.quantidade - servico.desconto).toFixed(2)}`;
+                    
+                    doc.text(quantidade, pageWidth - 120, y);
+                    doc.text(precoUnitario, pageWidth - 90, y);
+                    doc.text(desconto, pageWidth - 60, y);
+                    doc.text(totalItem, pageWidth - 30, y, { align: 'right' });
+                    
+                    y += 12;
+                    
+                    // Linha divisória entre itens
+                    doc.setLineWidth(0.1);
+                    doc.line(margin, y - 2, pageWidth - margin, y - 2);
                 });
-            } else if (pedido.servicos) {
-                adicionarServico(pedido.servicos);
             }
             
-            // Tornar campos readonly
-            clientePedido.disabled = true;
-            dataPedido.disabled = true;
-            statusServico.disabled = true;
-            statusPagamento.disabled = true;
-            tipoPagamento.disabled = true;
-            valorPago.disabled = true;
-            observacoes.disabled = true;
-            btnAddServico.style.display = 'none';
-            
-            // Tornar todos os inputs de serviços readonly
-            servicosContainer.querySelectorAll('input, select, textarea').forEach(input => {
-                input.disabled = true;
-            });
-            
-            // Esconder botões de remover
-            servicosContainer.querySelectorAll('.btn-remove-servico').forEach(btn => {
-                btn.style.display = 'none';
-            });
-            
-            // Mudar botão salvar para "Fechar"
-            btnSalvarPedido.textContent = 'Fechar';
-            btnSalvarPedido.onclick = () => modalPedido.hide();
-            
-            modalPedido.show();
-            
-            // Restaurar após fechar
-            modalPedido._element.addEventListener('hidden.bs.modal', function restore() {
-                clientePedido.disabled = false;
-                dataPedido.disabled = false;
-                statusServico.disabled = false;
-                statusPagamento.disabled = false;
-                tipoPagamento.disabled = false;
-                valorPago.disabled = false;
-                observacoes.disabled = false;
-                btnAddServico.style.display = 'block';
-                btnSalvarPedido.textContent = 'Salvar Pedido';
-                btnSalvarPedido.onclick = salvarPedido;
-                modalPedido._element.removeEventListener('hidden.bs.modal', restore);
-            }, { once: true });
-        };
-
-        // Editar pedido
-        window.editarPedido = async function(id) {
-            const pedido = pedidos.find(p => p.id === id);
-            if (!pedido) return;
-            
-            modalTitle.textContent = `Editar Pedido ${pedido.numeroPedido}`;
-            pedidoId.value = id;
-            
-            // Preencher campos
-            clientePedido.value = pedido.clienteId;
-            dataPedido.value = pedido.dataPedido;
-            statusServico.value = pedido.statusServico;
-            statusPagamento.value = pedido.statusPagamento;
-            tipoPagamento.value = pedido.tipoPagamento;
-            valorPago.value = pedido.valorPago || 0;
-            observacoes.value = pedido.observacoes || '';
-            
-            // Adicionar serviços
-            servicosContainer.innerHTML = '';
-            servicosNoPedido = [];
-            
-            if (Array.isArray(pedido.servicos)) {
-                pedido.servicos.forEach(servico => {
-                    adicionarServico(servico);
-                });
-            } else if (pedido.servicos) {
-                adicionarServico(pedido.servicos);
+            // Totais
+            if (y > 220) {
+                doc.addPage();
+                y = margin;
             }
             
-            // Mostrar botão adicionar
-            btnAddServico.style.display = 'block';
+            y += 15;
+            doc.setLineWidth(0.5);
+            doc.line(pageWidth - 100, y, pageWidth - margin, y);
+            y += 8;
             
-            // Habilitar todos os campos
-            servicosContainer.querySelectorAll('input, select, textarea').forEach(input => {
-                input.disabled = false;
-            });
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RESUMO FINANCEIRO:', pageWidth - 100, y);
+            y += 8;
             
-            // Mostrar botões de remover
-            servicosContainer.querySelectorAll('.btn-remove-servico').forEach(btn => {
-                btn.style.display = 'block';
-            });
+            doc.setFont('helvetica', 'normal');
+            doc.text('Subtotal:', pageWidth - 100, y);
+            doc.text(`R$ ${pedido.subtotal?.toFixed(2) || '0.00'}`, pageWidth - 30, y, { align: 'right' });
+            y += 7;
             
-            // Botão salvar normal
-            btnSalvarPedido.textContent = 'Atualizar Pedido';
-            btnSalvarPedido.onclick = salvarPedido;
+            if (pedido.totalDescontos > 0) {
+                doc.text('Descontos:', pageWidth - 100, y);
+                doc.text(`R$ ${pedido.totalDescontos?.toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+                y += 7;
+            }
             
-            modalPedido.show();
-        };
+            doc.setFont('helvetica', 'bold');
+            doc.text('VALOR TOTAL:', pageWidth - 100, y);
+            doc.text(`R$ ${pedido.valorTotal?.toFixed(2) || '0.00'}`, pageWidth - 30, y, { align: 'right' });
+            y += 12;
+            
+            // Status e Pagamento
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Status do Serviço: ${getStatusTexto(pedido.statusServico)}`, margin, y);
+            y += 5;
+            doc.text(`Status do Pagamento: ${getStatusTexto(pedido.statusPagamento)}`, margin, y);
+            y += 5;
+            doc.text(`Forma de Pagamento: ${getFormaPagamentoTexto(pedido.tipoPagamento)}`, margin, y);
+            y += 5;
+            
+            if (pedido.valorPago > 0) {
+                doc.text(`Valor Pago: R$ ${pedido.valorPago.toFixed(2)}`, margin, y);
+                doc.text(`Valor Pendente: R$ ${(pedido.valorTotal - pedido.valorPago).toFixed(2)}`, pageWidth - margin, y, { align: 'right' });
+                y += 5;
+            }
+            
+            // Observações
+            if (pedido.observacoes) {
+                y += 10;
+                doc.setFont('helvetica', 'bold');
+                doc.text('Observações:', margin, y);
+                y += 5;
+                doc.setFont('helvetica', 'normal');
+                const obsLines = doc.splitTextToSize(pedido.observacoes, pageWidth - 2*margin);
+                obsLines.forEach(line => {
+                    doc.text(line, margin, y);
+                    y += 5;
+                });
+            }
+            
+            // Assinaturas
+            if (y > 180) {
+                doc.addPage();
+                y = margin;
+            }
+            
+            y += 20;
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageWidth/2 - 10, y);
+            doc.line(pageWidth/2 + 10, y, pageWidth - margin, y);
+            y += 5;
+            
+            doc.setFontSize(9);
+            doc.text('Assinatura do Prestador', margin, y);
+            doc.text('Assinatura do Cliente', pageWidth/2 + 10, y);
+            y += 20;
+            
+            // Data e local
+            const hoje = new Date();
+            doc.text(`Emitido em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, margin, y);
+            
+            // Rodapé
+            doc.setFontSize(8);
+            doc.text('Documento gerado automaticamente pelo sistema ScanHub', pageWidth/2, 280, { align: 'center' });
+            
+            // Salvar PDF
+            doc.save(`Orcamento-${pedido.numeroPedido || pedido.id}.pdf`);
+            
+        } catch (error) {
+            console.error('Erro ao gerar recibo:', error);
+            alert('Erro ao gerar recibo. Por favor, tente novamente.');
+        }
+    };
 
-        // Novo pedido
-        btnNovoPedido.addEventListener('click', () => {
-            modalTitle.textContent = 'Novo Pedido';
-            pedidoId.value = '';
-            
-            // Limpar formulário
-            formPedido.reset();
-            
-            // Data atual
+    // Helper: Texto do status
+    function getStatusTexto(status) {
+        const textos = {
+            'andamento': 'Em Andamento',
+            'concluido': 'Concluído',
+            'cancelado': 'Cancelado',
+            'a_receber': 'A Receber',
+            'pago': 'Pago',
+            'parcial': 'Pago Parcialmente',
+            'atrasado': 'Em Atraso'
+        };
+        return textos[status] || status;
+    }
+
+    // Helper: Texto da forma de pagamento
+    function getFormaPagamentoTexto(forma) {
+        const formas = {
+            'avista': 'À Vista',
+            'pix': 'PIX',
+            'cartao_credito': 'Cartão de Crédito',
+            'cartao_debito': 'Cartão de Débito',
+            'boleto': 'Boleto',
+            'outros': 'Outros'
+        };
+        return formas[forma] || forma;
+    }
+
+    // Event listeners para filtros
+    searchPedidos.addEventListener('input', atualizarTabelaPedidos);
+    filterStatusServico.addEventListener('change', atualizarTabelaPedidos);
+    filterStatusPagamento.addEventListener('change', atualizarTabelaPedidos);
+    filterMes.addEventListener('change', atualizarTabelaPedidos);
+    filterCliente.addEventListener('change', atualizarTabelaPedidos);
+
+    // Event listener para status de pagamento (atualizar valor pago)
+    statusPagamento.addEventListener('change', calcularTotais);
+
+    // Menu mobile
+    menuToggle.addEventListener('click', () => {
+        dashboardMenu.classList.toggle('show');
+        const icon = menuToggle.querySelector('i');
+        if (dashboardMenu.classList.contains('show')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+            dashboardMenu.classList.remove('show');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    // Logout
+    btnLogout.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        } catch (error) {
+            alert('Erro ao sair. Tente novamente.');
+        }
+    });
+
+    // Inicializar data atual no modal quando aberto
+    document.getElementById('modalPedido').addEventListener('shown.bs.modal', () => {
+        if (!dataPedido.value) {
             const hoje = new Date().toISOString().split('T')[0];
             dataPedido.value = hoje;
-            
-            // Limpar serviços
-            servicosContainer.innerHTML = '';
-            servicosNoPedido = [];
-            
-            // Adicionar um serviço inicial
-            adicionarServico();
-            
-            // Status padrão
-            statusServico.value = 'andamento';
-            statusPagamento.value = 'a_receber';
-            tipoPagamento.value = 'avista';
-            valorPago.value = 0;
-            
-            // Mostrar botão adicionar
-            btnAddServico.style.display = 'block';
-            
-            // Botão salvar normal
-            btnSalvarPedido.textContent = 'Salvar Pedido';
-            btnSalvarPedido.onclick = salvarPedido;
-        });
-
-        // Salvar pedido
-        async function salvarPedido() {
-            // Validações básicas
-            if (!clientePedido.value) {
-                alert('Por favor, selecione um cliente.');
-                clientePedido.focus();
-                return;
-            }
-            
-            if (servicosNoPedido.length === 0) {
-                alert('Por favor, adicione pelo menos um serviço.');
-                return;
-            }
-            
-            // Validar serviços
-            for (let i = 0; i < servicosNoPedido.length; i++) {
-                const servico = servicosNoPedido[i];
-                if (!servico.servicoId) {
-                    alert(`Por favor, selecione o serviço ${i + 1}.`);
-                    return;
-                }
-                if (servico.precoUnitario <= 0) {
-                    alert(`O preço do serviço ${i + 1} deve ser maior que zero.`);
-                    return;
-                }
-                if (servico.quantidade <= 0) {
-                    alert(`A quantidade do serviço ${i + 1} deve ser maior que zero.`);
-                    return;
-                }
-            }
-            
-            try {
-                // Encontrar cliente selecionado
-                const clienteSelecionado = clientes.find(c => c.id === clientePedido.value);
-                if (!clienteSelecionado) {
-                    alert('Cliente não encontrado. Por favor, selecione um cliente válido.');
-                    return;
-                }
-                
-                // Calcular totais
-                let subtotalValue = 0;
-                let totalDescontosValue = 0;
-                let valorTotalValue = 0;
-                
-                servicosNoPedido.forEach(servico => {
-                    const valorServico = servico.precoUnitario * servico.quantidade;
-                    subtotalValue += valorServico;
-                    totalDescontosValue += servico.desconto;
-                    valorTotalValue += servico.valorTotal;
-                });
-                
-                const valorPagoValue = parseFloat(valorPago.value) || 0;
-                const valorPendente = valorTotalValue - valorPagoValue;
-                
-                // Preparar dados do pedido
-                const pedidoData = {
-                    clienteId: clientePedido.value,
-                    clienteNome: clienteSelecionado.nome,
-                    clienteEmail: clienteSelecionado.email,
-                    clienteTelefone: clienteSelecionado.telefone,
-                    
-                    numeroPedido: pedidoId.value ? undefined : `PED-${String(proximoNumeroPedido).padStart(3, '0')}`,
-                    dataPedido: dataPedido.value,
-                    
-                    servicos: servicosNoPedido,
-                    
-                    subtotal: subtotalValue,
-                    totalDescontos: totalDescontosValue,
-                    valorTotal: valorTotalValue,
-                    
-                    statusServico: statusServico.value,
-                    statusPagamento: statusPagamento.value,
-                    tipoPagamento: tipoPagamento.value,
-                    
-                    valorPago: valorPagoValue,
-                    valorPendente: valorPendente,
-                    
-                    observacoes: observacoes.value || null,
-                    
-                    profissionalId: currentUser.uid,
-                    profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
-                    criadoEm: pedidoId.value ? undefined : serverTimestamp(),
-                    atualizadoEm: serverTimestamp()
-                };
-                
-                // Salvar no Firestore
-                if (pedidoId.value) {
-                    // Atualizar pedido existente
-                    const pedidoRef = doc(db, "pedidos", pedidoId.value);
-                    await updateDoc(pedidoRef, pedidoData);
-                } else {
-                    // Criar novo pedido
-                    await addDoc(collection(db, "pedidos"), pedidoData);
-                }
-                
-                // Fechar modal e atualizar dados
-                modalPedido.hide();
-                await carregarPedidos();
-                
-            } catch (error) {
-                console.error('Erro ao salvar pedido:', error);
-                alert('Erro ao salvar pedido. Por favor, tente novamente.');
-            }
         }
+    });
 
-        // Gerar recibo PDF
-        window.gerarRecibo = async function(id) {
-            const pedido = pedidos.find(p => p.id === id);
-            if (!pedido) {
-                alert('Pedido não encontrado.');
-                return;
-            }
-            
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Configurações
-                const margin = 20;
-                let y = margin;
-                
-                // Cabeçalho
-                doc.setFontSize(20);
-                doc.setFont('helvetica', 'bold');
-                doc.text('RECIBO', 105, y, { align: 'center' });
-                y += 15;
-                
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`Nº: ${pedido.numeroPedido || 'PEDIDO'}`, margin, y);
-                doc.text(`Data: ${formatarData(pedido.dataPedido)}`, 150, y);
-                y += 10;
-                
-                // Linha
-                doc.setLineWidth(0.5);
-                doc.line(margin, y, 190, y);
-                y += 15;
-                
-                // Dados do Profissional
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.text('PRESTADOR DO SERVIÇO:', margin, y);
-                y += 7;
-                
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.text(userData?.nomeCompleto || userData?.apelido || 'Profissional', margin, y);
-                doc.text(`ID: ${userData?.idScanHub || '---'}`, margin, y + 5);
-                y += 15;
-                
-                // Dados do Cliente
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.text('CLIENTE:', margin, y);
-                y += 7;
-                
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.text(pedido.clienteNome || 'Cliente', margin, y);
-                if (pedido.clienteEmail) doc.text(`E-mail: ${pedido.clienteEmail}`, margin, y + 5);
-                if (pedido.clienteTelefone) doc.text(`Telefone: ${pedido.clienteTelefone}`, margin, y + 10);
-                y += 20;
-                
-                // Serviços
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.text('DESCRIÇÃO DOS SERVIÇOS:', margin, y);
-                y += 10;
-                
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                
-                if (Array.isArray(pedido.servicos)) {
-                    pedido.servicos.forEach((servico, index) => {
-                        if (y > 250) {
-                            doc.addPage();
-                            y = margin;
-                        }
-                        
-                        doc.text(`${index + 1}. ${servico.nome}`, margin, y);
-                        y += 5;
-                        
-                        if (servico.descricao) {
-                            doc.text(`   ${servico.descricao}`, margin + 5, y);
-                            y += 5;
-                        }
-                        
-                        doc.text(`   Quantidade: ${servico.quantidade} ${servico.unidade || 'unidade'}`, margin + 5, y);
-                        doc.text(`   Preço unitário: R$ ${servico.precoUnitario?.toFixed(2)}`, 120, y);
-                        y += 5;
-                        
-                        if (servico.desconto > 0) {
-                            doc.text(`   Desconto: R$ ${servico.desconto?.toFixed(2)}`, margin + 5, y);
-                            y += 5;
-                        }
-                        
-                        doc.text(`   Total: R$ ${servico.valorTotal?.toFixed(2)}`, margin + 5, y);
-                        y += 10;
-                    });
-                } else if (pedido.servicos) {
-                    const servico = pedido.servicos;
-                    doc.text(`1. ${servico.nome}`, margin, y);
-                    y += 15;
-                }
-                
-                // Totais
-                if (y > 230) {
-                    doc.addPage();
-                    y = margin;
-                }
-                
-                y += 10;
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'bold');
-                
-                doc.text('RESUMO FINANCEIRO:', margin, y);
-                y += 10;
-                
-                doc.setFont('helvetica', 'normal');
-                doc.text('Subtotal:', 130, y);
-                doc.text(`R$ ${pedido.subtotal?.toFixed(2) || '0.00'}`, 170, y, { align: 'right' });
-                y += 7;
-                
-                if (pedido.totalDescontos > 0) {
-                    doc.text('Descontos:', 130, y);
-                    doc.text(`R$ ${pedido.totalDescontos?.toFixed(2)}`, 170, y, { align: 'right' });
-                    y += 7;
-                }
-                
-                doc.setFont('helvetica', 'bold');
-                doc.text('TOTAL:', 130, y);
-                doc.text(`R$ ${pedido.valorTotal?.toFixed(2) || '0.00'}`, 170, y, { align: 'right' });
-                y += 10;
-                
-                // Status
-                doc.setFontSize(10);
-                doc.text(`Status do Serviço: ${getStatusTexto(pedido.statusServico)}`, margin, y);
-                y += 5;
-                doc.text(`Status do Pagamento: ${getStatusTexto(pedido.statusPagamento)}`, margin, y);
-                y += 5;
-                doc.text(`Forma de Pagamento: ${getFormaPagamentoTexto(pedido.tipoPagamento)}`, margin, y);
-                y += 5;
-                
-                if (pedido.valorPago > 0) {
-                    doc.text(`Valor Pago: R$ ${pedido.valorPago.toFixed(2)}`, margin, y);
-                    y += 5;
-                }
-                
-                // Assinaturas
-                if (y > 200) {
-                    doc.addPage();
-                    y = margin;
-                }
-                
-                y += 20;
-                doc.setLineWidth(0.5);
-                doc.line(margin, y, 90, y);
-                doc.line(110, y, 190, y);
-                y += 5;
-                
-                doc.setFontSize(9);
-                doc.text('Assinatura do Prestador', margin, y);
-                doc.text('Assinatura do Cliente', 110, y);
-                y += 20;
-                
-                // Data e local
-                const hoje = new Date();
-                doc.text(`Emitido em: ${hoje.toLocaleDateString('pt-BR')} às ${hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`, margin, y);
-                
-                // Rodapé
-                doc.setFontSize(8);
-                doc.text('Este documento foi gerado automaticamente pelo sistema ScanHub', 105, 280, { align: 'center' });
-                
-                // Salvar PDF
-                doc.save(`Recibo-${pedido.numeroPedido || pedido.id}.pdf`);
-                
-            } catch (error) {
-                console.error('Erro ao gerar recibo:', error);
-                alert('Erro ao gerar recibo. Por favor, tente novamente.');
-            }
-        };
-
-        // Helper: Texto do status
-        function getStatusTexto(status) {
-            const textos = {
-                'andamento': 'Em Andamento',
-                'concluido': 'Concluído',
-                'cancelado': 'Cancelado',
-                'a_receber': 'A Receber',
-                'pago': 'Pago',
-                'parcial': 'Pago Parcialmente',
-                'atrasado': 'Em Atraso'
-            };
-            return textos[status] || status;
-        }
-
-        // Helper: Texto da forma de pagamento
-        function getFormaPagamentoTexto(forma) {
-            const formas = {
-                'avista': 'À Vista',
-                'pix': 'PIX',
-                'cartao_credito': 'Cartão de Crédito',
-                'cartao_debito': 'Cartão de Débito',
-                'boleto': 'Boleto',
-                'outros': 'Outros'
-            };
-            return formas[forma] || forma;
-        }
-
-        // Event listeners para filtros
-        searchPedidos.addEventListener('input', atualizarTabelaPedidos);
-        filterStatusServico.addEventListener('change', atualizarTabelaPedidos);
-        filterStatusPagamento.addEventListener('change', atualizarTabelaPedidos);
-        filterMes.addEventListener('change', atualizarTabelaPedidos);
-        filterCliente.addEventListener('change', atualizarTabelaPedidos);
-
-        // Event listener para status de pagamento (atualizar valor pago)
-        statusPagamento.addEventListener('change', calcularTotais);
-
-        // Menu mobile
-        menuToggle.addEventListener('click', () => {
-            dashboardMenu.classList.toggle('show');
-            const icon = menuToggle.querySelector('i');
-            if (dashboardMenu.classList.contains('show')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        // Fechar menu ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                dashboardMenu.classList.remove('show');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        // Logout
-        btnLogout.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                alert('Erro ao sair. Tente novamente.');
-            }
-        });
-
-        // Inicializar data atual no modal quando aberto
-        document.getElementById('modalPedido').addEventListener('shown.bs.modal', () => {
-            if (!dataPedido.value) {
-                const hoje = new Date().toISOString().split('T')[0];
-                dataPedido.value = hoje;
-            }
-        });
-
-    </script>
+</script>
 </body>
 </html>
