@@ -984,12 +984,13 @@
         }
     }
 
-    // Carregar pedidos
+    // Carregar pedidos - FUNÇÃO REVISADA
     async function carregarPedidos() {
         try {
             const q = query(
                 collection(db, "pedidos"),
-                where("profissionalId", "==", currentUser.uid)
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("dataPedido", "desc")
             );
             
             const querySnapshot = await getDocs(q);
@@ -997,16 +998,18 @@
             let maxNumero = 0;
             
             querySnapshot.forEach((doc) => {
+                const pedidoData = doc.data();
                 const pedido = {
                     id: doc.id,
-                    ...doc.data()
+                    ...pedidoData
                 };
                 pedidos.push(pedido);
                 
                 // Encontrar maior número de pedido
-                if (pedido.numeroPedido) {
-                    const num = parseInt(pedido.numeroPedido.replace('PED-', ''));
-                    if (num > maxNumero) maxNumero = num;
+                if (pedido.numeroPedido && pedido.numeroPedido.startsWith('PED-')) {
+                    const numStr = pedido.numeroPedido.replace('PED-', '');
+                    const num = parseInt(numStr);
+                    if (!isNaN(num) && num > maxNumero) maxNumero = num;
                 }
             });
             
@@ -1015,10 +1018,13 @@
             atualizarEstatisticas();
         } catch (error) {
             console.error('Erro ao carregar pedidos:', error);
+            pedidos = [];
+            atualizarTabelaPedidos();
+            atualizarEstatisticas();
         }
     }
 
-    // ATUALIZAR ESTATÍSTICAS - CORRIGIDA
+    // Atualizar estatísticas
     function atualizarEstatisticas() {
         if (pedidos.length === 0) {
             totalPedidos.textContent = '0';
@@ -1034,18 +1040,19 @@
         const emAndamento = pedidos.filter(p => p.statusServico === 'andamento').length;
         const concluidos = pedidos.filter(p => p.statusServico === 'concluido').length;
         
-        // Calcular valor a receber - CORRIGIDO
+        // Calcular valor a receber
         let aReceber = 0;
-        pedidos.forEach(p => {
-            // Se tem valorPendente, usa ele
-            if (p.valorPendente !== undefined && p.valorPendente !== null && p.valorPendente > 0) {
-                aReceber += p.valorPendente;
-            } 
-            // Se não tem, calcula baseado no status
-            else if (p.statusPagamento === 'a_receber' || p.statusPagamento === 'parcial' || p.statusPagamento === 'atrasado') {
-                const valorPendente = p.valorTotal - (p.valorPago || 0);
-                if (valorPendente > 0) {
-                    aReceber += valorPendente;
+        pedidos.forEach(pedido => {
+            // Tenta usar o valorPendente salvo
+            if (pedido.valorPendente !== undefined && pedido.valorPendente !== null && pedido.valorPendente > 0) {
+                aReceber += pedido.valorPendente;
+            } else {
+                // Calcula baseado no status
+                if (pedido.statusPagamento === 'a_receber' || pedido.statusPagamento === 'parcial' || pedido.statusPagamento === 'atrasado') {
+                    const valorPendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
+                    if (valorPendente > 0) {
+                        aReceber += valorPendente;
+                    }
                 }
             }
         });
@@ -1171,7 +1178,7 @@
         const inputs = [nomeInput, quantidadeInput, precoInput, descontoInput, descricaoInput, unidadeInput];
         
         inputs.forEach(input => {
-            input.addEventListener('input', (e) => atualizarServico(servicoIndex, e));
+            input.addEventListener('input', () => atualizarServico(servicoIndex));
         });
         
         // Botão remover
@@ -1208,7 +1215,7 @@
     }
 
     // Atualizar serviço
-    function atualizarServico(index, event) {
+    function atualizarServico(index) {
         const servicoDiv = servicosContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
         
         const nomeInput = servicoDiv.querySelector('.servico-nome');
@@ -1330,7 +1337,7 @@
             
             // Filtro por mês
             let matchMes = true;
-            if (mesFilter) {
+            if (mesFilter && pedido.dataPedido) {
                 const data = new Date(pedido.dataPedido);
                 const mes = data.getMonth() + 1;
                 matchMes = mes.toString() === mesFilter;
@@ -1388,7 +1395,7 @@
                 <td>
                     <small>${servicosText.substring(0, 50)}${servicosText.length > 50 ? '...' : ''}</small>
                 </td>
-                <td><strong>R$ ${pedido.valorTotal?.toFixed(2) || '0.00'}</strong></td>
+                <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
                 <td>${statusServicoBadge}</td>
                 <td>${statusPagamentoBadge}</td>
                 <td>${dataFormatada}</td>
@@ -1435,8 +1442,13 @@
     // Helper: Formatar data
     function formatarData(dataString) {
         if (!dataString) return '--';
-        const date = new Date(dataString);
-        return date.toLocaleDateString('pt-BR');
+        try {
+            const date = new Date(dataString);
+            if (isNaN(date.getTime())) return '--';
+            return date.toLocaleDateString('pt-BR');
+        } catch (e) {
+            return '--';
+        }
     }
 
     // Ver pedido
@@ -1514,10 +1526,13 @@
         }, { once: true });
     };
 
-    // Editar pedido
+    // Editar pedido - FUNÇÃO REVISADA
     window.editarPedido = async function(id) {
         const pedido = pedidos.find(p => p.id === id);
-        if (!pedido) return;
+        if (!pedido) {
+            alert('Pedido não encontrado!');
+            return;
+        }
         
         modalTitle.textContent = `Editar Pedido ${pedido.numeroPedido}`;
         pedidoId.value = id;
@@ -1527,7 +1542,7 @@
         dataPedido.value = pedido.dataPedido;
         statusServico.value = pedido.statusServico;
         statusPagamento.value = pedido.statusPagamento;
-        tipoPagamento.value = pedido.tipoPagamento;
+        tipoPagamento.value = pedido.tipoPagamento || 'avista';
         valorPago.value = pedido.valorPago || 0;
         observacoes.value = pedido.observacoes || '';
         
@@ -1590,6 +1605,7 @@
         statusPagamento.value = 'a_receber';
         tipoPagamento.value = 'avista';
         valorPago.value = 0;
+        observacoes.value = '';
         
         // Mostrar botão adicionar
         btnAddServico.style.display = 'block';
@@ -1599,7 +1615,7 @@
         btnSalvarPedido.onclick = salvarPedido;
     });
 
-    // Salvar pedido
+    // Salvar pedido - FUNÇÃO PRINCIPAL REVISADA
     async function salvarPedido() {
         // Validações básicas
         if (!clientePedido.value) {
@@ -1619,19 +1635,19 @@
             if (!servico.nome || servico.nome.trim() === '') {
                 alert(`Por favor, informe a descrição do item ${i + 1}.`);
                 const servicoDiv = servicosContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
-                servicoDiv.querySelector('.servico-nome').focus();
+                if (servicoDiv) servicoDiv.querySelector('.servico-nome').focus();
                 return;
             }
             if (servico.precoUnitario <= 0) {
                 alert(`O preço do item ${i + 1} deve ser maior que zero.`);
                 const servicoDiv = servicosContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
-                servicoDiv.querySelector('.servico-preco').focus();
+                if (servicoDiv) servicoDiv.querySelector('.servico-preco').focus();
                 return;
             }
             if (servico.quantidade <= 0) {
                 alert(`A quantidade do item ${i + 1} deve ser maior que zero.`);
                 const servicoDiv = servicosContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
-                servicoDiv.querySelector('.servico-quantidade').focus();
+                if (servicoDiv) servicoDiv.querySelector('.servico-quantidade').focus();
                 return;
             }
         }
@@ -1653,20 +1669,19 @@
                 const valorServico = servico.precoUnitario * servico.quantidade;
                 subtotalValue += valorServico;
                 totalDescontosValue += servico.desconto;
-                valorTotalValue += servico.subtotal;
+                valorTotalValue += servico.subtotal || (valorServico - servico.desconto);
             });
             
             const valorPagoValue = parseFloat(valorPago.value) || 0;
-            const valorPendente = valorTotalValue - valorPagoValue;
+            const valorPendente = Math.max(0, valorTotalValue - valorPagoValue);
             
             // Preparar dados do pedido
             const pedidoData = {
                 clienteId: clientePedido.value,
                 clienteNome: clienteSelecionado.nome,
-                clienteEmail: clienteSelecionado.email,
-                clienteTelefone: clienteSelecionado.telefone,
+                clienteEmail: clienteSelecionado.email || '',
+                clienteTelefone: clienteSelecionado.telefone || '',
                 
-                numeroPedido: pedidoId.value ? undefined : `PED-${String(proximoNumeroPedido).padStart(3, '0')}`,
                 dataPedido: dataPedido.value,
                 
                 servicos: servicosNoPedido,
@@ -1680,29 +1695,51 @@
                 tipoPagamento: tipoPagamento.value,
                 
                 valorPago: valorPagoValue,
-                valorPendente: valorPendente > 0 ? valorPendente : 0,
+                valorPendente: valorPendente,
                 
-                observacoes: observacoes.value || null,
+                observacoes: observacoes.value || '',
                 
                 profissionalId: currentUser.uid,
                 profissionalNome: userData?.nomeCompleto || userData?.apelido || '',
-                criadoEm: pedidoId.value ? undefined : serverTimestamp(),
                 atualizadoEm: serverTimestamp()
             };
             
+            // Adicionar número de pedido apenas para novos pedidos
+            if (!pedidoId.value) {
+                pedidoData.numeroPedido = `PED-${String(proximoNumeroPedido).padStart(3, '0')}`;
+                pedidoData.criadoEm = serverTimestamp();
+            }
+            
             // Salvar no Firestore
+            let pedidoAtualizado;
             if (pedidoId.value) {
                 // Atualizar pedido existente
                 const pedidoRef = doc(db, "pedidos", pedidoId.value);
                 await updateDoc(pedidoRef, pedidoData);
+                pedidoAtualizado = pedidos.find(p => p.id === pedidoId.value);
+                if (pedidoAtualizado) {
+                    // Atualizar localmente
+                    Object.assign(pedidoAtualizado, pedidoData);
+                }
             } else {
                 // Criar novo pedido
-                await addDoc(collection(db, "pedidos"), pedidoData);
+                const docRef = await addDoc(collection(db, "pedidos"), pedidoData);
+                pedidoData.id = docRef.id;
+                pedidos.unshift(pedidoData); // Adicionar no início do array
+                proximoNumeroPedido++;
             }
             
-            // Fechar modal e atualizar dados
+            // Fechar modal
             modalPedido.hide();
-            await carregarPedidos(); // ISSO ATUALIZA OS CARDS AUTOMATICAMENTE
+            
+            // ATUALIZAR TELA IMEDIATAMENTE
+            atualizarTabelaPedidos();
+            atualizarEstatisticas();
+            
+            // Mostrar mensagem de sucesso
+            setTimeout(() => {
+                alert(pedidoId.value ? 'Pedido atualizado com sucesso!' : 'Pedido criado com sucesso!');
+            }, 300);
             
         } catch (error) {
             console.error('Erro ao salvar pedido:', error);
@@ -1796,49 +1833,56 @@
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             
+            let servicosArray = [];
             if (Array.isArray(pedido.servicos)) {
-                pedido.servicos.forEach((servico, index) => {
-                    // Quebra de página se necessário
-                    if (y > 240) {
-                        doc.addPage();
-                        y = margin;
-                    }
-                    
-                    // Número do item
-                    doc.text(`${index + 1}.`, margin, y);
-                    
-                    // Descrição (com quebra de linha)
-                    const descricao = servico.descricao ? `${servico.nome} - ${servico.descricao}` : servico.nome;
-                    const descricaoLines = doc.splitTextToSize(descricao, 80);
-                    
-                    doc.text(descricaoLines[0], margin + 15, y);
-                    
-                    // Se tiver mais de uma linha na descrição
-                    if (descricaoLines.length > 1) {
-                        for (let i = 1; i < descricaoLines.length; i++) {
-                            y += 4;
-                            doc.text(descricaoLines[i], margin + 15, y);
-                        }
-                    }
-                    
-                    // Quantidade, preço, desconto e total
-                    const quantidade = `${servico.quantidade} ${servico.unidade || 'un'}`;
-                    const precoUnitario = `R$ ${servico.precoUnitario?.toFixed(2)}`;
-                    const desconto = servico.desconto > 0 ? `R$ ${servico.desconto?.toFixed(2)}` : '-';
-                    const totalItem = `R$ ${servico.subtotal?.toFixed(2) || (servico.precoUnitario * servico.quantidade - servico.desconto).toFixed(2)}`;
-                    
-                    doc.text(quantidade, pageWidth - 120, y);
-                    doc.text(precoUnitario, pageWidth - 90, y);
-                    doc.text(desconto, pageWidth - 60, y);
-                    doc.text(totalItem, pageWidth - 30, y, { align: 'right' });
-                    
-                    y += 12;
-                    
-                    // Linha divisória entre itens
-                    doc.setLineWidth(0.1);
-                    doc.line(margin, y - 2, pageWidth - margin, y - 2);
-                });
+                servicosArray = pedido.servicos;
+            } else if (pedido.servicos) {
+                servicosArray = [pedido.servicos];
             }
+            
+            servicosArray.forEach((servico, index) => {
+                // Quebra de página se necessário
+                if (y > 240) {
+                    doc.addPage();
+                    y = margin;
+                }
+                
+                // Número do item
+                doc.text(`${index + 1}.`, margin, y);
+                
+                // Descrição (com quebra de linha)
+                const descricao = servico.descricao ? `${servico.nome} - ${servico.descricao}` : servico.nome;
+                const descricaoLines = doc.splitTextToSize(descricao || 'Item sem descrição', 80);
+                
+                doc.text(descricaoLines[0], margin + 15, y);
+                
+                // Se tiver mais de uma linha na descrição
+                if (descricaoLines.length > 1) {
+                    for (let i = 1; i < descricaoLines.length; i++) {
+                        y += 4;
+                        doc.text(descricaoLines[i], margin + 15, y);
+                    }
+                }
+                
+                // Quantidade, preço, desconto e total
+                const quantidade = `${servico.quantidade || 1} ${servico.unidade || 'un'}`;
+                const precoUnitario = `R$ ${(servico.precoUnitario || 0).toFixed(2)}`;
+                const desconto = servico.desconto > 0 ? `R$ ${(servico.desconto || 0).toFixed(2)}` : '-';
+                const totalItem = servico.subtotal ? 
+                    `R$ ${(servico.subtotal || 0).toFixed(2)}` : 
+                    `R$ ${((servico.precoUnitario || 0) * (servico.quantidade || 1) - (servico.desconto || 0)).toFixed(2)}`;
+                
+                doc.text(quantidade, pageWidth - 120, y);
+                doc.text(precoUnitario, pageWidth - 90, y);
+                doc.text(desconto, pageWidth - 60, y);
+                doc.text(totalItem, pageWidth - 30, y, { align: 'right' });
+                
+                y += 12;
+                
+                // Linha divisória entre itens
+                doc.setLineWidth(0.1);
+                doc.line(margin, y - 2, pageWidth - margin, y - 2);
+            });
             
             // Totais
             if (y > 220) {
@@ -1858,18 +1902,18 @@
             
             doc.setFont('helvetica', 'normal');
             doc.text('Subtotal:', pageWidth - 100, y);
-            doc.text(`R$ ${pedido.subtotal?.toFixed(2) || '0.00'}`, pageWidth - 30, y, { align: 'right' });
+            doc.text(`R$ ${(pedido.subtotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
             y += 7;
             
             if (pedido.totalDescontos > 0) {
                 doc.text('Descontos:', pageWidth - 100, y);
-                doc.text(`R$ ${pedido.totalDescontos?.toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+                doc.text(`R$ ${(pedido.totalDescontos || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
                 y += 7;
             }
             
             doc.setFont('helvetica', 'bold');
             doc.text('VALOR TOTAL:', pageWidth - 100, y);
-            doc.text(`R$ ${pedido.valorTotal?.toFixed(2) || '0.00'}`, pageWidth - 30, y, { align: 'right' });
+            doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
             y += 12;
             
             // Status e Pagamento
@@ -1883,8 +1927,9 @@
             y += 5;
             
             if (pedido.valorPago > 0) {
-                doc.text(`Valor Pago: R$ ${pedido.valorPago.toFixed(2)}`, margin, y);
-                doc.text(`Valor Pendente: R$ ${(pedido.valorTotal - pedido.valorPago).toFixed(2)}`, pageWidth - margin, y, { align: 'right' });
+                doc.text(`Valor Pago: R$ ${(pedido.valorPago || 0).toFixed(2)}`, margin, y);
+                const pendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
+                doc.text(`Valor Pendente: R$ ${pendente.toFixed(2)}`, pageWidth - margin, y, { align: 'right' });
                 y += 5;
             }
             
