@@ -1177,440 +1177,657 @@
     
     <!-- Script Principal -->
     <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            getDocs,
-            query,
-            where,
-            orderBy,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        getDocs,
+        query,
+        where,
+        orderBy,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config - MESMA CONFIGURAÇÃO
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
-        let currentUser = null;
-        let userData = null;
-        let servicos = [];
-        let produtos = [];
-        let tipoAtualCatalogo = 'servicos';
-        let fotosPublicas = [];
-        let modoEdicao = false;
-        let itemEmEdicao = null;
+    // ============================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================
+    let currentUser = null;
+    let userData = null;
+    let servicos = [];
+    let produtos = [];
+    let tipoAtualCatalogo = 'servicos';
+    let fotosPublicas = [];
+    let modoEdicao = false;
+    let itemEmEdicao = null;
+    let tagsPublicas = [];
+    let materiaisServico = [];
 
-        // ============================================
-        // ELEMENTOS DOM
-        // ============================================
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const userId = document.getElementById('userId');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        
-        // Elementos das abas
-        const catalogoTabs = document.getElementById('catalogoTabs');
-        const tabButtons = catalogoTabs ? catalogoTabs.querySelectorAll('.tab-btn') : [];
-        const badgeServicos = document.getElementById('badgeServicos');
-        const badgeProdutos = document.getElementById('badgeProdutos');
-        const badgeTodos = document.getElementById('badgeTodos');
-        
-        // Elementos de filtro
-        const searchCatalogo = document.getElementById('searchCatalogo');
-        const filterCategoria = document.getElementById('filterCategoria');
-        const filterStatus = document.getElementById('filterStatus');
-        
-        // Elementos de estatísticas
-        const totalServicos = document.getElementById('totalServicos');
-        const totalProdutos = document.getElementById('totalProdutos');
-        const valorEstoque = document.getElementById('valorEstoque');
-        const baixoEstoque = document.getElementById('baixoEstoque');
-        
-        // Grid do catálogo
-        const catalogoGrid = document.getElementById('catalogoGrid');
-        
-        // Modal
-        const modalItem = new bootstrap.Modal(document.getElementById('modalItem'));
-        const modalTitle = document.getElementById('modalTitle');
-        const seletorTipoItem = document.getElementById('seletorTipoItem');
-        const tipoItemBtns = document.querySelectorAll('.tipo-item-btn');
-        const tipoItemInput = document.getElementById('tipoItem');
-        const itemId = document.getElementById('itemId');
-        const formItem = document.getElementById('formItem');
-        const btnSalvarItem = document.getElementById('btnSalvarItem');
-        
-        // Abas do modal
-        const modalTabs = document.getElementById('modalTabs');
-        const modalTabBtns = document.querySelectorAll('.modal-tab-btn');
-        
-        // Campos gerais
-        const nomePublico = document.getElementById('nomePublico');
-        const statusPublico = document.getElementById('statusPublico');
-        const descricaoPublico = document.getElementById('descricaoPublico');
-        const categoriaPublico = document.getElementById('categoriaPublico');
-        const precoVenda = document.getElementById('precoVenda');
-        const unidadeMedida = document.getElementById('unidadeMedida');
-        const garantiaDias = document.getElementById('garantiaDias');
-        
-        // Campos específicos Produto (Público)
-        const camposProdutoPublico = document.getElementById('camposProdutoPublico');
-        const marcaProduto = document.getElementById('marcaProduto');
-        const modeloProduto = document.getElementById('modeloProduto');
-        const corProduto = document.getElementById('corProduto');
-        const tamanhoProduto = document.getElementById('tamanhoProduto');
-        const pesoProduto = document.getElementById('pesoProduto');
-        
-        // Campos específicos Serviço (Público)
-        const camposServicoPublico = document.getElementById('camposServicoPublico');
-        const duracaoServico = document.getElementById('duracaoServico');
-        const tipoServico = document.getElementById('tipoServico');
-        
-        // Campos Privados (Produto)
-        const camposProdutoPrivado = document.getElementById('camposProdutoPrivado');
-        const codigoSKU = document.getElementById('codigoSKU');
-        const codigoBarras = document.getElementById('codigoBarras');
-        const precoCusto = document.getElementById('precoCusto');
-        const fornecedor = document.getElementById('fornecedor');
-        const estoqueAtual = document.getElementById('estoqueAtual');
-        const estoqueMinimo = document.getElementById('estoqueMinimo');
-        const localizacaoEstoque = document.getElementById('localizacaoEstoque');
-        const impostos = document.getElementById('impostos');
-        const taxaCartao = document.getElementById('taxaCartao');
-        const cargaTributaria = document.getElementById('cargaTributaria');
-        const contatoFornecedor = document.getElementById('contatoFornecedor');
-        
-        // Campos Privados (Serviço)
-        const camposServicoPrivado = document.getElementById('camposServicoPrivado');
-        const custoHoraServico = document.getElementById('custoHoraServico');
-        const observacoesPrivadas = document.getElementById('observacoesPrivadas');
-        
-        // Tags containers
-        const tagsPublicoContainer = document.getElementById('tagsPublicoContainer');
-        const tagPublicoInput = document.getElementById('tagPublicoInput');
-        const materiaisServicoContainer = document.getElementById('materiaisServicoContainer');
-        const materialServicoInput = document.getElementById('materialServicoInput');
-        
-        // Upload de imagens
-        const uploadAreaPublico = document.getElementById('uploadAreaPublico');
-        const fotosPublicoInput = document.getElementById('fotosPublicoInput');
-        const galleryPublico = document.getElementById('galleryPublico');
-        
-        // Display financeiro
-        const displayCusto = document.getElementById('displayCusto');
-        const displayVenda = document.getElementById('displayVenda');
-        const displayMargem = document.getElementById('displayMargem');
-        const displayLucro = document.getElementById('displayLucro');
+    // ============================================
+    // ELEMENTOS DOM
+    // ============================================
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userId = document.getElementById('userId');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Elementos das abas
+    const catalogoTabs = document.getElementById('catalogoTabs');
+    const tabButtons = catalogoTabs ? catalogoTabs.querySelectorAll('.tab-btn') : [];
+    const badgeServicos = document.getElementById('badgeServicos');
+    const badgeProdutos = document.getElementById('badgeProdutos');
+    const badgeTodos = document.getElementById('badgeTodos');
+    
+    // Elementos de filtro
+    const searchCatalogo = document.getElementById('searchCatalogo');
+    const filterCategoria = document.getElementById('filterCategoria');
+    const filterStatus = document.getElementById('filterStatus');
+    
+    // Elementos de estatísticas
+    const totalServicos = document.getElementById('totalServicos');
+    const totalProdutos = document.getElementById('totalProdutos');
+    const valorEstoque = document.getElementById('valorEstoque');
+    const baixoEstoque = document.getElementById('baixoEstoque');
+    
+    // Grid do catálogo
+    const catalogoGrid = document.getElementById('catalogoGrid');
+    
+    // Modal
+    const modalItem = new bootstrap.Modal(document.getElementById('modalItem'));
+    const modalTitle = document.getElementById('modalTitle');
+    const seletorTipoItem = document.getElementById('seletorTipoItem');
+    const tipoItemBtns = document.querySelectorAll('.tipo-item-btn');
+    const tipoItemInput = document.getElementById('tipoItem');
+    const itemId = document.getElementById('itemId');
+    const formItem = document.getElementById('formItem');
+    const btnSalvarItem = document.getElementById('btnSalvarItem');
+    
+    // Abas do modal
+    const modalTabs = document.getElementById('modalTabs');
+    const modalTabBtns = document.querySelectorAll('.modal-tab-btn');
+    
+    // Campos gerais
+    const nomePublico = document.getElementById('nomePublico');
+    const statusPublico = document.getElementById('statusPublico');
+    const descricaoPublico = document.getElementById('descricaoPublico');
+    const categoriaPublico = document.getElementById('categoriaPublico');
+    const precoVenda = document.getElementById('precoVenda');
+    const unidadeMedida = document.getElementById('unidadeMedida');
+    const garantiaDias = document.getElementById('garantiaDias');
+    
+    // Campos específicos Produto (Público)
+    const camposProdutoPublico = document.getElementById('camposProdutoPublico');
+    const marcaProduto = document.getElementById('marcaProduto');
+    const modeloProduto = document.getElementById('modeloProduto');
+    const corProduto = document.getElementById('corProduto');
+    const tamanhoProduto = document.getElementById('tamanhoProduto');
+    const pesoProduto = document.getElementById('pesoProduto');
+    
+    // Campos específicos Serviço (Público)
+    const camposServicoPublico = document.getElementById('camposServicoPublico');
+    const duracaoServico = document.getElementById('duracaoServico');
+    const tipoServico = document.getElementById('tipoServico');
+    
+    // Campos Privados (Produto)
+    const camposProdutoPrivado = document.getElementById('camposProdutoPrivado');
+    const codigoSKU = document.getElementById('codigoSKU');
+    const codigoBarras = document.getElementById('codigoBarras');
+    const precoCusto = document.getElementById('precoCusto');
+    const fornecedor = document.getElementById('fornecedor');
+    const estoqueAtual = document.getElementById('estoqueAtual');
+    const estoqueMinimo = document.getElementById('estoqueMinimo');
+    const localizacaoEstoque = document.getElementById('localizacaoEstoque');
+    const impostos = document.getElementById('impostos');
+    const taxaCartao = document.getElementById('taxaCartao');
+    const cargaTributaria = document.getElementById('cargaTributaria');
+    const contatoFornecedor = document.getElementById('contatoFornecedor');
+    
+    // Campos Privados (Serviço)
+    const camposServicoPrivado = document.getElementById('camposServicoPrivado');
+    const custoHoraServico = document.getElementById('custoHoraServico');
+    const observacoesPrivadas = document.getElementById('observacoesPrivadas');
+    
+    // Tags containers
+    const tagsPublicoContainer = document.getElementById('tagsPublicoContainer');
+    const tagPublicoInput = document.getElementById('tagPublicoInput');
+    const materiaisServicoContainer = document.getElementById('materiaisServicoContainer');
+    const materialServicoInput = document.getElementById('materialServicoInput');
+    
+    // Upload de imagens
+    const uploadAreaPublico = document.getElementById('uploadAreaPublico');
+    const fotosPublicoInput = document.getElementById('fotosPublicoInput');
+    const galleryPublico = document.getElementById('galleryPublico');
+    
+    // Display financeiro
+    const displayCusto = document.getElementById('displayCusto');
+    const displayVenda = document.getElementById('displayVenda');
+    const displayMargem = document.getElementById('displayMargem');
+    const displayLucro = document.getElementById('displayLucro');
 
-        // ============================================
-        // FUNÇÕES DE UTILIDADE
-        // ============================================
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
+    // ============================================
+    // FUNÇÕES DE UTILIDADE
+    // ============================================
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+    }
 
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
 
-        function showAlert(mensagem, tipo = 'success') {
-            alert(mensagem);
-        }
+    function showAlert(mensagem, tipo = 'success') {
+        alert(mensagem);
+    }
 
-        // Upload Imgur - MESMO CÓDIGO DO PERFIL
-        async function uploadParaImgur(arquivo) {
-            showLoading();
+    // Upload Imgur - MESMO CÓDIGO DO PERFIL
+    async function uploadParaImgur(arquivo) {
+        showLoading();
+        
+        try {
+            const base64 = await converterParaBase64(arquivo);
+            const CLIENT_ID = '546c25a59c58ad7';
+            const formData = new FormData();
+            formData.append('image', base64.split(',')[1]);
+            formData.append('type', 'base64');
             
+            const resposta = await fetch('https://api.imgur.com/3/image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Client-ID ${CLIENT_ID}`
+                },
+                body: formData
+            });
+            
+            if (!resposta.ok) {
+                throw new Error('Erro do Imgur');
+            }
+            
+            const dados = await resposta.json();
+            
+            if (!dados.success) {
+                throw new Error('Erro no upload');
+            }
+            
+            return dados.data.link;
+            
+        } catch (erro) {
+            throw new Error('Falha ao enviar imagem');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function converterParaBase64(arquivo) {
+        return new Promise((resolve, reject) => {
+            const leitor = new FileReader();
+            leitor.onload = (e) => resolve(e.target.result);
+            leitor.onerror = reject;
+            leitor.readAsDataURL(arquivo);
+        });
+    }
+
+    function formatarMoeda(valor) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor || 0);
+    }
+
+    function calcularMargem(custo, venda) {
+        if (!custo || !venda || custo <= 0 || venda <= 0) return 0;
+        const margem = ((venda - custo) / custo) * 100;
+        return Math.round(margem * 100) / 100;
+    }
+
+    function calcularLucro(custo, venda) {
+        if (!custo || !venda) return 0;
+        return venda - custo;
+    }
+
+    function formatarData(data) {
+        if (!data) return '--';
+        try {
+            const date = data.toDate ? data.toDate() : new Date(data);
+            if (isNaN(date.getTime())) return '--';
+            return date.toLocaleDateString('pt-BR');
+        } catch {
+            return '--';
+        }
+    }
+
+    // ============================================
+    // INICIALIZAÇÃO DO SISTEMA
+    // ============================================
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
             try {
-                const base64 = await converterParaBase64(arquivo);
-                const CLIENT_ID = '546c25a59c58ad7';
-                const formData = new FormData();
-                formData.append('image', base64.split(',')[1]);
-                formData.append('type', 'base64');
+                showLoading();
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
                 
-                const resposta = await fetch('https://api.imgur.com/3/image', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Client-ID ${CLIENT_ID}`
-                    },
-                    body: formData
-                });
-                
-                if (!resposta.ok) {
-                    throw new Error('Erro do Imgur');
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    atualizarInterfaceUsuario(userData);
+                    await carregarCatalogo();
+                    carregarCategorias(); // DEVE VIR ANTES DE inicializarSistema
+                    inicializarSistema();
                 }
-                
-                const dados = await resposta.json();
-                
-                if (!dados.success) {
-                    throw new Error('Erro no upload');
-                }
-                
-                return dados.data.link;
-                
-            } catch (erro) {
-                throw new Error('Falha ao enviar imagem');
+            } catch (error) {
+                console.error('Erro:', error);
+                showAlert('Erro ao carregar dados do usuário', 'error');
             } finally {
                 hideLoading();
             }
+        } else {
+            window.location.href = 'login.html';
         }
+    });
 
-        function converterParaBase64(arquivo) {
-            return new Promise((resolve, reject) => {
-                const leitor = new FileReader();
-                leitor.onload = (e) => resolve(e.target.result);
-                leitor.onerror = reject;
-                leitor.readAsDataURL(arquivo);
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+        }
+        
+        if (data.idScanHub) {
+            userId.textContent = data.idScanHub;
+        }
+    }
+
+    function inicializarSistema() {
+        // Inicializar abas
+        if (tabButtons.length > 0) inicializarAbasCatalogo();
+        
+        // Inicializar seletor de tipo no modal
+        if (tipoItemBtns.length > 0) inicializarSeletorTipo();
+        
+        // Inicializar abas do modal (público/privado)
+        if (modalTabBtns.length > 0) inicializarAbasModal();
+        
+        // Inicializar eventos
+        inicializarEventListeners();
+        
+        // Inicializar tags system
+        inicializarTagsSystem();
+    }
+
+    // ============================================
+    // CARREGAMENTO DE DADOS
+    // ============================================
+    async function carregarCatalogo() {
+        await carregarServicos();
+        await carregarProdutos();
+        atualizarContadores();
+        atualizarGridCatalogo();
+    }
+
+    async function carregarServicos() {
+        try {
+            const q = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", currentUser.uid)
+            );
+            
+            const querySnapshot = await getDocs(q);
+            servicos = [];
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                servicos.push({
+                    id: doc.id,
+                    ...data,
+                    criadoEm: data.criadoEm || null,
+                    atualizadoEm: data.atualizadoEm || null
+                });
             });
+            
+            // Ordenar por data de criação (mais recente primeiro)
+            servicos.sort((a, b) => {
+                const dateA = a.criadoEm ? (a.criadoEm.toDate ? a.criadoEm.toDate() : new Date(a.criadoEm)) : new Date(0);
+                const dateB = b.criadoEm ? (b.criadoEm.toDate ? b.criadoEm.toDate() : new Date(b.criadoEm)) : new Date(0);
+                return dateB - dateA;
+            });
+            
+        } catch (error) {
+            console.error('Erro ao carregar serviços:', error);
+            showAlert('Erro ao carregar serviços', 'error');
         }
+    }
 
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor || 0);
+    async function carregarProdutos() {
+        try {
+            const q = query(
+                collection(db, "produtos"),
+                where("profissionalId", "==", currentUser.uid)
+            );
+            
+            const querySnapshot = await getDocs(q);
+            produtos = [];
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                produtos.push({
+                    id: doc.id,
+                    ...data,
+                    criadoEm: data.criadoEm || null,
+                    atualizadoEm: data.atualizadoEm || null
+                });
+            });
+            
+            // Ordenar por data de criação (mais recente primeiro)
+            produtos.sort((a, b) => {
+                const dateA = a.criadoEm ? (a.criadoEm.toDate ? a.criadoEm.toDate() : new Date(a.criadoEm)) : new Date(0);
+                const dateB = b.criadoEm ? (b.criadoEm.toDate ? b.criadoEm.toDate() : new Date(b.criadoEm)) : new Date(0);
+                return dateB - dateA;
+            });
+            
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+            showAlert('Erro ao carregar produtos', 'error');
         }
+    }
 
-        function calcularMargem(custo, venda) {
-            if (!custo || !venda || custo <= 0 || venda <= 0) return 0;
-            const margem = ((venda - custo) / custo) * 100;
-            return Math.round(margem * 100) / 100;
+    function carregarCategorias() {
+        // Categorias padrão do sistema
+        const categoriasPadrao = [
+            // Serviços
+            'Reparo de Celulares',
+            'Manutenção de Computadores',
+            'Instalação Elétrica',
+            'Encanamento',
+            'Pintura',
+            'Construção Civil',
+            'Consultoria Técnica',
+            'Design Gráfico',
+            'Desenvolvimento Web',
+            'Marketing Digital',
+            'Limpeza',
+            'Organização',
+            'Transporte',
+            'Entregas',
+            'Aulas Particulares',
+            'Personal Trainer',
+            'Beleza',
+            'Cuidados Pessoais',
+            
+            // Produtos
+            'Eletrônicos',
+            'Informática',
+            'Celulares & Tablets',
+            'Acessórios',
+            'Eletrodomésticos',
+            'Móveis',
+            'Decoração',
+            'Ferramentas',
+            'Materiais de Construção',
+            'Automotivo',
+            'Beleza & Saúde',
+            'Moda',
+            'Calçados',
+            'Esportes',
+            'Brinquedos',
+            'Alimentos',
+            'Bebidas',
+            'Livros',
+            'Papelaria',
+            'Outros'
+        ];
+
+        // Limpar selects
+        if (filterCategoria) {
+            filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
         }
-
-        function calcularLucro(custo, venda) {
-            if (!custo || !venda) return 0;
-            return venda - custo;
+        
+        if (categoriaPublico) {
+            categoriaPublico.innerHTML = '<option value="">Selecione uma categoria</option>';
         }
-
-        // ============================================
-        // INICIALIZAÇÃO DO SISTEMA
-        // ============================================
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    showLoading();
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
-                    
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        await carregarCatalogo();
-                        inicializarSistema();
-                        carregarCategorias();
+        
+        // Adicionar categorias padrão
+        categoriasPadrao.forEach(categoria => {
+            if (filterCategoria) {
+                const option1 = document.createElement('option');
+                option1.value = categoria;
+                option1.textContent = categoria;
+                filterCategoria.appendChild(option1);
+            }
+            
+            if (categoriaPublico) {
+                const option2 = document.createElement('option');
+                option2.value = categoria;
+                option2.textContent = categoria;
+                categoriaPublico.appendChild(option2);
+            }
+        });
+        
+        // Adicionar opção para criar nova categoria
+        if (categoriaPublico) {
+            const novaCategoriaOption = document.createElement('option');
+            novaCategoriaOption.value = 'nova_categoria';
+            novaCategoriaOption.textContent = '+ Adicionar nova categoria';
+            categoriaPublico.appendChild(novaCategoriaOption);
+            
+            // Evento para nova categoria
+            categoriaPublico.addEventListener('change', function() {
+                if (this.value === 'nova_categoria') {
+                    const novaCategoria = prompt('Digite o nome da nova categoria:');
+                    if (novaCategoria && novaCategoria.trim()) {
+                        // Adicionar ao select
+                        const option = document.createElement('option');
+                        option.value = novaCategoria.trim();
+                        option.textContent = novaCategoria.trim();
+                        option.selected = true;
+                        
+                        // Inserir antes da opção "nova_categoria"
+                        categoriaPublico.insertBefore(option, novaCategoriaOption);
+                        
+                        // Adicionar ao filtro também
+                        if (filterCategoria) {
+                            const filterOption = document.createElement('option');
+                            filterOption.value = novaCategoria.trim();
+                            filterOption.textContent = novaCategoria.trim();
+                            filterCategoria.appendChild(filterOption);
+                        }
+                    } else {
+                        this.value = '';
                     }
-                } catch (error) {
-                    showAlert('Erro ao carregar dados do usuário', 'error');
-                } finally {
-                    hideLoading();
                 }
-            } else {
-                window.location.href = 'login.html';
-            }
+            });
+        }
+    }
+
+    // ============================================
+    // SISTEMA DE ABAS
+    // ============================================
+    function inicializarAbasCatalogo() {
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                tipoAtualCatalogo = this.getAttribute('data-tipo');
+                atualizarGridCatalogo();
+            });
         });
+    }
 
-        function inicializarSistema() {
-            // Inicializar abas
-            if (tabButtons.length > 0) inicializarAbasCatalogo();
-            
-            // Inicializar seletor de tipo no modal
-            if (tipoItemBtns.length > 0) inicializarSeletorTipo();
-            
-            // Inicializar abas do modal (público/privado)
-            if (modalTabBtns.length > 0) inicializarAbasModal();
-            
-            // Inicializar eventos
-            inicializarEventListeners();
-        }
-
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-            }
-            
-            if (data.idScanHub) {
-                userId.textContent = data.idScanHub;
-            }
-        }
-
-        // ============================================
-        // CARREGAMENTO DE DADOS
-        // ============================================
-        async function carregarCatalogo() {
-            await carregarServicos();
-            await carregarProdutos();
-            atualizarContadores();
-            atualizarGridCatalogo();
-        }
-
-        async function carregarServicos() {
-            try {
-                const q = query(
-                    collection(db, "servicos"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("criadoEm", "desc")
-                );
+    function inicializarAbasModal() {
+        modalTabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                modalTabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const tab = this.getAttribute('data-tab');
                 
-                const querySnapshot = await getDocs(q);
-                servicos = [];
-                
-                querySnapshot.forEach((doc) => {
-                    servicos.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
+                // Mostrar conteúdo da aba selecionada
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active');
                 });
-            } catch (error) {
-                console.error('Erro ao carregar serviços:', error);
-            }
-        }
+                document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+            });
+        });
+    }
 
-        async function carregarProdutos() {
-            try {
-                const q = query(
-                    collection(db, "produtos"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("criadoEm", "desc")
-                );
-                
-                const querySnapshot = await getDocs(q);
-                produtos = [];
-                
-                querySnapshot.forEach((doc) => {
-                    produtos.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-            }
-        }
+    function inicializarSeletorTipo() {
+        tipoItemBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tipoItemBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const novoTipo = this.getAttribute('data-tipo');
+                tipoItemInput.value = novoTipo;
+                alternarCamposPorTipo(novoTipo);
+            });
+        });
+    }
 
-        function carregarCategorias() {
-            // Usar especialidades do perfil como categorias
-            if (userData?.profissional?.especialidades) {
-                const especialidades = userData.profissional.especialidades;
-                filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
-                categoriaPublico.innerHTML = '<option value="">Selecione uma categoria</option>';
-                
-                especialidades.forEach(especialidade => {
-                    const option = document.createElement('option');
-                    option.value = especialidade;
-                    option.textContent = especialidade;
-                    filterCategoria.appendChild(option.cloneNode(true));
-                    categoriaPublico.appendChild(option);
-                });
-            }
+    function alternarCamposPorTipo(tipo) {
+        if (tipo === 'servico') {
+            camposServicoPublico.style.display = 'block';
+            camposProdutoPublico.style.display = 'none';
+            camposServicoPrivado.style.display = 'block';
+            camposProdutoPrivado.style.display = 'none';
+            
+            // Habilitar/desabilitar campos obrigatórios
+            if (codigoSKU) codigoSKU.required = false;
+            if (precoCusto) precoCusto.required = false;
+            if (estoqueAtual) estoqueAtual.required = false;
+            
+            // Habilitar campos de serviço
+            if (duracaoServico) duracaoServico.required = true;
+            
+        } else if (tipo === 'produto') {
+            camposServicoPublico.style.display = 'none';
+            camposProdutoPublico.style.display = 'block';
+            camposServicoPrivado.style.display = 'none';
+            camposProdutoPrivado.style.display = 'block';
+            
+            // Habilitar/desabilitar campos obrigatórios
+            if (codigoSKU) codigoSKU.required = true;
+            if (precoCusto) precoCusto.required = true;
+            if (estoqueAtual) estoqueAtual.required = true;
+            
+            // Desabilitar campos de serviço
+            if (duracaoServico) duracaoServico.required = false;
         }
+        
+        // Recalcular margem se houver valores
+        atualizarDisplayFinanceiro();
+    }
 
-        // ============================================
-        // SISTEMA DE ABAS
-        // ============================================
-        function inicializarAbasCatalogo() {
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    tipoAtualCatalogo = this.getAttribute('data-tipo');
-                    atualizarGridCatalogo();
-                });
+    // ============================================
+    // TAGS SYSTEM
+    // ============================================
+    function inicializarTagsSystem() {
+        // Tags públicas
+        if (tagPublicoInput) {
+            tagPublicoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && tagPublicoInput.value.trim()) {
+                    e.preventDefault();
+                    adicionarTagPublica(tagPublicoInput.value.trim());
+                    tagPublicoInput.value = '';
+                }
             });
         }
-
-        function inicializarAbasModal() {
-            modalTabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    modalTabBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    const tab = this.getAttribute('data-tab');
-                    
-                    // Mostrar conteúdo da aba selecionada
-                    document.querySelectorAll('.tab-pane').forEach(pane => {
-                        pane.classList.remove('active');
-                    });
-                    document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-                });
+        
+        // Materiais do serviço
+        if (materialServicoInput) {
+            materialServicoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && materialServicoInput.value.trim()) {
+                    e.preventDefault();
+                    adicionarMaterialServico(materialServicoInput.value.trim());
+                    materialServicoInput.value = '';
+                }
             });
         }
+    }
 
-        function inicializarSeletorTipo() {
-            tipoItemBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tipoItemBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    const novoTipo = this.getAttribute('data-tipo');
-                    tipoItemInput.value = novoTipo;
-                    alternarCamposPorTipo(novoTipo);
-                });
-            });
+    function adicionarTagPublica(texto) {
+        if (!texto.trim()) return;
+        
+        tagsPublicas.push(texto.trim());
+        
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `
+            ${texto}
+            <span class="tag-remove" onclick="removerTagPublica('${texto}', this)">×</span>
+        `;
+        
+        if (tagsPublicoContainer) {
+            tagsPublicoContainer.insertBefore(tag, tagPublicoInput);
         }
+    }
 
-        function alternarCamposPorTipo(tipo) {
-            if (tipo === 'servico') {
-                camposServicoPublico.style.display = 'block';
-                camposProdutoPublico.style.display = 'none';
-                camposServicoPrivado.style.display = 'block';
-                camposProdutoPrivado.style.display = 'none';
-                
-                // Habilitar/desabilitar campos obrigatórios
-                codigoSKU.required = false;
-                precoCusto.required = false;
-                estoqueAtual.required = false;
-                
-            } else if (tipo === 'produto') {
-                camposServicoPublico.style.display = 'none';
-                camposProdutoPublico.style.display = 'block';
-                camposServicoPrivado.style.display = 'none';
-                camposProdutoPrivado.style.display = 'block';
-                
-                // Habilitar/desabilitar campos obrigatórios
-                codigoSKU.required = true;
-                precoCusto.required = true;
-                estoqueAtual.required = true;
-            }
-            
-            // Recalcular margem se houver valores
-            atualizarDisplayFinanceiro();
+    function adicionarMaterialServico(texto) {
+        if (!texto.trim()) return;
+        
+        materiaisServico.push(texto.trim());
+        
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `
+            ${texto}
+            <span class="tag-remove" onclick="removerMaterialServico('${texto}', this)">×</span>
+        `;
+        
+        if (materiaisServicoContainer) {
+            materiaisServicoContainer.insertBefore(tag, materialServicoInput);
         }
+    }
 
-        // ============================================
-        // UPLOAD DE IMAGENS (igual perfil)
-        // ============================================
+    // Funções globais para remover tags
+    window.removerTagPublica = function(texto, elemento) {
+        tagsPublicas = tagsPublicas.filter(tag => tag !== texto);
+        if (elemento && elemento.parentElement) {
+            elemento.parentElement.remove();
+        }
+    };
+
+    window.removerMaterialServico = function(texto, elemento) {
+        materiaisServico = materiaisServico.filter(material => material !== texto);
+        if (elemento && elemento.parentElement) {
+            elemento.parentElement.remove();
+        }
+    };
+
+    // ============================================
+    // UPLOAD DE IMAGENS
+    // ============================================
+    if (uploadAreaPublico) {
         uploadAreaPublico.addEventListener('click', () => {
-            fotosPublicoInput.click();
+            if (fotosPublicoInput) {
+                fotosPublicoInput.click();
+            }
         });
+    }
 
+    if (fotosPublicoInput) {
         fotosPublicoInput.addEventListener('change', async (e) => {
             const files = Array.from(e.target.files);
             
@@ -1626,82 +1843,56 @@
                     fotosPublicas.push(imageUrl);
                     adicionarFotoGaleria(imageUrl);
                 } catch (erro) {
+                    console.error('Erro no upload:', erro);
                     showAlert('Erro ao enviar foto', 'error');
                 } finally {
                     hideLoading();
                 }
             }
         });
+    }
 
-        function adicionarFotoGaleria(url) {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <img src="${url}" alt="Foto do item">
-                <div class="gallery-item-remove" onclick="removerFotoCatalogo('${url}', this)">
-                    <i class="fas fa-times"></i>
-                </div>
-            `;
-            galleryPublico.appendChild(item);
-        }
+    function adicionarFotoGaleria(url) {
+        if (!galleryPublico) return;
+        
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `
+            <img src="${url}" alt="Foto do item">
+            <div class="gallery-item-remove" onclick="removerFotoCatalogo('${url}', this)">
+                <i class="fas fa-times"></i>
+            </div>
+        `;
+        galleryPublico.appendChild(item);
+    }
 
-        window.removerFotoCatalogo = function(url, element) {
-            if (confirm('Remover esta foto?')) {
-                fotosPublicas = fotosPublicas.filter(foto => foto !== url);
+    window.removerFotoCatalogo = function(url, element) {
+        if (confirm('Remover esta foto?')) {
+            fotosPublicas = fotosPublicas.filter(foto => foto !== url);
+            if (element && element.parentElement) {
                 element.parentElement.remove();
             }
-        };
-
-        // ============================================
-        // TAGS SYSTEM (igual perfil)
-        // ============================================
-        function inicializarTags(container, inputElement, dadosIniciais = []) {
-            dadosIniciais.forEach(tag => {
-                criarTag(tag, container);
-            });
-            
-            inputElement.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && inputElement.value.trim()) {
-                    e.preventDefault();
-                    criarTag(inputElement.value.trim(), container);
-                    inputElement.value = '';
-                }
-            });
         }
+    };
 
-        function criarTag(texto, container) {
-            const tag = document.createElement('div');
-            tag.className = 'tag';
-            tag.innerHTML = `
-                ${texto}
-                <span class="tag-remove" onclick="this.parentElement.remove()">×</span>
-            `;
-            container.insertBefore(tag, container.querySelector('.tags-input'));
-        }
-
-        function getTags(container) {
-            const tags = [];
-            container.querySelectorAll('.tag').forEach(tag => {
-                tags.push(tag.firstChild.textContent.trim());
-            });
-            return tags;
-        }
-
-        // ============================================
-        // DISPLAY FINANCEIRO
-        // ============================================
-        function atualizarDisplayFinanceiro() {
-            const custo = parseFloat(precoCusto.value) || 0;
-            const venda = parseFloat(precoVenda.value) || 0;
-            const margem = calcularMargem(custo, venda);
-            const lucro = calcularLucro(custo, venda);
-            
-            displayCusto.textContent = formatarMoeda(custo);
-            displayVenda.textContent = formatarMoeda(venda);
-            displayMargem.textContent = `${margem}%`;
-            displayLucro.textContent = formatarMoeda(lucro);
-            
-            // Colorir margem
+    // ============================================
+    // DISPLAY FINANCEIRO
+    // ============================================
+    function atualizarDisplayFinanceiro() {
+        if (!displayCusto || !displayVenda || !displayMargem || !displayLucro) return;
+        
+        const custo = precoCusto ? parseFloat(precoCusto.value) || 0 : 0;
+        const venda = precoVenda ? parseFloat(precoVenda.value) || 0 : 0;
+        const margem = calcularMargem(custo, venda);
+        const lucro = calcularLucro(custo, venda);
+        
+        displayCusto.textContent = formatarMoeda(custo);
+        displayVenda.textContent = formatarMoeda(venda);
+        displayMargem.textContent = `${margem}%`;
+        displayLucro.textContent = formatarMoeda(lucro);
+        
+        // Colorir margem
+        if (displayMargem.style) {
             if (margem > 30) {
                 displayMargem.style.color = '#27ae60';
             } else if (margem > 15) {
@@ -1712,525 +1903,605 @@
                 displayMargem.style.color = '#95a5a6';
             }
         }
+    }
 
-        // Eventos para atualizar display financeiro
-        if (precoCusto) precoCusto.addEventListener('input', atualizarDisplayFinanceiro);
-        if (precoVenda) precoVenda.addEventListener('input', atualizarDisplayFinanceiro);
+    // Eventos para atualizar display financeiro
+    if (precoCusto) {
+        precoCusto.addEventListener('input', atualizarDisplayFinanceiro);
+    }
+    
+    if (precoVenda) {
+        precoVenda.addEventListener('input', atualizarDisplayFinanceiro);
+    }
 
-        // ============================================
-        // CRUD - CREATE, READ, UPDATE, DELETE
-        // ============================================
-        window.abrirModalItem = function(tipo = 'servico', itemId = null) {
-            resetarModal();
+    // ============================================
+    // CRUD - CREATE, READ, UPDATE, DELETE
+    // ============================================
+    window.abrirModalItem = function(tipo = 'servico', itemId = null) {
+        resetarModal();
+        
+        if (itemId) {
+            // Modo edição
+            modoEdicao = true;
+            const item = tipo === 'servico' 
+                ? servicos.find(s => s.id === itemId)
+                : produtos.find(p => p.id === itemId);
             
-            if (itemId) {
-                // Modo edição
-                modoEdicao = true;
-                const item = tipo === 'servico' 
-                    ? servicos.find(s => s.id === itemId)
-                    : produtos.find(p => p.id === itemId);
-                
-                if (!item) {
-                    showAlert('Item não encontrado', 'error');
-                    return;
-                }
-                
-                itemEmEdicao = item;
-                preencherModal(item);
-                modalTitle.textContent = `Editar ${tipo === 'servico' ? 'Serviço' : 'Produto'}`;
-                seletorTipoItem.style.display = 'none'; // Não mudar tipo na edição
-            } else {
-                // Modo criação
-                modoEdicao = false;
-                modalTitle.textContent = `Novo ${tipo === 'servico' ? 'Serviço' : 'Produto'}`;
-                seletorTipoItem.style.display = 'block';
-                
-                // Ativar botão do tipo selecionado
-                tipoItemBtns.forEach(btn => btn.classList.remove('active'));
-                const btnAtivo = document.querySelector(`.tipo-item-btn[data-tipo="${tipo}"]`);
-                if (btnAtivo) btnAtivo.classList.add('active');
-                tipoItemInput.value = tipo;
-                
-                alternarCamposPorTipo(tipo);
+            if (!item) {
+                showAlert('Item não encontrado', 'error');
+                return;
             }
             
+            itemEmEdicao = item;
+            preencherModal(item);
+            modalTitle.textContent = `Editar ${tipo === 'servico' ? 'Serviço' : 'Produto'}`;
+            if (seletorTipoItem) seletorTipoItem.style.display = 'none'; // Não mudar tipo na edição
+        } else {
+            // Modo criação
+            modoEdicao = false;
+            modalTitle.textContent = `Novo ${tipo === 'servico' ? 'Serviço' : 'Produto'}`;
+            if (seletorTipoItem) seletorTipoItem.style.display = 'block';
+            
+            // Ativar botão do tipo selecionado
+            tipoItemBtns.forEach(btn => btn.classList.remove('active'));
+            const btnAtivo = document.querySelector(`.tipo-item-btn[data-tipo="${tipo}"]`);
+            if (btnAtivo) btnAtivo.classList.add('active');
+            if (tipoItemInput) tipoItemInput.value = tipo;
+            
+            alternarCamposPorTipo(tipo);
+        }
+        
+        if (modalItem) {
             modalItem.show();
-        };
+        }
+    };
 
-        function resetarModal() {
-            formItem.reset();
-            itemId.value = '';
-            fotosPublicas = [];
-            galleryPublico.innerHTML = '';
-            
-            // Resetar tags
-            tagsPublicoContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
-            materiaisServicoContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
-            
-            // Resetar abas
+    function resetarModal() {
+        // Resetar formulário
+        if (formItem) formItem.reset();
+        if (itemId) itemId.value = '';
+        
+        // Resetar arrays
+        fotosPublicas = [];
+        tagsPublicas = [];
+        materiaisServico = [];
+        
+        // Limpar galeria
+        if (galleryPublico) galleryPublico.innerHTML = '';
+        
+        // Limpar tags containers
+        if (tagsPublicoContainer) {
+            const tags = tagsPublicoContainer.querySelectorAll('.tag');
+            tags.forEach(tag => tag.remove());
+        }
+        
+        if (materiaisServicoContainer) {
+            const tags = materiaisServicoContainer.querySelectorAll('.tag');
+            tags.forEach(tag => tag.remove());
+        }
+        
+        // Resetar abas
+        if (modalTabBtns && modalTabBtns.length > 0) {
             modalTabBtns.forEach(btn => btn.classList.remove('active'));
             modalTabBtns[0].classList.add('active');
+            
             document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-            document.getElementById('tabPublico').classList.add('active');
-            
-            // Data padrão
-            const hoje = new Date().toISOString().split('T')[0];
+            const tabPublico = document.getElementById('tabPublico');
+            if (tabPublico) tabPublico.classList.add('active');
         }
+        
+        // Data padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        
+        // Resetar display financeiro
+        setTimeout(atualizarDisplayFinanceiro, 100);
+    }
 
-        function preencherModal(item) {
-            itemId.value = item.id;
-            tipoItemInput.value = item.tipo || 'servico';
-            
-            // Preencher dados públicos
-            nomePublico.value = item.nome || '';
-            statusPublico.value = item.status || 'ativo';
-            descricaoPublico.value = item.descricao || '';
-            categoriaPublico.value = item.categoria || '';
-            precoVenda.value = item.precoVenda || 0;
-            unidadeMedida.value = item.unidadeMedida || 'unidade';
-            garantiaDias.value = item.garantiaDias || 90;
-            
-            // Preencher tags
-            if (item.tags && Array.isArray(item.tags)) {
-                inicializarTags(tagsPublicoContainer, tagPublicoInput, item.tags);
-            }
-            
-            // Preencher imagens
-            if (item.imagens && Array.isArray(item.imagens)) {
-                fotosPublicas = item.imagens;
-                item.imagens.forEach(img => adicionarFotoGaleria(img));
-            }
-            
-            // Alternar campos por tipo
-            alternarCamposPorTipo(item.tipo || 'servico');
-            
-            if (item.tipo === 'produto' || (!item.tipo && item.codigoSKU)) {
-                // É produto
-                marcaProduto.value = item.marca || '';
-                modeloProduto.value = item.modelo || '';
-                corProduto.value = item.cor || '';
-                tamanhoProduto.value = item.tamanho || '';
-                pesoProduto.value = item.peso || '';
-                
-                // Dados privados
-                codigoSKU.value = item.codigoSKU || '';
-                codigoBarras.value = item.codigoBarras || '';
-                precoCusto.value = item.precoCusto || 0;
-                fornecedor.value = item.fornecedor || '';
-                estoqueAtual.value = item.estoqueAtual || 0;
-                estoqueMinimo.value = item.estoqueMinimo || 0;
-                localizacaoEstoque.value = item.localizacaoEstoque || '';
-                impostos.value = item.impostos || 0;
-                taxaCartao.value = item.taxaCartao || 0;
-                cargaTributaria.value = item.cargaTributaria || 0;
-                contatoFornecedor.value = item.contatoFornecedor || '';
-                
-            } else {
-                // É serviço
-                duracaoServico.value = item.duracao || '';
-                tipoServico.value = item.tipoServico || 'presencial';
-                custoHoraServico.value = item.custoHora || 0;
-                observacoesPrivadas.value = item.observacoesPrivadas || '';
-                
-                // Preencher materiais
-                if (item.materiais && Array.isArray(item.materiais)) {
-                    inicializarTags(materiaisServicoContainer, materialServicoInput, item.materiais);
-                }
-            }
-            
-            atualizarDisplayFinanceiro();
+    function preencherModal(item) {
+        if (!item) return;
+        
+        if (itemId) itemId.value = item.id;
+        if (tipoItemInput) tipoItemInput.value = item.tipo || 'servico';
+        
+        // Preencher dados públicos
+        if (nomePublico) nomePublico.value = item.nome || '';
+        if (statusPublico) statusPublico.value = item.status || 'ativo';
+        if (descricaoPublico) descricaoPublico.value = item.descricao || '';
+        if (categoriaPublico) categoriaPublico.value = item.categoria || '';
+        if (precoVenda) precoVenda.value = item.precoVenda || 0;
+        if (unidadeMedida) unidadeMedida.value = item.unidadeMedida || 'unidade';
+        if (garantiaDias) garantiaDias.value = item.garantiaDias || 90;
+        
+        // Preencher tags
+        if (item.tags && Array.isArray(item.tags)) {
+            item.tags.forEach(tag => {
+                adicionarTagPublica(tag);
+            });
         }
+        
+        // Preencher imagens
+        if (item.imagens && Array.isArray(item.imagens)) {
+            fotosPublicas = item.imagens;
+            item.imagens.forEach(img => adicionarFotoGaleria(img));
+        }
+        
+        // Alternar campos por tipo
+        const tipo = item.tipo || (item.codigoSKU ? 'produto' : 'servico');
+        alternarCamposPorTipo(tipo);
+        
+        if (tipo === 'produto') {
+            // É produto
+            if (marcaProduto) marcaProduto.value = item.marca || '';
+            if (modeloProduto) modeloProduto.value = item.modelo || '';
+            if (corProduto) corProduto.value = item.cor || '';
+            if (tamanhoProduto) tamanhoProduto.value = item.tamanho || '';
+            if (pesoProduto) pesoProduto.value = item.peso || '';
+            
+            // Dados privados
+            if (codigoSKU) codigoSKU.value = item.codigoSKU || '';
+            if (codigoBarras) codigoBarras.value = item.codigoBarras || '';
+            if (precoCusto) precoCusto.value = item.precoCusto || 0;
+            if (fornecedor) fornecedor.value = item.fornecedor || '';
+            if (estoqueAtual) estoqueAtual.value = item.estoqueAtual || 0;
+            if (estoqueMinimo) estoqueMinimo.value = item.estoqueMinimo || 0;
+            if (localizacaoEstoque) localizacaoEstoque.value = item.localizacaoEstoque || '';
+            if (impostos) impostos.value = item.impostos || 0;
+            if (taxaCartao) taxaCartao.value = item.taxaCartao || 0;
+            if (cargaTributaria) cargaTributaria.value = item.cargaTributaria || 0;
+            if (contatoFornecedor) contatoFornecedor.value = item.contatoFornecedor || '';
+            
+        } else {
+            // É serviço
+            if (duracaoServico) duracaoServico.value = item.duracao || '';
+            if (tipoServico) tipoServico.value = item.tipoServico || 'presencial';
+            if (custoHoraServico) custoHoraServico.value = item.custoHora || 0;
+            if (observacoesPrivadas) observacoesPrivadas.value = item.observacoesPrivadas || '';
+            
+            // Preencher materiais
+            if (item.materiais && Array.isArray(item.materiais)) {
+                item.materiais.forEach(material => {
+                    adicionarMaterialServico(material);
+                });
+            }
+        }
+        
+        atualizarDisplayFinanceiro();
+    }
 
-        async function salvarItem() {
-            // Validação básica
-            if (!nomePublico.value.trim()) {
-                showAlert('Informe o nome do item', 'error');
-                nomePublico.focus();
+    async function salvarItem() {
+        // Validação básica
+        if (!nomePublico || !nomePublico.value.trim()) {
+            showAlert('Informe o nome do item', 'error');
+            if (nomePublico) nomePublico.focus();
+            return;
+        }
+        
+        if (!categoriaPublico || !categoriaPublico.value || categoriaPublico.value === 'nova_categoria') {
+            showAlert('Selecione uma categoria válida', 'error');
+            if (categoriaPublico) categoriaPublico.focus();
+            return;
+        }
+        
+        if (!precoVenda || !precoVenda.value || precoVenda.value <= 0) {
+            showAlert('Informe um preço de venda válido', 'error');
+            if (precoVenda) precoVenda.focus();
+            return;
+        }
+        
+        const tipo = tipoItemInput ? tipoItemInput.value : 'servico';
+        
+        // Validações específicas para produto
+        if (tipo === 'produto') {
+            if (!codigoSKU || !codigoSKU.value.trim()) {
+                showAlert('Informe o código/SKU do produto', 'error');
+                if (codigoSKU) codigoSKU.focus();
                 return;
             }
             
-            if (!categoriaPublico.value) {
-                showAlert('Selecione uma categoria', 'error');
-                categoriaPublico.focus();
+            if (!precoCusto || precoCusto.value === '' || precoCusto.value < 0) {
+                showAlert('Informe o preço de custo', 'error');
+                if (precoCusto) precoCusto.focus();
                 return;
             }
             
-            if (!precoVenda.value || precoVenda.value <= 0) {
-                showAlert('Informe um preço de venda válido', 'error');
-                precoVenda.focus();
+            if (!estoqueAtual || estoqueAtual.value === '' || estoqueAtual.value < 0) {
+                showAlert('Informe o estoque atual', 'error');
+                if (estoqueAtual) estoqueAtual.focus();
                 return;
             }
-            
-            const tipo = tipoItemInput.value;
-            
-            // Validações específicas para produto
-            if (tipo === 'produto') {
-                if (!codigoSKU.value.trim()) {
-                    showAlert('Informe o código/SKU do produto', 'error');
-                    codigoSKU.focus();
-                    return;
-                }
-                
-                if (!precoCusto.value || precoCusto.value < 0) {
-                    showAlert('Informe o preço de custo', 'error');
-                    precoCusto.focus();
-                    return;
-                }
-                
-                if (estoqueAtual.value < 0) {
-                    showAlert('Estoque atual não pode ser negativo', 'error');
-                    estoqueAtual.focus();
-                    return;
-                }
-            }
-            
-            try {
-                showLoading();
+        }
+        
+        try {
+            showLoading();
+            if (btnSalvarItem) {
                 btnSalvarItem.disabled = true;
                 btnSalvarItem.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+            }
+            
+            // Preparar dados públicos
+            const dadosPublicos = {
+                nome: nomePublico ? nomePublico.value.trim() : '',
+                descricao: descricaoPublico ? descricaoPublico.value.trim() : '',
+                categoria: categoriaPublico ? categoriaPublico.value : '',
+                precoVenda: precoVenda ? parseFloat(precoVenda.value) : 0,
+                unidadeMedida: unidadeMedida ? unidadeMedida.value : 'unidade',
+                garantiaDias: garantiaDias ? parseInt(garantiaDias.value) || null : null,
+                status: statusPublico ? statusPublico.value : 'ativo',
+                tags: tagsPublicas,
+                imagens: fotosPublicas,
+                profissionalId: currentUser.uid,
+                profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
+                tipo: tipo,
+                atualizadoEm: serverTimestamp()
+            };
+            
+            // Adicionar campos específicos
+            if (tipo === 'produto') {
+                dadosPublicos.marca = marcaProduto ? marcaProduto.value.trim() || null : null;
+                dadosPublicos.modelo = modeloProduto ? modeloProduto.value.trim() || null : null;
+                dadosPublicos.cor = corProduto ? corProduto.value.trim() || null : null;
+                dadosPublicos.tamanho = tamanhoProduto ? tamanhoProduto.value.trim() || null : null;
+                dadosPublicos.peso = pesoProduto ? (parseFloat(pesoProduto.value) || null) : null;
+            } else {
+                dadosPublicos.duracao = duracaoServico ? duracaoServico.value.trim() || null : null;
+                dadosPublicos.tipoServico = tipoServico ? tipoServico.value : 'presencial';
+            }
+            
+            // Preparar dados privados
+            const dadosPrivados = {};
+            
+            if (tipo === 'produto') {
+                dadosPrivados.codigoSKU = codigoSKU ? codigoSKU.value.trim() : '';
+                dadosPrivados.codigoBarras = codigoBarras ? codigoBarras.value.trim() || null : null;
+                dadosPrivados.precoCusto = precoCusto ? parseFloat(precoCusto.value) || 0 : 0;
+                dadosPrivados.fornecedor = fornecedor ? fornecedor.value.trim() || null : null;
+                dadosPrivados.contatoFornecedor = contatoFornecedor ? contatoFornecedor.value.trim() || null : null;
+                dadosPrivados.estoqueAtual = estoqueAtual ? parseInt(estoqueAtual.value) || 0 : 0;
+                dadosPrivados.estoqueMinimo = estoqueMinimo ? parseInt(estoqueMinimo.value) || 0 : 0;
+                dadosPrivados.localizacaoEstoque = localizacaoEstoque ? localizacaoEstoque.value.trim() || null : null;
+                dadosPrivados.impostos = impostos ? parseFloat(impostos.value) || 0 : 0;
+                dadosPrivados.taxaCartao = taxaCartao ? parseFloat(taxaCartao.value) || 0 : 0;
+                dadosPrivados.cargaTributaria = cargaTributaria ? parseFloat(cargaTributaria.value) || 0 : 0;
                 
-                // Preparar dados públicos
-                const dadosPublicos = {
-                    nome: nomePublico.value.trim(),
-                    descricao: descricaoPublico.value.trim(),
-                    categoria: categoriaPublico.value,
-                    precoVenda: parseFloat(precoVenda.value),
-                    unidadeMedida: unidadeMedida.value,
-                    garantiaDias: parseInt(garantiaDias.value) || null,
-                    status: statusPublico.value,
-                    tags: getTags(tagsPublicoContainer),
-                    imagens: fotosPublicas,
-                    profissionalId: currentUser.uid,
-                    profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
-                    tipo: tipo,
-                    atualizadoEm: serverTimestamp()
-                };
+                // Calcular margem e lucro
+                const margem = calcularMargem(dadosPrivados.precoCusto, dadosPublicos.precoVenda);
+                const lucro = calcularLucro(dadosPrivados.precoCusto, dadosPublicos.precoVenda);
+                dadosPrivados.margemLucro = margem;
+                dadosPrivados.lucroUnitario = lucro;
+            } else {
+                dadosPrivados.custoHora = custoHoraServico ? parseFloat(custoHoraServico.value) || 0 : 0;
+                dadosPrivados.materiais = materiaisServico;
+                dadosPrivados.observacoesPrivadas = observacoesPrivadas ? observacoesPrivadas.value.trim() || null : null;
+            }
+            
+            // Unir dados
+            const dadosCompletos = {
+                ...dadosPublicos,
+                ...dadosPrivados
+            };
+            
+            if (modoEdicao && itemEmEdicao) {
+                // Atualizar item existente
+                const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
+                const itemRef = doc(db, collectionName, itemEmEdicao.id);
+                await updateDoc(itemRef, dadosCompletos);
                 
-                // Adicionar campos específicos
-                if (tipo === 'produto') {
-                    dadosPublicos.marca = marcaProduto.value.trim() || null;
-                    dadosPublicos.modelo = modeloProduto.value.trim() || null;
-                    dadosPublicos.cor = corProduto.value.trim() || null;
-                    dadosPublicos.tamanho = tamanhoProduto.value.trim() || null;
-                    dadosPublicos.peso = pesoProduto.value ? parseFloat(pesoProduto.value) : null;
-                } else {
-                    dadosPublicos.duracao = duracaoServico.value.trim() || null;
-                    dadosPublicos.tipoServico = tipoServico.value;
+                // Atualizar localmente
+                const lista = tipo === 'servico' ? servicos : produtos;
+                const index = lista.findIndex(item => item.id === itemEmEdicao.id);
+                if (index !== -1) {
+                    lista[index] = { ...lista[index], ...dadosCompletos };
                 }
                 
-                // Preparar dados privados
-                const dadosPrivados = {};
+                showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} atualizado com sucesso!`, 'success');
+            } else {
+                // Criar novo item
+                dadosCompletos.criadoEm = serverTimestamp();
                 
-                if (tipo === 'produto') {
-                    dadosPrivados.codigoSKU = codigoSKU.value.trim();
-                    dadosPrivados.codigoBarras = codigoBarras.value.trim() || null;
-                    dadosPrivados.precoCusto = parseFloat(precoCusto.value) || 0;
-                    dadosPrivados.fornecedor = fornecedor.value.trim() || null;
-                    dadosPrivados.contatoFornecedor = contatoFornecedor.value.trim() || null;
-                    dadosPrivados.estoqueAtual = parseInt(estoqueAtual.value) || 0;
-                    dadosPrivados.estoqueMinimo = parseInt(estoqueMinimo.value) || 0;
-                    dadosPrivados.localizacaoEstoque = localizacaoEstoque.value.trim() || null;
-                    dadosPrivados.impostos = parseFloat(impostos.value) || 0;
-                    dadosPrivados.taxaCartao = parseFloat(taxaCartao.value) || 0;
-                    dadosPrivados.cargaTributaria = parseFloat(cargaTributaria.value) || 0;
-                    
-                    // Calcular margem e lucro
-                    const margem = calcularMargem(dadosPrivados.precoCusto, dadosPublicos.precoVenda);
-                    const lucro = calcularLucro(dadosPrivados.precoCusto, dadosPublicos.precoVenda);
-                    dadosPrivados.margemLucro = margem;
-                    dadosPrivados.lucroUnitario = lucro;
+                const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
+                const docRef = await addDoc(collection(db, collectionName), dadosCompletos);
+                dadosCompletos.id = docRef.id;
+                
+                // Adicionar localmente
+                if (tipo === 'servico') {
+                    servicos.unshift(dadosCompletos);
                 } else {
-                    dadosPrivados.custoHora = parseFloat(custoHoraServico.value) || 0;
-                    dadosPrivados.materiais = getTags(materiaisServicoContainer);
-                    dadosPrivados.observacoesPrivadas = observacoesPrivadas.value.trim() || null;
+                    produtos.unshift(dadosCompletos);
                 }
                 
-                // Unir dados
-                const dadosCompletos = {
-                    ...dadosPublicos,
-                    ...dadosPrivados,
-                    // Adicionar privado como sub-objeto se quiser separar
-                    // dadosPrivados: dadosPrivados
-                };
-                
-                if (modoEdicao && itemEmEdicao) {
-                    // Atualizar item existente
-                    const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
-                    const itemRef = doc(db, collectionName, itemEmEdicao.id);
-                    await updateDoc(itemRef, dadosCompletos);
-                    
-                    // Atualizar localmente
-                    const lista = tipo === 'servico' ? servicos : produtos;
-                    const index = lista.findIndex(item => item.id === itemEmEdicao.id);
-                    if (index !== -1) {
-                        lista[index] = { ...lista[index], ...dadosCompletos };
-                    }
-                    
-                    showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} atualizado com sucesso!`, 'success');
-                } else {
-                    // Criar novo item
-                    dadosCompletos.criadoEm = serverTimestamp();
-                    
-                    const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
-                    const docRef = await addDoc(collection(db, collectionName), dadosCompletos);
-                    dadosCompletos.id = docRef.id;
-                    
-                    // Adicionar localmente
-                    if (tipo === 'servico') {
-                        servicos.unshift(dadosCompletos);
-                    } else {
-                        produtos.unshift(dadosCompletos);
-                    }
-                    
-                    showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} criado com sucesso!`, 'success');
-                }
-                
+                showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} criado com sucesso!`, 'success');
+            }
+            
+            if (modalItem) {
                 modalItem.hide();
-                
-                // Atualizar interface
-                atualizarContadores();
-                atualizarGridCatalogo();
-                
-            } catch (error) {
-                console.error('Erro ao salvar item:', error);
-                showAlert('Erro ao salvar item. Tente novamente.', 'error');
-            } finally {
-                hideLoading();
+            }
+            
+            // Atualizar interface
+            atualizarContadores();
+            atualizarGridCatalogo();
+            
+        } catch (error) {
+            console.error('Erro ao salvar item:', error);
+            showAlert('Erro ao salvar item. Tente novamente.', 'error');
+        } finally {
+            hideLoading();
+            if (btnSalvarItem) {
                 btnSalvarItem.disabled = false;
                 btnSalvarItem.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Item';
             }
         }
+    }
 
-        window.editarItem = function(tipo, id) {
-            abrirModalItem(tipo, id);
-        };
+    window.editarItem = function(tipo, id) {
+        abrirModalItem(tipo, id);
+    };
 
-        window.excluirItem = async function(tipo, id) {
-            if (!confirm(`Tem certeza que deseja excluir este ${tipo === 'servico' ? 'serviço' : 'produto'}?\nEsta ação não pode ser desfeita.`)) {
-                return;
-            }
-            
-            try {
-                showLoading();
-                
-                const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
-                const itemRef = doc(db, collectionName, id);
-                await deleteDoc(itemRef);
-                
-                // Remover localmente
-                const lista = tipo === 'servico' ? servicos : produtos;
-                const index = lista.findIndex(item => item.id === id);
-                if (index !== -1) {
-                    lista.splice(index, 1);
-                }
-                
-                // Atualizar interface
-                atualizarContadores();
-                atualizarGridCatalogo();
-                
-                showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} excluído com sucesso!`, 'success');
-                
-            } catch (error) {
-                console.error('Erro ao excluir item:', error);
-                showAlert('Erro ao excluir item. Tente novamente.', 'error');
-            } finally {
-                hideLoading();
-            }
-        };
-
-        // ============================================
-        // DISPLAY DO CATÁLOGO
-        // ============================================
-        function atualizarGridCatalogo() {
-            const searchTerm = searchCatalogo.value.toLowerCase();
-            const categoriaFilter = filterCategoria.value;
-            const statusFilter = filterStatus.value;
-            
-            let itensParaExibir = [];
-            
-            // Filtrar por tipo
-            if (tipoAtualCatalogo === 'servicos') {
-                itensParaExibir = [...servicos];
-            } else if (tipoAtualCatalogo === 'produtos') {
-                itensParaExibir = [...produtos];
-            } else {
-                itensParaExibir = [...servicos, ...produtos];
-            }
-            
-            // Aplicar filtros
-            itensParaExibir = itensParaExibir.filter(item => {
-                const matchSearch = !searchTerm || 
-                    item.nome.toLowerCase().includes(searchTerm) ||
-                    (item.descricao && item.descricao.toLowerCase().includes(searchTerm)) ||
-                    (item.categoria && item.categoria.toLowerCase().includes(searchTerm)) ||
-                    (item.tags && Array.isArray(item.tags) && 
-                     item.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
-                
-                const matchCategoria = !categoriaFilter || item.categoria === categoriaFilter;
-                const matchStatus = !statusFilter || item.status === statusFilter;
-                
-                return matchSearch && matchCategoria && matchStatus;
-            });
-            
-            // Ordenar por data de criação (mais recentes primeiro)
-            itensParaExibir.sort((a, b) => {
-                const dataA = a.criadoEm ? a.criadoEm.toDate() : new Date(0);
-                const dataB = b.criadoEm ? b.criadoEm.toDate() : new Date(0);
-                return dataB - dataA;
-            });
-            
-            // Limpar grid
-            catalogoGrid.innerHTML = '';
-            
-            if (itensParaExibir.length === 0) {
-                const emptyState = document.createElement('div');
-                emptyState.className = 'empty-state';
-                emptyState.innerHTML = `
-                    <i class="fas fa-${tipoAtualCatalogo === 'servicos' ? 'tools' : tipoAtualCatalogo === 'produtos' ? 'box' : 'boxes'}"></i>
-                    <h4>Nenhum item encontrado</h4>
-                    <p class="text-muted">${searchTerm || categoriaFilter || statusFilter ? 'Tente ajustar os filtros' : 'Comece adicionando seu primeiro item'}</p>
-                    <button class="btn btn-primary-action mt-3" onclick="abrirModalItem('${tipoAtualCatalogo === 'servicos' ? 'servico' : 'produto'}')">
-                        <i class="fas fa-plus me-2"></i>Adicionar Item
-                    </button>
-                `;
-                catalogoGrid.appendChild(emptyState);
-                return;
-            }
-            
-            // Preencher grid
-            itensParaExibir.forEach(item => {
-                const tipo = item.tipo || (item.codigoSKU ? 'produto' : 'servico');
-                const card = criarCardItem(item, tipo);
-                catalogoGrid.appendChild(card);
-            });
+    window.excluirItem = async function(tipo, id) {
+        if (!confirm(`Tem certeza que deseja excluir este ${tipo === 'servico' ? 'serviço' : 'produto'}?\nEsta ação não pode ser desfeita.`)) {
+            return;
         }
-
-        function criarCardItem(item, tipo) {
-            const card = document.createElement('div');
-            card.className = 'catalogo-card';
+        
+        try {
+            showLoading();
             
-            // Badge de tipo
-            const badgeClass = tipo === 'servico' ? 'badge-servico' : 'badge-produto';
-            const badgeIcon = tipo === 'servico' ? 'fa-tools' : 'fa-box';
-            const badgeText = tipo === 'servico' ? 'Serviço' : 'Produto';
+            const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
+            const itemRef = doc(db, collectionName, id);
+            await deleteDoc(itemRef);
             
-            // Imagem principal
-            const imagemPrincipal = item.imagens && item.imagens.length > 0 
-                ? item.imagens[0] 
-                : 'https://via.placeholder.com/400x300?text=' + (tipo === 'servico' ? 'Serviço' : 'Produto');
-            
-            // Informações específicas
-            let infoExtra = '';
-            if (tipo === 'produto') {
-                const estoque = item.estoqueAtual || 0;
-                const estoqueMinimo = item.estoqueMinimo || 0;
-                const statusEstoque = estoque <= estoqueMinimo ? 'alert-danger' : 'alert-success';
-                const textoEstoque = estoque <= estoqueMinimo ? `⚠️ Baixo: ${estoque} un` : `📦 ${estoque} un`;
-                
-                infoExtra = `<div class="card-info"><span>${textoEstoque}</span><span>${item.marca || 'Sem marca'}</span></div>`;
-            } else {
-                infoExtra = `<div class="card-info"><span>${item.duracao || '--'}</span><span>${item.tipoServico || 'Presencial'}</span></div>`;
+            // Remover localmente
+            const lista = tipo === 'servico' ? servicos : produtos;
+            const index = lista.findIndex(item => item.id === id);
+            if (index !== -1) {
+                lista.splice(index, 1);
             }
             
-            card.innerHTML = `
-                <div class="card-image">
-                    <img src="${imagemPrincipal}" alt="${item.nome}">
-                    <span class="card-badge ${badgeClass}">
-                        <i class="fas ${badgeIcon} me-1"></i>${badgeText}
+            // Atualizar interface
+            atualizarContadores();
+            atualizarGridCatalogo();
+            
+            showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} excluído com sucesso!`, 'success');
+            
+        } catch (error) {
+            console.error('Erro ao excluir item:', error);
+            showAlert('Erro ao excluir item. Tente novamente.', 'error');
+        } finally {
+            hideLoading();
+        }
+    };
+
+    // ============================================
+    // DISPLAY DO CATÁLOGO
+    // ============================================
+    function atualizarGridCatalogo() {
+        if (!catalogoGrid) return;
+        
+        const searchTerm = searchCatalogo ? searchCatalogo.value.toLowerCase() : '';
+        const categoriaFilter = filterCategoria ? filterCategoria.value : '';
+        const statusFilter = filterStatus ? filterStatus.value : '';
+        
+        let itensParaExibir = [];
+        
+        // Filtrar por tipo
+        if (tipoAtualCatalogo === 'servicos') {
+            itensParaExibir = [...servicos];
+        } else if (tipoAtualCatalogo === 'produtos') {
+            itensParaExibir = [...produtos];
+        } else {
+            itensParaExibir = [...servicos, ...produtos];
+        }
+        
+        // Aplicar filtros
+        itensParaExibir = itensParaExibir.filter(item => {
+            const matchSearch = !searchTerm || 
+                item.nome.toLowerCase().includes(searchTerm) ||
+                (item.descricao && item.descricao.toLowerCase().includes(searchTerm)) ||
+                (item.categoria && item.categoria.toLowerCase().includes(searchTerm)) ||
+                (item.tags && Array.isArray(item.tags) && 
+                 item.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+            
+            const matchCategoria = !categoriaFilter || item.categoria === categoriaFilter;
+            const matchStatus = !statusFilter || item.status === statusFilter;
+            
+            return matchSearch && matchCategoria && matchStatus;
+        });
+        
+        // Limpar grid
+        catalogoGrid.innerHTML = '';
+        
+        if (itensParaExibir.length === 0) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <i class="fas fa-${tipoAtualCatalogo === 'servicos' ? 'tools' : tipoAtualCatalogo === 'produtos' ? 'box' : 'boxes'}"></i>
+                <h4>Nenhum item encontrado</h4>
+                <p class="text-muted">${searchTerm || categoriaFilter || statusFilter ? 'Tente ajustar os filtros' : 'Comece adicionando seu primeiro item'}</p>
+                <button class="btn btn-primary-action mt-3" onclick="abrirModalItem('${tipoAtualCatalogo === 'servicos' ? 'servico' : 'produto'}')">
+                    <i class="fas fa-plus me-2"></i>Adicionar Item
+                </button>
+            `;
+            catalogoGrid.appendChild(emptyState);
+            return;
+        }
+        
+        // Preencher grid
+        itensParaExibir.forEach(item => {
+            const tipo = item.tipo || (item.codigoSKU ? 'produto' : 'servico');
+            const card = criarCardItem(item, tipo);
+            if (card) {
+                catalogoGrid.appendChild(card);
+            }
+        });
+    }
+
+    function criarCardItem(item, tipo) {
+        if (!item) return null;
+        
+        const card = document.createElement('div');
+        card.className = 'catalogo-card';
+        
+        // Badge de tipo
+        const badgeClass = tipo === 'servico' ? 'badge-servico' : 'badge-produto';
+        const badgeIcon = tipo === 'servico' ? 'fa-tools' : 'fa-box';
+        const badgeText = tipo === 'servico' ? 'Serviço' : 'Produto';
+        
+        // Imagem principal
+        const imagemPrincipal = item.imagens && item.imagens.length > 0 
+            ? item.imagens[0] 
+            : `https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome || (tipo === 'servico' ? 'Serviço' : 'Produto'))}`;
+        
+        // Informações específicas
+        let infoExtra = '';
+        if (tipo === 'produto') {
+            const estoque = item.estoqueAtual || 0;
+            const estoqueMinimo = item.estoqueMinimo || 0;
+            const textoEstoque = estoque <= estoqueMinimo ? `⚠️ Baixo: ${estoque} un` : `📦 ${estoque} un`;
+            
+            infoExtra = `<div class="card-info"><span>${textoEstoque}</span><span>${item.marca || 'Sem marca'}</span></div>`;
+        } else {
+            infoExtra = `<div class="card-info"><span>${item.duracao || '--'}</span><span>${item.tipoServico || 'Presencial'}</span></div>`;
+        }
+        
+        // Status
+        const statusMap = {
+            'ativo': 'Ativo',
+            'inativo': 'Inativo',
+            'esgotado': 'Esgotado'
+        };
+        const statusTexto = statusMap[item.status] || 'Ativo';
+        const statusClass = item.status === 'ativo' ? 'status-active' : 
+                          item.status === 'inativo' ? 'status-inactive' : 'status-pending';
+        
+        card.innerHTML = `
+            <div class="card-image">
+                <img src="${imagemPrincipal}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome || 'Item')}'">
+                <span class="card-badge ${badgeClass}">
+                    <i class="fas ${badgeIcon} me-1"></i>${badgeText}
+                </span>
+            </div>
+            <div class="card-content">
+                <h5 class="card-title">${item.nome || 'Sem nome'}</h5>
+                ${infoExtra}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="card-price">${formatarMoeda(item.precoVenda)}</div>
+                    <span class="status-badge ${statusClass}">
+                        ${statusTexto}
                     </span>
                 </div>
-                <div class="card-content">
-                    <h5 class="card-title">${item.nome}</h5>
-                    ${infoExtra}
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="card-price">${formatarMoeda(item.precoVenda)}</div>
-                        <span class="status-badge status-${item.status || 'ativo'}">
-                            ${item.status === 'ativo' ? 'Ativo' : item.status === 'inativo' ? 'Inativo' : 'Esgotado'}
-                        </span>
-                    </div>
-                    <p class="text-muted small mb-0" style="height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                        ${item.descricao || 'Sem descrição'}
-                    </p>
-                    <div class="card-actions mt-3">
-                        <button class="btn-card btn-card-edit" onclick="editarItem('${tipo}', '${item.id}')">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn-card btn-card-delete" onclick="excluirItem('${tipo}', '${item.id}')">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </div>
+                <p class="text-muted small mb-0" style="height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                    ${item.descricao || 'Sem descrição'}
+                </p>
+                <div class="card-actions mt-3">
+                    <button class="btn-card btn-card-edit" onclick="editarItem('${tipo}', '${item.id}')">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-card btn-card-delete" onclick="excluirItem('${tipo}', '${item.id}')">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
                 </div>
-            `;
-            
-            return card;
-        }
+            </div>
+        `;
+        
+        return card;
+    }
 
-        function atualizarContadores() {
-            // Contagem
+    function atualizarContadores() {
+        // Contagem
+        if (totalServicos) {
             totalServicos.textContent = servicos.filter(s => s.status === 'ativo').length;
+        }
+        
+        if (totalProdutos) {
             totalProdutos.textContent = produtos.filter(p => p.status === 'ativo').length;
-            
-            // Atualizar badges
-            badgeServicos.textContent = servicos.length;
-            badgeProdutos.textContent = produtos.length;
-            badgeTodos.textContent = servicos.length + produtos.length;
-            
-            // Calcular valor do estoque
-            let valorTotalEstoque = 0;
-            let baixoEstoqueCount = 0;
-            
-            produtos.forEach(produto => {
-                if (produto.status === 'ativo') {
-                    const estoque = produto.estoqueAtual || 0;
-                    const precoCusto = produto.precoCusto || 0;
-                    valorTotalEstoque += estoque * precoCusto;
-                    
-                    const estoqueMinimo = produto.estoqueMinimo || 0;
-                    if (estoque <= estoqueMinimo) {
-                        baixoEstoqueCount++;
+        }
+        
+        // Atualizar badges
+        if (badgeServicos) badgeServicos.textContent = servicos.length;
+        if (badgeProdutos) badgeProdutos.textContent = produtos.length;
+        if (badgeTodos) badgeTodos.textContent = servicos.length + produtos.length;
+        
+        // Calcular valor do estoque
+        let valorTotalEstoque = 0;
+        let baixoEstoqueCount = 0;
+        
+        produtos.forEach(produto => {
+            if (produto.status === 'ativo') {
+                const estoque = produto.estoqueAtual || 0;
+                const precoCusto = produto.precoCusto || 0;
+                valorTotalEstoque += estoque * precoCusto;
+                
+                const estoqueMinimo = produto.estoqueMinimo || 0;
+                if (estoque <= estoqueMinimo && estoqueMinimo > 0) {
+                    baixoEstoqueCount++;
+                }
+            }
+        });
+        
+        if (valorEstoque) {
+            valorEstoque.textContent = formatarMoeda(valorTotalEstoque);
+        }
+        
+        if (baixoEstoque) {
+            baixoEstoque.textContent = baixoEstoqueCount;
+        }
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    function inicializarEventListeners() {
+        // Botão salvar
+        if (btnSalvarItem) {
+            btnSalvarItem.addEventListener('click', salvarItem);
+        }
+        
+        // Filtros
+        if (searchCatalogo) {
+            searchCatalogo.addEventListener('input', atualizarGridCatalogo);
+        }
+        
+        if (filterCategoria) {
+            filterCategoria.addEventListener('change', atualizarGridCatalogo);
+        }
+        
+        if (filterStatus) {
+            filterStatus.addEventListener('change', atualizarGridCatalogo);
+        }
+        
+        // Menu mobile
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                if (dashboardMenu) {
+                    dashboardMenu.classList.toggle('show');
+                    const icon = menuToggle.querySelector('i');
+                    if (icon) {
+                        if (dashboardMenu.classList.contains('show')) {
+                            icon.classList.remove('fa-bars');
+                            icon.classList.add('fa-times');
+                        } else {
+                            icon.classList.remove('fa-times');
+                            icon.classList.add('fa-bars');
+                        }
                     }
                 }
             });
-            
-            valorEstoque.textContent = formatarMoeda(valorTotalEstoque);
-            baixoEstoque.textContent = baixoEstoqueCount;
         }
-
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        function inicializarEventListeners() {
-            // Botão salvar
-            btnSalvarItem.addEventListener('click', salvarItem);
-            
-            // Filtros
-            searchCatalogo.addEventListener('input', atualizarGridCatalogo);
-            filterCategoria.addEventListener('change', atualizarGridCatalogo);
-            filterStatus.addEventListener('change', atualizarGridCatalogo);
-            
-            // Inicializar tags
-            inicializarTags(tagsPublicoContainer, tagPublicoInput);
-            inicializarTags(materiaisServicoContainer, materialServicoInput);
-            
-            // Menu mobile
-            menuToggle.addEventListener('click', () => {
-                dashboardMenu.classList.toggle('show');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-times');
-            });
-            
-            // Fechar menu ao clicar fora
-            document.addEventListener('click', (e) => {
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (dashboardMenu && menuToggle) {
                 if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
                     dashboardMenu.classList.remove('show');
                     const icon = menuToggle.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
                 }
-            });
-            
-            // Logout
+            }
+        });
+        
+        // Logout
+        if (btnLogout) {
             btnLogout.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
@@ -2240,15 +2511,21 @@
                 }
             });
         }
+        
+        // Auto-save quando modal fecha
+        const modalElement = document.getElementById('modalItem');
+        if (modalElement) {
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                resetarModal();
+            });
+        }
+    }
 
-        // Inicializar quando o DOM carregar
-        document.addEventListener('DOMContentLoaded', function() {
-            if (modalItem._element) {
-                modalItem._element.addEventListener('hidden.bs.modal', function() {
-                    resetarModal();
-                });
-            }
-        });
-    </script>
+    // Inicializar quando o DOM carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar display financeiro
+        setTimeout(atualizarDisplayFinanceiro, 500);
+    });
+</script>
 </body>
 </html>
