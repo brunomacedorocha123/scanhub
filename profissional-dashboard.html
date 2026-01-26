@@ -542,65 +542,67 @@
     </nav>
 
     <!-- Menu Dashboard Horizontal -->
-<div class="container-fluid">
-    <ul class="dashboard-menu" id="dashboardMenu">
-        <li>
-            <a href="#" class="active" data-page="dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-        <li>
-            <!-- MUDANÇA AQUI: Link para página externa -->
-            <a href="perfil-profissional.html">
-                <i class="fas fa-user"></i>
-                <span>Perfil</span>
-            </a>
-        </li>
-       <li>
-    <a href="meus-clientes.html">  
-        <i class="fas fa-users"></i>
-        <span>Clientes</span>
-    </a>
-</li>
-        <li>
-            <a href="#" data-page="financeiro">
-                <i class="fas fa-chart-line"></i>
-                <span>Financeiro</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" data-page="agenda">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Agenda</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" data-page="servicos">
-                <i class="fas fa-tools"></i>
-                <span>Serviços</span>
-            </a>
-        </li>
-        <li>
-          <a href="pedidos.html">
-        <i class="fas fa-clipboard-list"></i>
-        <span>Pedidos</span>
-    </a>
-</li>
-        <li>
-            <a href="#" data-page="assinatura">
-                <i class="fas fa-crown"></i>
-                <span>Assinatura</span>
-            </a>
-        </li>
-        <li>
-            <a href="#" data-page="configuracoes">
-                <i class="fas fa-cog"></i>
-                <span>Configurações</span>
-            </a>
-        </li>
-    </ul>
-</div>
+    <div class="container-fluid">
+        <ul class="dashboard-menu" id="dashboardMenu">
+            <li>
+                <a href="#" class="active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <!-- Link para página externa -->
+                <a href="perfil-profissional.html">
+                    <i class="fas fa-user"></i>
+                    <span>Perfil</span>
+                </a>
+            </li>
+            <li>
+                <a href="meus-clientes.html">  
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="financeiro">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Financeiro</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="agenda">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Agenda</span>
+                </a>
+            </li>
+            <li>
+                <!-- MUDANÇA AQUI: Substitui "Serviços" por "Catálogo" -->
+                <a href="catalogo.html">
+                    <i class="fas fa-boxes"></i>
+                    <span>Catálogo</span>
+                </a>
+            </li>
+            <li>
+                <a href="pedidos.html">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="assinatura">
+                    <i class="fas fa-crown"></i>
+                    <span>Assinatura</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="configuracoes">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
     <!-- Main Content -->
     <div class="main-content">
         <!-- Welcome Card -->
@@ -635,9 +637,10 @@
 
         <!-- Botões de Ação Rápidos -->
         <div class="action-buttons">
-            <button class="btn-action btn-primary-action" id="btnNovoServico">
+            <!-- MUDANÇA AQUI: Alterei o botão "Novo Serviço" para "Novo Item" que redireciona para Catálogo -->
+            <button class="btn-action btn-primary-action" id="btnNovoItem">
                 <i class="fas fa-plus"></i>
-                Novo Serviço
+                Novo Item no Catálogo
             </button>
             <button class="btn-action btn-secondary-action" id="btnVerAgenda">
                 <i class="fas fa-calendar-alt"></i>
@@ -703,15 +706,8 @@
             </div>
         </div>
 
-        <!-- Meus Serviços -->
-        <div id="pageServicos" class="content-area">
-            <h4 class="mb-4">Meus Serviços</h4>
-            <div class="content-placeholder">
-                <i class="fas fa-tools"></i>
-                <h4>Serviços oferecidos</h4>
-                <p class="text-muted">Cadastre e gerencie os serviços que você oferece</p>
-            </div>
-        </div>
+        <!-- Meus Serviços (Removido) -->
+        <!-- Esta área foi removida pois agora temos a página catálogo.html -->
 
         <!-- Pedidos -->
         <div id="pagePedidos" class="content-area">
@@ -794,8 +790,8 @@
     const receitaTotal = document.getElementById('receitaTotal');
     const statusProfissional = document.getElementById('statusProfissional');
 
-    // Botões de ação
-    const btnNovoServico = document.getElementById('btnNovoServico');
+    // Botões de ação - MUDANÇA AQUI: btnNovoServico foi alterado para btnNovoItem
+    const btnNovoItem = document.getElementById('btnNovoItem');
     const btnVerAgenda = document.getElementById('btnVerAgenda');
     const btnFinanceiro = document.getElementById('btnFinanceiro');
 
@@ -893,7 +889,7 @@
         link.addEventListener('click', (e) => {
             // Se o link não tem data-page (é link externo), deixa seguir normalmente
             if (!link.hasAttribute('data-page')) {
-                return; // Segue para href normal (como perfil-profissional.html)
+                return; // Segue para href normal (como perfil-profissional.html, catalogo.html, etc.)
             }
             
             e.preventDefault();
@@ -924,9 +920,10 @@
         });
     });
 
-    // Botões de ação rápida
-    btnNovoServico.addEventListener('click', () => {
-        document.querySelector('[data-page="servicos"]').click();
+    // Botões de ação rápida - MUDANÇA AQUI
+    btnNovoItem.addEventListener('click', () => {
+        // Redireciona para a página de catálogo
+        window.location.href = 'catalogo.html';
     });
 
     btnVerAgenda.addEventListener('click', () => {

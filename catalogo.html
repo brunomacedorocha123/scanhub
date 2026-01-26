@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #33c47;
+            --light-color: #f8f9fa;
+            --dark-color: #2c3e50;
+            --public-color: #28a745;
+            --private-color: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            padding-top: 80px;
+        }
+
+        /* Logo Grande - Mesmo estilo da dashboard */
+        .navbar-brand-dashboard {
+            display: flex;
+            align-items: center;
+            transform: scale(2.5);
+            transform-origin: left center;
+            margin-right: 40px;
+        }
+
+        .navbar-brand-dashboard img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Navbar Dashboard - Mesmo estilo */
+        .navbar-dashboard {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* Menu Dashboard - Mesmo estilo */
+        .dashboard-menu {
+            list-style: none;
+            display: flex;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-menu li {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dashboard-menu a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            background: transparent;
+            text-align: center;
+        }
+
+        .dashboard-menu a:hover,
+        .dashboard-menu a.active {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-menu i {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        /* Container Principal */
+        .container-main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* Header com Tabs - Estilo igual Pedidos */
+        .header-abas {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        /* Tabs Container - Igual Pedidos */
+        .catalogo-tabs-container {
+            display: flex;
+            gap: 5px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #e8ecef;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .tab-btn:hover {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 8px rgba(68, 104, 154, 0.3);
+        }
+
+        .tab-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .tab-btn:not(.active) .tab-badge {
+            background: #e8ecef;
+            color: #666;
+        }
+
+        /* Botão Principal */
+        .btn-primary-action {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Cards de Catálogo */
+        .catalogo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .catalogo-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .catalogo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-image {
+            height: 180px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-servico {
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+        }
+
+        .badge-produto {
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FF6B35;
+            margin-bottom: 5px;
+        }
+
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .btn-card {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-card-edit {
+            background: #f8f9fa;
+            color: #44689a;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-card-delete {
+            background: #ffeaea;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Modal - Estilo Perfil */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 20px 30px;
+            border: none;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-lg {
+            max-width: 900px;
+        }
+
+        /* Abas no Modal */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 2px solid #e8ecef;
+            margin-bottom: 20px;
+        }
+
+        .modal-tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .modal-tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Upload Area - Igual Perfil */
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #f8f9fa;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        /* Gallery Grid - Igual Perfil */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        /* Tags Container - Igual Perfil */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            min-height: 45px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .tag {
+            background: #e3f2fd;
+            color: var(--primary-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Status Indicators */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+        }
+
+        /* Toggle Público/Privado */
+        .visibilidade-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .visibilidade-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-publico {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--public-color);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .badge-privado {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--private-color);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #44689a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        /* Responsivo */
+        @media (max-width: 992px) {
+            .navbar-brand-dashboard {
+                transform: scale(2);
+            }
+            
+            .catalogo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.6);
+            }
+            
+            .catalogo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            
+            .modal-lg {
+                margin: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .catalogo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-abas {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .catalogo-tabs-container {
+                width: 100%;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* Informações Financeiras (Privado) */
+        .financeiro-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--private-color);
+        }
+
+        .financeiro-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .financeiro-valor {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .financeiro-lucro {
+            color: var(--public-color);
+        }
+
+        .financeiro-custo {
+            color: var(--private-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar Dashboard -->
+    <nav class="navbar navbar-dashboard">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center w-100">
+                <!-- Logo -->
+                <a class="navbar-brand-dashboard" href="profissional-dashboard.html">
+                    <img src="logoscanhub.png" alt="ScanHub">
+                </a>
+
+                <!-- Menu Mobile Toggle -->
+                <button class="mobile-menu-toggle d-lg-none" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- User Info -->
+                <div class="user-info-mobile ms-auto">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-details d-none d-md-block ms-2">
+                        <h5 id="userName">Carregando...</h5>
+                        <small>ID: <span id="userId">---</span></small>
+                    </div>
+                </div>
+
+                <!-- Botão Logout -->
+                <button class="btn btn-outline-danger btn-sm ms-3" id="btnLogout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-md-inline">Sair</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Dashboard -->
+    <div class="container-fluid">
+        <ul class="dashboard-menu" id="dashboardMenu">
+            <li>
+                <a href="profissional-dashboard.html">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="perfil-profissional.html">
+                    <i class="fas fa-user"></i>
+                    <span>Perfil</span>
+                </a>
+            </li>
+            <li>
+                <a href="meus-clientes.html">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Financeiro</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Agenda</span>
+                </a>
+            </li>
+            <li>
+                <a href="catalogo.html" class="active">
+                    <i class="fas fa-boxes"></i>
+                    <span>Catálogo</span>
+                </a>
+            </li>
+            <li>
+                <a href="pedidos.html">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-crown"></i>
+                    <span>Assinatura</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-main">
+        <!-- Header com Abas -->
+        <div class="header-abas">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Título e Abas -->
+                <div class="d-flex align-items-center">
+                    <h4 class="mb-0 me-3">Catálogo</h4>
+                    <div class="catalogo-tabs-container" id="catalogoTabs">
+                        <button class="tab-btn active" data-tipo="servicos">
+                            <i class="fas fa-tools"></i>
+                            <span>Serviços</span>
+                            <span class="tab-badge" id="badgeServicos">0</span>
+                        </button>
+                        <button class="tab-btn" data-tipo="produtos">
+                            <i class="fas fa-box"></i>
+                            <span>Produtos</span>
+                            <span class="tab-badge" id="badgeProdutos">0</span>
+                        </button>
+                        <button class="tab-btn" data-tipo="todos">
+                            <i class="fas fa-list"></i>
+                            <span>Todos</span>
+                            <span class="tab-badge" id="badgeTodos">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Botão Novo Item -->
+                <div class="dropdown">
+                    <button class="btn btn-primary-action dropdown-toggle" type="button" 
+                            id="btnNovoItemDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus"></i> Novo Item
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="abrirModalItem('servico')">
+                                <i class="fas fa-tools text-primary me-2"></i>
+                                Novo Serviço
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="abrirModalItem('produto')">
+                                <i class="fas fa-box text-success me-2"></i>
+                                Novo Produto
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Filtros Rápidos -->
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchCatalogo" 
+                               placeholder="Buscar por nome, descrição, categoria...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterCategoria">
+                        <option value="">Todas categorias</option>
+                        <!-- Categorias serão carregadas -->
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterStatus">
+                        <option value="">Todos status</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                        <option value="esgotado">Esgotado</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Rápidos -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-tools"></i>
+                    <h3 id="totalServicos">0</h3>
+                    <p>Serviços Ativos</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-box"></i>
+                    <h3 id="totalProdutos">0</h3>
+                    <p>Produtos em Estoque</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3 id="valorEstoque">R$ 0</h3>
+                    <p>Valor do Estoque</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3 id="baixoEstoque">0</h3>
+                    <p>Baixo Estoque</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid do Catálogo -->
+        <div class="catalogo-grid" id="catalogoGrid">
+            <!-- Itens serão carregados aqui -->
+            <div class="empty-state">
+                <i class="fas fa-boxes"></i>
+                <h4>Seu catálogo está vazio</h4>
+                <p class="text-muted">Comece adicionando seu primeiro serviço ou produto</p>
+                <button class="btn btn-primary-action mt-3" onclick="abrirModalItem('servico')">
+                    <i class="fas fa-plus me-2"></i>Adicionar Primeiro Item
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cadastro/Edição Item -->
+    <div class="modal fade" id="modalItem" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Novo Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tipo de Item (visível apenas em novo) -->
+                    <div class="row mb-4" id="seletorTipoItem">
+                        <div class="col-12">
+                            <label class="form-label">Tipo de Item *</label>
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-outline-primary flex-fill tipo-item-btn active" data-tipo="servico">
+                                    <i class="fas fa-tools me-2"></i>Serviço
+                                </button>
+                                <button type="button" class="btn btn-outline-success flex-fill tipo-item-btn" data-tipo="produto">
+                                    <i class="fas fa-box me-2"></i>Produto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="formItem">
+                        <input type="hidden" id="itemId">
+                        <input type="hidden" id="tipoItem" value="servico">
+                        
+                        <!-- Abas Público/Privado -->
+                        <div class="modal-tabs" id="modalTabs">
+                            <button type="button" class="modal-tab-btn active" data-tab="publico">
+                                <i class="fas fa-eye me-2"></i>Informações Públicas
+                            </button>
+                            <button type="button" class="modal-tab-btn" data-tab="privado">
+                                <i class="fas fa-lock me-2"></i>Informações Privadas
+                            </button>
+                        </div>
+
+                        <!-- Conteúdo das Abas -->
+                        <div class="tab-content">
+                            <!-- ABA PÚBLICA -->
+                            <div class="tab-pane active" id="tabPublico">
+                                <!-- Informações Gerais -->
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Nome do Item *</label>
+                                        <input type="text" class="form-control" id="nomePublico" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Status *</label>
+                                        <select class="form-select" id="statusPublico" required>
+                                            <option value="ativo">Ativo</option>
+                                            <option value="inativo">Inativo</option>
+                                            <option value="esgotado">Esgotado</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Descrição -->
+                                <div class="mb-3">
+                                    <label class="form-label">Descrição Detalhada *</label>
+                                    <textarea class="form-control" id="descricaoPublico" rows="3" required></textarea>
+                                </div>
+
+                                <!-- Categoria -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Categoria *</label>
+                                        <select class="form-select" id="categoriaPublico" required>
+                                            <!-- Categorias serão carregadas -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tags</label>
+                                        <div class="tags-container" id="tagsPublicoContainer">
+                                            <input type="text" class="tags-input" id="tagPublicoInput" 
+                                                   placeholder="Digite e pressione Enter">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Preço (Público) -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Preço de Venda *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control" id="precoVenda" 
+                                                   min="0" step="0.01" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Unidade de Medida</label>
+                                        <select class="form-select" id="unidadeMedida">
+                                            <option value="unidade">Unidade</option>
+                                            <option value="metro">Metro</option>
+                                            <option value="metro_quadrado">m²</option>
+                                            <option value="hora">Hora</option>
+                                            <option value="servico">Serviço</option>
+                                            <option value="pacote">Pacote</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Garantia</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="garantiaDias" 
+                                                   min="0" value="90">
+                                            <span class="input-group-text">dias</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Imagens (Público) -->
+                                <div class="mb-4">
+                                    <label class="form-label">Imagens do Item (Máx. 5)</label>
+                                    <p class="text-muted small">Essas imagens serão vistas pelos clientes</p>
+                                    
+                                    <div class="upload-area" id="uploadAreaPublico">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <h5>Arraste e solte suas imagens aqui</h5>
+                                        <p class="text-muted">ou clique para selecionar (JPEG, PNG)</p>
+                                        <input type="file" id="fotosPublicoInput" accept="image/*" multiple style="display: none;">
+                                    </div>
+                                    
+                                    <div class="gallery-grid" id="galleryPublico">
+                                        <!-- Imagens serão adicionadas aqui -->
+                                    </div>
+                                </div>
+
+                                <!-- Campos específicos para Produto (Público) -->
+                                <div id="camposProdutoPublico" style="display: none;">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Marca</label>
+                                            <input type="text" class="form-control" id="marcaProduto">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Modelo</label>
+                                            <input type="text" class="form-control" id="modeloProduto">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Cor</label>
+                                            <input type="text" class="form-control" id="corProduto">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tamanho</label>
+                                            <input type="text" class="form-control" id="tamanhoProduto">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Peso (kg)</label>
+                                            <input type="number" class="form-control" id="pesoProduto" step="0.01">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Campos específicos para Serviço (Público) -->
+                                <div id="camposServicoPublico">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Duração Estimada</label>
+                                            <input type="text" class="form-control" id="duracaoServico" 
+                                                   placeholder="Ex: 2 horas, 1 dia completo">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo de Serviço</label>
+                                            <select class="form-select" id="tipoServico">
+                                                <option value="presencial">Presencial</option>
+                                                <option value="remoto">Remoto</option>
+                                                <option value="ambos">Ambos</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ABA PRIVADA -->
+                            <div class="tab-pane" id="tabPrivado">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Estas informações são visíveis apenas para você (profissional)
+                                </div>
+
+                                <!-- Informações Financeiras (Privado) -->
+                                <div class="financeiro-container">
+                                    <h6><i class="fas fa-chart-line me-2"></i>Informações Financeiras</h6>
+                                    
+                                    <div class="financeiro-item">
+                                        <span>Preço de Custo:</span>
+                                        <span class="financeiro-valor financeiro-custo" id="displayCusto">R$ 0,00</span>
+                                    </div>
+                                    
+                                    <div class="financeiro-item">
+                                        <span>Preço de Venda:</span>
+                                        <span class="financeiro-valor" id="displayVenda">R$ 0,00</span>
+                                    </div>
+                                    
+                                    <div class="financeiro-item">
+                                        <span>Margem de Lucro:</span>
+                                        <span class="financeiro-valor financeiro-lucro" id="displayMargem">0%</span>
+                                    </div>
+                                    
+                                    <div class="financeiro-item">
+                                        <span>Lucro por Unidade:</span>
+                                        <span class="financeiro-valor financeiro-lucro" id="displayLucro">R$ 0,00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Campos Privados para Produto -->
+                                <div id="camposProdutoPrivado" style="display: none;">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Código/SKU *</label>
+                                            <input type="text" class="form-control" id="codigoSKU" 
+                                                   placeholder="Ex: PROD-001">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Código de Barras</label>
+                                            <input type="text" class="form-control" id="codigoBarras">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Preço de Custo *</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">R$</span>
+                                                <input type="number" class="form-control" id="precoCusto" 
+                                                       min="0" step="0.01">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Fornecedor</label>
+                                            <input type="text" class="form-control" id="fornecedor" 
+                                                   placeholder="Nome do fornecedor">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Estoque Atual *</label>
+                                            <input type="number" class="form-control" id="estoqueAtual" 
+                                                   min="0" step="1" value="0">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Estoque Mínimo</label>
+                                            <input type="number" class="form-control" id="estoqueMinimo" 
+                                                   min="0" step="1" value="0">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Localização</label>
+                                            <input type="text" class="form-control" id="localizacaoEstoque" 
+                                                   placeholder="Ex: Prateleira A3">
+                                        </div>
+                                    </div>
+
+                                    <!-- Impostos e Taxas -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Impostos (%)</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="impostos" 
+                                                       min="0" max="100" step="0.1" value="0">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Taxa Cartão (%)</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="taxaCartao" 
+                                                       min="0" max="100" step="0.1" value="0">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Carga Tributária (%)</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="cargaTributaria" 
+                                                       min="0" max="100" step="0.1" value="0">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Contato do Fornecedor</label>
+                                        <textarea class="form-control" id="contatoFornecedor" rows="2" 
+                                                  placeholder="Telefone, email, site..."></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Campos Privados para Serviço -->
+                                <div id="camposServicoPrivado">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Custo por Hora/Material</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">R$</span>
+                                                <input type="number" class="form-control" id="custoHoraServico" 
+                                                       min="0" step="0.01" placeholder="Custo estimado">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Materiais Necessários</label>
+                                            <div class="tags-container" id="materiaisServicoContainer">
+                                                <input type="text" class="tags-input" id="materialServicoInput" 
+                                                       placeholder="Digite material e pressione Enter">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Observações Internas</label>
+                                        <textarea class="form-control" id="observacoesPrivadas" rows="3" 
+                                                  placeholder="Informações internas, detalhes técnicos..."></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Histórico (futuro) -->
+                                <div class="alert alert-info">
+                                    <i class="fas fa-history me-2"></i>
+                                    Histórico de preços e alterações será implementado em breve
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-action" id="btnSalvarItem">
+                        <i class="fas fa-save me-2"></i>Salvar Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script Principal -->
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            collection,
+            addDoc,
+            updateDoc,
+            deleteDoc,
+            getDocs,
+            query,
+            where,
+            orderBy,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config - MESMA CONFIGURAÇÃO
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ============================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================
+        let currentUser = null;
+        let userData = null;
+        let servicos = [];
+        let produtos = [];
+        let tipoAtualCatalogo = 'servicos';
+        let fotosPublicas = [];
+        let modoEdicao = false;
+        let itemEmEdicao = null;
+
+        // ============================================
+        // ELEMENTOS DOM
+        // ============================================
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const userId = document.getElementById('userId');
+        const btnLogout = document.getElementById('btnLogout');
+        const menuToggle = document.getElementById('menuToggle');
+        const dashboardMenu = document.getElementById('dashboardMenu');
+        
+        // Elementos das abas
+        const catalogoTabs = document.getElementById('catalogoTabs');
+        const tabButtons = catalogoTabs ? catalogoTabs.querySelectorAll('.tab-btn') : [];
+        const badgeServicos = document.getElementById('badgeServicos');
+        const badgeProdutos = document.getElementById('badgeProdutos');
+        const badgeTodos = document.getElementById('badgeTodos');
+        
+        // Elementos de filtro
+        const searchCatalogo = document.getElementById('searchCatalogo');
+        const filterCategoria = document.getElementById('filterCategoria');
+        const filterStatus = document.getElementById('filterStatus');
+        
+        // Elementos de estatísticas
+        const totalServicos = document.getElementById('totalServicos');
+        const totalProdutos = document.getElementById('totalProdutos');
+        const valorEstoque = document.getElementById('valorEstoque');
+        const baixoEstoque = document.getElementById('baixoEstoque');
+        
+        // Grid do catálogo
+        const catalogoGrid = document.getElementById('catalogoGrid');
+        
+        // Modal
+        const modalItem = new bootstrap.Modal(document.getElementById('modalItem'));
+        const modalTitle = document.getElementById('modalTitle');
+        const seletorTipoItem = document.getElementById('seletorTipoItem');
+        const tipoItemBtns = document.querySelectorAll('.tipo-item-btn');
+        const tipoItemInput = document.getElementById('tipoItem');
+        const itemId = document.getElementById('itemId');
+        const formItem = document.getElementById('formItem');
+        const btnSalvarItem = document.getElementById('btnSalvarItem');
+        
+        // Abas do modal
+        const modalTabs = document.getElementById('modalTabs');
+        const modalTabBtns = document.querySelectorAll('.modal-tab-btn');
+        
+        // Campos gerais
+        const nomePublico = document.getElementById('nomePublico');
+        const statusPublico = document.getElementById('statusPublico');
+        const descricaoPublico = document.getElementById('descricaoPublico');
+        const categoriaPublico = document.getElementById('categoriaPublico');
+        const precoVenda = document.getElementById('precoVenda');
+        const unidadeMedida = document.getElementById('unidadeMedida');
+        const garantiaDias = document.getElementById('garantiaDias');
+        
+        // Campos específicos Produto (Público)
+        const camposProdutoPublico = document.getElementById('camposProdutoPublico');
+        const marcaProduto = document.getElementById('marcaProduto');
+        const modeloProduto = document.getElementById('modeloProduto');
+        const corProduto = document.getElementById('corProduto');
+        const tamanhoProduto = document.getElementById('tamanhoProduto');
+        const pesoProduto = document.getElementById('pesoProduto');
+        
+        // Campos específicos Serviço (Público)
+        const camposServicoPublico = document.getElementById('camposServicoPublico');
+        const duracaoServico = document.getElementById('duracaoServico');
+        const tipoServico = document.getElementById('tipoServico');
+        
+        // Campos Privados (Produto)
+        const camposProdutoPrivado = document.getElementById('camposProdutoPrivado');
+        const codigoSKU = document.getElementById('codigoSKU');
+        const codigoBarras = document.getElementById('codigoBarras');
+        const precoCusto = document.getElementById('precoCusto');
+        const fornecedor = document.getElementById('fornecedor');
+        const estoqueAtual = document.getElementById('estoqueAtual');
+        const estoqueMinimo = document.getElementById('estoqueMinimo');
+        const localizacaoEstoque = document.getElementById('localizacaoEstoque');
+        const impostos = document.getElementById('impostos');
+        const taxaCartao = document.getElementById('taxaCartao');
+        const cargaTributaria = document.getElementById('cargaTributaria');
+        const contatoFornecedor = document.getElementById('contatoFornecedor');
+        
+        // Campos Privados (Serviço)
+        const camposServicoPrivado = document.getElementById('camposServicoPrivado');
+        const custoHoraServico = document.getElementById('custoHoraServico');
+        const observacoesPrivadas = document.getElementById('observacoesPrivadas');
+        
+        // Tags containers
+        const tagsPublicoContainer = document.getElementById('tagsPublicoContainer');
+        const tagPublicoInput = document.getElementById('tagPublicoInput');
+        const materiaisServicoContainer = document.getElementById('materiaisServicoContainer');
+        const materialServicoInput = document.getElementById('materialServicoInput');
+        
+        // Upload de imagens
+        const uploadAreaPublico = document.getElementById('uploadAreaPublico');
+        const fotosPublicoInput = document.getElementById('fotosPublicoInput');
+        const galleryPublico = document.getElementById('galleryPublico');
+        
+        // Display financeiro
+        const displayCusto = document.getElementById('displayCusto');
+        const displayVenda = document.getElementById('displayVenda');
+        const displayMargem = document.getElementById('displayMargem');
+        const displayLucro = document.getElementById('displayLucro');
+
+        // ============================================
+        // FUNÇÕES DE UTILIDADE
+        // ============================================
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showAlert(mensagem, tipo = 'success') {
+            alert(mensagem);
+        }
+
+        // Upload Imgur - MESMO CÓDIGO DO PERFIL
+        async function uploadParaImgur(arquivo) {
+            showLoading();
+            
+            try {
+                const base64 = await converterParaBase64(arquivo);
+                const CLIENT_ID = '546c25a59c58ad7';
+                const formData = new FormData();
+                formData.append('image', base64.split(',')[1]);
+                formData.append('type', 'base64');
+                
+                const resposta = await fetch('https://api.imgur.com/3/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Client-ID ${CLIENT_ID}`
+                    },
+                    body: formData
+                });
+                
+                if (!resposta.ok) {
+                    throw new Error('Erro do Imgur');
+                }
+                
+                const dados = await resposta.json();
+                
+                if (!dados.success) {
+                    throw new Error('Erro no upload');
+                }
+                
+                return dados.data.link;
+                
+            } catch (erro) {
+                throw new Error('Falha ao enviar imagem');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function converterParaBase64(arquivo) {
+            return new Promise((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onload = (e) => resolve(e.target.result);
+                leitor.onerror = reject;
+                leitor.readAsDataURL(arquivo);
+            });
+        }
+
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor || 0);
+        }
+
+        function calcularMargem(custo, venda) {
+            if (!custo || !venda || custo <= 0 || venda <= 0) return 0;
+            const margem = ((venda - custo) / custo) * 100;
+            return Math.round(margem * 100) / 100;
+        }
+
+        function calcularLucro(custo, venda) {
+            if (!custo || !venda) return 0;
+            return venda - custo;
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO DO SISTEMA
+        // ============================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    showLoading();
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const userDoc = await getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                        atualizarInterfaceUsuario(userData);
+                        await carregarCatalogo();
+                        inicializarSistema();
+                        carregarCategorias();
+                    }
+                } catch (error) {
+                    showAlert('Erro ao carregar dados do usuário', 'error');
+                } finally {
+                    hideLoading();
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function inicializarSistema() {
+            // Inicializar abas
+            if (tabButtons.length > 0) inicializarAbasCatalogo();
+            
+            // Inicializar seletor de tipo no modal
+            if (tipoItemBtns.length > 0) inicializarSeletorTipo();
+            
+            // Inicializar abas do modal (público/privado)
+            if (modalTabBtns.length > 0) inicializarAbasModal();
+            
+            // Inicializar eventos
+            inicializarEventListeners();
+        }
+
+        function atualizarInterfaceUsuario(data) {
+            if (data.apelido) {
+                userName.textContent = `Olá, ${data.apelido}`;
+                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+            }
+            
+            if (data.idScanHub) {
+                userId.textContent = data.idScanHub;
+            }
+        }
+
+        // ============================================
+        // CARREGAMENTO DE DADOS
+        // ============================================
+        async function carregarCatalogo() {
+            await carregarServicos();
+            await carregarProdutos();
+            atualizarContadores();
+            atualizarGridCatalogo();
+        }
+
+        async function carregarServicos() {
+            try {
+                const q = query(
+                    collection(db, "servicos"),
+                    where("profissionalId", "==", currentUser.uid),
+                    orderBy("criadoEm", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                servicos = [];
+                
+                querySnapshot.forEach((doc) => {
+                    servicos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar serviços:', error);
+            }
+        }
+
+        async function carregarProdutos() {
+            try {
+                const q = query(
+                    collection(db, "produtos"),
+                    where("profissionalId", "==", currentUser.uid),
+                    orderBy("criadoEm", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                produtos = [];
+                
+                querySnapshot.forEach((doc) => {
+                    produtos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+            }
+        }
+
+        function carregarCategorias() {
+            // Usar especialidades do perfil como categorias
+            if (userData?.profissional?.especialidades) {
+                const especialidades = userData.profissional.especialidades;
+                filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
+                categoriaPublico.innerHTML = '<option value="">Selecione uma categoria</option>';
+                
+                especialidades.forEach(especialidade => {
+                    const option = document.createElement('option');
+                    option.value = especialidade;
+                    option.textContent = especialidade;
+                    filterCategoria.appendChild(option.cloneNode(true));
+                    categoriaPublico.appendChild(option);
+                });
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE ABAS
+        // ============================================
+        function inicializarAbasCatalogo() {
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    tipoAtualCatalogo = this.getAttribute('data-tipo');
+                    atualizarGridCatalogo();
+                });
+            });
+        }
+
+        function inicializarAbasModal() {
+            modalTabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modalTabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const tab = this.getAttribute('data-tab');
+                    
+                    // Mostrar conteúdo da aba selecionada
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.remove('active');
+                    });
+                    document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+                });
+            });
+        }
+
+        function inicializarSeletorTipo() {
+            tipoItemBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tipoItemBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const novoTipo = this.getAttribute('data-tipo');
+                    tipoItemInput.value = novoTipo;
+                    alternarCamposPorTipo(novoTipo);
+                });
+            });
+        }
+
+        function alternarCamposPorTipo(tipo) {
+            if (tipo === 'servico') {
+                camposServicoPublico.style.display = 'block';
+                camposProdutoPublico.style.display = 'none';
+                camposServicoPrivado.style.display = 'block';
+                camposProdutoPrivado.style.display = 'none';
+                
+                // Habilitar/desabilitar campos obrigatórios
+                codigoSKU.required = false;
+                precoCusto.required = false;
+                estoqueAtual.required = false;
+                
+            } else if (tipo === 'produto') {
+                camposServicoPublico.style.display = 'none';
+                camposProdutoPublico.style.display = 'block';
+                camposServicoPrivado.style.display = 'none';
+                camposProdutoPrivado.style.display = 'block';
+                
+                // Habilitar/desabilitar campos obrigatórios
+                codigoSKU.required = true;
+                precoCusto.required = true;
+                estoqueAtual.required = true;
+            }
+            
+            // Recalcular margem se houver valores
+            atualizarDisplayFinanceiro();
+        }
+
+        // ============================================
+        // UPLOAD DE IMAGENS (igual perfil)
+        // ============================================
+        uploadAreaPublico.addEventListener('click', () => {
+            fotosPublicoInput.click();
+        });
+
+        fotosPublicoInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            
+            if (fotosPublicas.length + files.length > 5) {
+                showAlert('Máximo de 5 fotos por item', 'error');
+                return;
+            }
+            
+            for (const file of files) {
+                try {
+                    showLoading();
+                    const imageUrl = await uploadParaImgur(file);
+                    fotosPublicas.push(imageUrl);
+                    adicionarFotoGaleria(imageUrl);
+                } catch (erro) {
+                    showAlert('Erro ao enviar foto', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        });
+
+        function adicionarFotoGaleria(url) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${url}" alt="Foto do item">
+                <div class="gallery-item-remove" onclick="removerFotoCatalogo('${url}', this)">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            galleryPublico.appendChild(item);
+        }
+
+        window.removerFotoCatalogo = function(url, element) {
+            if (confirm('Remover esta foto?')) {
+                fotosPublicas = fotosPublicas.filter(foto => foto !== url);
+                element.parentElement.remove();
+            }
+        };
+
+        // ============================================
+        // TAGS SYSTEM (igual perfil)
+        // ============================================
+        function inicializarTags(container, inputElement, dadosIniciais = []) {
+            dadosIniciais.forEach(tag => {
+                criarTag(tag, container);
+            });
+            
+            inputElement.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && inputElement.value.trim()) {
+                    e.preventDefault();
+                    criarTag(inputElement.value.trim(), container);
+                    inputElement.value = '';
+                }
+            });
+        }
+
+        function criarTag(texto, container) {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `
+                ${texto}
+                <span class="tag-remove" onclick="this.parentElement.remove()">×</span>
+            `;
+            container.insertBefore(tag, container.querySelector('.tags-input'));
+        }
+
+        function getTags(container) {
+            const tags = [];
+            container.querySelectorAll('.tag').forEach(tag => {
+                tags.push(tag.firstChild.textContent.trim());
+            });
+            return tags;
+        }
+
+        // ============================================
+        // DISPLAY FINANCEIRO
+        // ============================================
+        function atualizarDisplayFinanceiro() {
+            const custo = parseFloat(precoCusto.value) || 0;
+            const venda = parseFloat(precoVenda.value) || 0;
+            const margem = calcularMargem(custo, venda);
+            const lucro = calcularLucro(custo, venda);
+            
+            displayCusto.textContent = formatarMoeda(custo);
+            displayVenda.textContent = formatarMoeda(venda);
+            displayMargem.textContent = `${margem}%`;
+            displayLucro.textContent = formatarMoeda(lucro);
+            
+            // Colorir margem
+            if (margem > 30) {
+                displayMargem.style.color = '#27ae60';
+            } else if (margem > 15) {
+                displayMargem.style.color = '#f39c12';
+            } else if (margem > 0) {
+                displayMargem.style.color = '#e74c3c';
+            } else {
+                displayMargem.style.color = '#95a5a6';
+            }
+        }
+
+        // Eventos para atualizar display financeiro
+        if (precoCusto) precoCusto.addEventListener('input', atualizarDisplayFinanceiro);
+        if (precoVenda) precoVenda.addEventListener('input', atualizarDisplayFinanceiro);
+
+        // ============================================
+        // CRUD - CREATE, READ, UPDATE, DELETE
+        // ============================================
+        window.abrirModalItem = function(tipo = 'servico', itemId = null) {
+            resetarModal();
+            
+            if (itemId) {
+                // Modo edição
+                modoEdicao = true;
+                const item = tipo === 'servico' 
+                    ? servicos.find(s => s.id === itemId)
+                    : produtos.find(p => p.id === itemId);
+                
+                if (!item) {
+                    showAlert('Item não encontrado', 'error');
+                    return;
+                }
+                
+                itemEmEdicao = item;
+                preencherModal(item);
+                modalTitle.textContent = `Editar ${tipo === 'servico' ? 'Serviço' : 'Produto'}`;
+                seletorTipoItem.style.display = 'none'; // Não mudar tipo na edição
+            } else {
+                // Modo criação
+                modoEdicao = false;
+                modalTitle.textContent = `Novo ${tipo === 'servico' ? 'Serviço' : 'Produto'}`;
+                seletorTipoItem.style.display = 'block';
+                
+                // Ativar botão do tipo selecionado
+                tipoItemBtns.forEach(btn => btn.classList.remove('active'));
+                const btnAtivo = document.querySelector(`.tipo-item-btn[data-tipo="${tipo}"]`);
+                if (btnAtivo) btnAtivo.classList.add('active');
+                tipoItemInput.value = tipo;
+                
+                alternarCamposPorTipo(tipo);
+            }
+            
+            modalItem.show();
+        };
+
+        function resetarModal() {
+            formItem.reset();
+            itemId.value = '';
+            fotosPublicas = [];
+            galleryPublico.innerHTML = '';
+            
+            // Resetar tags
+            tagsPublicoContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
+            materiaisServicoContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
+            
+            // Resetar abas
+            modalTabBtns.forEach(btn => btn.classList.remove('active'));
+            modalTabBtns[0].classList.add('active');
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            document.getElementById('tabPublico').classList.add('active');
+            
+            // Data padrão
+            const hoje = new Date().toISOString().split('T')[0];
+        }
+
+        function preencherModal(item) {
+            itemId.value = item.id;
+            tipoItemInput.value = item.tipo || 'servico';
+            
+            // Preencher dados públicos
+            nomePublico.value = item.nome || '';
+            statusPublico.value = item.status || 'ativo';
+            descricaoPublico.value = item.descricao || '';
+            categoriaPublico.value = item.categoria || '';
+            precoVenda.value = item.precoVenda || 0;
+            unidadeMedida.value = item.unidadeMedida || 'unidade';
+            garantiaDias.value = item.garantiaDias || 90;
+            
+            // Preencher tags
+            if (item.tags && Array.isArray(item.tags)) {
+                inicializarTags(tagsPublicoContainer, tagPublicoInput, item.tags);
+            }
+            
+            // Preencher imagens
+            if (item.imagens && Array.isArray(item.imagens)) {
+                fotosPublicas = item.imagens;
+                item.imagens.forEach(img => adicionarFotoGaleria(img));
+            }
+            
+            // Alternar campos por tipo
+            alternarCamposPorTipo(item.tipo || 'servico');
+            
+            if (item.tipo === 'produto' || (!item.tipo && item.codigoSKU)) {
+                // É produto
+                marcaProduto.value = item.marca || '';
+                modeloProduto.value = item.modelo || '';
+                corProduto.value = item.cor || '';
+                tamanhoProduto.value = item.tamanho || '';
+                pesoProduto.value = item.peso || '';
+                
+                // Dados privados
+                codigoSKU.value = item.codigoSKU || '';
+                codigoBarras.value = item.codigoBarras || '';
+                precoCusto.value = item.precoCusto || 0;
+                fornecedor.value = item.fornecedor || '';
+                estoqueAtual.value = item.estoqueAtual || 0;
+                estoqueMinimo.value = item.estoqueMinimo || 0;
+                localizacaoEstoque.value = item.localizacaoEstoque || '';
+                impostos.value = item.impostos || 0;
+                taxaCartao.value = item.taxaCartao || 0;
+                cargaTributaria.value = item.cargaTributaria || 0;
+                contatoFornecedor.value = item.contatoFornecedor || '';
+                
+            } else {
+                // É serviço
+                duracaoServico.value = item.duracao || '';
+                tipoServico.value = item.tipoServico || 'presencial';
+                custoHoraServico.value = item.custoHora || 0;
+                observacoesPrivadas.value = item.observacoesPrivadas || '';
+                
+                // Preencher materiais
+                if (item.materiais && Array.isArray(item.materiais)) {
+                    inicializarTags(materiaisServicoContainer, materialServicoInput, item.materiais);
+                }
+            }
+            
+            atualizarDisplayFinanceiro();
+        }
+
+        async function salvarItem() {
+            // Validação básica
+            if (!nomePublico.value.trim()) {
+                showAlert('Informe o nome do item', 'error');
+                nomePublico.focus();
+                return;
+            }
+            
+            if (!categoriaPublico.value) {
+                showAlert('Selecione uma categoria', 'error');
+                categoriaPublico.focus();
+                return;
+            }
+            
+            if (!precoVenda.value || precoVenda.value <= 0) {
+                showAlert('Informe um preço de venda válido', 'error');
+                precoVenda.focus();
+                return;
+            }
+            
+            const tipo = tipoItemInput.value;
+            
+            // Validações específicas para produto
+            if (tipo === 'produto') {
+                if (!codigoSKU.value.trim()) {
+                    showAlert('Informe o código/SKU do produto', 'error');
+                    codigoSKU.focus();
+                    return;
+                }
+                
+                if (!precoCusto.value || precoCusto.value < 0) {
+                    showAlert('Informe o preço de custo', 'error');
+                    precoCusto.focus();
+                    return;
+                }
+                
+                if (estoqueAtual.value < 0) {
+                    showAlert('Estoque atual não pode ser negativo', 'error');
+                    estoqueAtual.focus();
+                    return;
+                }
+            }
+            
+            try {
+                showLoading();
+                btnSalvarItem.disabled = true;
+                btnSalvarItem.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+                
+                // Preparar dados públicos
+                const dadosPublicos = {
+                    nome: nomePublico.value.trim(),
+                    descricao: descricaoPublico.value.trim(),
+                    categoria: categoriaPublico.value,
+                    precoVenda: parseFloat(precoVenda.value),
+                    unidadeMedida: unidadeMedida.value,
+                    garantiaDias: parseInt(garantiaDias.value) || null,
+                    status: statusPublico.value,
+                    tags: getTags(tagsPublicoContainer),
+                    imagens: fotosPublicas,
+                    profissionalId: currentUser.uid,
+                    profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
+                    tipo: tipo,
+                    atualizadoEm: serverTimestamp()
+                };
+                
+                // Adicionar campos específicos
+                if (tipo === 'produto') {
+                    dadosPublicos.marca = marcaProduto.value.trim() || null;
+                    dadosPublicos.modelo = modeloProduto.value.trim() || null;
+                    dadosPublicos.cor = corProduto.value.trim() || null;
+                    dadosPublicos.tamanho = tamanhoProduto.value.trim() || null;
+                    dadosPublicos.peso = pesoProduto.value ? parseFloat(pesoProduto.value) : null;
+                } else {
+                    dadosPublicos.duracao = duracaoServico.value.trim() || null;
+                    dadosPublicos.tipoServico = tipoServico.value;
+                }
+                
+                // Preparar dados privados
+                const dadosPrivados = {};
+                
+                if (tipo === 'produto') {
+                    dadosPrivados.codigoSKU = codigoSKU.value.trim();
+                    dadosPrivados.codigoBarras = codigoBarras.value.trim() || null;
+                    dadosPrivados.precoCusto = parseFloat(precoCusto.value) || 0;
+                    dadosPrivados.fornecedor = fornecedor.value.trim() || null;
+                    dadosPrivados.contatoFornecedor = contatoFornecedor.value.trim() || null;
+                    dadosPrivados.estoqueAtual = parseInt(estoqueAtual.value) || 0;
+                    dadosPrivados.estoqueMinimo = parseInt(estoqueMinimo.value) || 0;
+                    dadosPrivados.localizacaoEstoque = localizacaoEstoque.value.trim() || null;
+                    dadosPrivados.impostos = parseFloat(impostos.value) || 0;
+                    dadosPrivados.taxaCartao = parseFloat(taxaCartao.value) || 0;
+                    dadosPrivados.cargaTributaria = parseFloat(cargaTributaria.value) || 0;
+                    
+                    // Calcular margem e lucro
+                    const margem = calcularMargem(dadosPrivados.precoCusto, dadosPublicos.precoVenda);
+                    const lucro = calcularLucro(dadosPrivados.precoCusto, dadosPublicos.precoVenda);
+                    dadosPrivados.margemLucro = margem;
+                    dadosPrivados.lucroUnitario = lucro;
+                } else {
+                    dadosPrivados.custoHora = parseFloat(custoHoraServico.value) || 0;
+                    dadosPrivados.materiais = getTags(materiaisServicoContainer);
+                    dadosPrivados.observacoesPrivadas = observacoesPrivadas.value.trim() || null;
+                }
+                
+                // Unir dados
+                const dadosCompletos = {
+                    ...dadosPublicos,
+                    ...dadosPrivados,
+                    // Adicionar privado como sub-objeto se quiser separar
+                    // dadosPrivados: dadosPrivados
+                };
+                
+                if (modoEdicao && itemEmEdicao) {
+                    // Atualizar item existente
+                    const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
+                    const itemRef = doc(db, collectionName, itemEmEdicao.id);
+                    await updateDoc(itemRef, dadosCompletos);
+                    
+                    // Atualizar localmente
+                    const lista = tipo === 'servico' ? servicos : produtos;
+                    const index = lista.findIndex(item => item.id === itemEmEdicao.id);
+                    if (index !== -1) {
+                        lista[index] = { ...lista[index], ...dadosCompletos };
+                    }
+                    
+                    showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} atualizado com sucesso!`, 'success');
+                } else {
+                    // Criar novo item
+                    dadosCompletos.criadoEm = serverTimestamp();
+                    
+                    const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
+                    const docRef = await addDoc(collection(db, collectionName), dadosCompletos);
+                    dadosCompletos.id = docRef.id;
+                    
+                    // Adicionar localmente
+                    if (tipo === 'servico') {
+                        servicos.unshift(dadosCompletos);
+                    } else {
+                        produtos.unshift(dadosCompletos);
+                    }
+                    
+                    showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} criado com sucesso!`, 'success');
+                }
+                
+                modalItem.hide();
+                
+                // Atualizar interface
+                atualizarContadores();
+                atualizarGridCatalogo();
+                
+            } catch (error) {
+                console.error('Erro ao salvar item:', error);
+                showAlert('Erro ao salvar item. Tente novamente.', 'error');
+            } finally {
+                hideLoading();
+                btnSalvarItem.disabled = false;
+                btnSalvarItem.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Item';
+            }
+        }
+
+        window.editarItem = function(tipo, id) {
+            abrirModalItem(tipo, id);
+        };
+
+        window.excluirItem = async function(tipo, id) {
+            if (!confirm(`Tem certeza que deseja excluir este ${tipo === 'servico' ? 'serviço' : 'produto'}?\nEsta ação não pode ser desfeita.`)) {
+                return;
+            }
+            
+            try {
+                showLoading();
+                
+                const collectionName = tipo === 'servico' ? 'servicos' : 'produtos';
+                const itemRef = doc(db, collectionName, id);
+                await deleteDoc(itemRef);
+                
+                // Remover localmente
+                const lista = tipo === 'servico' ? servicos : produtos;
+                const index = lista.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    lista.splice(index, 1);
+                }
+                
+                // Atualizar interface
+                atualizarContadores();
+                atualizarGridCatalogo();
+                
+                showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} excluído com sucesso!`, 'success');
+                
+            } catch (error) {
+                console.error('Erro ao excluir item:', error);
+                showAlert('Erro ao excluir item. Tente novamente.', 'error');
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // ============================================
+        // DISPLAY DO CATÁLOGO
+        // ============================================
+        function atualizarGridCatalogo() {
+            const searchTerm = searchCatalogo.value.toLowerCase();
+            const categoriaFilter = filterCategoria.value;
+            const statusFilter = filterStatus.value;
+            
+            let itensParaExibir = [];
+            
+            // Filtrar por tipo
+            if (tipoAtualCatalogo === 'servicos') {
+                itensParaExibir = [...servicos];
+            } else if (tipoAtualCatalogo === 'produtos') {
+                itensParaExibir = [...produtos];
+            } else {
+                itensParaExibir = [...servicos, ...produtos];
+            }
+            
+            // Aplicar filtros
+            itensParaExibir = itensParaExibir.filter(item => {
+                const matchSearch = !searchTerm || 
+                    item.nome.toLowerCase().includes(searchTerm) ||
+                    (item.descricao && item.descricao.toLowerCase().includes(searchTerm)) ||
+                    (item.categoria && item.categoria.toLowerCase().includes(searchTerm)) ||
+                    (item.tags && Array.isArray(item.tags) && 
+                     item.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                
+                const matchCategoria = !categoriaFilter || item.categoria === categoriaFilter;
+                const matchStatus = !statusFilter || item.status === statusFilter;
+                
+                return matchSearch && matchCategoria && matchStatus;
+            });
+            
+            // Ordenar por data de criação (mais recentes primeiro)
+            itensParaExibir.sort((a, b) => {
+                const dataA = a.criadoEm ? a.criadoEm.toDate() : new Date(0);
+                const dataB = b.criadoEm ? b.criadoEm.toDate() : new Date(0);
+                return dataB - dataA;
+            });
+            
+            // Limpar grid
+            catalogoGrid.innerHTML = '';
+            
+            if (itensParaExibir.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <i class="fas fa-${tipoAtualCatalogo === 'servicos' ? 'tools' : tipoAtualCatalogo === 'produtos' ? 'box' : 'boxes'}"></i>
+                    <h4>Nenhum item encontrado</h4>
+                    <p class="text-muted">${searchTerm || categoriaFilter || statusFilter ? 'Tente ajustar os filtros' : 'Comece adicionando seu primeiro item'}</p>
+                    <button class="btn btn-primary-action mt-3" onclick="abrirModalItem('${tipoAtualCatalogo === 'servicos' ? 'servico' : 'produto'}')">
+                        <i class="fas fa-plus me-2"></i>Adicionar Item
+                    </button>
+                `;
+                catalogoGrid.appendChild(emptyState);
+                return;
+            }
+            
+            // Preencher grid
+            itensParaExibir.forEach(item => {
+                const tipo = item.tipo || (item.codigoSKU ? 'produto' : 'servico');
+                const card = criarCardItem(item, tipo);
+                catalogoGrid.appendChild(card);
+            });
+        }
+
+        function criarCardItem(item, tipo) {
+            const card = document.createElement('div');
+            card.className = 'catalogo-card';
+            
+            // Badge de tipo
+            const badgeClass = tipo === 'servico' ? 'badge-servico' : 'badge-produto';
+            const badgeIcon = tipo === 'servico' ? 'fa-tools' : 'fa-box';
+            const badgeText = tipo === 'servico' ? 'Serviço' : 'Produto';
+            
+            // Imagem principal
+            const imagemPrincipal = item.imagens && item.imagens.length > 0 
+                ? item.imagens[0] 
+                : 'https://via.placeholder.com/400x300?text=' + (tipo === 'servico' ? 'Serviço' : 'Produto');
+            
+            // Informações específicas
+            let infoExtra = '';
+            if (tipo === 'produto') {
+                const estoque = item.estoqueAtual || 0;
+                const estoqueMinimo = item.estoqueMinimo || 0;
+                const statusEstoque = estoque <= estoqueMinimo ? 'alert-danger' : 'alert-success';
+                const textoEstoque = estoque <= estoqueMinimo ? `⚠️ Baixo: ${estoque} un` : `📦 ${estoque} un`;
+                
+                infoExtra = `<div class="card-info"><span>${textoEstoque}</span><span>${item.marca || 'Sem marca'}</span></div>`;
+            } else {
+                infoExtra = `<div class="card-info"><span>${item.duracao || '--'}</span><span>${item.tipoServico || 'Presencial'}</span></div>`;
+            }
+            
+            card.innerHTML = `
+                <div class="card-image">
+                    <img src="${imagemPrincipal}" alt="${item.nome}">
+                    <span class="card-badge ${badgeClass}">
+                        <i class="fas ${badgeIcon} me-1"></i>${badgeText}
+                    </span>
+                </div>
+                <div class="card-content">
+                    <h5 class="card-title">${item.nome}</h5>
+                    ${infoExtra}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="card-price">${formatarMoeda(item.precoVenda)}</div>
+                        <span class="status-badge status-${item.status || 'ativo'}">
+                            ${item.status === 'ativo' ? 'Ativo' : item.status === 'inativo' ? 'Inativo' : 'Esgotado'}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0" style="height: 40px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        ${item.descricao || 'Sem descrição'}
+                    </p>
+                    <div class="card-actions mt-3">
+                        <button class="btn-card btn-card-edit" onclick="editarItem('${tipo}', '${item.id}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-card btn-card-delete" onclick="excluirItem('${tipo}', '${item.id}')">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function atualizarContadores() {
+            // Contagem
+            totalServicos.textContent = servicos.filter(s => s.status === 'ativo').length;
+            totalProdutos.textContent = produtos.filter(p => p.status === 'ativo').length;
+            
+            // Atualizar badges
+            badgeServicos.textContent = servicos.length;
+            badgeProdutos.textContent = produtos.length;
+            badgeTodos.textContent = servicos.length + produtos.length;
+            
+            // Calcular valor do estoque
+            let valorTotalEstoque = 0;
+            let baixoEstoqueCount = 0;
+            
+            produtos.forEach(produto => {
+                if (produto.status === 'ativo') {
+                    const estoque = produto.estoqueAtual || 0;
+                    const precoCusto = produto.precoCusto || 0;
+                    valorTotalEstoque += estoque * precoCusto;
+                    
+                    const estoqueMinimo = produto.estoqueMinimo || 0;
+                    if (estoque <= estoqueMinimo) {
+                        baixoEstoqueCount++;
+                    }
+                }
+            });
+            
+            valorEstoque.textContent = formatarMoeda(valorTotalEstoque);
+            baixoEstoque.textContent = baixoEstoqueCount;
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        function inicializarEventListeners() {
+            // Botão salvar
+            btnSalvarItem.addEventListener('click', salvarItem);
+            
+            // Filtros
+            searchCatalogo.addEventListener('input', atualizarGridCatalogo);
+            filterCategoria.addEventListener('change', atualizarGridCatalogo);
+            filterStatus.addEventListener('change', atualizarGridCatalogo);
+            
+            // Inicializar tags
+            inicializarTags(tagsPublicoContainer, tagPublicoInput);
+            inicializarTags(materiaisServicoContainer, materialServicoInput);
+            
+            // Menu mobile
+            menuToggle.addEventListener('click', () => {
+                dashboardMenu.classList.toggle('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+            
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                    dashboardMenu.classList.remove('show');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+            
+            // Logout
+            btnLogout.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch {
+                    showAlert('Erro ao sair. Tente novamente.', 'error');
+                }
+            });
+        }
+
+        // Inicializar quando o DOM carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (modalItem._element) {
+                modalItem._element.addEventListener('hidden.bs.modal', function() {
+                    resetarModal();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
