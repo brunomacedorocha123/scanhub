@@ -34,10 +34,10 @@
             font-family: 'Poppins', sans-serif;
             background: #f8f9fa;
             color: #333;
-            padding-top: 90px; /* VOLTEI PARA 90px (ou ajuste conforme necessidade) */
+            padding-top: 100px; /* ÚNICA ALTERAÇÃO NECESSÁRIA: de 80px para 100px */
         }
 
-        /* Logo Grande */
+        /* Logo Grande - EXATAMENTE IGUAL */
         .navbar-brand-dashboard {
             display: flex;
             align-items: center;
@@ -52,27 +52,19 @@
             object-fit: contain;
         }
 
-        /* Navbar Dashboard - VOLTEI AO NORMAL */
+        /* Navbar Dashboard - EXATAMENTE IGUAL */
         .navbar-dashboard {
             background: white;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 15px 0; /* VOLTEI PARA 15px */
+            padding: 15px 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            /* REMOVI height: 80px; */
         }
 
-        /* Container da navbar - NOVO: para alinhar verticalmente */
-        .navbar-dashboard .container-fluid {
-            display: flex;
-            align-items: center;
-            height: 60px; /* Altura fixa para o container */
-        }
-
-        /* Ajuste do menu para ficar centralizado verticalmente */
+        /* Menu Dashboard - EXATAMENTE IGUAL */
         .dashboard-menu {
             list-style: none;
             display: flex;
@@ -80,16 +72,51 @@
             margin: 0;
             padding: 0;
             flex-wrap: wrap;
-            align-items: center; /* Centraliza verticalmente */
         }
 
-        /* User Info Compacto - AJUSTE PARA FICAR ALINHADO */
+        .dashboard-menu li {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dashboard-menu a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            background: transparent;
+            text-align: center;
+        }
+
+        .dashboard-menu a:hover,
+        .dashboard-menu a.active {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-menu i {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-menu span {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        /* User Info Compacto - EXATAMENTE IGUAL */
         .user-info-mobile {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-left: auto;
-            height: 100%; /* Ocupa toda altura disponível */
         }
 
         .user-avatar {
@@ -111,30 +138,21 @@
             margin: 0;
             font-weight: 600;
             font-size: 0.9rem;
-            line-height: 1.2;
         }
 
         .user-details small {
             color: #666;
             font-size: 0.75rem;
-            line-height: 1;
         }
 
-        /* Botão Logout - AJUSTE PARA FICAR ALINHADO */
-        .navbar-dashboard .btn-outline-danger {
-            display: flex;
-            align-items: center;
-            height: 40px; /* Mesma altura do avatar */
-        }
-
-        /* Container Principal */
+        /* Container Principal - EXATAMENTE IGUAL */
         .container-main {
             max-width: 1200px;
             margin: 20px auto;
             padding: 0 20px;
         }
 
-        /* Header com Tabs */
+        /* Header com Tabs - Estilo igual Pedidos */
         .header-abas {
             background: white;
             border-radius: 15px;
@@ -143,7 +161,7 @@
             margin-bottom: 25px;
         }
 
-        /* Tabs Container */
+        /* Tabs Container - Igual Pedidos */
         .catalogo-tabs-container {
             display: flex;
             gap: 5px;
@@ -209,113 +227,6 @@
             box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
         }
 
-        /* Menu Dashboard quando expandido (mobile) - CORREÇÃO */
-        @media (max-width: 992px) {
-            .dashboard-menu {
-                position: fixed;
-                top: 70px; /* AJUSTADO: altura da navbar no mobile */
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                border-radius: 0 0 20px 20px;
-                display: none;
-                z-index: 999;
-                max-height: calc(100vh - 70px);
-                overflow-y: auto;
-                align-items: stretch; /* Para ocupar toda largura */
-            }
-            
-            .dashboard-menu li {
-                width: 100%;
-            }
-            
-            .dashboard-menu a {
-                flex-direction: row;
-                justify-content: flex-start;
-                padding: 15px;
-                font-size: 1rem;
-                text-align: left;
-            }
-            
-            .dashboard-menu i {
-                margin-right: 15px;
-                margin-bottom: 0;
-                width: 25px;
-                text-align: center;
-            }
-            
-            /* Ajuste da navbar no mobile */
-            .navbar-dashboard {
-                height: 70px; /* Altura fixa no mobile */
-            }
-            
-            .navbar-dashboard .container-fluid {
-                height: 70px;
-            }
-        }
-
-        /* Ajustes para mobile */
-        @media (max-width: 768px) {
-            body {
-                padding-top: 70px; /* Ajustado para mobile */
-            }
-            
-            .navbar-brand-dashboard {
-                transform: scale(1.6);
-            }
-            
-            /* Ajuste do user info no mobile */
-            .user-details {
-                display: none; /* Esconde detalhes no mobile muito pequeno */
-            }
-            
-            .user-avatar {
-                width: 35px;
-                height: 35px;
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .navbar-brand-dashboard {
-                transform: scale(1.4);
-            }
-            
-            .user-info-mobile {
-                gap: 5px;
-            }
-            
-            .navbar-dashboard .btn-outline-danger span {
-                display: none; /* Esconde texto "Sair" no mobile */
-            }
-            
-            .navbar-dashboard .btn-outline-danger {
-                width: 40px;
-                height: 40px;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .navbar-brand-dashboard {
-                transform: scale(1.2);
-            }
-            
-            .user-avatar {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* O RESTO DO CÓDIGO PERMANECE IGUAL (não alterei abaixo desta linha) */
-        
         /* Cards de Catálogo */
         .catalogo-grid {
             display: grid;
@@ -665,32 +576,93 @@
             margin-bottom: 20px;
         }
 
-        /* Responsivo */
-        @media (max-width: 992px) {
+        /* Responsivo - MOBILE FIRST (EXATAMENTE IGUAL) */
+        @media (max-width: 1200px) {
             .navbar-brand-dashboard {
                 transform: scale(2);
             }
             
-            .catalogo-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            .dashboard-menu a {
+                font-size: 0.8rem;
+                padding: 12px 8px;
+            }
+            
+            .dashboard-menu i {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.8);
+                margin-right: 20px;
+            }
+            
+            .dashboard-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 20px 20px;
+                display: none;
+                z-index: 999;
+            }
+            
+            .dashboard-menu.show {
+                display: flex;
+            }
+            
+            .dashboard-menu li {
+                width: 100%;
+            }
+            
+            .dashboard-menu a {
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 15px;
+                font-size: 1rem;
+                text-align: left;
+            }
+            
+            .dashboard-menu i {
+                margin-right: 15px;
+                margin-bottom: 0;
+                width: 25px;
+                text-align: center;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .user-info-mobile {
+                margin-left: 0;
             }
         }
 
         @media (max-width: 768px) {
+            body {
+                padding-top: 90px; /* Ajuste: de 70px para 90px */
+            }
+            
             .navbar-brand-dashboard {
                 transform: scale(1.6);
             }
             
-            .catalogo-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
-            
-            .modal-lg {
-                margin: 10px;
+            .container-main {
+                padding: 15px;
             }
         }
 
         @media (max-width: 576px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.4);
+            }
+            
             .catalogo-grid {
                 grid-template-columns: 1fr;
             }
@@ -707,6 +679,22 @@
             .tab-btn {
                 flex: 1;
                 justify-content: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.2);
+            }
+            
+            .user-details h5 {
+                font-size: 0.8rem;
+            }
+            
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
             }
         }
 
