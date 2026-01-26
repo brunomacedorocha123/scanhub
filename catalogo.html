@@ -34,10 +34,10 @@
             font-family: 'Poppins', sans-serif;
             background: #f8f9fa;
             color: #333;
-            padding-top: 100px; /* AUMENTEI DE 80px PARA 100px */
+            padding-top: 90px; /* VOLTEI PARA 90px (ou ajuste conforme necessidade) */
         }
 
-        /* Logo Grande - Mesmo estilo da dashboard */
+        /* Logo Grande */
         .navbar-brand-dashboard {
             display: flex;
             align-items: center;
@@ -52,20 +52,27 @@
             object-fit: contain;
         }
 
-        /* Navbar Dashboard - AUMENTEI A ALTURA */
+        /* Navbar Dashboard - VOLTEI AO NORMAL */
         .navbar-dashboard {
             background: white;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 20px 0; /* AUMENTEI DE 15px PARA 20px */
+            padding: 15px 0; /* VOLTEI PARA 15px */
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            height: 80px; /* ALTURA FIXA */
+            /* REMOVI height: 80px; */
         }
 
-        /* Menu Dashboard - Mesmo estilo */
+        /* Container da navbar - NOVO: para alinhar verticalmente */
+        .navbar-dashboard .container-fluid {
+            display: flex;
+            align-items: center;
+            height: 60px; /* Altura fixa para o container */
+        }
+
+        /* Ajuste do menu para ficar centralizado verticalmente */
         .dashboard-menu {
             list-style: none;
             display: flex;
@@ -73,105 +80,70 @@
             margin: 0;
             padding: 0;
             flex-wrap: wrap;
+            align-items: center; /* Centraliza verticalmente */
         }
 
-        .dashboard-menu li {
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .dashboard-menu a {
+        /* User Info Compacto - AJUSTE PARA FICAR ALINHADO */
+        .user-info-mobile {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 15px 10px;
-            color: var(--dark-color);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            border-radius: 10px;
-            background: transparent;
-            text-align: center;
+            gap: 10px;
+            margin-left: auto;
+            height: 100%; /* Ocupa toda altura disponível */
         }
 
-        .dashboard-menu a:hover,
-        .dashboard-menu a.active {
-            background: rgba(68, 104, 154, 0.1);
-            color: var(--primary-color);
-            transform: translateY(-2px);
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .dashboard-menu i {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
+        .user-details h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            line-height: 1.2;
         }
 
-        /* Container Principal - ADICIONEI MARGIN TOP EXTRA */
+        .user-details small {
+            color: #666;
+            font-size: 0.75rem;
+            line-height: 1;
+        }
+
+        /* Botão Logout - AJUSTE PARA FICAR ALINHADO */
+        .navbar-dashboard .btn-outline-danger {
+            display: flex;
+            align-items: center;
+            height: 40px; /* Mesma altura do avatar */
+        }
+
+        /* Container Principal */
         .container-main {
             max-width: 1200px;
-            margin: 30px auto 20px; /* AUMENTEI MARGIN TOP PARA 30px */
+            margin: 20px auto;
             padding: 0 20px;
         }
 
-        /* Header com Tabs - ADICIONEI MARGIN TOP */
+        /* Header com Tabs */
         .header-abas {
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             margin-bottom: 25px;
-            margin-top: 10px; /* ADICIONADO */
         }
 
-        /* Menu Dashboard quando expandido (mobile) - AJUSTEI A POSIÇÃO */
-        @media (max-width: 992px) {
-            .dashboard-menu {
-                position: fixed;
-                top: 80px; /* AJUSTEI PARA BAIXO DA NAVBAR */
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                border-radius: 0 0 20px 20px;
-                display: none;
-                z-index: 999;
-                max-height: calc(100vh - 80px); /* LIMITA ALTURA */
-                overflow-y: auto; /* SCROLL SE PRECISAR */
-            }
-        }
-
-        /* Ajustes para mobile - AUMENTEI PADDING TOP DO BODY */
-        @media (max-width: 768px) {
-            body {
-                padding-top: 90px; /* AJUSTEI PARA MOBILE */
-            }
-            
-            .navbar-dashboard {
-                height: 70px; /* REDUZI UM POUCO NO MOBILE */
-                padding: 15px 0;
-            }
-            
-            .navbar-brand-dashboard {
-                transform: scale(1.6);
-            }
-        }
-
-        @media (max-width: 576px) {
-            body {
-                padding-top: 85px; /* AJUSTE FINO PARA MOBILE PEQUENO */
-            }
-            
-            .navbar-dashboard {
-                height: 65px;
-            }
-        }
-
-        /* O RESTO DO CÓDIGO PERMANECE IGUAL... */
-        
-        /* Tabs Container - Igual Pedidos */
+        /* Tabs Container */
         .catalogo-tabs-container {
             display: flex;
             gap: 5px;
@@ -237,6 +209,113 @@
             box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
         }
 
+        /* Menu Dashboard quando expandido (mobile) - CORREÇÃO */
+        @media (max-width: 992px) {
+            .dashboard-menu {
+                position: fixed;
+                top: 70px; /* AJUSTADO: altura da navbar no mobile */
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 20px 20px;
+                display: none;
+                z-index: 999;
+                max-height: calc(100vh - 70px);
+                overflow-y: auto;
+                align-items: stretch; /* Para ocupar toda largura */
+            }
+            
+            .dashboard-menu li {
+                width: 100%;
+            }
+            
+            .dashboard-menu a {
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 15px;
+                font-size: 1rem;
+                text-align: left;
+            }
+            
+            .dashboard-menu i {
+                margin-right: 15px;
+                margin-bottom: 0;
+                width: 25px;
+                text-align: center;
+            }
+            
+            /* Ajuste da navbar no mobile */
+            .navbar-dashboard {
+                height: 70px; /* Altura fixa no mobile */
+            }
+            
+            .navbar-dashboard .container-fluid {
+                height: 70px;
+            }
+        }
+
+        /* Ajustes para mobile */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px; /* Ajustado para mobile */
+            }
+            
+            .navbar-brand-dashboard {
+                transform: scale(1.6);
+            }
+            
+            /* Ajuste do user info no mobile */
+            .user-details {
+                display: none; /* Esconde detalhes no mobile muito pequeno */
+            }
+            
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.4);
+            }
+            
+            .user-info-mobile {
+                gap: 5px;
+            }
+            
+            .navbar-dashboard .btn-outline-danger span {
+                display: none; /* Esconde texto "Sair" no mobile */
+            }
+            
+            .navbar-dashboard .btn-outline-danger {
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.2);
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* O RESTO DO CÓDIGO PERMANECE IGUAL (não alterei abaixo desta linha) */
+        
         /* Cards de Catálogo */
         .catalogo-grid {
             display: grid;
