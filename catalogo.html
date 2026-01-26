@@ -34,7 +34,7 @@
             font-family: 'Poppins', sans-serif;
             background: #f8f9fa;
             color: #333;
-            padding-top: 80px;
+            padding-top: 100px; /* AUMENTEI DE 80px PARA 100px */
         }
 
         /* Logo Grande - Mesmo estilo da dashboard */
@@ -52,16 +52,17 @@
             object-fit: contain;
         }
 
-        /* Navbar Dashboard - Mesmo estilo */
+        /* Navbar Dashboard - AUMENTEI A ALTURA */
         .navbar-dashboard {
             background: white;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 15px 0;
+            padding: 20px 0; /* AUMENTEI DE 15px PARA 20px */
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
+            height: 80px; /* ALTURA FIXA */
         }
 
         /* Menu Dashboard - Mesmo estilo */
@@ -106,22 +107,70 @@
             margin-bottom: 5px;
         }
 
-        /* Container Principal */
+        /* Container Principal - ADICIONEI MARGIN TOP EXTRA */
         .container-main {
             max-width: 1200px;
-            margin: 20px auto;
+            margin: 30px auto 20px; /* AUMENTEI MARGIN TOP PARA 30px */
             padding: 0 20px;
         }
 
-        /* Header com Tabs - Estilo igual Pedidos */
+        /* Header com Tabs - ADICIONEI MARGIN TOP */
         .header-abas {
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             margin-bottom: 25px;
+            margin-top: 10px; /* ADICIONADO */
         }
 
+        /* Menu Dashboard quando expandido (mobile) - AJUSTEI A POSIÇÃO */
+        @media (max-width: 992px) {
+            .dashboard-menu {
+                position: fixed;
+                top: 80px; /* AJUSTEI PARA BAIXO DA NAVBAR */
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 20px 20px;
+                display: none;
+                z-index: 999;
+                max-height: calc(100vh - 80px); /* LIMITA ALTURA */
+                overflow-y: auto; /* SCROLL SE PRECISAR */
+            }
+        }
+
+        /* Ajustes para mobile - AUMENTEI PADDING TOP DO BODY */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 90px; /* AJUSTEI PARA MOBILE */
+            }
+            
+            .navbar-dashboard {
+                height: 70px; /* REDUZI UM POUCO NO MOBILE */
+                padding: 15px 0;
+            }
+            
+            .navbar-brand-dashboard {
+                transform: scale(1.6);
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding-top: 85px; /* AJUSTE FINO PARA MOBILE PEQUENO */
+            }
+            
+            .navbar-dashboard {
+                height: 65px;
+            }
+        }
+
+        /* O RESTO DO CÓDIGO PERMANECE IGUAL... */
+        
         /* Tabs Container - Igual Pedidos */
         .catalogo-tabs-container {
             display: flex;
@@ -1438,7 +1487,7 @@
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
                     await carregarCatalogo();
-                    carregarCategorias(); // DEVE VIR ANTES DE inicializarSistema
+                    carregarCategorias(); 
                     inicializarSistema();
                 }
             } catch (error) {
