@@ -995,8 +995,7 @@
         query,
         where,
         orderBy,
-        serverTimestamp,
-        Timestamp
+        serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     // Firebase Config
@@ -1064,23 +1063,18 @@
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            console.log('Usuário autenticado:', user.uid);
             try {
                 const userRef = doc(db, "usuarios", user.uid);
                 const userDoc = await getDoc(userRef);
                 
                 if (userDoc.exists()) {
                     userData = userDoc.data();
-                    console.log('Dados do usuário carregados:', userData);
                     atualizarInterfaceUsuario(userData);
                     await carregarMovimentacoes();
                     inicializarSistema();
                     inicializarGraficos();
-                } else {
-                    console.log('Documento do usuário não encontrado');
                 }
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
                 showNotification('Erro ao carregar dados do usuário', 'error');
             }
         } else {
@@ -1109,13 +1103,11 @@
     }
 
     // ============================================
-    // CARREGAMENTO DE DADOS - CORRIGIDO
+    // CARREGAMENTO DE DADOS
     // ============================================
 
     async function carregarMovimentacoes() {
         try {
-            console.log('Carregando movimentações para usuário:', currentUser.uid);
-            
             const q = query(
                 collection(db, "movimentacoes"),
                 where("profissionalId", "==", currentUser.uid),
@@ -1125,73 +1117,44 @@
             const querySnapshot = await getDocs(q);
             movimentacoes = [];
             
-            console.log(`Total de documentos encontrados: ${querySnapshot.size}`);
-            
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                console.log('Movimentação encontrada:', data);
+                let dataMov = data.data;
+                let dataVencimento = data.vencimento;
                 
-                // Converter Timestamps para string
-                const movData = {
+                // Converter Timestamps para string se necessário
+                if (dataMov && typeof dataMov.toDate === 'function') {
+                    dataMov = dataMov.toDate().toISOString().split('T')[0];
+                }
+                
+                if (dataVencimento && typeof dataVencimento.toDate === 'function') {
+                    dataVencimento = dataVencimento.toDate().toISOString().split('T')[0];
+                }
+                
+                movimentacoes.push({
                     id: doc.id,
                     ...data,
-                    data: formatarTimestampParaString(data.data),
-                    vencimento: formatarTimestampParaString(data.vencimento),
-                    criadoEm: formatarTimestampParaString(data.criadoEm),
-                    atualizadoEm: formatarTimestampParaString(data.atualizadoEm)
-                };
-                
-                movimentacoes.push(movData);
+                    data: dataMov || '',
+                    vencimento: dataVencimento || ''
+                });
             });
-            
-            console.log('Movimentações carregadas:', movimentacoes);
             
             // Verificar e atualizar status de atrasados
             await verificarAtrasados();
             
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
-            
-            if (movimentacoes.length === 0) {
-                console.log('Nenhuma movimentação encontrada');
-            }
-            
         } catch (error) {
-            console.error('Erro detalhado ao carregar movimentações:', error);
-            showNotification('Erro ao carregar movimentações: ' + error.message, 'error');
+            showNotification('Erro ao carregar movimentações', 'error');
         }
-    }
-
-    function formatarTimestampParaString(timestamp) {
-        if (!timestamp) return null;
-        
-        try {
-            if (timestamp.toDate) {
-                // É um Timestamp do Firebase
-                const date = timestamp.toDate();
-                return date.toISOString().split('T')[0];
-            } else if (typeof timestamp === 'string') {
-                // Já é uma string
-                return timestamp.split('T')[0];
-            } else if (timestamp instanceof Date) {
-                // É um objeto Date
-                return timestamp.toISOString().split('T')[0];
-            }
-        } catch (e) {
-            console.error('Erro ao formatar timestamp:', e);
-        }
-        
-        return null;
     }
 
     async function verificarAtrasados() {
         const hoje = new Date().toISOString().split('T')[0];
-        console.log('Verificando atrasados. Hoje:', hoje);
 
         for (const mov of movimentacoes) {
-            if (mov.status === 'pendente' && mov.vencimento && mov.vencimento < hoje) {
+            if (mov.status === 'pendente' && mov.vencimento < hoje) {
                 try {
-                    console.log('Atualizando movimentação atrasada:', mov.id);
                     const movRef = doc(db, "movimentacoes", mov.id);
                     await updateDoc(movRef, {
                         status: 'atrasado',
@@ -1200,14 +1163,14 @@
                     
                     mov.status = 'atrasado';
                 } catch (error) {
-                    console.error('Erro ao atualizar status:', error);
+                    // Silenciar erro, continuar com outras movimentações
                 }
             }
         }
     }
 
     // ============================================
-    // TABELA DE MOVIMENTAÇÕES - CORRIGIDA
+    // TABELA DE MOVIMENTAÇÕES
     // ============================================
 
     function atualizarTabelaMovimentacoes() {
@@ -1215,11 +1178,6 @@
         const tipoFilter = filterTipo.value;
         const statusFilter = filterStatus.value;
         const mesFilter = filterMes.value;
-        
-        console.log('Atualizando tabela com filtros:', {
-            searchTerm, tipoFilter, statusFilter, mesFilter,
-            totalMovimentacoes: movimentacoes.length
-        });
         
         // Aplicar filtros
         let movimentacoesFiltradas = movimentacoes.filter(mov => {
@@ -1235,16 +1193,13 @@
                     const data = new Date(mov.data);
                     const mes = data.getMonth() + 1;
                     matchMes = mes.toString() === mesFilter;
-                } catch (e) {
-                    console.error('Erro ao filtrar por mês:', e);
+                } catch {
                     matchMes = false;
                 }
             }
             
             return matchSearch && matchTipo && matchStatus && matchMes;
         });
-        
-        console.log('Movimentações filtradas:', movimentacoesFiltradas.length);
         
         // Limpar tabela
         movimentacoesTable.innerHTML = '';
@@ -1364,12 +1319,6 @@
         const mesAtual = hoje.getMonth();
         const anoAtual = hoje.getFullYear();
         
-        console.log('Calculando estatísticas para:', {
-            totalMovimentacoes: movimentacoes.length,
-            mesAtual: mesAtual + 1,
-            anoAtual
-        });
-        
         // Calcular valores
         let totalReceita = 0;
         let totalDespesa = 0;
@@ -1391,8 +1340,8 @@
                         if (diferencaDias <= 7 && diferencaDias >= 0) {
                             totalAReceber7dias += valor;
                         }
-                    } catch (e) {
-                        console.error('Erro ao calcular dias até vencimento:', e);
+                    } catch {
+                        // Ignorar erro de data
                     }
                 }
                 
@@ -1411,8 +1360,8 @@
                         if (diferencaDias <= 7 && diferencaDias >= 0) {
                             totalAPagar7dias += valor;
                         }
-                    } catch (e) {
-                        console.error('Erro ao calcular dias até vencimento:', e);
+                    } catch {
+                        // Ignorar erro de data
                     }
                 }
                 
@@ -1424,11 +1373,6 @@
         });
         
         const saldo = totalReceita - totalDespesa;
-        
-        console.log('Estatísticas calculadas:', {
-            saldo, totalReceita, totalDespesa, totalAtrasados,
-            totalAReceber7dias, totalAPagar7dias
-        });
         
         // Atualizar elementos
         saldoAtual.textContent = formatarMoeda(saldo);
@@ -1446,20 +1390,9 @@
             const dadosReceitas = gerarDadosPorMes('receita');
             const dadosDespesas = gerarDadosPorMes('despesa');
             
-            console.log('Dados para gráficos:', {
-                meses,
-                dadosReceitas,
-                dadosDespesas
-            });
-            
             // Gráfico de Fluxo de Caixa (últimos 6 meses)
             const ctxFluxo = document.getElementById('graficoFluxoCaixa');
             if (ctxFluxo) {
-                const existingChart = Chart.getChart(ctxFluxo);
-                if (existingChart) {
-                    existingChart.destroy();
-                }
-                
                 new Chart(ctxFluxo.getContext('2d'), {
                     type: 'line',
                     data: {
@@ -1516,11 +1449,6 @@
             // Gráfico de Distribuição de Despesas
             const ctxDespesas = document.getElementById('graficoDespesas');
             if (ctxDespesas) {
-                const existingChart = Chart.getChart(ctxDespesas);
-                if (existingChart) {
-                    existingChart.destroy();
-                }
-                
                 const dadosCategorias = getDadosCategoriasDespesa();
                 new Chart(ctxDespesas.getContext('2d'), {
                     type: 'doughnut',
@@ -1554,11 +1482,6 @@
             // Gráfico Comparativo
             const ctxComparativo = document.getElementById('graficoComparativo');
             if (ctxComparativo) {
-                const existingChart = Chart.getChart(ctxComparativo);
-                if (existingChart) {
-                    existingChart.destroy();
-                }
-                
                 new Chart(ctxComparativo.getContext('2d'), {
                     type: 'bar',
                     data: {
@@ -1601,7 +1524,7 @@
                 });
             }
         } catch (error) {
-            console.error('Erro ao inicializar gráficos:', error);
+            // Silenciar erro de gráficos
         }
     }
 
@@ -1629,8 +1552,8 @@
                         const categoria = mov.categoria || 'outros';
                         categoriasDespesa[categoria] = (categoriasDespesa[categoria] || 0) + (mov.valor || 0);
                     }
-                } catch (e) {
-                    console.error('Erro ao processar data da movimentação:', e);
+                } catch {
+                    // Ignorar erro de data
                 }
             }
         });
@@ -1672,8 +1595,7 @@
                         const dataMov = new Date(m.data);
                         return dataMov.getMonth() === mes && 
                                dataMov.getFullYear() === ano;
-                    } catch (e) {
-                        console.error('Erro ao filtrar por mês:', e);
+                    } catch {
                         return false;
                     }
                 })
@@ -1919,7 +1841,6 @@
                 movData.criadoEm = serverTimestamp();
                 const docRef = await addDoc(collection(db, "movimentacoes"), movData);
                 movData.id = docRef.id;
-                movData.data = formatarTimestampParaString(movData.criadoEm);
                 movimentacoes.unshift(movData);
                 
                 showNotification('Movimentação criada com sucesso!', 'success');
@@ -1934,8 +1855,7 @@
             inicializarGraficos();
             
         } catch (error) {
-            console.error('Erro detalhado ao salvar movimentação:', error);
-            showNotification('Erro ao salvar movimentação: ' + error.message, 'error');
+            showNotification('Erro ao salvar movimentação. Tente novamente.', 'error');
         }
     }
 
@@ -1961,7 +1881,6 @@
             
             showNotification('Movimentação excluída com sucesso!', 'success');
         } catch (error) {
-            console.error('Erro ao excluir movimentação:', error);
             showNotification('Erro ao excluir movimentação. Tente novamente.', 'error');
         }
     };
@@ -1971,81 +1890,76 @@
     // ============================================
 
     window.exportarPDF = function() {
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.width;
+        let y = margin;
+        
+        // Cabeçalho
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RELATÓRIO FINANCEIRO - SCANHUB', pageWidth/2, y, { align: 'center' });
+        y += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
+        y += 15;
+        
+        // Resumo Financeiro
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RESUMO FINANCEIRO', margin, y);
+        y += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        const resumo = [
+            ['Saldo Atual:', saldoAtual.textContent],
+            ['Receita do Mês:', receitaMes.textContent],
+            ['Despesas do Mês:', despesaMes.textContent],
+            ['Pagamentos Atrasados:', atrasados.textContent],
+            ['A Receber (7 dias):', aReceber.textContent],
+            ['A Pagar (7 dias):', aPagar.textContent]
+        ];
+        
+        resumo.forEach(([label, value]) => {
+            doc.text(label, margin, y);
+            doc.text(value, pageWidth - margin, y, { align: 'right' });
+            y += 7;
+        });
+        
+        y += 10;
+        
+        // Movimentações
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MOVIMENTAÇÕES', margin, y);
+        y += 10;
+        
+        // Adicionar movimentações
+        movimentacoes.forEach((mov, index) => {
+            if (y > 250) {
+                doc.addPage();
+                y = margin;
+            }
             
-            const margin = 20;
-            const pageWidth = doc.internal.pageSize.width;
-            let y = margin;
+            const categoriaNome = getCategoriaNome(mov.categoria);
+            const valor = formatarMoeda(mov.valor);
             
-            // Cabeçalho
-            doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            doc.text('RELATÓRIO FINANCEIRO - SCANHUB', pageWidth/2, y, { align: 'center' });
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
-            doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
-            y += 15;
-            
-            // Resumo Financeiro
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('RESUMO FINANCEIRO', margin, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            
-            const resumo = [
-                ['Saldo Atual:', saldoAtual.textContent],
-                ['Receita do Mês:', receitaMes.textContent],
-                ['Despesas do Mês:', despesaMes.textContent],
-                ['Pagamentos Atrasados:', atrasados.textContent],
-                ['A Receber (7 dias):', aReceber.textContent],
-                ['A Pagar (7 dias):', aPagar.textContent]
-            ];
-            
-            resumo.forEach(([label, value]) => {
-                doc.text(label, margin, y);
-                doc.text(value, pageWidth - margin, y, { align: 'right' });
-                y += 7;
-            });
-            
-            y += 10;
-            
-            // Movimentações
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('MOVIMENTAÇÕES', margin, y);
-            y += 10;
-            
-            // Adicionar movimentações
-            movimentacoes.forEach((mov, index) => {
-                if (y > 250) {
-                    doc.addPage();
-                    y = margin;
-                }
-                
-                const categoriaNome = getCategoriaNome(mov.categoria);
-                const valor = formatarMoeda(mov.valor);
-                
-                doc.setFontSize(9);
-                doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
-                doc.text(`${categoriaNome}`, pageWidth/2 - 20, y);
-                doc.text(`${mov.tipo === 'receita' ? '+' : '-'} ${valor}`, pageWidth - margin, y, { align: 'right' });
-                y += 6;
-            });
-            
-            doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
-            showNotification('Relatório PDF gerado com sucesso!', 'success');
-        } catch (error) {
-            console.error('Erro ao exportar PDF:', error);
-            showNotification('Erro ao gerar PDF', 'error');
-        }
+            doc.setFontSize(9);
+            doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
+            doc.text(`${categoriaNome}`, pageWidth/2 - 20, y);
+            doc.text(`${mov.tipo === 'receita' ? '+' : '-'} ${valor}`, pageWidth - margin, y, { align: 'right' });
+            y += 6;
+        });
+        
+        doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
+        showNotification('Relatório PDF gerado com sucesso!', 'success');
     };
 
     // ============================================
@@ -2167,40 +2081,6 @@
             vencimento.value = hoje;
         }
     }
-
-    // ============================================
-    // FUNÇÃO PARA TESTAR FIREBASE - DEBUG
-    // ============================================
-
-    async function testarFirebase() {
-        try {
-            console.log('Testando conexão com Firebase...');
-            
-            // Testar se consegue acessar a coleção
-            const movimentacoesRef = collection(db, "movimentacoes");
-            console.log('Referência da coleção:', movimentacoesRef);
-            
-            // Tentar contar documentos
-            const q = query(movimentacoesRef);
-            const snapshot = await getDocs(q);
-            console.log(`Total de documentos na coleção 'movimentacoes': ${snapshot.size}`);
-            
-            // Mostrar alguns documentos
-            snapshot.forEach((doc, index) => {
-                if (index < 3) {
-                    console.log(`Documento ${index + 1}:`, doc.id, doc.data());
-                }
-            });
-            
-        } catch (error) {
-            console.error('Erro no teste do Firebase:', error);
-        }
-    }
-
-    // Executar teste ao carregar
-    setTimeout(() => {
-        testarFirebase();
-    }, 1000);
 
 </script>
 </body>
