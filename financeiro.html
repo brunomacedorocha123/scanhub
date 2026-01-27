@@ -923,34 +923,43 @@
     </div>
 
     <!-- Calculadora Flutuante -->
-    <div class="calculadora-flutuante">
-        <div class="calculadora-panel" id="calculadoraPanel">
-            <div class="calculadora-display" id="calcDisplay">0</div>
-            <div class="calculadora-botoes">
-                <button class="calc-btn" onclick="calcInput('7')">7</button>
-                <button class="calc-btn" onclick="calcInput('8')">8</button>
-                <button class="calc-btn" onclick="calcInput('9')">9</button>
-                <button class="calc-btn operador" onclick="calcInput('/')">÷</button>
-                <button class="calc-btn" onclick="calcInput('4')">4</button>
-                <button class="calc-btn" onclick="calcInput('5')">5</button>
-                <button class="calc-btn" onclick="calcInput('6')">6</button>
-                <button class="calc-btn operador" onclick="calcInput('*')">×</button>
-                <button class="calc-btn" onclick="calcInput('1')">1</button>
-                <button class="calc-btn" onclick="calcInput('2')">2</button>
-                <button class="calc-btn" onclick="calcInput('3')">3</button>
-                <button class="calc-btn operador" onclick="calcInput('-')">-</button>
-                <button class="calc-btn" onclick="calcInput('0')">0</button>
-                <button class="calc-btn" onclick="calcInput('.')">.</button>
-                <button class="calc-btn" onclick="calcClear()">C</button>
-                <button class="calc-btn operador" onclick="calcInput('+')">+</button>
-                <button class="calc-btn" onclick="calcInput('%')">%</button>
-                <button class="calc-btn calcular" onclick="calcCalculate()">=</button>
-            </div>
+<div class="calculadora-flutuante">
+    <div class="calculadora-panel" id="calculadoraPanel">
+        <div class="calculadora-display" id="calcDisplay">0</div>
+        <div class="calculadora-botoes">
+            <!-- Primeira linha -->
+            <button class="calc-btn" onclick="calcInput('7')">7</button>
+            <button class="calc-btn" onclick="calcInput('8')">8</button>
+            <button class="calc-btn" onclick="calcInput('9')">9</button>
+            <button class="calc-btn operador" onclick="calcOperador('÷')">÷</button>
+            
+            <!-- Segunda linha -->
+            <button class="calc-btn" onclick="calcInput('4')">4</button>
+            <button class="calc-btn" onclick="calcInput('5')">5</button>
+            <button class="calc-btn" onclick="calcInput('6')">6</button>
+            <button class="calc-btn operador" onclick="calcOperador('×')">×</button>
+            
+            <!-- Terceira linha -->
+            <button class="calc-btn" onclick="calcInput('1')">1</button>
+            <button class="calc-btn" onclick="calcInput('2')">2</button>
+            <button class="calc-btn" onclick="calcInput('3')">3</button>
+            <button class="calc-btn operador" onclick="calcOperador('-')">-</button>
+            
+            <!-- Quarta linha -->
+            <button class="calc-btn" onclick="calcInput('0')">0</button>
+            <button class="calc-btn" onclick="calcInput('.')">.</button>
+            <button class="calc-btn" onclick="calcClear()">C</button>
+            <button class="calc-btn operador" onclick="calcOperador('+')">+</button>
+            
+            <!-- Quinta linha -->
+            <button class="calc-btn" onclick="calcPorcentagem()">%</button>
+            <button class="calc-btn calcular" onclick="calcCalculate()">=</button>
         </div>
-        <button class="calculadora-btn" id="toggleCalculadora">
-            <i class="fas fa-calculator"></i>
-        </button>
     </div>
+    <button class="calculadora-btn" id="toggleCalculadora">
+        <i class="fas fa-calculator"></i>
+    </button>
+</div>
 
     <!-- Modal Movimentação -->
     <div class="modal fade" id="modalMovimentacao" tabindex="-1" aria-hidden="true">
@@ -1149,1454 +1158,1631 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            getDocs,
-            query,
-            where,
-            orderBy,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        getDocs,
+        query,
+        where,
+        orderBy,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config - USE A SUA CONFIGURAÇÃO ATUAL
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
-        let currentUser = null;
-        let userData = null;
-        let movimentacoes = [];
-        let categorias = [];
-        let clientes = [];
-        let pedidos = [];
-        let tipoAtualAba = 'todas';
-        let calculadoraVisible = false;
-        let calculadoraValue = '0';
-        let calculadoraOperador = '';
-        let calculadoraValorAnterior = '0';
+    // ============================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================
+    let currentUser = null;
+    let userData = null;
+    let movimentacoes = [];
+    let categorias = [];
+    let clientes = [];
+    let pedidos = [];
+    let tipoAtualAba = 'todas';
+    
+    // Variáveis da Calculadora
+    let calculadoraValue = '0';
+    let calculadoraOperador = '';
+    let calculadoraValorAnterior = '';
+    let calculadoraAguardandoOperador = false;
 
-        // ============================================
-        // ELEMENTOS DOM
-        // ============================================
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const userId = document.getElementById('userId');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        
-        // Elementos de estatísticas
-        const saldoAtual = document.getElementById('saldoAtual');
-        const receitaMes = document.getElementById('receitaMes');
-        const despesaMes = document.getElementById('despesaMes');
-        const atrasados = document.getElementById('atrasados');
-        const aReceber = document.getElementById('aReceber');
-        const aPagar = document.getElementById('aPagar');
-        
-        // Elementos de filtro
-        const searchMovimentacoes = document.getElementById('searchMovimentacoes');
-        const filterTipo = document.getElementById('filterTipo');
-        const filterStatus = document.getElementById('filterStatus');
-        const filterMes = document.getElementById('filterMes');
-        const filterCategoria = document.getElementById('filterCategoria');
-        
-        // Tabelas
-        const movimentacoesTable = document.getElementById('movimentacoesTable');
-        const emptyState = document.getElementById('emptyState');
-        const categoriasTable = document.getElementById('categoriasTable');
-        
-        // Seções
-        const categoriasSection = document.getElementById('categoriasSection');
-        const relatoriosSection = document.getElementById('relatoriosSection');
-        
-        // Abas
-        const financeiroTabs = document.getElementById('financeiroTabs');
-        const tabButtons = financeiroTabs.querySelectorAll('.tab-btn');
-        
-        // Modais
-        const modalMovimentacao = new bootstrap.Modal(document.getElementById('modalMovimentacao'));
-        const modalCategoria = new bootstrap.Modal(document.getElementById('modalCategoria'));
-        const formMovimentacao = document.getElementById('formMovimentacao');
-        const tipoMovBtns = document.querySelectorAll('.tipo-mov-btn');
-        const tipoMovimentacao = document.getElementById('tipoMovimentacao');
-        const despesaFields = document.getElementById('despesaFields');
-        const receitaFields = document.getElementById('receitaFields');
-        const btnSalvarMovimentacao = document.getElementById('btnSalvarMovimentacao');
-        
-        // Calculadora
-        const calculadoraPanel = document.getElementById('calculadoraPanel');
-        const toggleCalculadora = document.getElementById('toggleCalculadora');
-        const calcDisplay = document.getElementById('calcDisplay');
+    // ============================================
+    // ELEMENTOS DOM
+    // ============================================
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userId = document.getElementById('userId');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Elementos de estatísticas
+    const saldoAtual = document.getElementById('saldoAtual');
+    const receitaMes = document.getElementById('receitaMes');
+    const despesaMes = document.getElementById('despesaMes');
+    const atrasados = document.getElementById('atrasados');
+    const aReceber = document.getElementById('aReceber');
+    const aPagar = document.getElementById('aPagar');
+    
+    // Elementos de filtro
+    const searchMovimentacoes = document.getElementById('searchMovimentacoes');
+    const filterTipo = document.getElementById('filterTipo');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterMes = document.getElementById('filterMes');
+    const filterCategoria = document.getElementById('filterCategoria');
+    
+    // Tabelas
+    const movimentacoesTable = document.getElementById('movimentacoesTable');
+    const emptyState = document.getElementById('emptyState');
+    const categoriasTable = document.getElementById('categoriasTable');
+    
+    // Seções
+    const categoriasSection = document.getElementById('categoriasSection');
+    const relatoriosSection = document.getElementById('relatoriosSection');
+    
+    // Abas
+    const financeiroTabs = document.getElementById('financeiroTabs');
+    const tabButtons = financeiroTabs.querySelectorAll('.tab-btn');
+    
+    // Modais
+    const modalMovimentacao = new bootstrap.Modal(document.getElementById('modalMovimentacao'));
+    const modalCategoria = new bootstrap.Modal(document.getElementById('modalCategoria'));
+    const formMovimentacao = document.getElementById('formMovimentacao');
+    const tipoMovBtns = document.querySelectorAll('.tipo-mov-btn');
+    const tipoMovimentacao = document.getElementById('tipoMovimentacao');
+    const despesaFields = document.getElementById('despesaFields');
+    const receitaFields = document.getElementById('receitaFields');
+    const btnSalvarMovimentacao = document.getElementById('btnSalvarMovimentacao');
+    
+    // Calculadora
+    const calculadoraPanel = document.getElementById('calculadoraPanel');
+    const toggleCalculadora = document.getElementById('toggleCalculadora');
+    const calcDisplay = document.getElementById('calcDisplay');
 
-        // ============================================
-        // INICIALIZAÇÃO DO SISTEMA
-        // ============================================
+    // ============================================
+    // INICIALIZAÇÃO DO SISTEMA
+    // ============================================
 
-        // Monitorar autenticação
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
-                    
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        await carregarDadosIniciais();
-                        inicializarSistema();
-                        inicializarGraficos();
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
-                    alert('Erro ao carregar dados do usuário');
+    // Monitorar autenticação
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
+                
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    atualizarInterfaceUsuario(userData);
+                    await carregarDadosIniciais();
+                    inicializarSistema();
+                    inicializarGraficos();
                 }
-            } else {
-                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados do usuário');
             }
-        });
-
-        function inicializarSistema() {
-            inicializarCalculadora();
-            inicializarAbas();
-            inicializarEventListeners();
-            inicializarModais();
+        } else {
+            window.location.href = 'login.html';
         }
+    });
 
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-            }
+    function inicializarSistema() {
+        inicializarCalculadora();
+        inicializarAbas();
+        inicializarEventListeners();
+        inicializarModais();
+    }
+
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+        }
+        
+        if (data.idScanHub) {
+            userId.textContent = data.idScanHub;
+        }
+    }
+
+    // ============================================
+    // CARREGAMENTO DE DADOS - CORRIGIDO
+    // ============================================
+
+    async function carregarDadosIniciais() {
+        try {
+            await carregarCategorias(); // Carregar categorias primeiro
+            await carregarMovimentacoes();
+            await carregarClientes();
+            await carregarPedidos();
             
-            if (data.idScanHub) {
-                userId.textContent = data.idScanHub;
-            }
-        }
-
-        // ============================================
-        // CARREGAMENTO DE DADOS
-        // ============================================
-
-        async function carregarDadosIniciais() {
-            await Promise.all([
-                carregarMovimentacoes(),
-                carregarCategorias(),
-                carregarClientes(),
-                carregarPedidos()
-            ]);
             atualizarFiltros();
             atualizarEstatisticas();
+        } catch (error) {
+            console.error('Erro ao carregar dados iniciais:', error);
+            alert('Erro ao carregar dados. Por favor, recarregue a página.');
         }
+    }
 
-        async function carregarMovimentacoes() {
-            try {
-                const q = query(
-                    collection(db, "movimentacoes"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("data", "desc")
-                );
-                
-                const querySnapshot = await getDocs(q);
-                movimentacoes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    movimentacoes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                atualizarTabelaMovimentacoes();
-            } catch (error) {
-                console.error('Erro ao carregar movimentações:', error);
-            }
-        }
-
-        async function carregarCategorias() {
-            try {
-                const q = query(
-                    collection(db, "categorias"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                categorias = [];
-                
-                querySnapshot.forEach((doc) => {
-                    categorias.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                if (categorias.length === 0) {
-                    await criarCategoriasPadrao();
-                }
-            } catch (error) {
-                console.error('Erro ao carregar categorias:', error);
-            }
-        }
-
-        async function criarCategoriasPadrao() {
-            const categoriasPadrao = [
-                { nome: "Serviços Prestados", tipo: "receita", cor: "#27ae60", orcamento: 0 },
-                { nome: "Venda de Produtos", tipo: "receita", cor: "#2ecc71", orcamento: 0 },
-                { nome: "Materiais/Insumos", tipo: "despesa", cor: "#e74c3c", orcamento: 0 },
-                { nome: "Marketing", tipo: "despesa", cor: "#9b59b6", orcamento: 0 },
-                { nome: "Transporte", tipo: "despesa", cor: "#f39c12", orcamento: 0 },
-                { nome: "Impostos", tipo: "despesa", cor: "#34495e", orcamento: 0 },
-                { nome: "Salários", tipo: "despesa", cor: "#1abc9c", orcamento: 0 },
-                { nome: "Aluguel", tipo: "despesa", cor: "#d35400", orcamento: 0 }
-            ];
+    async function carregarMovimentacoes() {
+        try {
+            const q = query(
+                collection(db, "movimentacoes"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("data", "desc")
+            );
             
-            for (const categoria of categoriasPadrao) {
-                try {
-                    await addDoc(collection(db, "categorias"), {
-                        ...categoria,
-                        profissionalId: currentUser.uid,
-                        criadoEm: serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Erro ao criar categoria padrão:', error);
-                }
-            }
+            const querySnapshot = await getDocs(q);
+            movimentacoes = [];
             
-            await carregarCategorias();
-        }
-
-        async function carregarClientes() {
-            try {
-                const q = query(
-                    collection(db, "clientes"),
-                    where("profissionalId", "==", currentUser.uid),
-                    where("status", "==", "ativo")
-                );
-                
-                const querySnapshot = await getDocs(q);
-                clientes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    clientes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-            } catch (error) {
-                console.error('Erro ao carregar clientes:', error);
-            }
-        }
-
-        async function carregarPedidos() {
-            try {
-                const q = query(
-                    collection(db, "pedidos"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                pedidos = [];
-                
-                querySnapshot.forEach((doc) => {
-                    pedidos.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-            } catch (error) {
-                console.error('Erro ao carregar pedidos:', error);
-            }
-        }
-
-        function atualizarFiltros() {
-            // Atualizar filtro de categorias
-            filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
-            const categoriaSelect = document.getElementById('categoria');
-            if (categoriaSelect) {
-                categoriaSelect.innerHTML = '<option value="">Selecione...</option>';
-            }
-            
-            categorias.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria.id;
-                option.textContent = categoria.nome;
-                option.style.color = categoria.cor || '#333';
-                
-                if (filterCategoria) {
-                    filterCategoria.appendChild(option.cloneNode(true));
-                }
-                if (categoriaSelect) {
-                    categoriaSelect.appendChild(option.cloneNode(true));
-                }
-            });
-            
-            // Atualizar filtro de clientes
-            const clienteSelect = document.getElementById('cliente');
-            if (clienteSelect) {
-                clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
-                clientes.forEach(cliente => {
-                    const option = document.createElement('option');
-                    option.value = cliente.id;
-                    option.textContent = cliente.nome;
-                    clienteSelect.appendChild(option);
-                });
-            }
-            
-            // Atualizar filtro de pedidos
-            const pedidoSelect = document.getElementById('pedidoRelacionado');
-            if (pedidoSelect) {
-                pedidoSelect.innerHTML = '<option value="">Selecione um pedido...</option>';
-                pedidos.forEach(pedido => {
-                    const option = document.createElement('option');
-                    option.value = pedido.id;
-                    option.textContent = pedido.numeroPedido || `Pedido ${pedido.id.substring(0, 8)}`;
-                    pedidoSelect.appendChild(option);
-                });
-            }
-        }
-
-        // ============================================
-        // SISTEMA DE ABAS
-        // ============================================
-
-        function inicializarAbas() {
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    tipoAtualAba = this.getAttribute('data-tipo');
-                    
-                    // Mostrar/ocultar seções
-                    categoriasSection.style.display = tipoAtualAba === 'categorias' ? 'block' : 'none';
-                    relatoriosSection.style.display = tipoAtualAba === 'relatorios' ? 'block' : 'none';
-                    
-                    // Atualizar tabela apropriada
-                    if (tipoAtualAba === 'categorias') {
-                        atualizarTabelaCategorias();
-                    } else {
-                        atualizarTabelaMovimentacoes();
-                    }
+            querySnapshot.forEach((doc) => {
+                movimentacoes.push({
+                    id: doc.id,
+                    ...doc.data()
                 });
             });
+            
+            console.log(`Carregadas ${movimentacoes.length} movimentações`);
+            atualizarTabelaMovimentacoes();
+        } catch (error) {
+            console.error('Erro ao carregar movimentações:', error);
         }
+    }
 
-        // ============================================
-        // TABELA DE MOVIMENTAÇÕES
-        // ============================================
-
-        function atualizarTabelaMovimentacoes() {
-            const searchTerm = searchMovimentacoes.value.toLowerCase();
-            const tipoFilter = filterTipo.value;
-            const statusFilter = filterStatus.value;
-            const mesFilter = filterMes.value;
-            const categoriaFilter = filterCategoria.value;
+    async function carregarCategorias() {
+        try {
+            const q = query(
+                collection(db, "categorias"),
+                where("profissionalId", "==", currentUser.uid)
+            );
             
-            // Filtrar por tipo da aba
-            let movimentacoesFiltradas = movimentacoes;
+            const querySnapshot = await getDocs(q);
+            categorias = [];
             
-            if (tipoAtualAba === 'receitas') {
-                movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'receita');
-            } else if (tipoAtualAba === 'despesas') {
-                movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'despesa');
-            }
-            
-            // Aplicar filtros adicionais
-            movimentacoesFiltradas = movimentacoesFiltradas.filter(mov => {
-                const matchSearch = !searchTerm || 
-                    (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
-                
-                const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
-                const matchStatus = !statusFilter || mov.status === statusFilter;
-                const matchCategoria = !categoriaFilter || mov.categoriaId === categoriaFilter;
-                
-                let matchMes = true;
-                if (mesFilter && mov.data) {
-                    const data = new Date(mov.data);
-                    const mes = data.getMonth() + 1;
-                    matchMes = mes.toString() === mesFilter;
-                }
-                
-                return matchSearch && matchTipo && matchStatus && matchMes && matchCategoria;
+            querySnapshot.forEach((doc) => {
+                const categoriaData = doc.data();
+                categorias.push({
+                    id: doc.id,
+                    ...categoriaData
+                });
             });
             
-            // Limpar tabela
-            movimentacoesTable.innerHTML = '';
+            console.log(`Carregadas ${categorias.length} categorias`);
             
-            if (movimentacoesFiltradas.length === 0) {
-                movimentacoesTable.appendChild(emptyState.cloneNode(true));
-                return;
-            }
-            
-            // Preencher tabela
-            movimentacoesFiltradas.forEach(mov => {
-                const categoria = categorias.find(c => c.id === mov.categoriaId);
-                const row = document.createElement('tr');
-                
-                const dataFormatada = formatarData(mov.data);
-                const vencimentoFormatado = formatarData(mov.vencimento);
-                const valorFormatado = formatarMoeda(mov.valor);
-                
-                // Determinar estilo baseado no tipo
-                const tipoBadge = mov.tipo === 'receita' 
-                    ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
-                    : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
-                
-                const statusBadge = getStatusBadge(mov.status);
-                
-                row.innerHTML = `
-                    <td>${dataFormatada}</td>
-                    <td>${tipoBadge}</td>
-                    <td>${mov.descricao || 'Sem descrição'}</td>
-                    <td>
-                        <span class="badge" style="background: ${categoria?.cor || '#ccc'}">
-                            ${categoria?.nome || 'Sem categoria'}
-                        </span>
-                    </td>
-                    <td class="${mov.tipo === 'receita' ? 'text-success' : 'text-danger'} fw-bold">
-                        ${mov.tipo === 'receita' ? '+' : '-'} ${valorFormatado}
-                    </td>
-                    <td>${statusBadge}</td>
-                    <td>${vencimentoFormatado}</td>
-                    <td><small>${mov.observacoes?.substring(0, 30) || ''}${mov.observacoes?.length > 30 ? '...' : ''}</small></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-action-sm btn-ver" onclick="verMovimentacao('${mov.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action-sm btn-recibo" onclick="exportarMovimentacaoPDF('${mov.id}')">
-                                <i class="fas fa-file-pdf"></i>
-                            </button>
-                            <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                // Destacar linhas atrasadas
-                if (mov.status === 'atrasado') {
-                    row.style.backgroundColor = '#fff5f5';
-                }
-                
-                movimentacoesTable.appendChild(row);
-            });
-        }
-
-        function getStatusBadge(status) {
-            switch(status) {
-                case 'pago':
-                    return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago/Recebido</span>';
-                case 'pendente':
-                    return '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i>Pendente</span>';
-                case 'atrasado':
-                    return '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i>Atrasado</span>';
-                default:
-                    return `<span class="badge-status">${status}</span>`;
-            }
-        }
-
-        // ============================================
-        // TABELA DE CATEGORIAS
-        // ============================================
-
-        function atualizarTabelaCategorias() {
-            categoriasTable.innerHTML = '';
-            
+            // Se não houver categorias, criar as padrão
             if (categorias.length === 0) {
-                categoriasTable.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
-                            <i class="fas fa-tags fa-2x mb-2"></i>
-                            <p>Nenhuma categoria cadastrada</p>
-                        </td>
-                    </tr>
-                `;
-                return;
+                await criarCategoriasPadrao();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar categorias:', error);
+        }
+    }
+
+    async function criarCategoriasPadrao() {
+        const categoriasPadrao = [
+            { nome: "Serviços Prestados", tipo: "receita", cor: "#27ae60", orcamento: 0 },
+            { nome: "Venda de Produtos", tipo: "receita", cor: "#2ecc71", orcamento: 0 },
+            { nome: "Materiais/Insumos", tipo: "despesa", cor: "#e74c3c", orcamento: 0 },
+            { nome: "Marketing", tipo: "despesa", cor: "#9b59b6", orcamento: 0 },
+            { nome: "Transporte", tipo: "despesa", cor: "#f39c12", orcamento: 0 },
+            { nome: "Impostos", tipo: "despesa", cor: "#34495e", orcamento: 0 },
+            { nome: "Salários", tipo: "despesa", cor: "#1abc9c", orcamento: 0 },
+            { nome: "Aluguel", tipo: "despesa", cor: "#d35400", orcamento: 0 },
+            { nome: "Outras Receitas", tipo: "receita", cor: "#3498db", orcamento: 0 },
+            { nome: "Outras Despesas", tipo: "despesa", cor: "#95a5a6", orcamento: 0 }
+        ];
+        
+        console.log('Criando categorias padrão...');
+        
+        for (const categoria of categoriasPadrao) {
+            try {
+                await addDoc(collection(db, "categorias"), {
+                    ...categoria,
+                    profissionalId: currentUser.uid,
+                    criadoEm: serverTimestamp(),
+                    atualizadoEm: serverTimestamp()
+                });
+                console.log(`Categoria criada: ${categoria.nome}`);
+            } catch (error) {
+                console.error(`Erro ao criar categoria ${categoria.nome}:`, error);
+            }
+        }
+        
+        // Recarregar categorias
+        await carregarCategorias();
+    }
+
+    async function carregarClientes() {
+        try {
+            const q = query(
+                collection(db, "clientes"),
+                where("profissionalId", "==", currentUser.uid),
+                where("status", "==", "ativo")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            clientes = [];
+            
+            querySnapshot.forEach((doc) => {
+                clientes.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            console.log(`Carregados ${clientes.length} clientes`);
+        } catch (error) {
+            console.error('Erro ao carregar clientes:', error);
+        }
+    }
+
+    async function carregarPedidos() {
+        try {
+            const q = query(
+                collection(db, "pedidos"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("dataPedido", "desc")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            pedidos = [];
+            
+            querySnapshot.forEach((doc) => {
+                pedidos.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            console.log(`Carregados ${pedidos.length} pedidos`);
+        } catch (error) {
+            console.error('Erro ao carregar pedidos:', error);
+        }
+    }
+
+    function atualizarFiltros() {
+        console.log('Atualizando filtros com', categorias.length, 'categorias');
+        
+        // Atualizar filtro de categorias
+        filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
+        const categoriaSelect = document.getElementById('categoria');
+        
+        if (categoriaSelect) {
+            categoriaSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
+            
+            // Separar categorias por tipo para melhor organização
+            const receitas = categorias.filter(c => c.tipo === 'receita');
+            const despesas = categorias.filter(c => c.tipo === 'despesa');
+            
+            // Adicionar receitas
+            if (receitas.length > 0) {
+                const optgroupReceitas = document.createElement('optgroup');
+                optgroupReceitas.label = 'Receitas';
+                categoriaSelect.appendChild(optgroupReceitas);
+                
+                receitas.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = categoria.nome;
+                    option.style.color = categoria.cor || '#27ae60';
+                    optgroupReceitas.appendChild(option);
+                });
             }
             
-            // Calcular totais por categoria
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
-            
-            categorias.forEach(categoria => {
-                // Filtrar movimentações desta categoria no mês atual
-                const movimentacoesCategoria = movimentacoes.filter(mov => {
-                    if (mov.categoriaId !== categoria.id) return false;
-                    
-                    const dataMov = new Date(mov.data);
-                    return dataMov.getMonth() === mesAtual && 
-                           dataMov.getFullYear() === anoAtual;
+            // Adicionar despesas
+            if (despesas.length > 0) {
+                const optgroupDespesas = document.createElement('optgroup');
+                optgroupDespesas.label = 'Despesas';
+                categoriaSelect.appendChild(optgroupDespesas);
+                
+                despesas.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = categoria.nome;
+                    option.style.color = categoria.cor || '#e74c3c';
+                    optgroupDespesas.appendChild(option);
                 });
-                
-                // Calcular total
-                const total = movimentacoesCategoria.reduce((sum, mov) => {
-                    return sum + (mov.valor || 0);
-                }, 0);
-                
-                // Calcular porcentagem do orçamento
-                let porcentagem = 0;
-                if (categoria.orcamento && categoria.orcamento > 0) {
-                    porcentagem = Math.min(100, Math.round((total / categoria.orcamento) * 100));
-                }
-                
-                // Determinar status
-                let status = 'normal';
-                let statusText = 'Normal';
-                let statusClass = 'text-success';
-                
-                if (categoria.orcamento && categoria.orcamento > 0) {
-                    if (porcentagem >= 100) {
-                        status = 'excedido';
-                        statusText = 'Excedido';
-                        statusClass = 'text-danger';
-                    } else if (porcentagem >= 80) {
-                        status = 'alerta';
-                        statusText = 'Alerta';
-                        statusClass = 'text-warning';
-                    }
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <span class="badge" style="background: ${categoria.cor || '#3498db'}">
-                            <i class="fas ${categoria.tipo === 'receita' ? 'fa-arrow-down' : 'fa-arrow-up'} me-1"></i>
-                            ${categoria.nome}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : 'bg-danger'}">
-                            ${categoria.tipo === 'receita' ? 'Receita' : 'Despesa'}
-                        </span>
-                    </td>
-                    <td class="fw-bold ${categoria.tipo === 'receita' ? 'text-success' : 'text-danger'}">
-                        ${formatarMoeda(total)}
-                    </td>
-                    <td>${categoria.orcamento ? formatarMoeda(categoria.orcamento) : 'Sem limite'}</td>
-                    <td>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar ${porcentagem >= 100 ? 'bg-danger' : porcentagem >= 80 ? 'bg-warning' : 'bg-success'}" 
-                                 style="width: ${porcentagem}%"></div>
-                        </div>
-                        <small>${porcentagem}%</small>
-                    </td>
-                    <td class="${statusClass}">
-                        <i class="fas ${status === 'excedido' ? 'fa-exclamation-triangle' : 
-                                       status === 'alerta' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-1"></i>
-                        ${statusText}
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-action-sm" onclick="editarCategoria('${categoria.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action-sm" onclick="excluirCategoria('${categoria.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                categoriasTable.appendChild(row);
+            }
+        }
+        
+        // Atualizar filtro de categorias no filtro principal
+        filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
+        categorias.forEach(categoria => {
+            const option = document.createElement('option');
+            option.value = categoria.id;
+            option.textContent = categoria.nome;
+            option.style.color = categoria.cor || '#333';
+            filterCategoria.appendChild(option);
+        });
+        
+        // Atualizar filtro de clientes
+        const clienteSelect = document.getElementById('cliente');
+        if (clienteSelect) {
+            clienteSelect.innerHTML = '<option value="">Selecione um cliente (opcional)...</option>';
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.id;
+                option.textContent = cliente.nome;
+                clienteSelect.appendChild(option);
             });
         }
+        
+        // Atualizar filtro de pedidos
+        const pedidoSelect = document.getElementById('pedidoRelacionado');
+        if (pedidoSelect) {
+            pedidoSelect.innerHTML = '<option value="">Selecione um pedido (opcional)...</option>';
+            pedidos.forEach(pedido => {
+                const option = document.createElement('option');
+                option.value = pedido.id;
+                option.textContent = pedido.numeroPedido || `Pedido ${pedido.id.substring(0, 8)}`;
+                pedidoSelect.appendChild(option);
+            });
+        }
+    }
 
-        // ============================================
-        // ESTATÍSTICAS E GRÁFICOS
-        // ============================================
+    // ============================================
+    // SISTEMA DE ABAS
+    // ============================================
 
-        function atualizarEstatisticas() {
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
+    function inicializarAbas() {
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                tipoAtualAba = this.getAttribute('data-tipo');
+                
+                // Mostrar/ocultar seções
+                categoriasSection.style.display = tipoAtualAba === 'categorias' ? 'block' : 'none';
+                relatoriosSection.style.display = tipoAtualAba === 'relatorios' ? 'block' : 'none';
+                
+                // Atualizar tabela apropriada
+                if (tipoAtualAba === 'categorias') {
+                    atualizarTabelaCategorias();
+                } else {
+                    atualizarTabelaMovimentacoes();
+                }
+            });
+        });
+    }
+
+    // ============================================
+    // CALCULADORA - CORRIGIDA
+    // ============================================
+
+    function inicializarCalculadora() {
+        if (!toggleCalculadora) return;
+        
+        toggleCalculadora.addEventListener('click', () => {
+            calculadoraPanel.classList.toggle('show');
+        });
+        
+        // Fechar calculadora ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (calculadoraPanel && !calculadoraPanel.contains(e.target) && 
+                toggleCalculadora && !toggleCalculadora.contains(e.target)) {
+                calculadoraPanel.classList.remove('show');
+            }
+        });
+        
+        // Inicializar display
+        calcDisplay.textContent = calculadoraValue;
+    }
+
+    window.calcInput = function(value) {
+        if (calculadoraAguardandoOperador) {
+            calculadoraValue = value;
+            calculadoraAguardandoOperador = false;
+        } else {
+            calculadoraValue = calculadoraValue === '0' ? value : calculadoraValue + value;
+        }
+        
+        // Limitar o número de caracteres
+        if (calculadoraValue.length > 12) {
+            calculadoraValue = calculadoraValue.substring(0, 12);
+        }
+        
+        calcDisplay.textContent = calculadoraValue;
+    };
+
+    window.calcClear = function() {
+        calculadoraValue = '0';
+        calculadoraOperador = '';
+        calculadoraValorAnterior = '';
+        calculadoraAguardandoOperador = false;
+        calcDisplay.textContent = calculadoraValue;
+    };
+
+    window.calcCalculate = function() {
+        if (calculadoraOperador && calculadoraValorAnterior !== '') {
+            let resultado;
+            const valorAtual = parseFloat(calculadoraValue.replace(',', '.'));
+            const valorAnterior = parseFloat(calculadoraValorAnterior.replace(',', '.'));
             
-            // Filtrar movimentações do mês atual
-            const movimentacoesMes = movimentacoes.filter(mov => {
+            switch(calculadoraOperador) {
+                case '+':
+                    resultado = valorAnterior + valorAtual;
+                    break;
+                case '-':
+                    resultado = valorAnterior - valorAtual;
+                    break;
+                case '×':
+                    resultado = valorAnterior * valorAtual;
+                    break;
+                case '÷':
+                    resultado = valorAtual !== 0 ? valorAnterior / valorAtual : 0;
+                    break;
+                default:
+                    resultado = valorAtual;
+            }
+            
+            calculadoraValue = resultado.toString().replace('.', ',');
+            calculadoraOperador = '';
+            calculadoraValorAnterior = '';
+            calculadoraAguardandoOperador = true;
+            calcDisplay.textContent = calculadoraValue;
+        }
+    };
+
+    // Função para operadores
+    window.calcOperador = function(operador) {
+        if (calculadoraValue !== '0') {
+            if (calculadoraOperador && calculadoraValorAnterior !== '') {
+                calcCalculate();
+            }
+            calculadoraValorAnterior = calculadoraValue;
+            calculadoraOperador = operador;
+            calculadoraAguardandoOperador = true;
+        }
+    };
+
+    // Função para porcentagem
+    window.calcPorcentagem = function() {
+        const valor = parseFloat(calculadoraValue.replace(',', '.'));
+        const resultado = valor / 100;
+        calculadoraValue = resultado.toString().replace('.', ',');
+        calcDisplay.textContent = calculadoraValue;
+    };
+
+    // ============================================
+    // TABELA DE MOVIMENTAÇÕES
+    // ============================================
+
+    function atualizarTabelaMovimentacoes() {
+        const searchTerm = searchMovimentacoes.value.toLowerCase();
+        const tipoFilter = filterTipo.value;
+        const statusFilter = filterStatus.value;
+        const mesFilter = filterMes.value;
+        const categoriaFilter = filterCategoria.value;
+        
+        // Filtrar por tipo da aba
+        let movimentacoesFiltradas = movimentacoes;
+        
+        if (tipoAtualAba === 'receitas') {
+            movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'receita');
+        } else if (tipoAtualAba === 'despesas') {
+            movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'despesa');
+        }
+        
+        // Aplicar filtros adicionais
+        movimentacoesFiltradas = movimentacoesFiltradas.filter(mov => {
+            const matchSearch = !searchTerm || 
+                (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
+            
+            const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
+            const matchStatus = !statusFilter || mov.status === statusFilter;
+            const matchCategoria = !categoriaFilter || mov.categoriaId === categoriaFilter;
+            
+            let matchMes = true;
+            if (mesFilter && mov.data) {
+                const data = new Date(mov.data);
+                const mes = data.getMonth() + 1;
+                matchMes = mes.toString() === mesFilter;
+            }
+            
+            return matchSearch && matchTipo && matchStatus && matchMes && matchCategoria;
+        });
+        
+        // Limpar tabela
+        movimentacoesTable.innerHTML = '';
+        
+        if (movimentacoesFiltradas.length === 0) {
+            movimentacoesTable.appendChild(emptyState.cloneNode(true));
+            return;
+        }
+        
+        // Preencher tabela
+        movimentacoesFiltradas.forEach(mov => {
+            const categoria = categorias.find(c => c.id === mov.categoriaId);
+            const row = document.createElement('tr');
+            
+            const dataFormatada = formatarData(mov.data);
+            const vencimentoFormatado = formatarData(mov.vencimento);
+            const valorFormatado = formatarMoeda(mov.valor);
+            
+            // Determinar estilo baseado no tipo
+            const tipoBadge = mov.tipo === 'receita' 
+                ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
+                : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
+            
+            const statusBadge = getStatusBadge(mov.status);
+            
+            row.innerHTML = `
+                <td>${dataFormatada}</td>
+                <td>${tipoBadge}</td>
+                <td>${mov.descricao || 'Sem descrição'}</td>
+                <td>
+                    <span class="badge" style="background: ${categoria?.cor || '#ccc'}">
+                        ${categoria?.nome || 'Sem categoria'}
+                    </span>
+                </td>
+                <td class="${mov.tipo === 'receita' ? 'text-success' : 'text-danger'} fw-bold">
+                    ${mov.tipo === 'receita' ? '+' : '-'} ${valorFormatado}
+                </td>
+                <td>${statusBadge}</td>
+                <td>${vencimentoFormatado}</td>
+                <td><small>${mov.observacoes?.substring(0, 30) || ''}${mov.observacoes?.length > 30 ? '...' : ''}</small></td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm btn-ver" onclick="verMovimentacao('${mov.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action-sm btn-recibo" onclick="exportarMovimentacaoPDF('${mov.id}')">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                        <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            // Destacar linhas atrasadas
+            if (mov.status === 'atrasado') {
+                row.style.backgroundColor = '#fff5f5';
+            }
+            
+            movimentacoesTable.appendChild(row);
+        });
+    }
+
+    function getStatusBadge(status) {
+        switch(status) {
+            case 'pago':
+                return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago/Recebido</span>';
+            case 'pendente':
+                return '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i>Pendente</span>';
+            case 'atrasado':
+                return '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i>Atrasado</span>';
+            default:
+                return `<span class="badge-status">${status}</span>`;
+        }
+    }
+
+    // ============================================
+    // TABELA DE CATEGORIAS
+    // ============================================
+
+    function atualizarTabelaCategorias() {
+        categoriasTable.innerHTML = '';
+        
+        if (categorias.length === 0) {
+            categoriasTable.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="fas fa-tags fa-2x mb-2"></i>
+                        <p>Nenhuma categoria cadastrada</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Calcular totais por categoria
+        const hoje = new Date();
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
+        
+        categorias.forEach(categoria => {
+            // Filtrar movimentações desta categoria no mês atual
+            const movimentacoesCategoria = movimentacoes.filter(mov => {
+                if (mov.categoriaId !== categoria.id) return false;
+                
+                if (!mov.data) return false;
                 const dataMov = new Date(mov.data);
                 return dataMov.getMonth() === mesAtual && 
                        dataMov.getFullYear() === anoAtual;
             });
             
-            // Calcular valores
-            let totalReceita = 0;
-            let totalDespesa = 0;
-            let totalAtrasados = 0;
-            let totalAReceber7dias = 0;
-            let totalAPagar7dias = 0;
+            // Calcular total
+            const total = movimentacoesCategoria.reduce((sum, mov) => {
+                return sum + (mov.valor || 0);
+            }, 0);
             
-            movimentacoes.forEach(mov => {
-                const valor = mov.valor || 0;
-                
-                if (mov.tipo === 'receita') {
-                    totalReceita += valor;
-                    
-                    // A receber nos próximos 7 dias
-                    if (mov.status === 'pendente' || mov.status === 'atrasado') {
-                        const vencimento = new Date(mov.vencimento);
-                        const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-                        if (diferencaDias <= 7 && diferencaDias >= 0) {
-                            totalAReceber7dias += valor;
-                        }
-                    }
-                    
-                    // Atrasados
-                    if (mov.status === 'atrasado') {
-                        totalAtrasados += valor;
-                    }
-                } else if (mov.tipo === 'despesa') {
-                    totalDespesa += valor;
-                    
-                    // A pagar nos próximos 7 dias
-                    if (mov.status === 'pendente' || mov.status === 'atrasado') {
-                        const vencimento = new Date(mov.vencimento);
-                        const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-                        if (diferencaDias <= 7 && diferencaDias >= 0) {
-                            totalAPagar7dias += valor;
-                        }
-                    }
+            // Calcular porcentagem do orçamento
+            let porcentagem = 0;
+            if (categoria.orcamento && categoria.orcamento > 0) {
+                porcentagem = Math.min(100, Math.round((total / categoria.orcamento) * 100));
+            }
+            
+            // Determinar status
+            let status = 'normal';
+            let statusText = 'Normal';
+            let statusClass = 'text-success';
+            
+            if (categoria.orcamento && categoria.orcamento > 0) {
+                if (porcentagem >= 100) {
+                    status = 'excedido';
+                    statusText = 'Excedido';
+                    statusClass = 'text-danger';
+                } else if (porcentagem >= 80) {
+                    status = 'alerta';
+                    statusText = 'Alerta';
+                    statusClass = 'text-warning';
                 }
-            });
+            }
             
-            const saldo = totalReceita - totalDespesa;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <span class="badge" style="background: ${categoria.cor || '#3498db'}">
+                        <i class="fas ${categoria.tipo === 'receita' ? 'fa-arrow-down' : 'fa-arrow-up'} me-1"></i>
+                        ${categoria.nome}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : 'bg-danger'}">
+                        ${categoria.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                    </span>
+                </td>
+                <td class="fw-bold ${categoria.tipo === 'receita' ? 'text-success' : 'text-danger'}">
+                    ${formatarMoeda(total)}
+                </td>
+                <td>${categoria.orcamento ? formatarMoeda(categoria.orcamento) : 'Sem limite'}</td>
+                <td>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar ${porcentagem >= 100 ? 'bg-danger' : porcentagem >= 80 ? 'bg-warning' : 'bg-success'}" 
+                             style="width: ${porcentagem}%"></div>
+                    </div>
+                    <small>${porcentagem}%</small>
+                </td>
+                <td class="${statusClass}">
+                    <i class="fas ${status === 'excedido' ? 'fa-exclamation-triangle' : 
+                                   status === 'alerta' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-1"></i>
+                    ${statusText}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm" onclick="editarCategoria('${categoria.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action-sm" onclick="excluirCategoria('${categoria.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
             
-            // Atualizar elementos
-            saldoAtual.textContent = formatarMoeda(saldo);
-            receitaMes.textContent = formatarMoeda(totalReceita);
-            despesaMes.textContent = formatarMoeda(totalDespesa);
-            atrasados.textContent = formatarMoeda(totalAtrasados);
-            aReceber.textContent = formatarMoeda(totalAReceber7dias);
-            aPagar.textContent = formatarMoeda(totalAPagar7dias);
-        }
+            categoriasTable.appendChild(row);
+        });
+    }
 
-        function inicializarGraficos() {
-            // Gráfico de Fluxo de Caixa (últimos 6 meses)
-            const ctxFluxo = document.getElementById('graficoFluxoCaixa').getContext('2d');
-            new Chart(ctxFluxo, {
-                type: 'line',
-                data: {
-                    labels: getUltimos6Meses(),
-                    datasets: [
-                        {
-                            label: 'Receitas',
-                            data: gerarDadosAleatorios(6, 1000, 10000),
-                            borderColor: '#27ae60',
-                            backgroundColor: 'rgba(39, 174, 96, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Despesas',
-                            data: gerarDadosAleatorios(6, 500, 8000),
-                            borderColor: '#e74c3c',
-                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: false
-                        }
+    // ============================================
+    // ESTATÍSTICAS E GRÁFICOS
+    // ============================================
+
+    function atualizarEstatisticas() {
+        const hoje = new Date();
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
+        
+        // Filtrar movimentações do mês atual
+        const movimentacoesMes = movimentacoes.filter(mov => {
+            if (!mov.data) return false;
+            const dataMov = new Date(mov.data);
+            return dataMov.getMonth() === mesAtual && 
+                   dataMov.getFullYear() === anoAtual;
+        });
+        
+        // Calcular valores
+        let totalReceita = 0;
+        let totalDespesa = 0;
+        let totalAtrasados = 0;
+        let totalAReceber7dias = 0;
+        let totalAPagar7dias = 0;
+        
+        movimentacoes.forEach(mov => {
+            const valor = mov.valor || 0;
+            
+            if (mov.tipo === 'receita') {
+                totalReceita += valor;
+                
+                // A receber nos próximos 7 dias
+                if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
+                    const vencimento = new Date(mov.vencimento);
+                    const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                    if (diferencaDias <= 7 && diferencaDias >= 0) {
+                        totalAReceber7dias += valor;
                     }
                 }
-            });
-            
-            // Gráfico de Distribuição de Despesas
-            const ctxDespesas = document.getElementById('graficoDespesas').getContext('2d');
-            new Chart(ctxDespesas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Materiais', 'Marketing', 'Transporte', 'Impostos', 'Outros'],
-                    datasets: [{
-                        data: [40, 20, 15, 15, 10],
-                        backgroundColor: [
-                            '#e74c3c',
-                            '#9b59b6',
-                            '#f39c12',
-                            '#34495e',
-                            '#bdc3c7'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                        }
+                
+                // Atrasados
+                if (mov.status === 'atrasado') {
+                    totalAtrasados += valor;
+                }
+            } else if (mov.tipo === 'despesa') {
+                totalDespesa += valor;
+                
+                // A pagar nos próximos 7 dias
+                if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
+                    const vencimento = new Date(mov.vencimento);
+                    const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                    if (diferencaDias <= 7 && diferencaDias >= 0) {
+                        totalAPagar7dias += valor;
                     }
                 }
-            });
-            
-            // Gráfico Comparativo
-            const ctxComparativo = document.getElementById('graficoComparativo').getContext('2d');
-            new Chart(ctxComparativo, {
-                type: 'bar',
-                data: {
-                    labels: getUltimos6Meses(),
-                    datasets: [
-                        {
-                            label: 'Receitas',
-                            data: gerarDadosAleatorios(6, 1000, 10000),
-                            backgroundColor: 'rgba(39, 174, 96, 0.7)',
-                            borderColor: '#27ae60',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Despesas',
-                            data: gerarDadosAleatorios(6, 500, 8000),
-                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                            borderColor: '#e74c3c',
-                            borderWidth: 1
-                        }
+            }
+        });
+        
+        const saldo = totalReceita - totalDespesa;
+        
+        // Atualizar elementos
+        saldoAtual.textContent = formatarMoeda(saldo);
+        receitaMes.textContent = formatarMoeda(totalReceita);
+        despesaMes.textContent = formatarMoeda(totalDespesa);
+        atrasados.textContent = formatarMoeda(totalAtrasados);
+        aReceber.textContent = formatarMoeda(totalAReceber7dias);
+        aPagar.textContent = formatarMoeda(totalAPagar7dias);
+    }
+
+    function inicializarGraficos() {
+        // Verificar se os elementos existem
+        const canvasFluxo = document.getElementById('graficoFluxoCaixa');
+        const canvasDespesas = document.getElementById('graficoDespesas');
+        const canvasComparativo = document.getElementById('graficoComparativo');
+        
+        if (!canvasFluxo || !canvasDespesas || !canvasComparativo) {
+            console.warn('Elementos de gráfico não encontrados');
+            return;
+        }
+        
+        // Gráfico de Fluxo de Caixa (últimos 6 meses)
+        const ctxFluxo = canvasFluxo.getContext('2d');
+        new Chart(ctxFluxo, {
+            type: 'line',
+            data: {
+                labels: getUltimos6Meses(),
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: gerarDadosAleatorios(6, 1000, 10000),
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Despesas',
+                        data: gerarDadosAleatorios(6, 500, 8000),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Gráfico de Distribuição de Despesas
+        const ctxDespesas = canvasDespesas.getContext('2d');
+        new Chart(ctxDespesas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Materiais', 'Marketing', 'Transporte', 'Impostos', 'Outros'],
+                datasets: [{
+                    data: [40, 20, 15, 15, 10],
+                    backgroundColor: [
+                        '#e74c3c',
+                        '#9b59b6',
+                        '#f39c12',
+                        '#34495e',
+                        '#bdc3c7'
                     ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toLocaleString('pt-BR');
-                                }
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+        
+        // Gráfico Comparativo
+        const ctxComparativo = canvasComparativo.getContext('2d');
+        new Chart(ctxComparativo, {
+            type: 'bar',
+            data: {
+                labels: getUltimos6Meses(),
+                datasets: [
+                    {
+                        label: 'Receitas',
+                        data: gerarDadosAleatorios(6, 1000, 10000),
+                        backgroundColor: 'rgba(39, 174, 96, 0.7)',
+                        borderColor: '#27ae60',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Despesas',
+                        data: gerarDadosAleatorios(6, 500, 8000),
+                        backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
                             }
                         }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
                     }
                 }
+            }
+        });
+    }
+
+    // ============================================
+    // FUNÇÕES PRINCIPAIS - MOVIMENTAÇÕES
+    // ============================================
+
+    window.abrirModalMovimentacao = function(tipo = 'receita') {
+        const modal = document.getElementById('modalMovimentacao');
+        const modalTitle = modal.querySelector('.modal-title');
+        
+        modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
+        
+        // Resetar formulário
+        formMovimentacao.reset();
+        document.getElementById('movimentacaoId').value = '';
+        
+        // Definir tipo
+        tipoMovimentacao.value = tipo;
+        
+        // Ativar botão correto
+        tipoMovBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tipo') === tipo) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Mostrar/ocultar campos específicos
+        if (tipo === 'despesa') {
+            despesaFields.style.display = 'block';
+            receitaFields.style.display = 'none';
+        } else {
+            despesaFields.style.display = 'none';
+            receitaFields.style.display = 'block';
+        }
+        
+        // Configurar data atual
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataMovimentacao').value = hoje;
+        document.getElementById('vencimento').value = hoje;
+        
+        // Carregar categorias no select
+        const categoriaSelect = document.getElementById('categoria');
+        categoriaSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
+        
+        // Filtrar categorias por tipo
+        const categoriasFiltradas = categorias.filter(c => c.tipo === tipo);
+        
+        if (categoriasFiltradas.length > 0) {
+            categoriasFiltradas.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.id;
+                option.textContent = categoria.nome;
+                option.style.color = categoria.cor || '#333';
+                categoriaSelect.appendChild(option);
+            });
+        } else {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Nenhuma categoria disponível';
+            option.disabled = true;
+            categoriaSelect.appendChild(option);
+        }
+        
+        modalMovimentacao.show();
+    };
+
+    window.verMovimentacao = function(id) {
+        const mov = movimentacoes.find(m => m.id === id);
+        if (!mov) {
+            alert('Movimentação não encontrada!');
+            return;
+        }
+        
+        abrirModalMovimentacao(mov.tipo);
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.textContent = `Detalhes da ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
+        
+        // Preencher dados
+        document.getElementById('movimentacaoId').value = mov.id;
+        document.getElementById('descricao').value = mov.descricao || '';
+        document.getElementById('valor').value = mov.valor || 0;
+        document.getElementById('status').value = mov.status || 'pendente';
+        document.getElementById('dataMovimentacao').value = mov.data || '';
+        document.getElementById('vencimento').value = mov.vencimento || '';
+        document.getElementById('formaPagamento').value = mov.formaPagamento || '';
+        document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
+        document.getElementById('observacoes').value = mov.observacoes || '';
+        document.getElementById('fornecedor').value = mov.fornecedor || '';
+        document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
+        document.getElementById('cliente').value = mov.clienteId || '';
+        document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
+        document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
+        document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
+        
+        // Selecionar a categoria correta
+        const categoriaSelect = document.getElementById('categoria');
+        categoriaSelect.value = mov.categoriaId || '';
+        
+        // Desabilitar todos os campos
+        const inputs = formMovimentacao.querySelectorAll('input, select, textarea, button');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+        
+        btnSalvarMovimentacao.textContent = 'Fechar';
+        btnSalvarMovimentacao.onclick = () => modalMovimentacao.hide();
+    };
+
+    window.editarMovimentacao = async function(id) {
+        const mov = movimentacoes.find(m => m.id === id);
+        if (!mov) {
+            alert('Movimentação não encontrada!');
+            return;
+        }
+        
+        abrirModalMovimentacao(mov.tipo);
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
+        
+        // Preencher dados
+        document.getElementById('movimentacaoId').value = mov.id;
+        document.getElementById('descricao').value = mov.descricao || '';
+        document.getElementById('valor').value = mov.valor || 0;
+        document.getElementById('status').value = mov.status || 'pendente';
+        document.getElementById('dataMovimentacao').value = mov.data || '';
+        document.getElementById('vencimento').value = mov.vencimento || '';
+        document.getElementById('formaPagamento').value = mov.formaPagamento || '';
+        document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
+        document.getElementById('observacoes').value = mov.observacoes || '';
+        document.getElementById('fornecedor').value = mov.fornecedor || '';
+        document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
+        document.getElementById('cliente').value = mov.clienteId || '';
+        document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
+        document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
+        document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
+        
+        // Carregar categorias no select e selecionar a correta
+        const categoriaSelect = document.getElementById('categoria');
+        const categoriasFiltradas = categorias.filter(c => c.tipo === mov.tipo);
+        
+        if (categoriasFiltradas.length > 0) {
+            categoriasFiltradas.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.id;
+                option.textContent = categoria.nome;
+                option.style.color = categoria.cor || '#333';
+                categoriaSelect.appendChild(option);
             });
         }
+        
+        categoriaSelect.value = mov.categoriaId || '';
+        
+        // Habilitar todos os campos
+        const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+        
+        btnSalvarMovimentacao.textContent = 'Atualizar';
+        btnSalvarMovimentacao.onclick = salvarMovimentacao;
+    };
 
-        // ============================================
-        // CALCULADORA
-        // ============================================
-
-        function inicializarCalculadora() {
-            toggleCalculadora.addEventListener('click', () => {
-                calculadoraVisible = !calculadoraVisible;
-                calculadoraPanel.classList.toggle('show', calculadoraVisible);
-            });
+    async function salvarMovimentacao() {
+        // Validação básica
+        const descricao = document.getElementById('descricao').value.trim();
+        const valor = parseFloat(document.getElementById('valor').value);
+        const categoriaId = document.getElementById('categoria').value;
+        
+        if (!descricao) {
+            alert('Informe uma descrição.');
+            document.getElementById('descricao').focus();
+            return;
+        }
+        
+        if (!valor || valor <= 0 || isNaN(valor)) {
+            alert('Informe um valor válido maior que zero.');
+            document.getElementById('valor').focus();
+            return;
+        }
+        
+        if (!categoriaId) {
+            alert('Selecione uma categoria.');
+            document.getElementById('categoria').focus();
+            return;
+        }
+        
+        try {
+            const categoriaSelecionada = categorias.find(c => c.id === categoriaId);
+            if (!categoriaSelecionada) {
+                alert('Categoria selecionada não encontrada.');
+                return;
+            }
             
-            // Fechar calculadora ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!calculadoraPanel.contains(e.target) && !toggleCalculadora.contains(e.target)) {
-                    calculadoraPanel.classList.remove('show');
-                    calculadoraVisible = false;
-                }
-            });
-        }
-
-        window.calcInput = function(value) {
-            if (calculadoraValue === '0' && value !== '.') {
-                calculadoraValue = value;
+            const movData = {
+                tipo: tipoMovimentacao.value,
+                descricao: descricao,
+                categoriaId: categoriaId,
+                categoriaNome: categoriaSelecionada.nome,
+                valor: valor,
+                status: document.getElementById('status').value,
+                data: document.getElementById('dataMovimentacao').value,
+                vencimento: document.getElementById('vencimento').value,
+                formaPagamento: document.getElementById('formaPagamento').value || '',
+                recorrencia: document.getElementById('recorrencia').value,
+                observacoes: document.getElementById('observacoes').value || '',
+                despesaFixa: document.getElementById('despesaFixa').checked,
+                gerarLembrete: document.getElementById('gerarLembrete').checked,
+                profissionalId: currentUser.uid,
+                profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
+                atualizadoEm: serverTimestamp()
+            };
+            
+            // Adicionar campos específicos
+            if (tipoMovimentacao.value === 'despesa') {
+                movData.fornecedor = document.getElementById('fornecedor').value || '';
+                movData.numeroDocumento = document.getElementById('numeroDocumento').value || '';
             } else {
-                calculadoraValue += value;
+                movData.clienteId = document.getElementById('cliente').value || '';
+                movData.pedidoId = document.getElementById('pedidoRelacionado').value || '';
             }
-            calcDisplay.textContent = calculadoraValue;
-        };
-
-        window.calcClear = function() {
-            calculadoraValue = '0';
-            calculadoraOperador = '';
-            calculadoraValorAnterior = '0';
-            calcDisplay.textContent = calculadoraValue;
-        };
-
-        window.calcCalculate = function() {
-            try {
-                // Substituir símbolos para avaliação
-                let expression = calculadoraValue
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/');
+            
+            const movId = document.getElementById('movimentacaoId').value;
+            
+            if (movId) {
+                // Atualizar
+                const movRef = doc(db, "movimentacoes", movId);
+                await updateDoc(movRef, movData);
                 
-                // Calcular porcentagem
-                if (expression.includes('%')) {
-                    const parts = expression.split('%');
-                    if (parts.length === 2) {
-                        const base = eval(parts[0]) || 0;
-                        const percent = eval(parts[1]) || 0;
-                        expression = `${base} * ${percent} / 100`;
-                    }
+                // Atualizar localmente
+                const index = movimentacoes.findIndex(m => m.id === movId);
+                if (index !== -1) {
+                    movimentacoes[index] = { ...movimentacoes[index], ...movData };
                 }
                 
-                const result = eval(expression) || 0;
-                calculadoraValue = parseFloat(result.toFixed(2)).toString();
-                calcDisplay.textContent = calculadoraValue;
-            } catch (error) {
-                calculadoraValue = 'Erro';
-                calcDisplay.textContent = calculadoraValue;
-            }
-        };
-
-        // ============================================
-        // FUNÇÕES PRINCIPAIS
-        // ============================================
-
-        window.abrirModalMovimentacao = function(tipo = 'receita') {
-            const modal = document.getElementById('modalMovimentacao');
-            const modalTitle = modal.querySelector('.modal-title');
-            
-            modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
-            
-            // Resetar formulário
-            formMovimentacao.reset();
-            document.getElementById('movimentacaoId').value = '';
-            
-            // Definir tipo
-            tipoMovimentacao.value = tipo;
-            
-            // Ativar botão correto
-            tipoMovBtns.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-tipo') === tipo) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            // Mostrar/ocultar campos específicos
-            if (tipo === 'despesa') {
-                despesaFields.style.display = 'block';
-                receitaFields.style.display = 'none';
+                alert('Movimentação atualizada com sucesso!');
             } else {
-                despesaFields.style.display = 'none';
-                receitaFields.style.display = 'block';
-            }
-            
-            // Configurar data atual
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataMovimentacao').value = hoje;
-            document.getElementById('vencimento').value = hoje;
-            
-            modalMovimentacao.show();
-        };
-
-        window.verMovimentacao = function(id) {
-            const mov = movimentacoes.find(m => m.id === id);
-            if (!mov) {
-                alert('Movimentação não encontrada!');
-                return;
-            }
-            
-            abrirModalMovimentacao(mov.tipo);
-            const modalTitle = document.getElementById('modalTitle');
-            modalTitle.textContent = `Detalhes da ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
-            
-            // Preencher dados
-            document.getElementById('movimentacaoId').value = mov.id;
-            document.getElementById('descricao').value = mov.descricao || '';
-            document.getElementById('categoria').value = mov.categoriaId || '';
-            document.getElementById('valor').value = mov.valor || 0;
-            document.getElementById('status').value = mov.status || 'pendente';
-            document.getElementById('dataMovimentacao').value = mov.data || '';
-            document.getElementById('vencimento').value = mov.vencimento || '';
-            document.getElementById('formaPagamento').value = mov.formaPagamento || '';
-            document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
-            document.getElementById('observacoes').value = mov.observacoes || '';
-            document.getElementById('fornecedor').value = mov.fornecedor || '';
-            document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
-            document.getElementById('cliente').value = mov.clienteId || '';
-            document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
-            document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-            document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
-            
-            // Desabilitar todos os campos
-            const inputs = formMovimentacao.querySelectorAll('input, select, textarea, button');
-            inputs.forEach(input => {
-                input.disabled = true;
-            });
-            
-            btnSalvarMovimentacao.textContent = 'Fechar';
-            btnSalvarMovimentacao.onclick = () => modalMovimentacao.hide();
-        };
-
-        window.editarMovimentacao = async function(id) {
-            const mov = movimentacoes.find(m => m.id === id);
-            if (!mov) {
-                alert('Movimentação não encontrada!');
-                return;
-            }
-            
-            abrirModalMovimentacao(mov.tipo);
-            const modalTitle = document.getElementById('modalTitle');
-            modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
-            
-            // Preencher dados
-            document.getElementById('movimentacaoId').value = mov.id;
-            document.getElementById('descricao').value = mov.descricao || '';
-            document.getElementById('categoria').value = mov.categoriaId || '';
-            document.getElementById('valor').value = mov.valor || 0;
-            document.getElementById('status').value = mov.status || 'pendente';
-            document.getElementById('dataMovimentacao').value = mov.data || '';
-            document.getElementById('vencimento').value = mov.vencimento || '';
-            document.getElementById('formaPagamento').value = mov.formaPagamento || '';
-            document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
-            document.getElementById('observacoes').value = mov.observacoes || '';
-            document.getElementById('fornecedor').value = mov.fornecedor || '';
-            document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
-            document.getElementById('cliente').value = mov.clienteId || '';
-            document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
-            document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-            document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
-            
-            // Habilitar todos os campos
-            const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.disabled = false;
-            });
-            
-            btnSalvarMovimentacao.textContent = 'Atualizar';
-            btnSalvarMovimentacao.onclick = salvarMovimentacao;
-        };
-
-        async function salvarMovimentacao() {
-            // Validação básica
-            const descricao = document.getElementById('descricao').value;
-            const valor = parseFloat(document.getElementById('valor').value);
-            const categoria = document.getElementById('categoria').value;
-            
-            if (!descricao.trim()) {
-                alert('Informe uma descrição.');
-                return;
-            }
-            
-            if (!valor || valor <= 0) {
-                alert('Informe um valor válido maior que zero.');
-                return;
-            }
-            
-            if (!categoria) {
-                alert('Selecione uma categoria.');
-                return;
-            }
-            
-            try {
-                const movData = {
-                    tipo: tipoMovimentacao.value,
-                    descricao: descricao,
-                    categoriaId: categoria,
-                    valor: valor,
-                    status: document.getElementById('status').value,
-                    data: document.getElementById('dataMovimentacao').value,
-                    vencimento: document.getElementById('vencimento').value,
-                    formaPagamento: document.getElementById('formaPagamento').value,
-                    recorrencia: document.getElementById('recorrencia').value,
-                    observacoes: document.getElementById('observacoes').value,
-                    despesaFixa: document.getElementById('despesaFixa').checked,
-                    gerarLembrete: document.getElementById('gerarLembrete').checked,
-                    profissionalId: currentUser.uid,
-                    atualizadoEm: serverTimestamp()
-                };
+                // Nova movimentação
+                movData.criadoEm = serverTimestamp();
+                const docRef = await addDoc(collection(db, "movimentacoes"), movData);
+                movData.id = docRef.id;
+                movimentacoes.unshift(movData);
                 
-                // Adicionar campos específicos
-                if (tipoMovimentacao.value === 'despesa') {
-                    movData.fornecedor = document.getElementById('fornecedor').value;
-                    movData.numeroDocumento = document.getElementById('numeroDocumento').value;
-                } else {
-                    movData.clienteId = document.getElementById('cliente').value;
-                    movData.pedidoId = document.getElementById('pedidoRelacionado').value;
-                }
-                
-                const movId = document.getElementById('movimentacaoId').value;
-                
-                if (movId) {
-                    // Atualizar
-                    const movRef = doc(db, "movimentacoes", movId);
-                    await updateDoc(movRef, movData);
-                    
-                    // Atualizar localmente
-                    const index = movimentacoes.findIndex(m => m.id === movId);
-                    if (index !== -1) {
-                        movimentacoes[index] = { ...movimentacoes[index], ...movData };
-                    }
-                    
-                    alert('Movimentação atualizada com sucesso!');
-                } else {
-                    // Nova movimentação
-                    movData.criadoEm = serverTimestamp();
-                    const docRef = await addDoc(collection(db, "movimentacoes"), movData);
-                    movData.id = docRef.id;
-                    movimentacoes.unshift(movData);
-                    
-                    alert('Movimentação criada com sucesso!');
-                }
-                
-                modalMovimentacao.hide();
-                
-                // Atualizar interface
-                atualizarTabelaMovimentacoes();
-                atualizarEstatisticas();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
-                
-            } catch (error) {
-                console.error('Erro ao salvar movimentação:', error);
-                alert('Erro ao salvar movimentação. Tente novamente.');
+                alert('Movimentação criada com sucesso!');
             }
+            
+            modalMovimentacao.hide();
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            if (tipoAtualAba === 'categorias') {
+                atualizarTabelaCategorias();
+            }
+            
+        } catch (error) {
+            console.error('Erro ao salvar movimentação:', error);
+            alert('Erro ao salvar movimentação. Tente novamente.');
         }
+    }
 
-        window.excluirMovimentacao = async function(id) {
-            if (!confirm('Tem certeza que deseja excluir esta movimentação?\nEsta ação não pode ser desfeita.')) {
-                return;
-            }
-            
-            try {
-                const movRef = doc(db, "movimentacoes", id);
-                await deleteDoc(movRef);
-                
-                // Remover da lista local
-                const index = movimentacoes.findIndex(m => m.id === id);
-                if (index !== -1) {
-                    movimentacoes.splice(index, 1);
-                }
-                
-                // Atualizar interface
-                atualizarTabelaMovimentacoes();
-                atualizarEstatisticas();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
-                
-                alert('Movimentação excluída com sucesso!');
-            } catch (error) {
-                alert('Erro ao excluir movimentação. Tente novamente.');
-            }
-        };
-
-        // ============================================
-        // FUNÇÕES DE CATEGORIA
-        // ============================================
-
-        window.abrirModalCategoria = function() {
-            document.getElementById('formCategoria').reset();
-            document.getElementById('nomeCategoria').value = '';
-            document.getElementById('tipoCategoria').value = 'despesa';
-            document.getElementById('orcamentoCategoria').value = '';
-            document.getElementById('corCategoria').value = '#3498db';
-            
-            const btnSalvar = document.getElementById('btnSalvarCategoria');
-            btnSalvar.textContent = 'Salvar';
-            btnSalvar.onclick = salvarCategoria;
-            
-            modalCategoria.show();
-        };
-
-        window.editarCategoria = function(id) {
-            const categoria = categorias.find(c => c.id === id);
-            if (!categoria) {
-                alert('Categoria não encontrada!');
-                return;
-            }
-            
-            document.getElementById('nomeCategoria').value = categoria.nome;
-            document.getElementById('tipoCategoria').value = categoria.tipo;
-            document.getElementById('orcamentoCategoria').value = categoria.orcamento || '';
-            document.getElementById('corCategoria').value = categoria.cor || '#3498db';
-            
-            const btnSalvar = document.getElementById('btnSalvarCategoria');
-            btnSalvar.textContent = 'Atualizar';
-            btnSalvar.onclick = () => salvarCategoria(id);
-            
-            modalCategoria.show();
-        };
-
-        async function salvarCategoria(categoriaId = null) {
-            const nome = document.getElementById('nomeCategoria').value.trim();
-            const tipo = document.getElementById('tipoCategoria').value;
-            const orcamento = document.getElementById('orcamentoCategoria').value;
-            const cor = document.getElementById('corCategoria').value;
-            
-            if (!nome) {
-                alert('Informe um nome para a categoria.');
-                return;
-            }
-            
-            try {
-                const categoriaData = {
-                    nome: nome,
-                    tipo: tipo,
-                    cor: cor,
-                    profissionalId: currentUser.uid,
-                    atualizadoEm: serverTimestamp()
-                };
-                
-                if (orcamento && orcamento > 0) {
-                    categoriaData.orcamento = parseFloat(orcamento);
-                }
-                
-                if (categoriaId) {
-                    // Atualizar categoria existente
-                    const catRef = doc(db, "categorias", categoriaId);
-                    await updateDoc(catRef, categoriaData);
-                    
-                    // Atualizar localmente
-                    const index = categorias.findIndex(c => c.id === categoriaId);
-                    if (index !== -1) {
-                        categorias[index] = { ...categorias[index], ...categoriaData };
-                    }
-                    
-                    alert('Categoria atualizada com sucesso!');
-                } else {
-                    // Nova categoria
-                    categoriaData.criadoEm = serverTimestamp();
-                    const docRef = await addDoc(collection(db, "categorias"), categoriaData);
-                    categoriaData.id = docRef.id;
-                    categorias.push(categoriaData);
-                    
-                    alert('Categoria criada com sucesso!');
-                }
-                
-                modalCategoria.hide();
-                
-                // Atualizar interface
-                atualizarFiltros();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
-                
-            } catch (error) {
-                console.error('Erro ao salvar categoria:', error);
-                alert('Erro ao salvar categoria. Tente novamente.');
-            }
+    window.excluirMovimentacao = async function(id) {
+        if (!confirm('Tem certeza que deseja excluir esta movimentação?\nEsta ação não pode ser desfeita.')) {
+            return;
         }
+        
+        try {
+            const movRef = doc(db, "movimentacoes", id);
+            await deleteDoc(movRef);
+            
+            // Remover da lista local
+            const index = movimentacoes.findIndex(m => m.id === id);
+            if (index !== -1) {
+                movimentacoes.splice(index, 1);
+            }
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            if (tipoAtualAba === 'categorias') {
+                atualizarTabelaCategorias();
+            }
+            
+            alert('Movimentação excluída com sucesso!');
+        } catch (error) {
+            console.error('Erro ao excluir movimentação:', error);
+            alert('Erro ao excluir movimentação. Tente novamente.');
+        }
+    };
 
-        window.excluirCategoria = async function(id) {
-            // Verificar se há movimentações usando esta categoria
-            const movimentacoesComCategoria = movimentacoes.filter(m => m.categoriaId === id);
+    // ============================================
+    // FUNÇÕES DE CATEGORIA
+    // ============================================
+
+    window.abrirModalCategoria = function() {
+        document.getElementById('formCategoria').reset();
+        document.getElementById('nomeCategoria').value = '';
+        document.getElementById('tipoCategoria').value = 'despesa';
+        document.getElementById('orcamentoCategoria').value = '';
+        document.getElementById('corCategoria').value = '#3498db';
+        
+        const btnSalvar = document.getElementById('btnSalvarCategoria');
+        btnSalvar.textContent = 'Salvar';
+        btnSalvar.onclick = () => salvarCategoria();
+        
+        modalCategoria.show();
+    };
+
+    window.editarCategoria = function(id) {
+        const categoria = categorias.find(c => c.id === id);
+        if (!categoria) {
+            alert('Categoria não encontrada!');
+            return;
+        }
+        
+        document.getElementById('nomeCategoria').value = categoria.nome;
+        document.getElementById('tipoCategoria').value = categoria.tipo;
+        document.getElementById('orcamentoCategoria').value = categoria.orcamento || '';
+        document.getElementById('corCategoria').value = categoria.cor || '#3498db';
+        
+        const btnSalvar = document.getElementById('btnSalvarCategoria');
+        btnSalvar.textContent = 'Atualizar';
+        btnSalvar.onclick = () => salvarCategoria(id);
+        
+        modalCategoria.show();
+    };
+
+    async function salvarCategoria(categoriaId = null) {
+        const nome = document.getElementById('nomeCategoria').value.trim();
+        const tipo = document.getElementById('tipoCategoria').value;
+        const orcamento = document.getElementById('orcamentoCategoria').value;
+        const cor = document.getElementById('corCategoria').value;
+        
+        if (!nome) {
+            alert('Informe um nome para a categoria.');
+            document.getElementById('nomeCategoria').focus();
+            return;
+        }
+        
+        try {
+            const categoriaData = {
+                nome: nome,
+                tipo: tipo,
+                cor: cor,
+                profissionalId: currentUser.uid,
+                atualizadoEm: serverTimestamp()
+            };
             
-            if (movimentacoesComCategoria.length > 0) {
-                alert('Não é possível excluir esta categoria pois existem movimentações vinculadas a ela.');
-                return;
+            if (orcamento && orcamento > 0) {
+                categoriaData.orcamento = parseFloat(orcamento);
+            } else {
+                categoriaData.orcamento = 0;
             }
             
-            if (!confirm('Tem certeza que deseja excluir esta categoria?\nEsta ação não pode ser desfeita.')) {
-                return;
-            }
-            
-            try {
-                const catRef = doc(db, "categorias", id);
-                await deleteDoc(catRef);
+            if (categoriaId) {
+                // Atualizar categoria existente
+                const catRef = doc(db, "categorias", categoriaId);
+                await updateDoc(catRef, categoriaData);
                 
-                // Remover da lista local
-                const index = categorias.findIndex(c => c.id === id);
+                // Atualizar localmente
+                const index = categorias.findIndex(c => c.id === categoriaId);
                 if (index !== -1) {
-                    categorias.splice(index, 1);
+                    categorias[index] = { ...categorias[index], ...categoriaData };
                 }
                 
-                // Atualizar interface
-                atualizarFiltros();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
+                alert('Categoria atualizada com sucesso!');
+            } else {
+                // Nova categoria
+                categoriaData.criadoEm = serverTimestamp();
+                const docRef = await addDoc(collection(db, "categorias"), categoriaData);
+                categoriaData.id = docRef.id;
+                categorias.push(categoriaData);
                 
-                alert('Categoria excluída com sucesso!');
-            } catch (error) {
-                alert('Erro ao excluir categoria. Tente novamente.');
-            }
-        };
-
-        // ============================================
-        // EXPORTAÇÃO E RELATÓRIOS
-        // ============================================
-
-        window.exportarPDF = function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            const margin = 20;
-            const pageWidth = doc.internal.pageSize.width;
-            let y = margin;
-            
-            // Cabeçalho
-            doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            doc.text('RELATÓRIO FINANCEIRO', pageWidth/2, y, { align: 'center' });
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
-            doc.text(`Período: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
-            y += 15;
-            
-            // Resumo
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('RESUMO FINANCEIRO', margin, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Saldo Atual: ${saldoAtual.textContent}`, margin, y);
-            y += 7;
-            doc.text(`Receita do Mês: ${receitaMes.textContent}`, margin, y);
-            y += 7;
-            doc.text(`Despesas do Mês: ${despesaMes.textContent}`, margin, y);
-            y += 7;
-            doc.text(`A Receber (7 dias): ${aReceber.textContent}`, margin, y);
-            y += 7;
-            doc.text(`A Pagar (7 dias): ${aPagar.textContent}`, margin, y);
-            y += 15;
-            
-            // Movimentações recentes
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('ÚLTIMAS MOVIMENTAÇÕES', margin, y);
-            y += 10;
-            
-            const movimentacoesRecentes = movimentacoes.slice(0, 10);
-            
-            movimentacoesRecentes.forEach((mov, index) => {
-                if (y > 250) {
-                    doc.addPage();
-                    y = margin;
-                }
-                
-                const categoria = categorias.find(c => c.id === mov.categoriaId);
-                const tipo = mov.tipo === 'receita' ? 'Receita' : 'Despesa';
-                const sinal = mov.tipo === 'receita' ? '+' : '-';
-                const valor = formatarMoeda(mov.valor);
-                
-                doc.setFontSize(9);
-                doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
-                doc.text(`${categoria?.nome || 'Sem categoria'}`, pageWidth/2, y);
-                doc.text(`${sinal} ${valor}`, pageWidth - margin, y, { align: 'right' });
-                y += 6;
-            });
-            
-            doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
-        };
-
-        window.exportarMovimentacaoPDF = async function(id) {
-            const mov = movimentacoes.find(m => m.id === id);
-            if (!mov) {
-                alert('Movimentação não encontrada.');
-                return;
+                alert('Categoria criada com sucesso!');
             }
             
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            modalCategoria.hide();
             
-            const margin = 20;
-            const pageWidth = doc.internal.pageSize.width;
-            let y = margin;
+            // Atualizar interface
+            atualizarFiltros();
+            if (tipoAtualAba === 'categorias') {
+                atualizarTabelaCategorias();
+            }
             
-            // Cabeçalho
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.text(mov.tipo === 'receita' ? 'COMPROVANTE DE RECEITA' : 'COMPROVANTE DE DESPESA', pageWidth/2, y, { align: 'center' });
-            y += 10;
+        } catch (error) {
+            console.error('Erro ao salvar categoria:', error);
+            alert('Erro ao salvar categoria. Tente novamente.');
+        }
+    }
+
+    window.excluirCategoria = async function(id) {
+        // Verificar se há movimentações usando esta categoria
+        const movimentacoesComCategoria = movimentacoes.filter(m => m.categoriaId === id);
+        
+        if (movimentacoesComCategoria.length > 0) {
+            alert('Não é possível excluir esta categoria pois existem movimentações vinculadas a ela.');
+            return;
+        }
+        
+        if (!confirm('Tem certeza que deseja excluir esta categoria?\nEsta ação não pode ser desfeita.')) {
+            return;
+        }
+        
+        try {
+            const catRef = doc(db, "categorias", id);
+            await deleteDoc(catRef);
             
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
-            y += 15;
+            // Remover da lista local
+            const index = categorias.findIndex(c => c.id === id);
+            if (index !== -1) {
+                categorias.splice(index, 1);
+            }
             
-            // Dados da movimentação
+            // Atualizar interface
+            atualizarFiltros();
+            if (tipoAtualAba === 'categorias') {
+                atualizarTabelaCategorias();
+            }
+            
+            alert('Categoria excluída com sucesso!');
+        } catch (error) {
+            console.error('Erro ao excluir categoria:', error);
+            alert('Erro ao excluir categoria. Tente novamente.');
+        }
+    };
+
+    // ============================================
+    // EXPORTAÇÃO E RELATÓRIOS
+    // ============================================
+
+    window.exportarPDF = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.width;
+        let y = margin;
+        
+        // Cabeçalho
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RELATÓRIO FINANCEIRO', pageWidth/2, y, { align: 'center' });
+        y += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
+        doc.text(`Período: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
+        y += 15;
+        
+        // Resumo
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RESUMO FINANCEIRO', margin, y);
+        y += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Saldo Atual: ${saldoAtual.textContent}`, margin, y);
+        y += 7;
+        doc.text(`Receita do Mês: ${receitaMes.textContent}`, margin, y);
+        y += 7;
+        doc.text(`Despesas do Mês: ${despesaMes.textContent}`, margin, y);
+        y += 7;
+        doc.text(`A Receber (7 dias): ${aReceber.textContent}`, margin, y);
+        y += 7;
+        doc.text(`A Pagar (7 dias): ${aPagar.textContent}`, margin, y);
+        y += 15;
+        
+        // Movimentações recentes
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('ÚLTIMAS MOVIMENTAÇÕES', margin, y);
+        y += 10;
+        
+        const movimentacoesRecentes = movimentacoes.slice(0, 10);
+        
+        movimentacoesRecentes.forEach((mov, index) => {
+            if (y > 250) {
+                doc.addPage();
+                y = margin;
+            }
+            
             const categoria = categorias.find(c => c.id === mov.categoriaId);
-            
-            const dados = [
-                ['Descrição:', mov.descricao],
-                ['Tipo:', mov.tipo === 'receita' ? 'Receita' : 'Despesa'],
-                ['Categoria:', categoria?.nome || '---'],
-                ['Valor:', formatarMoeda(mov.valor)],
-                ['Status:', getStatusTexto(mov.status)],
-                ['Data:', formatarData(mov.data)],
-                ['Vencimento:', formatarData(mov.vencimento)],
-                ['Forma de Pagamento:', getFormaPagamentoTexto(mov.formaPagamento)],
-                ['Recorrência:', getRecorrenciaTexto(mov.recorrencia)]
-            ];
-            
-            doc.setFont('helvetica', 'bold');
-            dados.forEach(([label, value]) => {
-                if (y > 250) {
-                    doc.addPage();
-                    y = margin;
-                }
-                
-                doc.text(label, margin, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(value || '---', margin + 50, y);
-                doc.setFont('helvetica', 'bold');
-                y += 8;
-            });
-            
-            y += 5;
-            doc.setFont('helvetica', 'normal');
-            doc.text('Observações:', margin, y);
-            y += 8;
-            
-            if (mov.observacoes) {
-                const obsLines = doc.splitTextToSize(mov.observacoes, pageWidth - 2*margin);
-                obsLines.forEach(line => {
-                    doc.text(line, margin, y);
-                    y += 5;
-                });
-            } else {
-                doc.text('Nenhuma observação.', margin, y);
-                y += 5;
-            }
-            
-            y += 15;
-            doc.setLineWidth(0.5);
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
+            const tipo = mov.tipo === 'receita' ? 'Receita' : 'Despesa';
+            const sinal = mov.tipo === 'receita' ? '+' : '-';
+            const valor = formatarMoeda(mov.valor);
             
             doc.setFontSize(9);
-            doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
+            doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
+            doc.text(`${categoria?.nome || 'Sem categoria'}`, pageWidth/2, y);
+            doc.text(`${sinal} ${valor}`, pageWidth - margin, y, { align: 'right' });
+            y += 6;
+        });
+        
+        doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
+    };
+
+    window.exportarMovimentacaoPDF = async function(id) {
+        const mov = movimentacoes.find(m => m.id === id);
+        if (!mov) {
+            alert('Movimentação não encontrada.');
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.width;
+        let y = margin;
+        
+        // Cabeçalho
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(mov.tipo === 'receita' ? 'COMPROVANTE DE RECEITA' : 'COMPROVANTE DE DESPESA', pageWidth/2, y, { align: 'center' });
+        y += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
+        y += 15;
+        
+        // Dados da movimentação
+        const categoria = categorias.find(c => c.id === mov.categoriaId);
+        
+        const dados = [
+            ['Descrição:', mov.descricao],
+            ['Tipo:', mov.tipo === 'receita' ? 'Receita' : 'Despesa'],
+            ['Categoria:', categoria?.nome || '---'],
+            ['Valor:', formatarMoeda(mov.valor)],
+            ['Status:', getStatusTexto(mov.status)],
+            ['Data:', formatarData(mov.data)],
+            ['Vencimento:', formatarData(mov.vencimento)],
+            ['Forma de Pagamento:', getFormaPagamentoTexto(mov.formaPagamento)],
+            ['Recorrência:', getRecorrenciaTexto(mov.recorrencia)]
+        ];
+        
+        doc.setFont('helvetica', 'bold');
+        dados.forEach(([label, value]) => {
+            if (y > 250) {
+                doc.addPage();
+                y = margin;
+            }
             
-            doc.save(`${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}-${mov.id.substring(0,8)}.pdf`);
+            doc.text(label, margin, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text(value || '---', margin + 50, y);
+            doc.setFont('helvetica', 'bold');
+            y += 8;
+        });
+        
+        y += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.text('Observações:', margin, y);
+        y += 8;
+        
+        if (mov.observacoes) {
+            const obsLines = doc.splitTextToSize(mov.observacoes, pageWidth - 2*margin);
+            obsLines.forEach(line => {
+                doc.text(line, margin, y);
+                y += 5;
+            });
+        } else {
+            doc.text('Nenhuma observação.', margin, y);
+            y += 5;
+        }
+        
+        y += 15;
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 10;
+        
+        doc.setFontSize(9);
+        doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
+        
+        doc.save(`${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}-${mov.id.substring(0,8)}.pdf`);
+    };
+
+    // ============================================
+    // FUNÇÕES AUXILIARES
+    // ============================================
+
+    function formatarData(dataString) {
+        if (!dataString) return '--';
+        try {
+            const date = new Date(dataString);
+            if (isNaN(date.getTime())) return '--';
+            return date.toLocaleDateString('pt-BR');
+        } catch {
+            return '--';
+        }
+    }
+
+    function formatarMoeda(valor) {
+        if (!valor && valor !== 0) return 'R$ 0,00';
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor);
+    }
+
+    function getStatusTexto(status) {
+        const textos = {
+            'pago': 'Pago/Recebido',
+            'pendente': 'Pendente',
+            'atrasado': 'Atrasado'
         };
+        return textos[status] || status;
+    }
 
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
+    function getFormaPagamentoTexto(forma) {
+        const formas = {
+            'dinheiro': 'Dinheiro',
+            'pix': 'PIX',
+            'cartao_credito': 'Cartão de Crédito',
+            'cartao_debito': 'Cartão de Débito',
+            'boleto': 'Boleto',
+            'transferencia': 'Transferência',
+            'outros': 'Outros'
+        };
+        return formas[forma] || forma;
+    }
 
-        function formatarData(dataString) {
-            if (!dataString) return '--';
-            try {
-                const date = new Date(dataString);
-                if (isNaN(date.getTime())) return '--';
-                return date.toLocaleDateString('pt-BR');
-            } catch {
-                return '--';
-            }
+    function getRecorrenciaTexto(recorrencia) {
+        const textos = {
+            'unica': 'Única',
+            'semanal': 'Semanal',
+            'mensal': 'Mensal',
+            'trimestral': 'Trimestral',
+            'anual': 'Anual'
+        };
+        return textos[recorrencia] || recorrencia;
+    }
+
+    function getUltimos6Meses() {
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const hoje = new Date();
+        const ultimosMeses = [];
+        
+        for (let i = 5; i >= 0; i--) {
+            const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+            ultimosMeses.push(`${meses[data.getMonth()]}/${data.getFullYear().toString().slice(2)}`);
         }
+        
+        return ultimosMeses;
+    }
 
-        function formatarMoeda(valor) {
-            if (!valor && valor !== 0) return 'R$ 0,00';
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor);
+    function gerarDadosAleatorios(quantidade, min, max) {
+        const dados = [];
+        for (let i = 0; i < quantidade; i++) {
+            dados.push(Math.floor(Math.random() * (max - min + 1)) + min);
         }
+        return dados;
+    }
 
-        function getStatusTexto(status) {
-            const textos = {
-                'pago': 'Pago/Recebido',
-                'pendente': 'Pendente',
-                'atrasado': 'Atrasado'
-            };
-            return textos[status] || status;
-        }
+    // ============================================
+    // EVENT LISTENERS E INICIALIZAÇÃO
+    // ============================================
 
-        function getFormaPagamentoTexto(forma) {
-            const formas = {
-                'dinheiro': 'Dinheiro',
-                'pix': 'PIX',
-                'cartao_credito': 'Cartão de Crédito',
-                'cartao_debito': 'Cartão de Débito',
-                'boleto': 'Boleto',
-                'transferencia': 'Transferência',
-                'outros': 'Outros'
-            };
-            return formas[forma] || forma;
-        }
-
-        function getRecorrenciaTexto(recorrencia) {
-            const textos = {
-                'unica': 'Única',
-                'semanal': 'Semanal',
-                'mensal': 'Mensal',
-                'trimestral': 'Trimestral',
-                'anual': 'Anual'
-            };
-            return textos[recorrencia] || recorrencia;
-        }
-
-        function getUltimos6Meses() {
-            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-            const hoje = new Date();
-            const ultimosMeses = [];
-            
-            for (let i = 5; i >= 0; i--) {
-                const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-                ultimosMeses.push(`${meses[data.getMonth()]}/${data.getFullYear().toString().slice(2)}`);
-            }
-            
-            return ultimosMeses;
-        }
-
-        function gerarDadosAleatorios(quantidade, min, max) {
-            const dados = [];
-            for (let i = 0; i < quantidade; i++) {
-                dados.push(Math.floor(Math.random() * (max - min + 1)) + min);
-            }
-            return dados;
-        }
-
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-
-        function inicializarEventListeners() {
-            // Filtros
+    function inicializarEventListeners() {
+        // Filtros
+        if (searchMovimentacoes) {
             searchMovimentacoes.addEventListener('input', atualizarTabelaMovimentacoes);
+        }
+        if (filterTipo) {
             filterTipo.addEventListener('change', atualizarTabelaMovimentacoes);
+        }
+        if (filterStatus) {
             filterStatus.addEventListener('change', atualizarTabelaMovimentacoes);
+        }
+        if (filterMes) {
             filterMes.addEventListener('change', atualizarTabelaMovimentacoes);
+        }
+        if (filterCategoria) {
             filterCategoria.addEventListener('change', atualizarTabelaMovimentacoes);
-            
-            // Menu mobile
+        }
+        
+        // Menu mobile
+        if (menuToggle) {
             menuToggle.addEventListener('click', () => {
                 dashboardMenu.classList.toggle('show');
                 const icon = menuToggle.querySelector('i');
                 icon.classList.toggle('fa-bars');
                 icon.classList.toggle('fa-times');
             });
-            
-            // Fechar menu ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                    dashboardMenu.classList.remove('show');
-                    const icon = menuToggle.querySelector('i');
+        }
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
+                const icon = menuToggle.querySelector('i');
+                if (icon) {
                     icon.classList.remove('fa-times');
                     icon.classList.add('fa-bars');
                 }
-            });
-            
-            // Logout
+            }
+        });
+        
+        // Logout
+        if (btnLogout) {
             btnLogout.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
@@ -2605,11 +2791,15 @@
                     alert('Erro ao sair. Tente novamente.');
                 }
             });
-            
-            // Botão salvar movimentação
+        }
+        
+        // Botão salvar movimentação
+        if (btnSalvarMovimentacao) {
             btnSalvarMovimentacao.addEventListener('click', salvarMovimentacao);
-            
-            // Botões de tipo no modal
+        }
+        
+        // Botões de tipo no modal
+        if (tipoMovBtns) {
             tipoMovBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     tipoMovBtns.forEach(b => b.classList.remove('active'));
@@ -2625,76 +2815,96 @@
                         despesaFields.style.display = 'none';
                         receitaFields.style.display = 'block';
                     }
+                    
+                    // Atualizar categorias no select
+                    const categoriaSelect = document.getElementById('categoria');
+                    if (categoriaSelect) {
+                        categoriaSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
+                        const categoriasFiltradas = categorias.filter(c => c.tipo === tipo);
+                        
+                        if (categoriasFiltradas.length > 0) {
+                            categoriasFiltradas.forEach(categoria => {
+                                const option = document.createElement('option');
+                                option.value = categoria.id;
+                                option.textContent = categoria.nome;
+                                option.style.color = categoria.cor || '#333';
+                                categoriaSelect.appendChild(option);
+                            });
+                        }
+                    }
                 });
             });
         }
+    }
 
-        function inicializarModais() {
-            // Configurar data padrão
-            const hoje = new Date().toISOString().split('T')[0];
-            const vencimento = document.getElementById('vencimento');
-            if (vencimento) {
-                vencimento.value = hoje;
-                vencimento.min = hoje;
-            }
+    function inicializarModais() {
+        // Configurar data padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        const vencimento = document.getElementById('vencimento');
+        if (vencimento) {
+            vencimento.value = hoje;
+            vencimento.min = hoje;
         }
+    }
 
-        // ============================================
-        // FUNÇÕES ADICIONAIS (para exportação)
-        // ============================================
+    // ============================================
+    // FUNÇÕES ADICIONAIS
+    // ============================================
 
-        window.aplicarFiltros = function() {
-            atualizarTabelaMovimentacoes();
-        };
+    window.aplicarFiltros = function() {
+        atualizarTabelaMovimentacoes();
+    };
 
-        window.exportarCSV = function() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Data,Tipo,Descrição,Categoria,Valor,Status,Vencimento,Observações\n";
+    window.exportarCSV = function() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Data,Tipo,Descrição,Categoria,Valor,Status,Vencimento,Observações\n";
+        
+        movimentacoes.forEach(mov => {
+            const categoria = categorias.find(c => c.id === mov.categoriaId);
+            const linha = [
+                formatarData(mov.data),
+                mov.tipo === 'receita' ? 'Receita' : 'Despesa',
+                `"${mov.descricao || ''}"`,
+                categoria?.nome || 'Sem categoria',
+                mov.valor,
+                getStatusTexto(mov.status),
+                formatarData(mov.vencimento),
+                `"${mov.observacoes || ''}"`
+            ].join(',');
             
-            movimentacoes.forEach(mov => {
-                const categoria = categorias.find(c => c.id === mov.categoriaId);
-                const linha = [
-                    formatarData(mov.data),
-                    mov.tipo === 'receita' ? 'Receita' : 'Despesa',
-                    `"${mov.descricao || ''}"`,
-                    categoria?.nome || 'Sem categoria',
-                    mov.valor,
-                    getStatusTexto(mov.status),
-                    formatarData(mov.vencimento),
-                    `"${mov.observacoes || ''}"`
-                ].join(',');
-                
-                csvContent += linha + "\n";
-            });
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `financeiro-${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
+            csvContent += linha + "\n";
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `financeiro-${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
-        window.exportarRelatorio = function() {
-            exportarPDF();
-        };
+    window.exportarRelatorio = function() {
+        exportarPDF();
+    };
 
-        window.gerarRelatorioCompleto = function() {
-            alert('Relatório completo gerado e salvo como PDF!');
-            exportarPDF();
-        };
+    window.gerarRelatorioCompleto = function() {
+        alert('Relatório completo gerado e salvo como PDF!');
+        exportarPDF();
+    };
 
-        window.gerarRelatorioSimples = function() {
-            alert('Relatório resumido gerado!');
-            // Aqui você pode implementar um relatório diferente
-        };
+    window.gerarRelatorioSimples = function() {
+        alert('Relatório resumido gerado!');
+        // Aqui você pode implementar um relatório diferente
+    };
 
-        window.gerarProjecao = function() {
-            alert('Projeção futura gerada!');
-            // Aqui você pode implementar a projeção
-        };
+    window.gerarProjecao = function() {
+        alert('Projeção futura gerada!');
+        
+    };
 
-    </script>
+    
+
+</script>
 </body>
 </html>
