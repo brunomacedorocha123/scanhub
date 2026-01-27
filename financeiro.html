@@ -1103,57 +1103,49 @@
 
     async function carregarMovimentacoes() {
         try {
-            // MÉTODO DIRETO: Carregar TODOS os documentos da coleção
-            const movimentacoesRef = collection(db, "movimentacoes");
-            const querySnapshot = await getDocs(movimentacoesRef);
+            // Usar query para filtrar por profissionalId diretamente no Firestore
+            const movimentacoesQuery = query(
+                collection(db, "movimentacoes"),
+                where("profissionalId", "==", currentUser.uid)
+            );
+            
+            const querySnapshot = await getDocs(movimentacoesQuery);
             
             movimentacoes = [];
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
+                const docId = doc.id;
                 
-                // Verificar se o documento pertence ao usuário logado
-                if (data.profissionalId === currentUser.uid) {
-                    // Criar objeto exatamente como está no Firestore
-                    const movimentacao = {
-                        id: doc.id,
-                        tipo: data.tipo || 'receita',
-                        descricao: data.descricao || '',
-                        categoria: data.categoria || 'outros',
-                        valor: parseFloat(data.valor) || 0,
-                        status: data.status || 'pendente',
-                        formaPagamento: data.formaPagamento || '',
-                        observacoes: data.observacoes || '',
-                        despesaFixa: Boolean(data.despesaFixa) || false,
-                        profissionalId: data.profissionalId,
-                        criadoEm: data.criadoEm,
-                        atualizadoEm: data.atualizadoEm
-                    };
-                    
-                    // Processar data - mantendo string se já for string
-                    if (data.data) {
-                        if (typeof data.data === 'string') {
-                            movimentacao.data = data.data;
-                        } else if (data.data.toDate && typeof data.data.toDate === 'function') {
-                            movimentacao.data = data.data.toDate().toISOString().split('T')[0];
-                        }
-                    } else {
-                        movimentacao.data = new Date().toISOString().split('T')[0];
-                    }
-                    
-                    // Processar vencimento - mantendo string se já for string
-                    if (data.vencimento) {
-                        if (typeof data.vencimento === 'string') {
-                            movimentacao.vencimento = data.vencimento;
-                        } else if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
-                            movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
-                        }
-                    } else {
-                        movimentacao.vencimento = new Date().toISOString().split('T')[0];
-                    }
-                    
-                    movimentacoes.push(movimentacao);
+                // Criar objeto com todos os dados do Firestore
+                const movimentacao = {
+                    id: docId,
+                    tipo: data.tipo || 'receita',
+                    descricao: data.descricao || '',
+                    categoria: data.categoria || 'outros',
+                    valor: parseFloat(data.valor) || 0,
+                    status: data.status || 'pendente',
+                    formaPagamento: data.formaPagamento || '',
+                    observacoes: data.observacoes || '',
+                    despesaFixa: Boolean(data.despesaFixa) || false,
+                    profissionalId: data.profissionalId,
+                    criadoEm: data.criadoEm,
+                    atualizadoEm: data.atualizadoEm,
+                    data: data.data || new Date().toISOString().split('T')[0],
+                    vencimento: data.vencimento || new Date().toISOString().split('T')[0]
+                };
+                
+                // Se data for timestamp, converter para string
+                if (movimentacao.data && typeof movimentacao.data.toDate === 'function') {
+                    movimentacao.data = movimentacao.data.toDate().toISOString().split('T')[0];
                 }
+                
+                // Se vencimento for timestamp, converter para string
+                if (movimentacao.vencimento && typeof movimentacao.vencimento.toDate === 'function') {
+                    movimentacao.vencimento = movimentacao.vencimento.toDate().toISOString().split('T')[0];
+                }
+                
+                movimentacoes.push(movimentacao);
             });
             
             // Ordenar por data (mais recente primeiro)
@@ -1294,11 +1286,15 @@
     }
 
     function getCategoriaClass(categoria) {
+        // CORREÇÃO: Não verificar se é receita/despesa pela categoria
+        // Apenas usar cores baseadas na categoria em si
         switch(categoria) {
             case 'servico':
+                return 'categoria-servico';
             case 'produto':
                 return 'categoria-receita';
             case 'material':
+                return 'categoria-material';
             case 'marketing':
             case 'transporte':
             case 'imposto':
