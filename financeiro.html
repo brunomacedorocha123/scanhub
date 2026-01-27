@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js para Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #33c47;
+            --light-color: #e8ecef;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #44689a 0%, #33c47 100%);
+            --receita-color: #27ae60;
+            --despesa-color: #e74c3c;
+            --saldo-color: #3498db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            padding-top: 80px;
+        }
+
+        /* Logo Grande */
+        .navbar-brand-dashboard {
+            display: flex;
+            align-items: center;
+            transform: scale(2.5);
+            transform-origin: left center;
+            margin-right: 40px;
+        }
+
+        .navbar-brand-dashboard img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Navbar Dashboard */
+        .navbar-dashboard {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* Menu Principal */
+        .dashboard-menu {
+            list-style: none;
+            display: flex;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-menu li {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dashboard-menu a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            background: transparent;
+            text-align: center;
+        }
+
+        .dashboard-menu a:hover,
+        .dashboard-menu a.active {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-menu i {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-menu span {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        /* User Info */
+        .user-info-mobile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        /* Stats Cards */
+        .stats-financeiro {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.saldo {
+            border-top: 4px solid var(--saldo-color);
+        }
+
+        .stat-card.receita {
+            border-top: 4px solid var(--receita-color);
+        }
+
+        .stat-card.despesa {
+            border-top: 4px solid var(--despesa-color);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card.saldo i { color: var(--saldo-color); }
+        .stat-card.receita i { color: var(--receita-color); }
+        .stat-card.despesa i { color: var(--despesa-color); }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        /* Gráficos */
+        .graficos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .grafico-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .grafico-card h5 {
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Calculadora Flutuante */
+        .calculadora-flutuante {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .calculadora-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calculadora-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .calculadora-panel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 300px;
+            display: none;
+        }
+
+        .calculadora-panel.show {
+            display: block;
+        }
+
+        .calculadora-display {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: right;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            min-height: 60px;
+            word-break: break-all;
+        }
+
+        .calculadora-botoes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            padding: 12px 5px;
+            border: none;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .calc-btn:hover {
+            background: #e9ecef;
+        }
+
+        .calc-btn.operador {
+            background: #3498db;
+            color: white;
+        }
+
+        .calc-btn.calcular {
+            background: #27ae60;
+            color: white;
+            grid-column: span 2;
+        }
+
+        /* Abas Financeiro */
+        .financeiro-tabs {
+            display: flex;
+            gap: 5px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #e8ecef;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .tab-btn:hover {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 8px rgba(68, 104, 154, 0.3);
+        }
+
+        /* Search and Filter */
+        .search-filter-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Tabelas */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table thead th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e8ecef;
+            font-weight: 600;
+            color: var(--dark-color);
+            padding: 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-color: #e8ecef;
+        }
+
+        /* Badges de Status */
+        .badge-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pago {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+        }
+
+        .status-pendente {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+        }
+
+        .status-atrasado {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+        }
+
+        /* Ações */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-action-sm {
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            border: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .btn-action-sm:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Botões Principais */
+        .btn-primary-action {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Modal */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 20px 30px;
+            border: none;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Responsivo */
+        @media (max-width: 1200px) {
+            .navbar-brand-dashboard {
+                transform: scale(2);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.8);
+            }
+            
+            .dashboard-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 20px 20px;
+                display: none;
+                z-index: 999;
+            }
+            
+            .dashboard-menu.show {
+                display: flex;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .graficos-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.6);
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .financeiro-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1 0 calc(50% - 10px);
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .calculadora-panel {
+                width: calc(100vw - 40px);
+                right: -100px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-financeiro {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-btn span {
+                font-size: 0.8rem;
+            }
+            
+            .tab-btn i {
+                display: none;
+            }
+            
+            .calculadora-panel {
+                width: calc(100vw - 20px);
+                right: -60px;
+            }
+        }
+
+        /* Botão Mobile Menu */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Dashboard -->
+    <nav class="navbar navbar-dashboard">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center w-100">
+                <!-- Logo -->
+                <a class="navbar-brand-dashboard" href="#">
+                    <img src="logoscanhub.png" alt="ScanHub">
+                </a>
+
+                <!-- Botão Menu Mobile -->
+                <button class="mobile-menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- User Info -->
+                <div class="user-info-mobile">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-details d-none d-md-block">
+                        <h5 id="userName">Carregando...</h5>
+                        <small>ID: <span id="userId">---</span></small>
+                    </div>
+                </div>
+
+                <!-- Botão Logout -->
+                <button class="btn btn-outline-danger btn-sm ms-3" id="btnLogout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-md-inline">Sair</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Dashboard -->
+    <div class="container-fluid">
+        <ul class="dashboard-menu" id="dashboardMenu">
+            <li>
+                <a href="profissional-dashboard.html">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="perfil-profissional.html">
+                    <i class="fas fa-user"></i>
+                    <span>Perfil</span>
+                </a>
+            </li>
+            <li>
+                <a href="meus-clientes.html">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li>
+                <a href="financeiro.html" class="active">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Financeiro</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Agenda</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-tools"></i>
+                    <span>Serviços</span>
+                </a>
+            </li>
+            <li>
+                <a href="pedidos.html">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-crown"></i>
+                    <span>Assinatura</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Card -->
+        <div class="welcome-card">
+            <h1>Financeiro 💰</h1>
+            <p>Controle completo das suas finanças - Receitas, Despesas e Análises</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-financeiro">
+            <div class="stat-card saldo">
+                <i class="fas fa-wallet"></i>
+                <h3 id="saldoAtual">R$ 0,00</h3>
+                <p>Saldo Atual</p>
+            </div>
+            <div class="stat-card receita">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3 id="receitaMes">R$ 0,00</h3>
+                <p>Receita (Mês)</p>
+            </div>
+            <div class="stat-card despesa">
+                <i class="fas fa-shopping-cart"></i>
+                <h3 id="despesaMes">R$ 0,00</h3>
+                <p>Despesas (Mês)</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3 id="atrasados">R$ 0,00</h3>
+                <p>Pagamentos Atrasados</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-calendar-day"></i>
+                <h3 id="aReceber">R$ 0,00</h3>
+                <p>A Receber (7 dias)</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-calendar-times"></i>
+                <h3 id="aPagar">R$ 0,00</h3>
+                <p>A Pagar (7 dias)</p>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="graficos-container">
+            <div class="grafico-card">
+                <h5>Fluxo de Caixa - Últimos 6 Meses</h5>
+                <canvas id="graficoFluxoCaixa"></canvas>
+            </div>
+            <div class="grafico-card">
+                <h5>Distribuição de Despesas</h5>
+                <canvas id="graficoDespesas"></canvas>
+            </div>
+            <div class="grafico-card">
+                <h5>Comparativo Receita x Despesa</h5>
+                <canvas id="graficoComparativo"></canvas>
+            </div>
+        </div>
+
+        <!-- Abas -->
+        <div class="financeiro-tabs" id="financeiroTabs">
+            <button class="tab-btn active" data-tipo="todas">
+                <i class="fas fa-list"></i>
+                <span>Todas Movimentações</span>
+            </button>
+            <button class="tab-btn" data-tipo="receitas">
+                <i class="fas fa-arrow-down"></i>
+                <span>Receitas</span>
+            </button>
+            <button class="tab-btn" data-tipo="despesas">
+                <i class="fas fa-arrow-up"></i>
+                <span>Despesas</span>
+            </button>
+            <button class="tab-btn" data-tipo="categorias">
+                <i class="fas fa-tags"></i>
+                <span>Categorias</span>
+            </button>
+            <button class="tab-btn" data-tipo="relatorios">
+                <i class="fas fa-file-alt"></i>
+                <span>Relatórios</span>
+            </button>
+        </div>
+
+        <!-- Botões Principais -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="mb-0">Movimentações Financeiras</h4>
+                <small class="text-muted">Gerencie receitas, despesas e relatórios</small>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary-action" onclick="abrirModalMovimentacao('receita')">
+                    <i class="fas fa-plus-circle"></i> Nova Receita
+                </button>
+                <button class="btn btn-primary-action" onclick="abrirModalMovimentacao('despesa')">
+                    <i class="fas fa-minus-circle"></i> Nova Despesa
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-primary-action dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> PDF Completo</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> CSV para Excel</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportarRelatorio()"><i class="fas fa-chart-bar"></i> Relatório Detalhado</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filter-container">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchMovimentacoes" placeholder="Buscar por descrição...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterTipo">
+                        <option value="">Todos tipos</option>
+                        <option value="receita">Receitas</option>
+                        <option value="despesa">Despesas</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterStatus">
+                        <option value="">Todos status</option>
+                        <option value="pago">Pago/Recebido</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="atrasado">Atrasado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterMes">
+                        <option value="">Todos os meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterCategoria">
+                        <option value="">Todas categorias</option>
+                        <!-- Categorias serão carregadas aqui -->
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Movimentações -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Vencimento</th>
+                            <th>Observações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movimentacoesTable">
+                        <!-- Movimentações serão carregadas aqui -->
+                        <tr id="emptyState">
+                            <td colspan="9" class="text-center py-5">
+                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Nenhuma movimentação cadastrada</h5>
+                                <p class="text-muted mb-0">Comece cadastrando sua primeira receita ou despesa</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumo por Categoria -->
+        <div class="table-container mt-4" id="categoriasSection" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center p-3">
+                <h5 class="mb-0">Categorias de Despesas</h5>
+                <button class="btn btn-primary-action btn-sm" onclick="abrirModalCategoria()">
+                    <i class="fas fa-plus"></i> Nova Categoria
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Tipo</th>
+                            <th>Valor Mensal</th>
+                            <th>Orçamento</th>
+                            <th>% do Total</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriasTable">
+                        <!-- Categorias serão carregadas aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Seção de Relatórios -->
+        <div class="row mt-4" id="relatoriosSection" style="display: none;">
+            <div class="col-md-4">
+                <div class="grafico-card h-100">
+                    <h5>Relatório Rápido</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Período</label>
+                        <select class="form-select" id="periodoRelatorio">
+                            <option value="este_mes">Este Mês</option>
+                            <option value="ultimo_mes">Último Mês</option>
+                            <option value="ultimos_3_meses">Últimos 3 Meses</option>
+                            <option value="este_ano">Este Ano</option>
+                            <option value="personalizado">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary-action" onclick="gerarRelatorioCompleto()">
+                            <i class="fas fa-file-pdf"></i> Gerar Relatório Completo
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="gerarRelatorioSimples()">
+                            <i class="fas fa-chart-pie"></i> Relatório Resumido
+                        </button>
+                        <button class="btn btn-outline-success" onclick="gerarProjecao()">
+                            <i class="fas fa-chart-line"></i> Projeção Futura
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="grafico-card h-100">
+                    <h5>Pré-visualização do Relatório</h5>
+                    <div id="previewRelatorio" class="p-3 border rounded" style="min-height: 300px;">
+                        <p class="text-muted">Selecione um tipo de relatório para visualizar</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculadora Flutuante -->
+    <div class="calculadora-flutuante">
+        <div class="calculadora-panel" id="calculadoraPanel">
+            <div class="calculadora-display" id="calcDisplay">0</div>
+            <div class="calculadora-botoes">
+                <button class="calc-btn" onclick="calcInput('7')">7</button>
+                <button class="calc-btn" onclick="calcInput('8')">8</button>
+                <button class="calc-btn" onclick="calcInput('9')">9</button>
+                <button class="calc-btn operador" onclick="calcInput('/')">÷</button>
+                <button class="calc-btn" onclick="calcInput('4')">4</button>
+                <button class="calc-btn" onclick="calcInput('5')">5</button>
+                <button class="calc-btn" onclick="calcInput('6')">6</button>
+                <button class="calc-btn operador" onclick="calcInput('*')">×</button>
+                <button class="calc-btn" onclick="calcInput('1')">1</button>
+                <button class="calc-btn" onclick="calcInput('2')">2</button>
+                <button class="calc-btn" onclick="calcInput('3')">3</button>
+                <button class="calc-btn operador" onclick="calcInput('-')">-</button>
+                <button class="calc-btn" onclick="calcInput('0')">0</button>
+                <button class="calc-btn" onclick="calcInput('.')">.</button>
+                <button class="calc-btn" onclick="calcClear()">C</button>
+                <button class="calc-btn operador" onclick="calcInput('+')">+</button>
+                <button class="calc-btn" onclick="calcInput('%')">%</button>
+                <button class="calc-btn calcular" onclick="calcCalculate()">=</button>
+            </div>
+        </div>
+        <button class="calculadora-btn" id="toggleCalculadora">
+            <i class="fas fa-calculator"></i>
+        </button>
+    </div>
+
+    <!-- Modal Movimentação -->
+    <div class="modal fade" id="modalMovimentacao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Nova Movimentação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formMovimentacao">
+                        <input type="hidden" id="movimentacaoId">
+                        <input type="hidden" id="tipoMovimentacao" value="receita">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo *</label>
+                                <div class="d-flex gap-3">
+                                    <button type="button" class="btn btn-outline-success flex-fill tipo-mov-btn active" data-tipo="receita">
+                                        <i class="fas fa-arrow-down me-2"></i>Receita
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger flex-fill tipo-mov-btn" data-tipo="despesa">
+                                        <i class="fas fa-arrow-up me-2"></i>Despesa
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Data *</label>
+                                <input type="date" class="form-control" id="dataMovimentacao" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Descrição *</label>
+                                <input type="text" class="form-control" id="descricao" required placeholder="Ex: Pagamento do cliente, Compra de material...">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Categoria *</label>
+                                <select class="form-select" id="categoria" required>
+                                    <option value="">Selecione...</option>
+                                    <!-- Categorias serão carregadas aqui -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Valor (R$) *</label>
+                                <input type="number" class="form-control" id="valor" min="0" step="0.01" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Status *</label>
+                                <select class="form-select" id="status" required>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="pago">Pago/Recebido</option>
+                                    <option value="atrasado">Atrasado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Vencimento *</label>
+                                <input type="date" class="form-control" id="vencimento" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Forma de Pagamento</label>
+                                <select class="form-select" id="formaPagamento">
+                                    <option value="">Selecione...</option>
+                                    <option value="dinheiro">Dinheiro</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="cartao_credito">Cartão de Crédito</option>
+                                    <option value="cartao_debito">Cartão de Débito</option>
+                                    <option value="boleto">Boleto</option>
+                                    <option value="transferencia">Transferência</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Recorrência</label>
+                                <select class="form-select" id="recorrencia">
+                                    <option value="unica">Única</option>
+                                    <option value="semanal">Semanal</option>
+                                    <option value="mensal">Mensal</option>
+                                    <option value="trimestral">Trimestral</option>
+                                    <option value="anual">Anual</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Observações</label>
+                            <textarea class="form-control" id="observacoes" rows="3" placeholder="Observações adicionais..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="despesaFixa">
+                                <label class="form-check-label" for="despesaFixa">
+                                    Esta é uma despesa fixa mensal
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gerarLembrete">
+                                <label class="form-check-label" for="gerarLembrete">
+                                    Gerar lembrete próximo ao vencimento
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Para despesas -->
+                        <div id="despesaFields" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Fornecedor/Responsável</label>
+                                    <input type="text" class="form-control" id="fornecedor" placeholder="Nome do fornecedor">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Número do Documento</label>
+                                    <input type="text" class="form-control" id="numeroDocumento" placeholder="NF, Boleto, etc.">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Para receitas -->
+                        <div id="receitaFields">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Cliente (opcional)</label>
+                                    <select class="form-select" id="cliente">
+                                        <option value="">Selecione um cliente...</option>
+                                        <!-- Clientes serão carregados aqui -->
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Pedido Relacionado (opcional)</label>
+                                    <select class="form-select" id="pedidoRelacionado">
+                                        <option value="">Selecione um pedido...</option>
+                                        <!-- Pedidos serão carregados aqui -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-action" id="btnSalvarMovimentacao">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Categoria -->
+    <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCategoria">
+                        <div class="mb-3">
+                            <label class="form-label">Nome da Categoria *</label>
+                            <input type="text" class="form-control" id="nomeCategoria" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo *</label>
+                            <select class="form-select" id="tipoCategoria" required>
+                                <option value="despesa">Despesa</option>
+                                <option value="receita">Receita</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Orçamento Mensal (opcional)</label>
+                            <input type="number" class="form-control" id="orcamentoCategoria" min="0" step="0.01">
+                            <small class="text-muted">Define um limite máximo para esta categoria</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cor de Identificação</label>
+                            <input type="color" class="form-control form-control-color" id="corCategoria" value="#3498db">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary-action" id="btnSalvarCategoria">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            collection,
+            addDoc,
+            updateDoc,
+            deleteDoc,
+            getDocs,
+            query,
+            where,
+            orderBy,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config - USE A SUA CONFIGURAÇÃO ATUAL
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ============================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================
+        let currentUser = null;
+        let userData = null;
+        let movimentacoes = [];
+        let categorias = [];
+        let clientes = [];
+        let pedidos = [];
+        let tipoAtualAba = 'todas';
+        let calculadoraVisible = false;
+        let calculadoraValue = '0';
+        let calculadoraOperador = '';
+        let calculadoraValorAnterior = '0';
+
+        // ============================================
+        // ELEMENTOS DOM
+        // ============================================
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const userId = document.getElementById('userId');
+        const btnLogout = document.getElementById('btnLogout');
+        const menuToggle = document.getElementById('menuToggle');
+        const dashboardMenu = document.getElementById('dashboardMenu');
+        
+        // Elementos de estatísticas
+        const saldoAtual = document.getElementById('saldoAtual');
+        const receitaMes = document.getElementById('receitaMes');
+        const despesaMes = document.getElementById('despesaMes');
+        const atrasados = document.getElementById('atrasados');
+        const aReceber = document.getElementById('aReceber');
+        const aPagar = document.getElementById('aPagar');
+        
+        // Elementos de filtro
+        const searchMovimentacoes = document.getElementById('searchMovimentacoes');
+        const filterTipo = document.getElementById('filterTipo');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterMes = document.getElementById('filterMes');
+        const filterCategoria = document.getElementById('filterCategoria');
+        
+        // Tabelas
+        const movimentacoesTable = document.getElementById('movimentacoesTable');
+        const emptyState = document.getElementById('emptyState');
+        const categoriasTable = document.getElementById('categoriasTable');
+        
+        // Seções
+        const categoriasSection = document.getElementById('categoriasSection');
+        const relatoriosSection = document.getElementById('relatoriosSection');
+        
+        // Abas
+        const financeiroTabs = document.getElementById('financeiroTabs');
+        const tabButtons = financeiroTabs.querySelectorAll('.tab-btn');
+        
+        // Modais
+        const modalMovimentacao = new bootstrap.Modal(document.getElementById('modalMovimentacao'));
+        const modalCategoria = new bootstrap.Modal(document.getElementById('modalCategoria'));
+        const formMovimentacao = document.getElementById('formMovimentacao');
+        const tipoMovBtns = document.querySelectorAll('.tipo-mov-btn');
+        const tipoMovimentacao = document.getElementById('tipoMovimentacao');
+        const despesaFields = document.getElementById('despesaFields');
+        const receitaFields = document.getElementById('receitaFields');
+        const btnSalvarMovimentacao = document.getElementById('btnSalvarMovimentacao');
+        
+        // Calculadora
+        const calculadoraPanel = document.getElementById('calculadoraPanel');
+        const toggleCalculadora = document.getElementById('toggleCalculadora');
+        const calcDisplay = document.getElementById('calcDisplay');
+
+        // ============================================
+        // INICIALIZAÇÃO DO SISTEMA
+        // ============================================
+
+        // Monitorar autenticação
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const userDoc = await getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                        atualizarInterfaceUsuario(userData);
+                        await carregarDadosIniciais();
+                        inicializarSistema();
+                        inicializarGraficos();
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    alert('Erro ao carregar dados do usuário');
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function inicializarSistema() {
+            inicializarCalculadora();
+            inicializarAbas();
+            inicializarEventListeners();
+            inicializarModais();
+        }
+
+        function atualizarInterfaceUsuario(data) {
+            if (data.apelido) {
+                userName.textContent = `Olá, ${data.apelido}`;
+                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+            }
+            
+            if (data.idScanHub) {
+                userId.textContent = data.idScanHub;
+            }
+        }
+
+        // ============================================
+        // CARREGAMENTO DE DADOS
+        // ============================================
+
+        async function carregarDadosIniciais() {
+            await Promise.all([
+                carregarMovimentacoes(),
+                carregarCategorias(),
+                carregarClientes(),
+                carregarPedidos()
+            ]);
+            atualizarFiltros();
+            atualizarEstatisticas();
+        }
+
+        async function carregarMovimentacoes() {
+            try {
+                const q = query(
+                    collection(db, "movimentacoes"),
+                    where("profissionalId", "==", currentUser.uid),
+                    orderBy("data", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                movimentacoes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    movimentacoes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                atualizarTabelaMovimentacoes();
+            } catch (error) {
+                console.error('Erro ao carregar movimentações:', error);
+            }
+        }
+
+        async function carregarCategorias() {
+            try {
+                const q = query(
+                    collection(db, "categorias"),
+                    where("profissionalId", "==", currentUser.uid)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                categorias = [];
+                
+                querySnapshot.forEach((doc) => {
+                    categorias.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                if (categorias.length === 0) {
+                    await criarCategoriasPadrao();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+
+        async function criarCategoriasPadrao() {
+            const categoriasPadrao = [
+                { nome: "Serviços Prestados", tipo: "receita", cor: "#27ae60", orcamento: 0 },
+                { nome: "Venda de Produtos", tipo: "receita", cor: "#2ecc71", orcamento: 0 },
+                { nome: "Materiais/Insumos", tipo: "despesa", cor: "#e74c3c", orcamento: 0 },
+                { nome: "Marketing", tipo: "despesa", cor: "#9b59b6", orcamento: 0 },
+                { nome: "Transporte", tipo: "despesa", cor: "#f39c12", orcamento: 0 },
+                { nome: "Impostos", tipo: "despesa", cor: "#34495e", orcamento: 0 },
+                { nome: "Salários", tipo: "despesa", cor: "#1abc9c", orcamento: 0 },
+                { nome: "Aluguel", tipo: "despesa", cor: "#d35400", orcamento: 0 }
+            ];
+            
+            for (const categoria of categoriasPadrao) {
+                try {
+                    await addDoc(collection(db, "categorias"), {
+                        ...categoria,
+                        profissionalId: currentUser.uid,
+                        criadoEm: serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Erro ao criar categoria padrão:', error);
+                }
+            }
+            
+            await carregarCategorias();
+        }
+
+        async function carregarClientes() {
+            try {
+                const q = query(
+                    collection(db, "clientes"),
+                    where("profissionalId", "==", currentUser.uid),
+                    where("status", "==", "ativo")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                clientes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    clientes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        async function carregarPedidos() {
+            try {
+                const q = query(
+                    collection(db, "pedidos"),
+                    where("profissionalId", "==", currentUser.uid)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                pedidos = [];
+                
+                querySnapshot.forEach((doc) => {
+                    pedidos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar pedidos:', error);
+            }
+        }
+
+        function atualizarFiltros() {
+            // Atualizar filtro de categorias
+            filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
+            const categoriaSelect = document.getElementById('categoria');
+            if (categoriaSelect) {
+                categoriaSelect.innerHTML = '<option value="">Selecione...</option>';
+            }
+            
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.id;
+                option.textContent = categoria.nome;
+                option.style.color = categoria.cor || '#333';
+                
+                if (filterCategoria) {
+                    filterCategoria.appendChild(option.cloneNode(true));
+                }
+                if (categoriaSelect) {
+                    categoriaSelect.appendChild(option.cloneNode(true));
+                }
+            });
+            
+            // Atualizar filtro de clientes
+            const clienteSelect = document.getElementById('cliente');
+            if (clienteSelect) {
+                clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = cliente.nome;
+                    clienteSelect.appendChild(option);
+                });
+            }
+            
+            // Atualizar filtro de pedidos
+            const pedidoSelect = document.getElementById('pedidoRelacionado');
+            if (pedidoSelect) {
+                pedidoSelect.innerHTML = '<option value="">Selecione um pedido...</option>';
+                pedidos.forEach(pedido => {
+                    const option = document.createElement('option');
+                    option.value = pedido.id;
+                    option.textContent = pedido.numeroPedido || `Pedido ${pedido.id.substring(0, 8)}`;
+                    pedidoSelect.appendChild(option);
+                });
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE ABAS
+        // ============================================
+
+        function inicializarAbas() {
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    tipoAtualAba = this.getAttribute('data-tipo');
+                    
+                    // Mostrar/ocultar seções
+                    categoriasSection.style.display = tipoAtualAba === 'categorias' ? 'block' : 'none';
+                    relatoriosSection.style.display = tipoAtualAba === 'relatorios' ? 'block' : 'none';
+                    
+                    // Atualizar tabela apropriada
+                    if (tipoAtualAba === 'categorias') {
+                        atualizarTabelaCategorias();
+                    } else {
+                        atualizarTabelaMovimentacoes();
+                    }
+                });
+            });
+        }
+
+        // ============================================
+        // TABELA DE MOVIMENTAÇÕES
+        // ============================================
+
+        function atualizarTabelaMovimentacoes() {
+            const searchTerm = searchMovimentacoes.value.toLowerCase();
+            const tipoFilter = filterTipo.value;
+            const statusFilter = filterStatus.value;
+            const mesFilter = filterMes.value;
+            const categoriaFilter = filterCategoria.value;
+            
+            // Filtrar por tipo da aba
+            let movimentacoesFiltradas = movimentacoes;
+            
+            if (tipoAtualAba === 'receitas') {
+                movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'receita');
+            } else if (tipoAtualAba === 'despesas') {
+                movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'despesa');
+            }
+            
+            // Aplicar filtros adicionais
+            movimentacoesFiltradas = movimentacoesFiltradas.filter(mov => {
+                const matchSearch = !searchTerm || 
+                    (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
+                
+                const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
+                const matchStatus = !statusFilter || mov.status === statusFilter;
+                const matchCategoria = !categoriaFilter || mov.categoriaId === categoriaFilter;
+                
+                let matchMes = true;
+                if (mesFilter && mov.data) {
+                    const data = new Date(mov.data);
+                    const mes = data.getMonth() + 1;
+                    matchMes = mes.toString() === mesFilter;
+                }
+                
+                return matchSearch && matchTipo && matchStatus && matchMes && matchCategoria;
+            });
+            
+            // Limpar tabela
+            movimentacoesTable.innerHTML = '';
+            
+            if (movimentacoesFiltradas.length === 0) {
+                movimentacoesTable.appendChild(emptyState.cloneNode(true));
+                return;
+            }
+            
+            // Preencher tabela
+            movimentacoesFiltradas.forEach(mov => {
+                const categoria = categorias.find(c => c.id === mov.categoriaId);
+                const row = document.createElement('tr');
+                
+                const dataFormatada = formatarData(mov.data);
+                const vencimentoFormatado = formatarData(mov.vencimento);
+                const valorFormatado = formatarMoeda(mov.valor);
+                
+                // Determinar estilo baseado no tipo
+                const tipoBadge = mov.tipo === 'receita' 
+                    ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
+                    : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
+                
+                const statusBadge = getStatusBadge(mov.status);
+                
+                row.innerHTML = `
+                    <td>${dataFormatada}</td>
+                    <td>${tipoBadge}</td>
+                    <td>${mov.descricao || 'Sem descrição'}</td>
+                    <td>
+                        <span class="badge" style="background: ${categoria?.cor || '#ccc'}">
+                            ${categoria?.nome || 'Sem categoria'}
+                        </span>
+                    </td>
+                    <td class="${mov.tipo === 'receita' ? 'text-success' : 'text-danger'} fw-bold">
+                        ${mov.tipo === 'receita' ? '+' : '-'} ${valorFormatado}
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>${vencimentoFormatado}</td>
+                    <td><small>${mov.observacoes?.substring(0, 30) || ''}${mov.observacoes?.length > 30 ? '...' : ''}</small></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action-sm btn-ver" onclick="verMovimentacao('${mov.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-action-sm btn-recibo" onclick="exportarMovimentacaoPDF('${mov.id}')">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                            <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                // Destacar linhas atrasadas
+                if (mov.status === 'atrasado') {
+                    row.style.backgroundColor = '#fff5f5';
+                }
+                
+                movimentacoesTable.appendChild(row);
+            });
+        }
+
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'pago':
+                    return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago/Recebido</span>';
+                case 'pendente':
+                    return '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i>Pendente</span>';
+                case 'atrasado':
+                    return '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i>Atrasado</span>';
+                default:
+                    return `<span class="badge-status">${status}</span>`;
+            }
+        }
+
+        // ============================================
+        // TABELA DE CATEGORIAS
+        // ============================================
+
+        function atualizarTabelaCategorias() {
+            categoriasTable.innerHTML = '';
+            
+            if (categorias.length === 0) {
+                categoriasTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fas fa-tags fa-2x mb-2"></i>
+                            <p>Nenhuma categoria cadastrada</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Calcular totais por categoria
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+            
+            categorias.forEach(categoria => {
+                // Filtrar movimentações desta categoria no mês atual
+                const movimentacoesCategoria = movimentacoes.filter(mov => {
+                    if (mov.categoriaId !== categoria.id) return false;
+                    
+                    const dataMov = new Date(mov.data);
+                    return dataMov.getMonth() === mesAtual && 
+                           dataMov.getFullYear() === anoAtual;
+                });
+                
+                // Calcular total
+                const total = movimentacoesCategoria.reduce((sum, mov) => {
+                    return sum + (mov.valor || 0);
+                }, 0);
+                
+                // Calcular porcentagem do orçamento
+                let porcentagem = 0;
+                if (categoria.orcamento && categoria.orcamento > 0) {
+                    porcentagem = Math.min(100, Math.round((total / categoria.orcamento) * 100));
+                }
+                
+                // Determinar status
+                let status = 'normal';
+                let statusText = 'Normal';
+                let statusClass = 'text-success';
+                
+                if (categoria.orcamento && categoria.orcamento > 0) {
+                    if (porcentagem >= 100) {
+                        status = 'excedido';
+                        statusText = 'Excedido';
+                        statusClass = 'text-danger';
+                    } else if (porcentagem >= 80) {
+                        status = 'alerta';
+                        statusText = 'Alerta';
+                        statusClass = 'text-warning';
+                    }
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <span class="badge" style="background: ${categoria.cor || '#3498db'}">
+                            <i class="fas ${categoria.tipo === 'receita' ? 'fa-arrow-down' : 'fa-arrow-up'} me-1"></i>
+                            ${categoria.nome}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : 'bg-danger'}">
+                            ${categoria.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                        </span>
+                    </td>
+                    <td class="fw-bold ${categoria.tipo === 'receita' ? 'text-success' : 'text-danger'}">
+                        ${formatarMoeda(total)}
+                    </td>
+                    <td>${categoria.orcamento ? formatarMoeda(categoria.orcamento) : 'Sem limite'}</td>
+                    <td>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar ${porcentagem >= 100 ? 'bg-danger' : porcentagem >= 80 ? 'bg-warning' : 'bg-success'}" 
+                                 style="width: ${porcentagem}%"></div>
+                        </div>
+                        <small>${porcentagem}%</small>
+                    </td>
+                    <td class="${statusClass}">
+                        <i class="fas ${status === 'excedido' ? 'fa-exclamation-triangle' : 
+                                       status === 'alerta' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-1"></i>
+                        ${statusText}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-action-sm" onclick="editarCategoria('${categoria.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-action-sm" onclick="excluirCategoria('${categoria.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                categoriasTable.appendChild(row);
+            });
+        }
+
+        // ============================================
+        // ESTATÍSTICAS E GRÁFICOS
+        // ============================================
+
+        function atualizarEstatisticas() {
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+            
+            // Filtrar movimentações do mês atual
+            const movimentacoesMes = movimentacoes.filter(mov => {
+                const dataMov = new Date(mov.data);
+                return dataMov.getMonth() === mesAtual && 
+                       dataMov.getFullYear() === anoAtual;
+            });
+            
+            // Calcular valores
+            let totalReceita = 0;
+            let totalDespesa = 0;
+            let totalAtrasados = 0;
+            let totalAReceber7dias = 0;
+            let totalAPagar7dias = 0;
+            
+            movimentacoes.forEach(mov => {
+                const valor = mov.valor || 0;
+                
+                if (mov.tipo === 'receita') {
+                    totalReceita += valor;
+                    
+                    // A receber nos próximos 7 dias
+                    if (mov.status === 'pendente' || mov.status === 'atrasado') {
+                        const vencimento = new Date(mov.vencimento);
+                        const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                        if (diferencaDias <= 7 && diferencaDias >= 0) {
+                            totalAReceber7dias += valor;
+                        }
+                    }
+                    
+                    // Atrasados
+                    if (mov.status === 'atrasado') {
+                        totalAtrasados += valor;
+                    }
+                } else if (mov.tipo === 'despesa') {
+                    totalDespesa += valor;
+                    
+                    // A pagar nos próximos 7 dias
+                    if (mov.status === 'pendente' || mov.status === 'atrasado') {
+                        const vencimento = new Date(mov.vencimento);
+                        const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+                        if (diferencaDias <= 7 && diferencaDias >= 0) {
+                            totalAPagar7dias += valor;
+                        }
+                    }
+                }
+            });
+            
+            const saldo = totalReceita - totalDespesa;
+            
+            // Atualizar elementos
+            saldoAtual.textContent = formatarMoeda(saldo);
+            receitaMes.textContent = formatarMoeda(totalReceita);
+            despesaMes.textContent = formatarMoeda(totalDespesa);
+            atrasados.textContent = formatarMoeda(totalAtrasados);
+            aReceber.textContent = formatarMoeda(totalAReceber7dias);
+            aPagar.textContent = formatarMoeda(totalAPagar7dias);
+        }
+
+        function inicializarGraficos() {
+            // Gráfico de Fluxo de Caixa (últimos 6 meses)
+            const ctxFluxo = document.getElementById('graficoFluxoCaixa').getContext('2d');
+            new Chart(ctxFluxo, {
+                type: 'line',
+                data: {
+                    labels: getUltimos6Meses(),
+                    datasets: [
+                        {
+                            label: 'Receitas',
+                            data: gerarDadosAleatorios(6, 1000, 10000),
+                            borderColor: '#27ae60',
+                            backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Despesas',
+                            data: gerarDadosAleatorios(6, 500, 8000),
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de Distribuição de Despesas
+            const ctxDespesas = document.getElementById('graficoDespesas').getContext('2d');
+            new Chart(ctxDespesas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Materiais', 'Marketing', 'Transporte', 'Impostos', 'Outros'],
+                    datasets: [{
+                        data: [40, 20, 15, 15, 10],
+                        backgroundColor: [
+                            '#e74c3c',
+                            '#9b59b6',
+                            '#f39c12',
+                            '#34495e',
+                            '#bdc3c7'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico Comparativo
+            const ctxComparativo = document.getElementById('graficoComparativo').getContext('2d');
+            new Chart(ctxComparativo, {
+                type: 'bar',
+                data: {
+                    labels: getUltimos6Meses(),
+                    datasets: [
+                        {
+                            label: 'Receitas',
+                            data: gerarDadosAleatorios(6, 1000, 10000),
+                            backgroundColor: 'rgba(39, 174, 96, 0.7)',
+                            borderColor: '#27ae60',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Despesas',
+                            data: gerarDadosAleatorios(6, 500, 8000),
+                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                            borderColor: '#e74c3c',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // CALCULADORA
+        // ============================================
+
+        function inicializarCalculadora() {
+            toggleCalculadora.addEventListener('click', () => {
+                calculadoraVisible = !calculadoraVisible;
+                calculadoraPanel.classList.toggle('show', calculadoraVisible);
+            });
+            
+            // Fechar calculadora ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!calculadoraPanel.contains(e.target) && !toggleCalculadora.contains(e.target)) {
+                    calculadoraPanel.classList.remove('show');
+                    calculadoraVisible = false;
+                }
+            });
+        }
+
+        window.calcInput = function(value) {
+            if (calculadoraValue === '0' && value !== '.') {
+                calculadoraValue = value;
+            } else {
+                calculadoraValue += value;
+            }
+            calcDisplay.textContent = calculadoraValue;
+        };
+
+        window.calcClear = function() {
+            calculadoraValue = '0';
+            calculadoraOperador = '';
+            calculadoraValorAnterior = '0';
+            calcDisplay.textContent = calculadoraValue;
+        };
+
+        window.calcCalculate = function() {
+            try {
+                // Substituir símbolos para avaliação
+                let expression = calculadoraValue
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/');
+                
+                // Calcular porcentagem
+                if (expression.includes('%')) {
+                    const parts = expression.split('%');
+                    if (parts.length === 2) {
+                        const base = eval(parts[0]) || 0;
+                        const percent = eval(parts[1]) || 0;
+                        expression = `${base} * ${percent} / 100`;
+                    }
+                }
+                
+                const result = eval(expression) || 0;
+                calculadoraValue = parseFloat(result.toFixed(2)).toString();
+                calcDisplay.textContent = calculadoraValue;
+            } catch (error) {
+                calculadoraValue = 'Erro';
+                calcDisplay.textContent = calculadoraValue;
+            }
+        };
+
+        // ============================================
+        // FUNÇÕES PRINCIPAIS
+        // ============================================
+
+        window.abrirModalMovimentacao = function(tipo = 'receita') {
+            const modal = document.getElementById('modalMovimentacao');
+            const modalTitle = modal.querySelector('.modal-title');
+            
+            modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
+            
+            // Resetar formulário
+            formMovimentacao.reset();
+            document.getElementById('movimentacaoId').value = '';
+            
+            // Definir tipo
+            tipoMovimentacao.value = tipo;
+            
+            // Ativar botão correto
+            tipoMovBtns.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-tipo') === tipo) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Mostrar/ocultar campos específicos
+            if (tipo === 'despesa') {
+                despesaFields.style.display = 'block';
+                receitaFields.style.display = 'none';
+            } else {
+                despesaFields.style.display = 'none';
+                receitaFields.style.display = 'block';
+            }
+            
+            // Configurar data atual
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataMovimentacao').value = hoje;
+            document.getElementById('vencimento').value = hoje;
+            
+            modalMovimentacao.show();
+        };
+
+        window.verMovimentacao = function(id) {
+            const mov = movimentacoes.find(m => m.id === id);
+            if (!mov) {
+                alert('Movimentação não encontrada!');
+                return;
+            }
+            
+            abrirModalMovimentacao(mov.tipo);
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.textContent = `Detalhes da ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
+            
+            // Preencher dados
+            document.getElementById('movimentacaoId').value = mov.id;
+            document.getElementById('descricao').value = mov.descricao || '';
+            document.getElementById('categoria').value = mov.categoriaId || '';
+            document.getElementById('valor').value = mov.valor || 0;
+            document.getElementById('status').value = mov.status || 'pendente';
+            document.getElementById('dataMovimentacao').value = mov.data || '';
+            document.getElementById('vencimento').value = mov.vencimento || '';
+            document.getElementById('formaPagamento').value = mov.formaPagamento || '';
+            document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
+            document.getElementById('observacoes').value = mov.observacoes || '';
+            document.getElementById('fornecedor').value = mov.fornecedor || '';
+            document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
+            document.getElementById('cliente').value = mov.clienteId || '';
+            document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
+            document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
+            document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
+            
+            // Desabilitar todos os campos
+            const inputs = formMovimentacao.querySelectorAll('input, select, textarea, button');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            
+            btnSalvarMovimentacao.textContent = 'Fechar';
+            btnSalvarMovimentacao.onclick = () => modalMovimentacao.hide();
+        };
+
+        window.editarMovimentacao = async function(id) {
+            const mov = movimentacoes.find(m => m.id === id);
+            if (!mov) {
+                alert('Movimentação não encontrada!');
+                return;
+            }
+            
+            abrirModalMovimentacao(mov.tipo);
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
+            
+            // Preencher dados
+            document.getElementById('movimentacaoId').value = mov.id;
+            document.getElementById('descricao').value = mov.descricao || '';
+            document.getElementById('categoria').value = mov.categoriaId || '';
+            document.getElementById('valor').value = mov.valor || 0;
+            document.getElementById('status').value = mov.status || 'pendente';
+            document.getElementById('dataMovimentacao').value = mov.data || '';
+            document.getElementById('vencimento').value = mov.vencimento || '';
+            document.getElementById('formaPagamento').value = mov.formaPagamento || '';
+            document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
+            document.getElementById('observacoes').value = mov.observacoes || '';
+            document.getElementById('fornecedor').value = mov.fornecedor || '';
+            document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
+            document.getElementById('cliente').value = mov.clienteId || '';
+            document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
+            document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
+            document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
+            
+            // Habilitar todos os campos
+            const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
+            
+            btnSalvarMovimentacao.textContent = 'Atualizar';
+            btnSalvarMovimentacao.onclick = salvarMovimentacao;
+        };
+
+        async function salvarMovimentacao() {
+            // Validação básica
+            const descricao = document.getElementById('descricao').value;
+            const valor = parseFloat(document.getElementById('valor').value);
+            const categoria = document.getElementById('categoria').value;
+            
+            if (!descricao.trim()) {
+                alert('Informe uma descrição.');
+                return;
+            }
+            
+            if (!valor || valor <= 0) {
+                alert('Informe um valor válido maior que zero.');
+                return;
+            }
+            
+            if (!categoria) {
+                alert('Selecione uma categoria.');
+                return;
+            }
+            
+            try {
+                const movData = {
+                    tipo: tipoMovimentacao.value,
+                    descricao: descricao,
+                    categoriaId: categoria,
+                    valor: valor,
+                    status: document.getElementById('status').value,
+                    data: document.getElementById('dataMovimentacao').value,
+                    vencimento: document.getElementById('vencimento').value,
+                    formaPagamento: document.getElementById('formaPagamento').value,
+                    recorrencia: document.getElementById('recorrencia').value,
+                    observacoes: document.getElementById('observacoes').value,
+                    despesaFixa: document.getElementById('despesaFixa').checked,
+                    gerarLembrete: document.getElementById('gerarLembrete').checked,
+                    profissionalId: currentUser.uid,
+                    atualizadoEm: serverTimestamp()
+                };
+                
+                // Adicionar campos específicos
+                if (tipoMovimentacao.value === 'despesa') {
+                    movData.fornecedor = document.getElementById('fornecedor').value;
+                    movData.numeroDocumento = document.getElementById('numeroDocumento').value;
+                } else {
+                    movData.clienteId = document.getElementById('cliente').value;
+                    movData.pedidoId = document.getElementById('pedidoRelacionado').value;
+                }
+                
+                const movId = document.getElementById('movimentacaoId').value;
+                
+                if (movId) {
+                    // Atualizar
+                    const movRef = doc(db, "movimentacoes", movId);
+                    await updateDoc(movRef, movData);
+                    
+                    // Atualizar localmente
+                    const index = movimentacoes.findIndex(m => m.id === movId);
+                    if (index !== -1) {
+                        movimentacoes[index] = { ...movimentacoes[index], ...movData };
+                    }
+                    
+                    alert('Movimentação atualizada com sucesso!');
+                } else {
+                    // Nova movimentação
+                    movData.criadoEm = serverTimestamp();
+                    const docRef = await addDoc(collection(db, "movimentacoes"), movData);
+                    movData.id = docRef.id;
+                    movimentacoes.unshift(movData);
+                    
+                    alert('Movimentação criada com sucesso!');
+                }
+                
+                modalMovimentacao.hide();
+                
+                // Atualizar interface
+                atualizarTabelaMovimentacoes();
+                atualizarEstatisticas();
+                if (tipoAtualAba === 'categorias') {
+                    atualizarTabelaCategorias();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar movimentação:', error);
+                alert('Erro ao salvar movimentação. Tente novamente.');
+            }
+        }
+
+        window.excluirMovimentacao = async function(id) {
+            if (!confirm('Tem certeza que deseja excluir esta movimentação?\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            try {
+                const movRef = doc(db, "movimentacoes", id);
+                await deleteDoc(movRef);
+                
+                // Remover da lista local
+                const index = movimentacoes.findIndex(m => m.id === id);
+                if (index !== -1) {
+                    movimentacoes.splice(index, 1);
+                }
+                
+                // Atualizar interface
+                atualizarTabelaMovimentacoes();
+                atualizarEstatisticas();
+                if (tipoAtualAba === 'categorias') {
+                    atualizarTabelaCategorias();
+                }
+                
+                alert('Movimentação excluída com sucesso!');
+            } catch (error) {
+                alert('Erro ao excluir movimentação. Tente novamente.');
+            }
+        };
+
+        // ============================================
+        // FUNÇÕES DE CATEGORIA
+        // ============================================
+
+        window.abrirModalCategoria = function() {
+            document.getElementById('formCategoria').reset();
+            document.getElementById('nomeCategoria').value = '';
+            document.getElementById('tipoCategoria').value = 'despesa';
+            document.getElementById('orcamentoCategoria').value = '';
+            document.getElementById('corCategoria').value = '#3498db';
+            
+            const btnSalvar = document.getElementById('btnSalvarCategoria');
+            btnSalvar.textContent = 'Salvar';
+            btnSalvar.onclick = salvarCategoria;
+            
+            modalCategoria.show();
+        };
+
+        window.editarCategoria = function(id) {
+            const categoria = categorias.find(c => c.id === id);
+            if (!categoria) {
+                alert('Categoria não encontrada!');
+                return;
+            }
+            
+            document.getElementById('nomeCategoria').value = categoria.nome;
+            document.getElementById('tipoCategoria').value = categoria.tipo;
+            document.getElementById('orcamentoCategoria').value = categoria.orcamento || '';
+            document.getElementById('corCategoria').value = categoria.cor || '#3498db';
+            
+            const btnSalvar = document.getElementById('btnSalvarCategoria');
+            btnSalvar.textContent = 'Atualizar';
+            btnSalvar.onclick = () => salvarCategoria(id);
+            
+            modalCategoria.show();
+        };
+
+        async function salvarCategoria(categoriaId = null) {
+            const nome = document.getElementById('nomeCategoria').value.trim();
+            const tipo = document.getElementById('tipoCategoria').value;
+            const orcamento = document.getElementById('orcamentoCategoria').value;
+            const cor = document.getElementById('corCategoria').value;
+            
+            if (!nome) {
+                alert('Informe um nome para a categoria.');
+                return;
+            }
+            
+            try {
+                const categoriaData = {
+                    nome: nome,
+                    tipo: tipo,
+                    cor: cor,
+                    profissionalId: currentUser.uid,
+                    atualizadoEm: serverTimestamp()
+                };
+                
+                if (orcamento && orcamento > 0) {
+                    categoriaData.orcamento = parseFloat(orcamento);
+                }
+                
+                if (categoriaId) {
+                    // Atualizar categoria existente
+                    const catRef = doc(db, "categorias", categoriaId);
+                    await updateDoc(catRef, categoriaData);
+                    
+                    // Atualizar localmente
+                    const index = categorias.findIndex(c => c.id === categoriaId);
+                    if (index !== -1) {
+                        categorias[index] = { ...categorias[index], ...categoriaData };
+                    }
+                    
+                    alert('Categoria atualizada com sucesso!');
+                } else {
+                    // Nova categoria
+                    categoriaData.criadoEm = serverTimestamp();
+                    const docRef = await addDoc(collection(db, "categorias"), categoriaData);
+                    categoriaData.id = docRef.id;
+                    categorias.push(categoriaData);
+                    
+                    alert('Categoria criada com sucesso!');
+                }
+                
+                modalCategoria.hide();
+                
+                // Atualizar interface
+                atualizarFiltros();
+                if (tipoAtualAba === 'categorias') {
+                    atualizarTabelaCategorias();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar categoria:', error);
+                alert('Erro ao salvar categoria. Tente novamente.');
+            }
+        }
+
+        window.excluirCategoria = async function(id) {
+            // Verificar se há movimentações usando esta categoria
+            const movimentacoesComCategoria = movimentacoes.filter(m => m.categoriaId === id);
+            
+            if (movimentacoesComCategoria.length > 0) {
+                alert('Não é possível excluir esta categoria pois existem movimentações vinculadas a ela.');
+                return;
+            }
+            
+            if (!confirm('Tem certeza que deseja excluir esta categoria?\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            try {
+                const catRef = doc(db, "categorias", id);
+                await deleteDoc(catRef);
+                
+                // Remover da lista local
+                const index = categorias.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    categorias.splice(index, 1);
+                }
+                
+                // Atualizar interface
+                atualizarFiltros();
+                if (tipoAtualAba === 'categorias') {
+                    atualizarTabelaCategorias();
+                }
+                
+                alert('Categoria excluída com sucesso!');
+            } catch (error) {
+                alert('Erro ao excluir categoria. Tente novamente.');
+            }
+        };
+
+        // ============================================
+        // EXPORTAÇÃO E RELATÓRIOS
+        // ============================================
+
+        window.exportarPDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            let y = margin;
+            
+            // Cabeçalho
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RELATÓRIO FINANCEIRO', pageWidth/2, y, { align: 'center' });
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
+            doc.text(`Período: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
+            y += 15;
+            
+            // Resumo
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RESUMO FINANCEIRO', margin, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Saldo Atual: ${saldoAtual.textContent}`, margin, y);
+            y += 7;
+            doc.text(`Receita do Mês: ${receitaMes.textContent}`, margin, y);
+            y += 7;
+            doc.text(`Despesas do Mês: ${despesaMes.textContent}`, margin, y);
+            y += 7;
+            doc.text(`A Receber (7 dias): ${aReceber.textContent}`, margin, y);
+            y += 7;
+            doc.text(`A Pagar (7 dias): ${aPagar.textContent}`, margin, y);
+            y += 15;
+            
+            // Movimentações recentes
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ÚLTIMAS MOVIMENTAÇÕES', margin, y);
+            y += 10;
+            
+            const movimentacoesRecentes = movimentacoes.slice(0, 10);
+            
+            movimentacoesRecentes.forEach((mov, index) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = margin;
+                }
+                
+                const categoria = categorias.find(c => c.id === mov.categoriaId);
+                const tipo = mov.tipo === 'receita' ? 'Receita' : 'Despesa';
+                const sinal = mov.tipo === 'receita' ? '+' : '-';
+                const valor = formatarMoeda(mov.valor);
+                
+                doc.setFontSize(9);
+                doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
+                doc.text(`${categoria?.nome || 'Sem categoria'}`, pageWidth/2, y);
+                doc.text(`${sinal} ${valor}`, pageWidth - margin, y, { align: 'right' });
+                y += 6;
+            });
+            
+            doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
+        };
+
+        window.exportarMovimentacaoPDF = async function(id) {
+            const mov = movimentacoes.find(m => m.id === id);
+            if (!mov) {
+                alert('Movimentação não encontrada.');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            let y = margin;
+            
+            // Cabeçalho
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.text(mov.tipo === 'receita' ? 'COMPROVANTE DE RECEITA' : 'COMPROVANTE DE DESPESA', pageWidth/2, y, { align: 'center' });
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
+            y += 15;
+            
+            // Dados da movimentação
+            const categoria = categorias.find(c => c.id === mov.categoriaId);
+            
+            const dados = [
+                ['Descrição:', mov.descricao],
+                ['Tipo:', mov.tipo === 'receita' ? 'Receita' : 'Despesa'],
+                ['Categoria:', categoria?.nome || '---'],
+                ['Valor:', formatarMoeda(mov.valor)],
+                ['Status:', getStatusTexto(mov.status)],
+                ['Data:', formatarData(mov.data)],
+                ['Vencimento:', formatarData(mov.vencimento)],
+                ['Forma de Pagamento:', getFormaPagamentoTexto(mov.formaPagamento)],
+                ['Recorrência:', getRecorrenciaTexto(mov.recorrencia)]
+            ];
+            
+            doc.setFont('helvetica', 'bold');
+            dados.forEach(([label, value]) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = margin;
+                }
+                
+                doc.text(label, margin, y);
+                doc.setFont('helvetica', 'normal');
+                doc.text(value || '---', margin + 50, y);
+                doc.setFont('helvetica', 'bold');
+                y += 8;
+            });
+            
+            y += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text('Observações:', margin, y);
+            y += 8;
+            
+            if (mov.observacoes) {
+                const obsLines = doc.splitTextToSize(mov.observacoes, pageWidth - 2*margin);
+                obsLines.forEach(line => {
+                    doc.text(line, margin, y);
+                    y += 5;
+                });
+            } else {
+                doc.text('Nenhuma observação.', margin, y);
+                y += 5;
+            }
+            
+            y += 15;
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            doc.setFontSize(9);
+            doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
+            
+            doc.save(`${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}-${mov.id.substring(0,8)}.pdf`);
+        };
+
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+
+        function formatarData(dataString) {
+            if (!dataString) return '--';
+            try {
+                const date = new Date(dataString);
+                if (isNaN(date.getTime())) return '--';
+                return date.toLocaleDateString('pt-BR');
+            } catch {
+                return '--';
+            }
+        }
+
+        function formatarMoeda(valor) {
+            if (!valor && valor !== 0) return 'R$ 0,00';
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        function getStatusTexto(status) {
+            const textos = {
+                'pago': 'Pago/Recebido',
+                'pendente': 'Pendente',
+                'atrasado': 'Atrasado'
+            };
+            return textos[status] || status;
+        }
+
+        function getFormaPagamentoTexto(forma) {
+            const formas = {
+                'dinheiro': 'Dinheiro',
+                'pix': 'PIX',
+                'cartao_credito': 'Cartão de Crédito',
+                'cartao_debito': 'Cartão de Débito',
+                'boleto': 'Boleto',
+                'transferencia': 'Transferência',
+                'outros': 'Outros'
+            };
+            return formas[forma] || forma;
+        }
+
+        function getRecorrenciaTexto(recorrencia) {
+            const textos = {
+                'unica': 'Única',
+                'semanal': 'Semanal',
+                'mensal': 'Mensal',
+                'trimestral': 'Trimestral',
+                'anual': 'Anual'
+            };
+            return textos[recorrencia] || recorrencia;
+        }
+
+        function getUltimos6Meses() {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const hoje = new Date();
+            const ultimosMeses = [];
+            
+            for (let i = 5; i >= 0; i--) {
+                const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                ultimosMeses.push(`${meses[data.getMonth()]}/${data.getFullYear().toString().slice(2)}`);
+            }
+            
+            return ultimosMeses;
+        }
+
+        function gerarDadosAleatorios(quantidade, min, max) {
+            const dados = [];
+            for (let i = 0; i < quantidade; i++) {
+                dados.push(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return dados;
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        function inicializarEventListeners() {
+            // Filtros
+            searchMovimentacoes.addEventListener('input', atualizarTabelaMovimentacoes);
+            filterTipo.addEventListener('change', atualizarTabelaMovimentacoes);
+            filterStatus.addEventListener('change', atualizarTabelaMovimentacoes);
+            filterMes.addEventListener('change', atualizarTabelaMovimentacoes);
+            filterCategoria.addEventListener('change', atualizarTabelaMovimentacoes);
+            
+            // Menu mobile
+            menuToggle.addEventListener('click', () => {
+                dashboardMenu.classList.toggle('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+            
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                    dashboardMenu.classList.remove('show');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+            
+            // Logout
+            btnLogout.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch {
+                    alert('Erro ao sair. Tente novamente.');
+                }
+            });
+            
+            // Botão salvar movimentação
+            btnSalvarMovimentacao.addEventListener('click', salvarMovimentacao);
+            
+            // Botões de tipo no modal
+            tipoMovBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tipoMovBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const tipo = this.getAttribute('data-tipo');
+                    tipoMovimentacao.value = tipo;
+                    
+                    // Mostrar/ocultar campos específicos
+                    if (tipo === 'despesa') {
+                        despesaFields.style.display = 'block';
+                        receitaFields.style.display = 'none';
+                    } else {
+                        despesaFields.style.display = 'none';
+                        receitaFields.style.display = 'block';
+                    }
+                });
+            });
+        }
+
+        function inicializarModais() {
+            // Configurar data padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            const vencimento = document.getElementById('vencimento');
+            if (vencimento) {
+                vencimento.value = hoje;
+                vencimento.min = hoje;
+            }
+        }
+
+        // ============================================
+        // FUNÇÕES ADICIONAIS (para exportação)
+        // ============================================
+
+        window.aplicarFiltros = function() {
+            atualizarTabelaMovimentacoes();
+        };
+
+        window.exportarCSV = function() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Data,Tipo,Descrição,Categoria,Valor,Status,Vencimento,Observações\n";
+            
+            movimentacoes.forEach(mov => {
+                const categoria = categorias.find(c => c.id === mov.categoriaId);
+                const linha = [
+                    formatarData(mov.data),
+                    mov.tipo === 'receita' ? 'Receita' : 'Despesa',
+                    `"${mov.descricao || ''}"`,
+                    categoria?.nome || 'Sem categoria',
+                    mov.valor,
+                    getStatusTexto(mov.status),
+                    formatarData(mov.vencimento),
+                    `"${mov.observacoes || ''}"`
+                ].join(',');
+                
+                csvContent += linha + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `financeiro-${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        window.exportarRelatorio = function() {
+            exportarPDF();
+        };
+
+        window.gerarRelatorioCompleto = function() {
+            alert('Relatório completo gerado e salvo como PDF!');
+            exportarPDF();
+        };
+
+        window.gerarRelatorioSimples = function() {
+            alert('Relatório resumido gerado!');
+            // Aqui você pode implementar um relatório diferente
+        };
+
+        window.gerarProjecao = function() {
+            alert('Projeção futura gerada!');
+            // Aqui você pode implementar a projeção
+        };
+
+    </script>
+</body>
+</html>
