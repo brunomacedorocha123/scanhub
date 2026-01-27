@@ -1103,18 +1103,102 @@
     }
 
     // ============================================
-    // CARREGAMENTO DE DADOS - CORRIGIDO 100%
+    // CARREGAMENTO DE DADOS - CORRIGIDO
     // ============================================
 
     async function carregarMovimentacoes() {
         try {
-            // Primeiro: Tentar carregar TODAS as movimentações
-            const movimentacoesRef = collection(db, "movimentacoes");
-            const querySnapshot = await getDocs(movimentacoesRef);
+            // Primeiro tentar com filtro profissionalId
+            const q = query(
+                collection(db, "movimentacoes"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("data", "desc")
+            );
+            
+            const querySnapshot = await getDocs(q);
             movimentacoes = [];
             
-            // Filtrar apenas as do usuário atual
-            querySnapshot.forEach((doc) => {
+            if (querySnapshot.size > 0) {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    if (data && data.profissionalId === currentUser.uid) {
+                        const movimentacao = {
+                            id: doc.id,
+                            tipo: data.tipo || 'receita',
+                            descricao: data.descricao || 'Sem descrição',
+                            categoria: data.categoria || 'outros',
+                            valor: data.valor || 0,
+                            status: data.status || 'pendente',
+                            formaPagamento: data.formaPagamento || '',
+                            observacoes: data.observacoes || '',
+                            despesaFixa: data.despesaFixa || false,
+                            profissionalId: data.profissionalId,
+                            atualizadoEm: data.atualizadoEm,
+                            criadoEm: data.criadoEm
+                        };
+                        
+                        // Processar data
+                        if (data.data) {
+                            if (data.data.toDate && typeof data.data.toDate === 'function') {
+                                // É um Timestamp do Firebase
+                                movimentacao.data = data.data.toDate().toISOString().split('T')[0];
+                            } else if (typeof data.data === 'string') {
+                                // Já é uma string
+                                movimentacao.data = data.data;
+                            } else {
+                                movimentacao.data = new Date().toISOString().split('T')[0];
+                            }
+                        } else {
+                            movimentacao.data = new Date().toISOString().split('T')[0];
+                        }
+                        
+                        // Processar vencimento
+                        if (data.vencimento) {
+                            if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
+                                // É um Timestamp do Firebase
+                                movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
+                            } else if (typeof data.vencimento === 'string') {
+                                // Já é uma string
+                                movimentacao.vencimento = data.vencimento;
+                            } else {
+                                movimentacao.vencimento = new Date().toISOString().split('T')[0];
+                            }
+                        } else {
+                            movimentacao.vencimento = new Date().toISOString().split('T')[0];
+                        }
+                        
+                        movimentacoes.push(movimentacao);
+                    }
+                });
+            }
+            
+            // Se não encontrou com filtro, tentar sem filtro
+            if (movimentacoes.length === 0) {
+                await carregarTodasMovimentacoes();
+            }
+            
+            // Verificar atrasados
+            await verificarAtrasados();
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            
+        } catch (error) {
+            // Se der erro na consulta filtrada, tentar sem filtro
+            await carregarTodasMovimentacoes();
+        }
+    }
+
+    async function carregarTodasMovimentacoes() {
+        try {
+            // Carregar todas as movimentações
+            const movimentacoesRef = collection(db, "movimentacoes");
+            const allDocs = await getDocs(movimentacoesRef);
+            movimentacoes = [];
+            
+            allDocs.forEach((doc) => {
                 const data = doc.data();
                 
                 // Verificar se é do usuário atual
@@ -1124,7 +1208,6 @@
                     data.user === currentUser.uid;
                 
                 if (isUserMovimentacao && data) {
-                    // Processar dados da movimentação
                     const movimentacao = {
                         id: doc.id,
                         tipo: data.tipo || 'receita',
@@ -1135,16 +1218,16 @@
                         formaPagamento: data.formaPagamento || '',
                         observacoes: data.observacoes || '',
                         despesaFixa: data.despesaFixa || false,
-                        profissionalId: data.profissionalId || currentUser.uid
+                        profissionalId: data.profissionalId || currentUser.uid,
+                        atualizadoEm: data.atualizadoEm,
+                        criadoEm: data.criadoEm
                     };
                     
                     // Processar data
                     if (data.data) {
                         if (data.data.toDate && typeof data.data.toDate === 'function') {
-                            // É um Timestamp do Firebase
                             movimentacao.data = data.data.toDate().toISOString().split('T')[0];
                         } else if (typeof data.data === 'string') {
-                            // Já é uma string
                             movimentacao.data = data.data;
                         } else {
                             movimentacao.data = new Date().toISOString().split('T')[0];
@@ -1156,10 +1239,8 @@
                     // Processar vencimento
                     if (data.vencimento) {
                         if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
-                            // É um Timestamp do Firebase
                             movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
                         } else if (typeof data.vencimento === 'string') {
-                            // Já é uma string
                             movimentacao.vencimento = data.vencimento;
                         } else {
                             movimentacao.vencimento = new Date().toISOString().split('T')[0];
@@ -1179,15 +1260,7 @@
                 return dateB - dateA;
             });
             
-            // Verificar atrasados
-            await verificarAtrasados();
-            
-            // Atualizar interface
-            atualizarTabelaMovimentacoes();
-            atualizarEstatisticas();
-            
         } catch (error) {
-            // Se der erro, inicializar array vazio
             movimentacoes = [];
         }
     }
