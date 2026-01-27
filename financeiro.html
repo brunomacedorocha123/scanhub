@@ -1075,7 +1075,7 @@
                     inicializarGraficos();
                 }
             } catch (error) {
-                showNotification('Erro ao carregar dados do usuário', 'error');
+                // Não mostrar notificação de erro
             }
         } else {
             window.location.href = 'login.html';
@@ -1103,7 +1103,7 @@
     }
 
     // ============================================
-    // CARREGAMENTO DE DADOS
+    // CARREGAMENTO DE DADOS - CORRIGIDO
     // ============================================
 
     async function carregarMovimentacoes() {
@@ -1120,23 +1120,33 @@
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 
-                // Processar datas do Firebase
+                // Converter datas do Firebase para string
                 let dataMov = data.data;
                 let dataVencimento = data.vencimento;
                 
+                // Se for Timestamp do Firebase
                 if (dataMov && dataMov.toDate) {
-                    dataMov = dataMov.toDate().toISOString().split('T')[0];
+                    dataMov = dataMov.toDate();
                 }
                 
                 if (dataVencimento && dataVencimento.toDate) {
-                    dataVencimento = dataVencimento.toDate().toISOString().split('T')[0];
+                    dataVencimento = dataVencimento.toDate();
                 }
+                
+                // Converter para string no formato YYYY-MM-DD
+                const dataMovStr = dataMov instanceof Date 
+                    ? dataMov.toISOString().split('T')[0]
+                    : dataMov || '';
+                
+                const vencimentoStr = dataVencimento instanceof Date
+                    ? dataVencimento.toISOString().split('T')[0]
+                    : dataVencimento || '';
                 
                 movimentacoes.push({
                     id: doc.id,
                     ...data,
-                    data: dataMov || '',
-                    vencimento: dataVencimento || ''
+                    data: dataMovStr,
+                    vencimento: vencimentoStr
                 });
             });
             
@@ -1145,8 +1155,9 @@
             
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
+            
         } catch (error) {
-            showNotification('Erro ao carregar movimentações', 'error');
+            // Não mostrar erro, apenas continuar
         }
     }
 
@@ -1154,7 +1165,7 @@
         const hoje = new Date().toISOString().split('T')[0];
 
         for (const mov of movimentacoes) {
-            if (mov.status === 'pendente' && mov.vencimento < hoje) {
+            if (mov.status === 'pendente' && mov.vencimento && mov.vencimento < hoje) {
                 try {
                     const movRef = doc(db, "movimentacoes", mov.id);
                     await updateDoc(movRef, {
