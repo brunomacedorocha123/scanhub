@@ -975,7 +975,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script type="module">
+   <script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
@@ -1032,7 +1032,6 @@
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
     
-    // Elementos de estatísticas
     const saldoAtual = document.getElementById('saldoAtual');
     const receitaMes = document.getElementById('receitaMes');
     const despesaMes = document.getElementById('despesaMes');
@@ -1040,26 +1039,22 @@
     const aReceber = document.getElementById('aReceber');
     const aPagar = document.getElementById('aPagar');
     
-    // Elementos de filtro
     const searchMovimentacoes = document.getElementById('searchMovimentacoes');
     const filterTipo = document.getElementById('filterTipo');
     const filterStatus = document.getElementById('filterStatus');
     const filterMes = document.getElementById('filterMes');
     
-    // Tabelas
     const movimentacoesTable = document.getElementById('movimentacoesTable');
     const emptyState = document.getElementById('emptyState');
     
-    // Calculadora
     const calculadoraPanel = document.getElementById('calculadoraPanel');
     const toggleCalculadora = document.getElementById('toggleCalculadora');
     const calcDisplay = document.getElementById('calcDisplay');
 
     // ============================================
-    // INICIALIZAÇÃO DO SISTEMA
+    // INICIALIZAÇÃO
     // ============================================
 
-    // Monitorar autenticação
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
@@ -1075,7 +1070,7 @@
                     inicializarGraficos();
                 }
             } catch (error) {
-                // Não mostrar notificação
+                // Silenciar erro
             }
         } else {
             window.location.href = 'login.html';
@@ -1103,147 +1098,55 @@
     }
 
     // ============================================
-    // CARREGAMENTO DE DADOS - CORRIGIDO
+    // CARREGAMENTO DE DADOS - FUNCIONAL
     // ============================================
 
     async function carregarMovimentacoes() {
         try {
-            // Primeiro tentar com filtro profissionalId
-            const q = query(
-                collection(db, "movimentacoes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("data", "desc")
-            );
-            
-            const querySnapshot = await getDocs(q);
-            movimentacoes = [];
-            
-            if (querySnapshot.size > 0) {
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    
-                    if (data && data.profissionalId === currentUser.uid) {
-                        const movimentacao = {
-                            id: doc.id,
-                            tipo: data.tipo || 'receita',
-                            descricao: data.descricao || 'Sem descrição',
-                            categoria: data.categoria || 'outros',
-                            valor: data.valor || 0,
-                            status: data.status || 'pendente',
-                            formaPagamento: data.formaPagamento || '',
-                            observacoes: data.observacoes || '',
-                            despesaFixa: data.despesaFixa || false,
-                            profissionalId: data.profissionalId,
-                            atualizadoEm: data.atualizadoEm,
-                            criadoEm: data.criadoEm
-                        };
-                        
-                        // Processar data
-                        if (data.data) {
-                            if (data.data.toDate && typeof data.data.toDate === 'function') {
-                                // É um Timestamp do Firebase
-                                movimentacao.data = data.data.toDate().toISOString().split('T')[0];
-                            } else if (typeof data.data === 'string') {
-                                // Já é uma string
-                                movimentacao.data = data.data;
-                            } else {
-                                movimentacao.data = new Date().toISOString().split('T')[0];
-                            }
-                        } else {
-                            movimentacao.data = new Date().toISOString().split('T')[0];
-                        }
-                        
-                        // Processar vencimento
-                        if (data.vencimento) {
-                            if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
-                                // É um Timestamp do Firebase
-                                movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
-                            } else if (typeof data.vencimento === 'string') {
-                                // Já é uma string
-                                movimentacao.vencimento = data.vencimento;
-                            } else {
-                                movimentacao.vencimento = new Date().toISOString().split('T')[0];
-                            }
-                        } else {
-                            movimentacao.vencimento = new Date().toISOString().split('T')[0];
-                        }
-                        
-                        movimentacoes.push(movimentacao);
-                    }
-                });
-            }
-            
-            // Se não encontrou com filtro, tentar sem filtro
-            if (movimentacoes.length === 0) {
-                await carregarTodasMovimentacoes();
-            }
-            
-            // Verificar atrasados
-            await verificarAtrasados();
-            
-            // Atualizar interface
-            atualizarTabelaMovimentacoes();
-            atualizarEstatisticas();
-            
-        } catch (error) {
-            // Se der erro na consulta filtrada, tentar sem filtro
-            await carregarTodasMovimentacoes();
-        }
-    }
-
-    async function carregarTodasMovimentacoes() {
-        try {
-            // Carregar todas as movimentações
+            // MÉTODO DIRETO: Carregar TODOS os documentos da coleção
             const movimentacoesRef = collection(db, "movimentacoes");
-            const allDocs = await getDocs(movimentacoesRef);
+            const querySnapshot = await getDocs(movimentacoesRef);
+            
             movimentacoes = [];
             
-            allDocs.forEach((doc) => {
+            querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 
-                // Verificar se é do usuário atual
-                const isUserMovimentacao = 
-                    data.profissionalId === currentUser.uid ||
-                    data.userId === currentUser.uid ||
-                    data.user === currentUser.uid;
-                
-                if (isUserMovimentacao && data) {
+                // Verificar se o documento pertence ao usuário logado
+                if (data.profissionalId === currentUser.uid) {
+                    // Criar objeto exatamente como está no Firestore
                     const movimentacao = {
                         id: doc.id,
                         tipo: data.tipo || 'receita',
-                        descricao: data.descricao || 'Sem descrição',
+                        descricao: data.descricao || '',
                         categoria: data.categoria || 'outros',
-                        valor: data.valor || 0,
+                        valor: parseFloat(data.valor) || 0,
                         status: data.status || 'pendente',
                         formaPagamento: data.formaPagamento || '',
                         observacoes: data.observacoes || '',
-                        despesaFixa: data.despesaFixa || false,
-                        profissionalId: data.profissionalId || currentUser.uid,
-                        atualizadoEm: data.atualizadoEm,
-                        criadoEm: data.criadoEm
+                        despesaFixa: Boolean(data.despesaFixa) || false,
+                        profissionalId: data.profissionalId,
+                        criadoEm: data.criadoEm,
+                        atualizadoEm: data.atualizadoEm
                     };
                     
-                    // Processar data
+                    // Processar data - mantendo string se já for string
                     if (data.data) {
-                        if (data.data.toDate && typeof data.data.toDate === 'function') {
-                            movimentacao.data = data.data.toDate().toISOString().split('T')[0];
-                        } else if (typeof data.data === 'string') {
+                        if (typeof data.data === 'string') {
                             movimentacao.data = data.data;
-                        } else {
-                            movimentacao.data = new Date().toISOString().split('T')[0];
+                        } else if (data.data.toDate && typeof data.data.toDate === 'function') {
+                            movimentacao.data = data.data.toDate().toISOString().split('T')[0];
                         }
                     } else {
                         movimentacao.data = new Date().toISOString().split('T')[0];
                     }
                     
-                    // Processar vencimento
+                    // Processar vencimento - mantendo string se já for string
                     if (data.vencimento) {
-                        if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
-                            movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
-                        } else if (typeof data.vencimento === 'string') {
+                        if (typeof data.vencimento === 'string') {
                             movimentacao.vencimento = data.vencimento;
-                        } else {
-                            movimentacao.vencimento = new Date().toISOString().split('T')[0];
+                        } else if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
+                            movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
                         }
                     } else {
                         movimentacao.vencimento = new Date().toISOString().split('T')[0];
@@ -1260,8 +1163,16 @@
                 return dateB - dateA;
             });
             
+            // Verificar pagamentos atrasados
+            await verificarAtrasados();
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            
         } catch (error) {
             movimentacoes = [];
+            atualizarTabelaMovimentacoes();
         }
     }
 
@@ -1327,7 +1238,7 @@
             return;
         }
         
-        // Preencher tabela
+        // Preencher tabela com dados REAIS
         movimentacoesFiltradas.forEach(mov => {
             const row = document.createElement('tr');
             
@@ -1335,11 +1246,9 @@
             const vencimentoFormatado = formatarData(mov.vencimento);
             const valorFormatado = formatarMoeda(mov.valor);
             
-            // Determinar categoria
             const categoriaClass = getCategoriaClass(mov.categoria);
             const categoriaNome = getCategoriaNome(mov.categoria);
             
-            // Determinar estilo baseado no tipo
             const tipoBadge = mov.tipo === 'receita' 
                 ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
                 : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
@@ -1438,7 +1347,6 @@
         const mesAtual = hoje.getMonth();
         const anoAtual = hoje.getFullYear();
         
-        // Calcular valores
         let totalReceita = 0;
         let totalDespesa = 0;
         let totalAtrasados = 0;
@@ -1509,7 +1417,7 @@
             const dadosReceitas = gerarDadosPorMes('receita');
             const dadosDespesas = gerarDadosPorMes('despesa');
             
-            // Gráfico de Fluxo de Caixa (últimos 6 meses)
+            // Gráfico de Fluxo de Caixa
             const ctxFluxo = document.getElementById('graficoFluxoCaixa');
             if (ctxFluxo) {
                 new Chart(ctxFluxo.getContext('2d'), {
