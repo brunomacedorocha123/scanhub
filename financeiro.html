@@ -976,408 +976,490 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            getDocs,
-            query,
-            where,
-            orderBy,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        getDocs,
+        query,
+        where,
+        orderBy,
+        serverTimestamp,
+        Timestamp
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
-        let currentUser = null;
-        let userData = null;
-        let movimentacoes = [];
-        let calculadoraVisible = false;
-        let calculadoraValue = '0';
+    // ============================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================
+    let currentUser = null;
+    let userData = null;
+    let movimentacoes = [];
+    let calculadoraVisible = false;
+    let calculadoraValue = '0';
 
-        // ============================================
-        // ELEMENTOS DOM
-        // ============================================
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const userId = document.getElementById('userId');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        
-        // Elementos de estatísticas
-        const saldoAtual = document.getElementById('saldoAtual');
-        const receitaMes = document.getElementById('receitaMes');
-        const despesaMes = document.getElementById('despesaMes');
-        const atrasados = document.getElementById('atrasados');
-        const aReceber = document.getElementById('aReceber');
-        const aPagar = document.getElementById('aPagar');
-        
-        // Elementos de filtro
-        const searchMovimentacoes = document.getElementById('searchMovimentacoes');
-        const filterTipo = document.getElementById('filterTipo');
-        const filterStatus = document.getElementById('filterStatus');
-        const filterMes = document.getElementById('filterMes');
-        
-        // Tabelas
-        const movimentacoesTable = document.getElementById('movimentacoesTable');
-        const emptyState = document.getElementById('emptyState');
-        
-        // Calculadora
-        const calculadoraPanel = document.getElementById('calculadoraPanel');
-        const toggleCalculadora = document.getElementById('toggleCalculadora');
-        const calcDisplay = document.getElementById('calcDisplay');
+    // ============================================
+    // ELEMENTOS DOM
+    // ============================================
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userId = document.getElementById('userId');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Elementos de estatísticas
+    const saldoAtual = document.getElementById('saldoAtual');
+    const receitaMes = document.getElementById('receitaMes');
+    const despesaMes = document.getElementById('despesaMes');
+    const atrasados = document.getElementById('atrasados');
+    const aReceber = document.getElementById('aReceber');
+    const aPagar = document.getElementById('aPagar');
+    
+    // Elementos de filtro
+    const searchMovimentacoes = document.getElementById('searchMovimentacoes');
+    const filterTipo = document.getElementById('filterTipo');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterMes = document.getElementById('filterMes');
+    
+    // Tabelas
+    const movimentacoesTable = document.getElementById('movimentacoesTable');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Calculadora
+    const calculadoraPanel = document.getElementById('calculadoraPanel');
+    const toggleCalculadora = document.getElementById('toggleCalculadora');
+    const calcDisplay = document.getElementById('calcDisplay');
 
-        // ============================================
-        // INICIALIZAÇÃO DO SISTEMA
-        // ============================================
+    // ============================================
+    // INICIALIZAÇÃO DO SISTEMA
+    // ============================================
 
-        // Monitorar autenticação
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
-                    
-                    if (userDoc.exists()) {
-                        userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        await carregarMovimentacoes();
-                        inicializarSistema();
-                        inicializarGraficos();
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
-                    showNotification('Erro ao carregar dados do usuário', 'error');
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        function inicializarSistema() {
-            inicializarCalculadora();
-            inicializarEventListeners();
-            inicializarModais();
-        }
-
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-            } else if (data.nomeCompleto) {
-                userName.textContent = `Olá, ${data.nomeCompleto.split(' ')[0]}`;
-                userAvatar.textContent = data.nomeCompleto.charAt(0).toUpperCase();
-            }
-            
-            if (data.idScanHub) {
-                userId.textContent = data.idScanHub;
-            }
-        }
-
-        // ============================================
-        // CARREGAMENTO DE DADOS
-        // ============================================
-
-        async function carregarMovimentacoes() {
+    // Monitorar autenticação
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            console.log('Usuário autenticado:', user.uid);
             try {
-                const q = query(
-                    collection(db, "movimentacoes"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("data", "desc")
-                );
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
                 
-                const querySnapshot = await getDocs(q);
-                movimentacoes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    movimentacoes.push({
-                        id: doc.id,
-                        ...data,
-                        data: data.data?.toDate?.().toISOString().split('T')[0] || data.data,
-                        vencimento: data.vencimento?.toDate?.().toISOString().split('T')[0] || data.vencimento
-                    });
-                });
-                
-                // Verificar e atualizar status de atrasados
-                await verificarAtrasados();
-                
-                atualizarTabelaMovimentacoes();
-                atualizarEstatisticas();
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    console.log('Dados do usuário carregados:', userData);
+                    atualizarInterfaceUsuario(userData);
+                    await carregarMovimentacoes();
+                    inicializarSistema();
+                    inicializarGraficos();
+                } else {
+                    console.log('Documento do usuário não encontrado');
+                }
             } catch (error) {
-                console.error('Erro ao carregar movimentações:', error);
-                showNotification('Erro ao carregar movimentações', 'error');
+                console.error('Erro ao carregar dados:', error);
+                showNotification('Erro ao carregar dados do usuário', 'error');
             }
+        } else {
+            window.location.href = 'login.html';
         }
+    });
 
-        async function verificarAtrasados() {
-            const hoje = new Date().toISOString().split('T')[0];
+    function inicializarSistema() {
+        inicializarCalculadora();
+        inicializarEventListeners();
+        inicializarModais();
+    }
 
-            for (const mov of movimentacoes) {
-                if (mov.status === 'pendente' && mov.vencimento < hoje) {
-                    try {
-                        const movRef = doc(db, "movimentacoes", mov.id);
-                        await updateDoc(movRef, {
-                            status: 'atrasado',
-                            atualizadoEm: serverTimestamp()
-                        });
-                        
-                        mov.status = 'atrasado';
-                    } catch (error) {
-                        console.error('Erro ao atualizar status:', error);
-                    }
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+        } else if (data.nomeCompleto) {
+            userName.textContent = `Olá, ${data.nomeCompleto.split(' ')[0]}`;
+            userAvatar.textContent = data.nomeCompleto.charAt(0).toUpperCase();
+        }
+        
+        if (data.idScanHub) {
+            userId.textContent = data.idScanHub;
+        }
+    }
+
+    // ============================================
+    // CARREGAMENTO DE DADOS - CORRIGIDO
+    // ============================================
+
+    async function carregarMovimentacoes() {
+        try {
+            console.log('Carregando movimentações para usuário:', currentUser.uid);
+            
+            const q = query(
+                collection(db, "movimentacoes"),
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("data", "desc")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            movimentacoes = [];
+            
+            console.log(`Total de documentos encontrados: ${querySnapshot.size}`);
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                console.log('Movimentação encontrada:', data);
+                
+                // Converter Timestamps para string
+                const movData = {
+                    id: doc.id,
+                    ...data,
+                    data: formatarTimestampParaString(data.data),
+                    vencimento: formatarTimestampParaString(data.vencimento),
+                    criadoEm: formatarTimestampParaString(data.criadoEm),
+                    atualizadoEm: formatarTimestampParaString(data.atualizadoEm)
+                };
+                
+                movimentacoes.push(movData);
+            });
+            
+            console.log('Movimentações carregadas:', movimentacoes);
+            
+            // Verificar e atualizar status de atrasados
+            await verificarAtrasados();
+            
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            
+            if (movimentacoes.length === 0) {
+                console.log('Nenhuma movimentação encontrada');
+            }
+            
+        } catch (error) {
+            console.error('Erro detalhado ao carregar movimentações:', error);
+            showNotification('Erro ao carregar movimentações: ' + error.message, 'error');
+        }
+    }
+
+    function formatarTimestampParaString(timestamp) {
+        if (!timestamp) return null;
+        
+        try {
+            if (timestamp.toDate) {
+                // É um Timestamp do Firebase
+                const date = timestamp.toDate();
+                return date.toISOString().split('T')[0];
+            } else if (typeof timestamp === 'string') {
+                // Já é uma string
+                return timestamp.split('T')[0];
+            } else if (timestamp instanceof Date) {
+                // É um objeto Date
+                return timestamp.toISOString().split('T')[0];
+            }
+        } catch (e) {
+            console.error('Erro ao formatar timestamp:', e);
+        }
+        
+        return null;
+    }
+
+    async function verificarAtrasados() {
+        const hoje = new Date().toISOString().split('T')[0];
+        console.log('Verificando atrasados. Hoje:', hoje);
+
+        for (const mov of movimentacoes) {
+            if (mov.status === 'pendente' && mov.vencimento && mov.vencimento < hoje) {
+                try {
+                    console.log('Atualizando movimentação atrasada:', mov.id);
+                    const movRef = doc(db, "movimentacoes", mov.id);
+                    await updateDoc(movRef, {
+                        status: 'atrasado',
+                        atualizadoEm: serverTimestamp()
+                    });
+                    
+                    mov.status = 'atrasado';
+                } catch (error) {
+                    console.error('Erro ao atualizar status:', error);
                 }
             }
         }
+    }
 
-        // ============================================
-        // TABELA DE MOVIMENTAÇÕES
-        // ============================================
+    // ============================================
+    // TABELA DE MOVIMENTAÇÕES - CORRIGIDA
+    // ============================================
 
-        function atualizarTabelaMovimentacoes() {
-            const searchTerm = searchMovimentacoes.value.toLowerCase();
-            const tipoFilter = filterTipo.value;
-            const statusFilter = filterStatus.value;
-            const mesFilter = filterMes.value;
+    function atualizarTabelaMovimentacoes() {
+        const searchTerm = searchMovimentacoes.value.toLowerCase();
+        const tipoFilter = filterTipo.value;
+        const statusFilter = filterStatus.value;
+        const mesFilter = filterMes.value;
+        
+        console.log('Atualizando tabela com filtros:', {
+            searchTerm, tipoFilter, statusFilter, mesFilter,
+            totalMovimentacoes: movimentacoes.length
+        });
+        
+        // Aplicar filtros
+        let movimentacoesFiltradas = movimentacoes.filter(mov => {
+            const matchSearch = !searchTerm || 
+                (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
             
-            // Aplicar filtros
-            let movimentacoesFiltradas = movimentacoes.filter(mov => {
-                const matchSearch = !searchTerm || 
-                    (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
-                
-                const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
-                const matchStatus = !statusFilter || mov.status === statusFilter;
-                
-                let matchMes = true;
-                if (mesFilter && mov.data) {
+            const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
+            const matchStatus = !statusFilter || mov.status === statusFilter;
+            
+            let matchMes = true;
+            if (mesFilter && mov.data) {
+                try {
                     const data = new Date(mov.data);
                     const mes = data.getMonth() + 1;
                     matchMes = mes.toString() === mesFilter;
+                } catch (e) {
+                    console.error('Erro ao filtrar por mês:', e);
+                    matchMes = false;
                 }
-                
-                return matchSearch && matchTipo && matchStatus && matchMes;
-            });
-            
-            // Limpar tabela
-            movimentacoesTable.innerHTML = '';
-            
-            if (movimentacoesFiltradas.length === 0) {
-                const emptyRow = emptyState.cloneNode(true);
-                emptyRow.id = '';
-                movimentacoesTable.appendChild(emptyRow);
-                return;
             }
             
-            // Preencher tabela
-            movimentacoesFiltradas.forEach(mov => {
-                const row = document.createElement('tr');
-                
-                const dataFormatada = formatarData(mov.data);
-                const vencimentoFormatado = formatarData(mov.vencimento);
-                const valorFormatado = formatarMoeda(mov.valor);
-                
-                // Determinar categoria
-                const categoriaClass = getCategoriaClass(mov.categoria);
-                const categoriaNome = getCategoriaNome(mov.categoria);
-                
-                // Determinar estilo baseado no tipo
-                const tipoBadge = mov.tipo === 'receita' 
-                    ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
-                    : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
-                
-                const statusBadge = getStatusBadge(mov.status);
-                
-                row.innerHTML = `
-                    <td>${dataFormatada}</td>
-                    <td>${tipoBadge}</td>
-                    <td>${mov.descricao || 'Sem descrição'}</td>
-                    <td>
-                        <span class="categoria-badge ${categoriaClass}">
-                            ${categoriaNome}
-                        </span>
-                    </td>
-                    <td class="${mov.tipo === 'receita' ? 'text-success' : 'text-danger'} fw-bold">
-                        ${mov.tipo === 'receita' ? '+' : '-'} ${valorFormatado}
-                    </td>
-                    <td>${statusBadge}</td>
-                    <td>${vencimentoFormatado}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')" title="Excluir">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                // Destacar linhas atrasadas
-                if (mov.status === 'atrasado') {
-                    row.style.backgroundColor = '#fff5f5';
-                }
-                
-                movimentacoesTable.appendChild(row);
-            });
+            return matchSearch && matchTipo && matchStatus && matchMes;
+        });
+        
+        console.log('Movimentações filtradas:', movimentacoesFiltradas.length);
+        
+        // Limpar tabela
+        movimentacoesTable.innerHTML = '';
+        
+        if (movimentacoesFiltradas.length === 0) {
+            const emptyRow = emptyState.cloneNode(true);
+            emptyRow.id = '';
+            movimentacoesTable.appendChild(emptyRow);
+            return;
         }
-
-        function getCategoriaClass(categoria) {
-            switch(categoria) {
-                case 'servico':
-                case 'produto':
-                    return 'categoria-receita';
-                case 'material':
-                case 'marketing':
-                case 'transporte':
-                case 'imposto':
-                case 'salario':
-                case 'aluguel':
-                    return 'categoria-despesa';
-                default:
-                    return 'categoria-outros';
+        
+        // Preencher tabela
+        movimentacoesFiltradas.forEach(mov => {
+            const row = document.createElement('tr');
+            
+            const dataFormatada = formatarData(mov.data);
+            const vencimentoFormatado = formatarData(mov.vencimento);
+            const valorFormatado = formatarMoeda(mov.valor);
+            
+            // Determinar categoria
+            const categoriaClass = getCategoriaClass(mov.categoria);
+            const categoriaNome = getCategoriaNome(mov.categoria);
+            
+            // Determinar estilo baseado no tipo
+            const tipoBadge = mov.tipo === 'receita' 
+                ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
+                : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
+            
+            const statusBadge = getStatusBadge(mov.status);
+            
+            row.innerHTML = `
+                <td>${dataFormatada}</td>
+                <td>${tipoBadge}</td>
+                <td>${mov.descricao || 'Sem descrição'}</td>
+                <td>
+                    <span class="categoria-badge ${categoriaClass}">
+                        ${categoriaNome}
+                    </span>
+                </td>
+                <td class="${mov.tipo === 'receita' ? 'text-success' : 'text-danger'} fw-bold">
+                    ${mov.tipo === 'receita' ? '+' : '-'} ${valorFormatado}
+                </td>
+                <td>${statusBadge}</td>
+                <td>${vencimentoFormatado}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            // Destacar linhas atrasadas
+            if (mov.status === 'atrasado') {
+                row.style.backgroundColor = '#fff5f5';
             }
-        }
-
-        function getCategoriaNome(categoria) {
-            const categorias = {
-                'servico': 'Serviço',
-                'produto': 'Produto',
-                'material': 'Material',
-                'marketing': 'Marketing',
-                'transporte': 'Transporte',
-                'imposto': 'Imposto',
-                'salario': 'Salário',
-                'aluguel': 'Aluguel',
-                'outros': 'Outros'
-            };
-            return categorias[categoria] || 'Outros';
-        }
-
-        function getStatusBadge(status) {
-            switch(status) {
-                case 'pago':
-                    return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago</span>';
-                case 'pendente':
-                    return '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i>Pendente</span>';
-                case 'atrasado':
-                    return '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i>Atrasado</span>';
-                default:
-                    return `<span class="badge-status">${status}</span>`;
-            }
-        }
-
-        // ============================================
-        // ESTATÍSTICAS E GRÁFICOS
-        // ============================================
-
-        function atualizarEstatisticas() {
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
             
-            // Filtrar movimentações do mês atual
-            const movimentacoesMes = movimentacoes.filter(mov => {
-                if (!mov.data) return false;
-                const dataMov = new Date(mov.data);
-                return dataMov.getMonth() === mesAtual && 
-                       dataMov.getFullYear() === anoAtual;
-            });
+            movimentacoesTable.appendChild(row);
+        });
+    }
+
+    function getCategoriaClass(categoria) {
+        switch(categoria) {
+            case 'servico':
+            case 'produto':
+                return 'categoria-receita';
+            case 'material':
+            case 'marketing':
+            case 'transporte':
+            case 'imposto':
+            case 'salario':
+            case 'aluguel':
+                return 'categoria-despesa';
+            default:
+                return 'categoria-outros';
+        }
+    }
+
+    function getCategoriaNome(categoria) {
+        const categorias = {
+            'servico': 'Serviço',
+            'produto': 'Produto',
+            'material': 'Material',
+            'marketing': 'Marketing',
+            'transporte': 'Transporte',
+            'imposto': 'Imposto',
+            'salario': 'Salário',
+            'aluguel': 'Aluguel',
+            'outros': 'Outros'
+        };
+        return categorias[categoria] || 'Outros';
+    }
+
+    function getStatusBadge(status) {
+        switch(status) {
+            case 'pago':
+                return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago</span>';
+            case 'pendente':
+                return '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i>Pendente</span>';
+            case 'atrasado':
+                return '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i>Atrasado</span>';
+            default:
+                return `<span class="badge-status">${status}</span>`;
+        }
+    }
+
+    // ============================================
+    // ESTATÍSTICAS E GRÁFICOS
+    // ============================================
+
+    function atualizarEstatisticas() {
+        const hoje = new Date();
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
+        
+        console.log('Calculando estatísticas para:', {
+            totalMovimentacoes: movimentacoes.length,
+            mesAtual: mesAtual + 1,
+            anoAtual
+        });
+        
+        // Calcular valores
+        let totalReceita = 0;
+        let totalDespesa = 0;
+        let totalAtrasados = 0;
+        let totalAReceber7dias = 0;
+        let totalAPagar7dias = 0;
+        
+        movimentacoes.forEach(mov => {
+            const valor = parseFloat(mov.valor) || 0;
             
-            // Calcular valores
-            let totalReceita = 0;
-            let totalDespesa = 0;
-            let totalAtrasados = 0;
-            let totalAReceber7dias = 0;
-            let totalAPagar7dias = 0;
-            
-            movimentacoes.forEach(mov => {
-                const valor = parseFloat(mov.valor) || 0;
+            if (mov.tipo === 'receita') {
+                totalReceita += valor;
                 
-                if (mov.tipo === 'receita') {
-                    totalReceita += valor;
-                    
-                    // A receber nos próximos 7 dias
-                    if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
+                // A receber nos próximos 7 dias
+                if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
+                    try {
                         const vencimento = new Date(mov.vencimento);
                         const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
                         if (diferencaDias <= 7 && diferencaDias >= 0) {
                             totalAReceber7dias += valor;
                         }
+                    } catch (e) {
+                        console.error('Erro ao calcular dias até vencimento:', e);
                     }
-                    
-                    // Atrasados
-                    if (mov.status === 'atrasado') {
-                        totalAtrasados += valor;
-                    }
-                } else if (mov.tipo === 'despesa') {
-                    totalDespesa += valor;
-                    
-                    // A pagar nos próximos 7 dias
-                    if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
+                }
+                
+                // Atrasados
+                if (mov.status === 'atrasado') {
+                    totalAtrasados += valor;
+                }
+            } else if (mov.tipo === 'despesa') {
+                totalDespesa += valor;
+                
+                // A pagar nos próximos 7 dias
+                if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
+                    try {
                         const vencimento = new Date(mov.vencimento);
                         const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
                         if (diferencaDias <= 7 && diferencaDias >= 0) {
                             totalAPagar7dias += valor;
                         }
-                    }
-                    
-                    // Atrasados
-                    if (mov.status === 'atrasado') {
-                        totalAtrasados += valor;
+                    } catch (e) {
+                        console.error('Erro ao calcular dias até vencimento:', e);
                     }
                 }
-            });
-            
-            const saldo = totalReceita - totalDespesa;
-            
-            // Atualizar elementos
-            saldoAtual.textContent = formatarMoeda(saldo);
-            receitaMes.textContent = formatarMoeda(totalReceita);
-            despesaMes.textContent = formatarMoeda(totalDespesa);
-            atrasados.textContent = formatarMoeda(totalAtrasados);
-            aReceber.textContent = formatarMoeda(totalAReceber7dias);
-            aPagar.textContent = formatarMoeda(totalAPagar7dias);
-        }
+                
+                // Atrasados
+                if (mov.status === 'atrasado') {
+                    totalAtrasados += valor;
+                }
+            }
+        });
+        
+        const saldo = totalReceita - totalDespesa;
+        
+        console.log('Estatísticas calculadas:', {
+            saldo, totalReceita, totalDespesa, totalAtrasados,
+            totalAReceber7dias, totalAPagar7dias
+        });
+        
+        // Atualizar elementos
+        saldoAtual.textContent = formatarMoeda(saldo);
+        receitaMes.textContent = formatarMoeda(totalReceita);
+        despesaMes.textContent = formatarMoeda(totalDespesa);
+        atrasados.textContent = formatarMoeda(totalAtrasados);
+        aReceber.textContent = formatarMoeda(totalAReceber7dias);
+        aPagar.textContent = formatarMoeda(totalAPagar7dias);
+    }
 
-        function inicializarGraficos() {
+    function inicializarGraficos() {
+        try {
             // Preparar dados dos últimos 6 meses
             const meses = getUltimos6Meses();
             const dadosReceitas = gerarDadosPorMes('receita');
             const dadosDespesas = gerarDadosPorMes('despesa');
             
+            console.log('Dados para gráficos:', {
+                meses,
+                dadosReceitas,
+                dadosDespesas
+            });
+            
             // Gráfico de Fluxo de Caixa (últimos 6 meses)
             const ctxFluxo = document.getElementById('graficoFluxoCaixa');
             if (ctxFluxo) {
+                const existingChart = Chart.getChart(ctxFluxo);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+                
                 new Chart(ctxFluxo.getContext('2d'), {
                     type: 'line',
                     data: {
@@ -1434,6 +1516,11 @@
             // Gráfico de Distribuição de Despesas
             const ctxDespesas = document.getElementById('graficoDespesas');
             if (ctxDespesas) {
+                const existingChart = Chart.getChart(ctxDespesas);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+                
                 const dadosCategorias = getDadosCategoriasDespesa();
                 new Chart(ctxDespesas.getContext('2d'), {
                     type: 'doughnut',
@@ -1467,6 +1554,11 @@
             // Gráfico Comparativo
             const ctxComparativo = document.getElementById('graficoComparativo');
             if (ctxComparativo) {
+                const existingChart = Chart.getChart(ctxComparativo);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+                
                 new Chart(ctxComparativo.getContext('2d'), {
                     type: 'bar',
                     data: {
@@ -1508,363 +1600,378 @@
                     }
                 });
             }
+        } catch (error) {
+            console.error('Erro ao inicializar gráficos:', error);
         }
+    }
 
-        function getDadosCategoriasDespesa() {
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
-            
-            const categoriasDespesa = {
-                'material': 0,
-                'marketing': 0,
-                'transporte': 0,
-                'imposto': 0,
-                'salario': 0,
-                'aluguel': 0,
-                'outros': 0
-            };
-            
-            // Calcular totais por categoria
-            movimentacoes.forEach(mov => {
-                if (mov.tipo === 'despesa') {
+    function getDadosCategoriasDespesa() {
+        const hoje = new Date();
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
+        
+        const categoriasDespesa = {
+            'material': 0,
+            'marketing': 0,
+            'transporte': 0,
+            'imposto': 0,
+            'salario': 0,
+            'aluguel': 0,
+            'outros': 0
+        };
+        
+        // Calcular totais por categoria
+        movimentacoes.forEach(mov => {
+            if (mov.tipo === 'despesa') {
+                try {
                     const dataMov = new Date(mov.data);
                     if (dataMov.getMonth() === mesAtual && dataMov.getFullYear() === anoAtual) {
                         const categoria = mov.categoria || 'outros';
                         categoriasDespesa[categoria] = (categoriasDespesa[categoria] || 0) + (mov.valor || 0);
                     }
+                } catch (e) {
+                    console.error('Erro ao processar data da movimentação:', e);
                 }
-            });
-            
-            // Preparar dados para o gráfico
-            const labels = [];
-            const valores = [];
-            const cores = ['#e74c3c', '#9b59b6', '#f39c12', '#34495e', '#1abc9c', '#d35400', '#7f8c8d'];
-            
-            Object.entries(categoriasDespesa).forEach(([categoria, valor], index) => {
-                if (valor > 0) {
-                    labels.push(getCategoriaNome(categoria));
-                    valores.push(valor);
-                }
-            });
-            
-            return {
-                labels: labels,
-                valores: valores,
-                cores: cores.slice(0, labels.length)
-            };
-        }
+            }
+        });
+        
+        // Preparar dados para o gráfico
+        const labels = [];
+        const valores = [];
+        const cores = ['#e74c3c', '#9b59b6', '#f39c12', '#34495e', '#1abc9c', '#d35400', '#7f8c8d'];
+        
+        Object.entries(categoriasDespesa).forEach(([categoria, valor], index) => {
+            if (valor > 0) {
+                labels.push(getCategoriaNome(categoria));
+                valores.push(valor);
+            }
+        });
+        
+        return {
+            labels: labels,
+            valores: valores,
+            cores: cores.slice(0, labels.length)
+        };
+    }
 
-        function gerarDadosPorMes(tipo) {
-            const hoje = new Date();
-            const dados = [];
+    function gerarDadosPorMes(tipo) {
+        const hoje = new Date();
+        const dados = [];
+        
+        for (let i = 5; i >= 0; i--) {
+            const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+            const mes = data.getMonth();
+            const ano = data.getFullYear();
             
-            for (let i = 5; i >= 0; i--) {
-                const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-                const mes = data.getMonth();
-                const ano = data.getFullYear();
-                
-                const total = movimentacoes
-                    .filter(m => {
-                        if (m.tipo !== tipo) return false;
+            const total = movimentacoes
+                .filter(m => {
+                    if (m.tipo !== tipo) return false;
+                    if (!m.data) return false;
+                    
+                    try {
                         const dataMov = new Date(m.data);
                         return dataMov.getMonth() === mes && 
                                dataMov.getFullYear() === ano;
-                    })
-                    .reduce((sum, m) => sum + (m.valor || 0), 0);
-                
-                dados.push(total);
-            }
-            
-            return dados;
-        }
-
-        // ============================================
-        // CALCULADORA - CORRIGIDA 100% FUNCIONAL
-        // ============================================
-
-        function inicializarCalculadora() {
-            toggleCalculadora.addEventListener('click', () => {
-                calculadoraVisible = !calculadoraVisible;
-                calculadoraPanel.classList.toggle('show', calculadoraVisible);
-            });
-            
-            // Fechar calculadora ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!calculadoraPanel.contains(e.target) && !toggleCalculadora.contains(e.target)) {
-                    calculadoraPanel.classList.remove('show');
-                    calculadoraVisible = false;
-                }
-            });
-        }
-
-        window.calcInput = function(value) {
-            if (calculadoraValue === '0' && value !== '.') {
-                calculadoraValue = value;
-            } else {
-                calculadoraValue += value;
-            }
-            calcDisplay.textContent = calculadoraValue;
-        };
-
-        window.calcClear = function() {
-            calculadoraValue = '0';
-            calcDisplay.textContent = calculadoraValue;
-        };
-
-        // FUNÇÃO DE PORCENTAGEM 100% FUNCIONAL
-        window.calcPercentage = function() {
-            try {
-                let expression = calculadoraValue.replace(/×/g, '*').replace(/÷/g, '/');
-                
-                // Se não tem operador, apenas calcula porcentagem do número
-                if (!/[+\-*/]/.test(expression)) {
-                    let num = parseFloat(expression) / 100;
-                    calculadoraValue = num.toString();
-                    calcDisplay.textContent = calculadoraValue;
-                    return;
-                }
-                
-                // Divide a expressão em partes: número, operador, número
-                let parts = expression.match(/(\d+\.?\d*)([+\-*/])(\d+\.?\d*)/);
-                
-                if (parts && parts.length === 4) {
-                    let num1 = parseFloat(parts[1]);
-                    let operador = parts[2];
-                    let num2 = parseFloat(parts[3]);
-                    
-                    let result;
-                    switch(operador) {
-                        case '+':
-                            result = num1 + (num1 * (num2 / 100));
-                            break;
-                        case '-':
-                            result = num1 - (num1 * (num2 / 100));
-                            break;
-                        case '*':
-                            result = num1 * (num2 / 100);
-                            break;
-                        case '/':
-                            result = num1 / (num2 / 100);
-                            break;
-                        default:
-                            result = 0;
+                    } catch (e) {
+                        console.error('Erro ao filtrar por mês:', e);
+                        return false;
                     }
-                    
-                    calculadoraValue = result.toString();
-                    calcDisplay.textContent = calculadoraValue;
-                }
-            } catch (error) {
-                calculadoraValue = 'Erro';
-                calcDisplay.textContent = calculadoraValue;
-            }
-        };
+                })
+                .reduce((sum, m) => sum + (m.valor || 0), 0);
+            
+            dados.push(total);
+        }
+        
+        return dados;
+    }
 
-        window.calcCalculate = function() {
-            try {
-                let expression = calculadoraValue.replace(/×/g, '*').replace(/÷/g, '/');
-                const result = eval(expression) || 0;
-                calculadoraValue = parseFloat(result.toFixed(2)).toString();
-                calcDisplay.textContent = calculadoraValue;
-            } catch (error) {
-                calculadoraValue = 'Erro';
-                calcDisplay.textContent = calculadoraValue;
-            }
-        };
+    // ============================================
+    // CALCULADORA
+    // ============================================
 
-        // ============================================
-        // FUNÇÕES PRINCIPAIS
-        // ============================================
-
-        window.abrirModalMovimentacao = function(tipo = 'receita') {
-            const modalTitle = document.getElementById('modalTitle');
-            
-            modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
-            
-            // Resetar formulário
-            document.getElementById('formMovimentacao').reset();
-            document.getElementById('movimentacaoId').value = '';
-            
-            // Definir tipo
-            document.getElementById('tipoMovimentacao').value = tipo;
-            
-            // Ativar botão correto
-            document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-tipo') === tipo) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            // Configurar data atual
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataMovimentacao').value = hoje;
-            document.getElementById('vencimento').value = hoje;
-            
-            // Mostrar modal
-            new bootstrap.Modal(document.getElementById('modalMovimentacao')).show();
-        };
-
-        window.editarMovimentacao = async function(id) {
-            const mov = movimentacoes.find(m => m.id === id);
-            if (!mov) {
-                showNotification('Movimentação não encontrada!', 'error');
-                return;
-            }
-            
-            const modalTitle = document.getElementById('modalTitle');
-            modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
-            
-            // Preencher dados
-            document.getElementById('movimentacaoId').value = mov.id;
-            document.getElementById('descricao').value = mov.descricao || '';
-            document.getElementById('categoria').value = mov.categoria || 'outros';
-            document.getElementById('valor').value = mov.valor || 0;
-            document.getElementById('status').value = mov.status || 'pendente';
-            document.getElementById('dataMovimentacao').value = mov.data || '';
-            document.getElementById('vencimento').value = mov.vencimento || '';
-            document.getElementById('formaPagamento').value = mov.formaPagamento || '';
-            document.getElementById('observacoes').value = mov.observacoes || '';
-            document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-            
-            // Definir tipo
-            document.getElementById('tipoMovimentacao').value = mov.tipo;
-            
-            // Ativar botão correto
-            document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-tipo') === mov.tipo) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            // Mostrar modal
-            new bootstrap.Modal(document.getElementById('modalMovimentacao')).show();
-        };
-
-        document.getElementById('btnSalvarMovimentacao').addEventListener('click', async function() {
-            await salvarMovimentacao();
+    function inicializarCalculadora() {
+        toggleCalculadora.addEventListener('click', () => {
+            calculadoraVisible = !calculadoraVisible;
+            calculadoraPanel.classList.toggle('show', calculadoraVisible);
         });
+        
+        // Fechar calculadora ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!calculadoraPanel.contains(e.target) && !toggleCalculadora.contains(e.target)) {
+                calculadoraPanel.classList.remove('show');
+                calculadoraVisible = false;
+            }
+        });
+    }
 
-        async function salvarMovimentacao() {
-            // Validação básica
-            const descricao = document.getElementById('descricao').value.trim();
-            const valor = parseFloat(document.getElementById('valor').value);
-            const categoria = document.getElementById('categoria').value;
-            const dataMov = document.getElementById('dataMovimentacao').value;
-            const vencimento = document.getElementById('vencimento').value;
-            
-            if (!descricao) {
-                showNotification('Informe uma descrição.', 'warning');
-                return;
-            }
-            
-            if (!valor || isNaN(valor) || valor <= 0) {
-                showNotification('Informe um valor válido maior que zero.', 'warning');
-                return;
-            }
-            
-            if (!categoria) {
-                showNotification('Selecione uma categoria.', 'warning');
-                return;
-            }
-            
-            if (!dataMov) {
-                showNotification('Informe a data da movimentação.', 'warning');
-                return;
-            }
-            
-            if (!vencimento) {
-                showNotification('Informe a data de vencimento.', 'warning');
-                return;
-            }
-            
-            try {
-                const movData = {
-                    tipo: document.getElementById('tipoMovimentacao').value,
-                    descricao: descricao,
-                    categoria: categoria,
-                    valor: valor,
-                    status: document.getElementById('status').value,
-                    data: dataMov,
-                    vencimento: vencimento,
-                    formaPagamento: document.getElementById('formaPagamento').value || '',
-                    observacoes: document.getElementById('observacoes').value || '',
-                    despesaFixa: document.getElementById('despesaFixa').checked,
-                    profissionalId: currentUser.uid,
-                    atualizadoEm: serverTimestamp()
-                };
-                
-                const movId = document.getElementById('movimentacaoId').value;
-                
-                if (movId) {
-                    // Atualizar
-                    const movRef = doc(db, "movimentacoes", movId);
-                    await updateDoc(movRef, movData);
-                    
-                    // Atualizar localmente
-                    const index = movimentacoes.findIndex(m => m.id === movId);
-                    if (index !== -1) {
-                        movimentacoes[index] = { ...movimentacoes[index], ...movData };
-                    }
-                    
-                    showNotification('Movimentação atualizada com sucesso!', 'success');
-                } else {
-                    // Nova movimentação
-                    movData.criadoEm = serverTimestamp();
-                    const docRef = await addDoc(collection(db, "movimentacoes"), movData);
-                    movData.id = docRef.id;
-                    movimentacoes.unshift(movData);
-                    
-                    showNotification('Movimentação criada com sucesso!', 'success');
-                }
-                
-                // Fechar modal
-                bootstrap.Modal.getInstance(document.getElementById('modalMovimentacao')).hide();
-                
-                // Atualizar interface
-                atualizarTabelaMovimentacoes();
-                atualizarEstatisticas();
-                inicializarGraficos(); // Atualizar gráficos
-                
-            } catch (error) {
-                console.error('Erro ao salvar movimentação:', error);
-                showNotification('Erro ao salvar movimentação. Tente novamente.', 'error');
-            }
+    window.calcInput = function(value) {
+        if (calculadoraValue === '0' && value !== '.') {
+            calculadoraValue = value;
+        } else {
+            calculadoraValue += value;
         }
+        calcDisplay.textContent = calculadoraValue;
+    };
 
-        window.excluirMovimentacao = async function(id) {
-            if (!confirm('Tem certeza que deseja excluir esta movimentação?\n\nEsta ação não pode ser desfeita.')) {
+    window.calcClear = function() {
+        calculadoraValue = '0';
+        calcDisplay.textContent = calculadoraValue;
+    };
+
+    window.calcPercentage = function() {
+        try {
+            let expression = calculadoraValue.replace(/×/g, '*').replace(/÷/g, '/');
+            
+            // Se não tem operador, apenas calcula porcentagem do número
+            if (!/[+\-*/]/.test(expression)) {
+                let num = parseFloat(expression) / 100;
+                calculadoraValue = num.toString();
+                calcDisplay.textContent = calculadoraValue;
                 return;
             }
             
-            try {
-                const movRef = doc(db, "movimentacoes", id);
-                await deleteDoc(movRef);
+            // Divide a expressão em partes: número, operador, número
+            let parts = expression.match(/(\d+\.?\d*)([+\-*/])(\d+\.?\d*)/);
+            
+            if (parts && parts.length === 4) {
+                let num1 = parseFloat(parts[1]);
+                let operador = parts[2];
+                let num2 = parseFloat(parts[3]);
                 
-                // Remover da lista local
-                const index = movimentacoes.findIndex(m => m.id === id);
-                if (index !== -1) {
-                    movimentacoes.splice(index, 1);
+                let result;
+                switch(operador) {
+                    case '+':
+                        result = num1 + (num1 * (num2 / 100));
+                        break;
+                    case '-':
+                        result = num1 - (num1 * (num2 / 100));
+                        break;
+                    case '*':
+                        result = num1 * (num2 / 100);
+                        break;
+                    case '/':
+                        result = num1 / (num2 / 100);
+                        break;
+                    default:
+                        result = 0;
                 }
                 
-                // Atualizar interface
-                atualizarTabelaMovimentacoes();
-                atualizarEstatisticas();
-                inicializarGraficos(); // Atualizar gráficos
-                
-                showNotification('Movimentação excluída com sucesso!', 'success');
-            } catch (error) {
-                console.error('Erro ao excluir movimentação:', error);
-                showNotification('Erro ao excluir movimentação. Tente novamente.', 'error');
+                calculadoraValue = result.toString();
+                calcDisplay.textContent = calculadoraValue;
             }
-        };
+        } catch (error) {
+            calculadoraValue = 'Erro';
+            calcDisplay.textContent = calculadoraValue;
+        }
+    };
 
-        // ============================================
-        // EXPORTAÇÃO
-        // ============================================
+    window.calcCalculate = function() {
+        try {
+            let expression = calculadoraValue.replace(/×/g, '*').replace(/÷/g, '/');
+            const result = eval(expression) || 0;
+            calculadoraValue = parseFloat(result.toFixed(2)).toString();
+            calcDisplay.textContent = calculadoraValue;
+        } catch (error) {
+            calculadoraValue = 'Erro';
+            calcDisplay.textContent = calculadoraValue;
+        }
+    };
 
-        window.exportarPDF = function() {
+    // ============================================
+    // FUNÇÕES PRINCIPAIS
+    // ============================================
+
+    window.abrirModalMovimentacao = function(tipo = 'receita') {
+        const modalTitle = document.getElementById('modalTitle');
+        
+        modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
+        
+        // Resetar formulário
+        document.getElementById('formMovimentacao').reset();
+        document.getElementById('movimentacaoId').value = '';
+        
+        // Definir tipo
+        document.getElementById('tipoMovimentacao').value = tipo;
+        
+        // Ativar botão correto
+        document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tipo') === tipo) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Configurar data atual
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataMovimentacao').value = hoje;
+        document.getElementById('vencimento').value = hoje;
+        
+        // Mostrar modal
+        new bootstrap.Modal(document.getElementById('modalMovimentacao')).show();
+    };
+
+    window.editarMovimentacao = async function(id) {
+        const mov = movimentacoes.find(m => m.id === id);
+        if (!mov) {
+            showNotification('Movimentação não encontrada!', 'error');
+            return;
+        }
+        
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
+        
+        // Preencher dados
+        document.getElementById('movimentacaoId').value = mov.id;
+        document.getElementById('descricao').value = mov.descricao || '';
+        document.getElementById('categoria').value = mov.categoria || 'outros';
+        document.getElementById('valor').value = mov.valor || 0;
+        document.getElementById('status').value = mov.status || 'pendente';
+        document.getElementById('dataMovimentacao').value = mov.data || '';
+        document.getElementById('vencimento').value = mov.vencimento || '';
+        document.getElementById('formaPagamento').value = mov.formaPagamento || '';
+        document.getElementById('observacoes').value = mov.observacoes || '';
+        document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
+        
+        // Definir tipo
+        document.getElementById('tipoMovimentacao').value = mov.tipo;
+        
+        // Ativar botão correto
+        document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-tipo') === mov.tipo) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Mostrar modal
+        new bootstrap.Modal(document.getElementById('modalMovimentacao')).show();
+    };
+
+    document.getElementById('btnSalvarMovimentacao').addEventListener('click', async function() {
+        await salvarMovimentacao();
+    });
+
+    async function salvarMovimentacao() {
+        // Validação básica
+        const descricao = document.getElementById('descricao').value.trim();
+        const valor = parseFloat(document.getElementById('valor').value);
+        const categoria = document.getElementById('categoria').value;
+        const dataMov = document.getElementById('dataMovimentacao').value;
+        const vencimento = document.getElementById('vencimento').value;
+        
+        if (!descricao) {
+            showNotification('Informe uma descrição.', 'warning');
+            return;
+        }
+        
+        if (!valor || isNaN(valor) || valor <= 0) {
+            showNotification('Informe um valor válido maior que zero.', 'warning');
+            return;
+        }
+        
+        if (!categoria) {
+            showNotification('Selecione uma categoria.', 'warning');
+            return;
+        }
+        
+        if (!dataMov) {
+            showNotification('Informe a data da movimentação.', 'warning');
+            return;
+        }
+        
+        if (!vencimento) {
+            showNotification('Informe a data de vencimento.', 'warning');
+            return;
+        }
+        
+        try {
+            const movData = {
+                tipo: document.getElementById('tipoMovimentacao').value,
+                descricao: descricao,
+                categoria: categoria,
+                valor: valor,
+                status: document.getElementById('status').value,
+                data: dataMov,
+                vencimento: vencimento,
+                formaPagamento: document.getElementById('formaPagamento').value || '',
+                observacoes: document.getElementById('observacoes').value || '',
+                despesaFixa: document.getElementById('despesaFixa').checked,
+                profissionalId: currentUser.uid,
+                atualizadoEm: serverTimestamp()
+            };
+            
+            const movId = document.getElementById('movimentacaoId').value;
+            
+            if (movId) {
+                // Atualizar
+                const movRef = doc(db, "movimentacoes", movId);
+                await updateDoc(movRef, movData);
+                
+                // Atualizar localmente
+                const index = movimentacoes.findIndex(m => m.id === movId);
+                if (index !== -1) {
+                    movimentacoes[index] = { ...movimentacoes[index], ...movData };
+                }
+                
+                showNotification('Movimentação atualizada com sucesso!', 'success');
+            } else {
+                // Nova movimentação
+                movData.criadoEm = serverTimestamp();
+                const docRef = await addDoc(collection(db, "movimentacoes"), movData);
+                movData.id = docRef.id;
+                movData.data = formatarTimestampParaString(movData.criadoEm);
+                movimentacoes.unshift(movData);
+                
+                showNotification('Movimentação criada com sucesso!', 'success');
+            }
+            
+            // Fechar modal
+            bootstrap.Modal.getInstance(document.getElementById('modalMovimentacao')).hide();
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            inicializarGraficos();
+            
+        } catch (error) {
+            console.error('Erro detalhado ao salvar movimentação:', error);
+            showNotification('Erro ao salvar movimentação: ' + error.message, 'error');
+        }
+    }
+
+    window.excluirMovimentacao = async function(id) {
+        if (!confirm('Tem certeza que deseja excluir esta movimentação?\n\nEsta ação não pode ser desfeita.')) {
+            return;
+        }
+        
+        try {
+            const movRef = doc(db, "movimentacoes", id);
+            await deleteDoc(movRef);
+            
+            // Remover da lista local
+            const index = movimentacoes.findIndex(m => m.id === id);
+            if (index !== -1) {
+                movimentacoes.splice(index, 1);
+            }
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            inicializarGraficos();
+            
+            showNotification('Movimentação excluída com sucesso!', 'success');
+        } catch (error) {
+            console.error('Erro ao excluir movimentação:', error);
+            showNotification('Erro ao excluir movimentação. Tente novamente.', 'error');
+        }
+    };
+
+    // ============================================
+    // EXPORTAÇÃO
+    // ============================================
+
+    window.exportarPDF = function() {
+        try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -1935,128 +2042,166 @@
             
             doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
             showNotification('Relatório PDF gerado com sucesso!', 'success');
-        };
-
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-
-        function formatarData(dataString) {
-            if (!dataString) return '--';
-            try {
-                const date = new Date(dataString);
-                if (isNaN(date.getTime())) return '--';
-                return date.toLocaleDateString('pt-BR');
-            } catch {
-                return '--';
-            }
+        } catch (error) {
+            console.error('Erro ao exportar PDF:', error);
+            showNotification('Erro ao gerar PDF', 'error');
         }
+    };
 
-        function formatarMoeda(valor) {
-            if (!valor && valor !== 0) return 'R$ 0,00';
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor);
+    // ============================================
+    // FUNÇÕES AUXILIARES
+    // ============================================
+
+    function formatarData(dataString) {
+        if (!dataString) return '--';
+        try {
+            const date = new Date(dataString);
+            if (isNaN(date.getTime())) return '--';
+            return date.toLocaleDateString('pt-BR');
+        } catch {
+            return '--';
         }
+    }
 
-        function getUltimos6Meses() {
-            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-            const hoje = new Date();
-            const ultimosMeses = [];
-            
-            for (let i = 5; i >= 0; i--) {
-                const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-                ultimosMeses.push(`${meses[data.getMonth()]}/${data.getFullYear().toString().slice(2)}`);
-            }
-            
-            return ultimosMeses;
+    function formatarMoeda(valor) {
+        if (!valor && valor !== 0) return 'R$ 0,00';
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor);
+    }
+
+    function getUltimos6Meses() {
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const hoje = new Date();
+        const ultimosMeses = [];
+        
+        for (let i = 5; i >= 0; i--) {
+            const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+            ultimosMeses.push(`${meses[data.getMonth()]}/${data.getFullYear().toString().slice(2)}`);
         }
+        
+        return ultimosMeses;
+    }
 
-        function showNotification(message, type = 'success') {
-            // Remover notificações anteriores
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(n => n.remove());
-            
-            // Criar nova notificação
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            // Remover após 5 segundos
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
-        }
+    function showNotification(message, type = 'success') {
+        // Remover notificações anteriores
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+        
+        // Criar nova notificação
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Remover após 5 segundos
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
 
-        function inicializarEventListeners() {
-            // Filtros
-            searchMovimentacoes.addEventListener('input', atualizarTabelaMovimentacoes);
-            filterTipo.addEventListener('change', atualizarTabelaMovimentacoes);
-            filterStatus.addEventListener('change', atualizarTabelaMovimentacoes);
-            filterMes.addEventListener('change', atualizarTabelaMovimentacoes);
-            
-            // Menu mobile
-            menuToggle.addEventListener('click', () => {
-                dashboardMenu.classList.toggle('show');
+    function inicializarEventListeners() {
+        // Filtros
+        searchMovimentacoes.addEventListener('input', atualizarTabelaMovimentacoes);
+        filterTipo.addEventListener('change', atualizarTabelaMovimentacoes);
+        filterStatus.addEventListener('change', atualizarTabelaMovimentacoes);
+        filterMes.addEventListener('change', atualizarTabelaMovimentacoes);
+        
+        // Menu mobile
+        menuToggle.addEventListener('click', () => {
+            dashboardMenu.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
                 const icon = menuToggle.querySelector('i');
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-times');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Logout
+        btnLogout.addEventListener('click', async () => {
+            if (confirm('Tem certeza que deseja sair?')) {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch {
+                    showNotification('Erro ao sair. Tente novamente.', 'error');
+                }
+            }
+        });
+        
+        // Botões de tipo no modal
+        document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tipo-mov-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tipoMovimentacao').value = this.getAttribute('data-tipo');
             });
+        });
+    }
+
+    function inicializarModais() {
+        // Configurar data padrão
+        const hoje = new Date().toISOString().split('T')[0];
+        const dataMov = document.getElementById('dataMovimentacao');
+        const vencimento = document.getElementById('vencimento');
+        
+        if (dataMov) {
+            dataMov.value = hoje;
+        }
+        
+        if (vencimento) {
+            vencimento.value = hoje;
+        }
+    }
+
+    // ============================================
+    // FUNÇÃO PARA TESTAR FIREBASE - DEBUG
+    // ============================================
+
+    async function testarFirebase() {
+        try {
+            console.log('Testando conexão com Firebase...');
             
-            // Fechar menu ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                    dashboardMenu.classList.remove('show');
-                    const icon = menuToggle.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
+            // Testar se consegue acessar a coleção
+            const movimentacoesRef = collection(db, "movimentacoes");
+            console.log('Referência da coleção:', movimentacoesRef);
+            
+            // Tentar contar documentos
+            const q = query(movimentacoesRef);
+            const snapshot = await getDocs(q);
+            console.log(`Total de documentos na coleção 'movimentacoes': ${snapshot.size}`);
+            
+            // Mostrar alguns documentos
+            snapshot.forEach((doc, index) => {
+                if (index < 3) {
+                    console.log(`Documento ${index + 1}:`, doc.id, doc.data());
                 }
             });
             
-            // Logout
-            btnLogout.addEventListener('click', async () => {
-                if (confirm('Tem certeza que deseja sair?')) {
-                    try {
-                        await signOut(auth);
-                        window.location.href = 'login.html';
-                    } catch {
-                        showNotification('Erro ao sair. Tente novamente.', 'error');
-                    }
-                }
-            });
-            
-            // Botões de tipo no modal
-            document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tipo-mov-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    document.getElementById('tipoMovimentacao').value = this.getAttribute('data-tipo');
-                });
-            });
+        } catch (error) {
+            console.error('Erro no teste do Firebase:', error);
         }
+    }
 
-        function inicializarModais() {
-            // Configurar data padrão
-            const hoje = new Date().toISOString().split('T')[0];
-            const dataMov = document.getElementById('dataMovimentacao');
-            const vencimento = document.getElementById('vencimento');
-            
-            if (dataMov) {
-                dataMov.value = hoje;
-            }
-            
-            if (vencimento) {
-                vencimento.value = hoje;
-            }
-        }
+    // Executar teste ao carregar
+    setTimeout(() => {
+        testarFirebase();
+    }, 1000);
 
-    </script>
+</script>
 </body>
 </html>
