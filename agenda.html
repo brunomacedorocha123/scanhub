@@ -959,22 +959,18 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Cliente (opcional)</label>
-                                <select class="form-select" id="clienteId">
-                                    <option value="">Selecione um cliente...</option>
-                                    <!-- Clientes serão carregados aqui -->
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Serviço (opcional)</label>
-                                <select class="form-select" id="servicoId">
-                                    <option value="">Selecione um serviço...</option>
-                                    <!-- Serviços serão carregados aqui -->
-                                </select>
-                            </div>
-                        </div>
+                       <div class="row mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Cliente (opcional)</label>
+        <input type="text" class="form-control" id="cliente" 
+               placeholder="Digite o nome do cliente...">
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Serviço (opcional)</label>
+        <input type="text" class="form-control" id="servico" 
+               placeholder="Digite o nome do serviço...">
+    </div>
+</div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -1033,913 +1029,892 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Script Principal -->
-    <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged,
-        signOut 
-    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        getDoc,
-        collection,
-        addDoc,
-        updateDoc,
-        deleteDoc,
-        getDocs,
-        query,
-        where,
-        orderBy,
-        serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+   <script type="module">
+// Import Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { 
+    getAuth, 
+    onAuthStateChanged,
+    signOut 
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    doc, 
+    getDoc,
+    collection,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    getDocs,
+    query,
+    where,
+    orderBy,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.firebasestorage.app",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
+// Firebase Config
+const firebaseConfig = {
+    apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+    authDomain: "scanhub-ed512.firebaseapp.com",
+    projectId: "scanhub-ed512",
+    storageBucket: "scanhub-ed512.firebasestorage.app",
+    messagingSenderId: "1083305018831",
+    appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+};
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    // ============================================
-    // VARIÁVEIS GLOBAIS
-    // ============================================
-    let currentUser = null;
-    let userData = null;
-    let compromissos = [];
-    let clientes = [];
-    let servicos = [];
-    let calendar = null;
-    let anotacoesTimeout = null;
+// ============================================
+// VARIÁVEIS GLOBAIS
+// ============================================
+let currentUser = null;
+let userData = null;
+let compromissos = [];
+let clientes = [];
+let servicos = [];
+let calendar = null;
+let anotacoesTimeout = null;
 
-    // ============================================
-    // ELEMENTOS DOM
-    // ============================================
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const userName = document.getElementById('userName');
-    const userAvatar = document.getElementById('userAvatar');
-    const userId = document.getElementById('userId');
-    const btnLogout = document.getElementById('btnLogout');
-    const menuToggle = document.getElementById('menuToggle');
-    const dashboardMenu = document.getElementById('dashboardMenu');
-    
-    // Views
-    const agendaTabs = document.getElementById('agendaTabs');
-    const viewCalendario = document.getElementById('viewCalendario');
-    const viewLista = document.getElementById('viewLista');
-    const viewAnotacoes = document.getElementById('viewAnotacoes');
-    
-    // Calendar
-    const calendarEl = document.getElementById('calendar');
-    
-    // Lista
-    const compromissosList = document.getElementById('compromissosList');
-    const filterStatus = document.getElementById('filterStatus');
-    
-    // Anotações
-    const anotacoesText = document.getElementById('anotacoesText');
-    const anotacoesStatus = document.getElementById('anotacoesStatus');
-    
-    // Modal
-    const modalCompromisso = new bootstrap.Modal(document.getElementById('modalCompromisso'));
-    const modalTitle = document.getElementById('modalTitle');
-    const formCompromisso = document.getElementById('formCompromisso');
-    const btnSalvarCompromisso = document.getElementById('btnSalvarCompromisso');
-    const compromissoId = document.getElementById('compromissoId');
-    const titulo = document.getElementById('titulo');
-    const tipo = document.getElementById('tipo');
-    const data = document.getElementById('data');
-    const horaInicio = document.getElementById('horaInicio');
-    const horaFim = document.getElementById('horaFim');
-    const clienteId = document.getElementById('clienteId');
-    const servicoId = document.getElementById('servicoId');
-    const pedidoNumero = document.getElementById('pedidoNumero');
-    const status = document.getElementById('status');
-    const local = document.getElementById('local');
-    const anotacoesField = document.getElementById('anotacoes');
-    const lembrete = document.getElementById('lembrete');
+// ============================================
+// ELEMENTOS DOM - ATUALIZADOS
+// ============================================
+const loadingOverlay = document.getElementById('loadingOverlay');
+const userName = document.getElementById('userName');
+const userAvatar = document.getElementById('userAvatar');
+const userId = document.getElementById('userId');
+const btnLogout = document.getElementById('btnLogout');
+const menuToggle = document.getElementById('menuToggle');
+const dashboardMenu = document.getElementById('dashboardMenu');
 
-    // ============================================
-    // INICIALIZAÇÃO
-    // ============================================
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                showLoading();
-                const userRef = doc(db, "usuarios", user.uid);
-                const userDoc = await getDoc(userRef);
-                
-                if (userDoc.exists()) {
-                    userData = userDoc.data();
-                    atualizarInterfaceUsuario(userData);
-                    await carregarDadosIniciais();
-                    inicializarSistema();
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                showNotification('Erro ao carregar dados', 'error');
-            } finally {
-                hideLoading();
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
+// Views
+const agendaTabs = document.getElementById('agendaTabs');
+const viewCalendario = document.getElementById('viewCalendario');
+const viewLista = document.getElementById('viewLista');
+const viewAnotacoes = document.getElementById('viewAnotacoes');
 
-    function atualizarInterfaceUsuario(data) {
-        if (data.apelido) {
-            userName.textContent = `Olá, ${data.apelido}`;
-            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-        }
-        
-        if (data.idScanHub) {
-            userId.textContent = data.idScanHub;
-        }
-    }
+// Calendar
+const calendarEl = document.getElementById('calendar');
 
-    async function carregarDadosIniciais() {
-        await Promise.all([
-            carregarCompromissos(),
-            carregarClientes(),
-            carregarServicos(),
-            carregarAnotacoes()
-        ]);
-    }
+// Lista
+const compromissosList = document.getElementById('compromissosList');
+const filterStatus = document.getElementById('filterStatus');
 
-    function inicializarSistema() {
-        inicializarCalendario();
-        inicializarEventListeners();
-        inicializarFormulario();
-        atualizarListaCompromissos();
-    }
+// Anotações
+const anotacoesText = document.getElementById('anotacoesText');
+const anotacoesStatus = document.getElementById('anotacoesStatus');
 
-    // ============================================
-    // CARREGAMENTO DE DADOS
-    // ============================================
-    async function carregarCompromissos() {
-        try {
-            const q = query(
-                collection(db, "compromissos"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("data", "asc")
-            );
-            
-            const querySnapshot = await getDocs(q);
-            compromissos = [];
-            
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                compromissos.push({
-                    id: doc.id,
-                    ...data,
-                    data: data.data || '',
-                    horaInicio: data.horaInicio || '',
-                    horaFim: data.horaFim || '',
-                    criadoEm: data.criadoEm || null,
-                    atualizadoEm: data.atualizadoEm || null
-                });
-            });
-            
-            // Ordenar por data e hora
-            compromissos.sort((a, b) => {
-                const dataA = new Date(`${a.data}T${a.horaInicio}`);
-                const dataB = new Date(`${b.data}T${b.horaInicio}`);
-                return dataA - dataB;
-            });
-            
-        } catch (error) {
-            console.error('Erro ao carregar compromissos:', error);
-            compromissos = [];
-        }
-    }
+// Modal - ATUALIZADO: removidos selects, mantidos inputs de texto
+const modalCompromisso = new bootstrap.Modal(document.getElementById('modalCompromisso'));
+const modalTitle = document.getElementById('modalTitle');
+const formCompromisso = document.getElementById('formCompromisso');
+const btnSalvarCompromisso = document.getElementById('btnSalvarCompromisso');
+const compromissoId = document.getElementById('compromissoId');
+const titulo = document.getElementById('titulo');
+const tipo = document.getElementById('tipo');
+const data = document.getElementById('data');
+const horaInicio = document.getElementById('horaInicio');
+const horaFim = document.getElementById('horaFim');
+const cliente = document.getElementById('cliente');           // Input de texto
+const servico = document.getElementById('servico');           // Input de texto
+const pedidoNumero = document.getElementById('pedidoNumero');
+const status = document.getElementById('status');
+const local = document.getElementById('local');
+const anotacoesField = document.getElementById('anotacoes');
+const lembrete = document.getElementById('lembrete');
 
-    async function carregarClientes() {
-        try {
-            const q = query(
-                collection(db, "clientes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("nome", "asc")
-            );
-            
-            const querySnapshot = await getDocs(q);
-            clientes = [];
-            
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                clientes.push({
-                    id: doc.id,
-                    ...data
-                });
-            });
-            
-            // Popular select de clientes
-            clienteId.innerHTML = '<option value="">Selecione um cliente...</option>';
-            clientes.forEach(cliente => {
-                const option = document.createElement('option');
-                option.value = cliente.id;
-                option.textContent = cliente.nome || cliente.apelido || `Cliente ${cliente.id.substring(0, 8)}`;
-                clienteId.appendChild(option);
-            });
-            
-        } catch (error) {
-            console.error('Erro ao carregar clientes:', error);
-        }
-    }
-
-    async function carregarServicos() {
-        try {
-            const q = query(
-                collection(db, "servicos"),
-                where("profissionalId", "==", currentUser.uid),
-                where("status", "==", "ativo"),
-                orderBy("nome", "asc")
-            );
-            
-            const querySnapshot = await getDocs(q);
-            servicos = [];
-            
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                servicos.push({
-                    id: doc.id,
-                    ...data
-                });
-            });
-            
-            // Popular select de serviços
-            servicoId.innerHTML = '<option value="">Selecione um serviço...</option>';
-            servicos.forEach(servico => {
-                const option = document.createElement('option');
-                option.value = servico.id;
-                option.textContent = servico.nome;
-                servicoId.appendChild(option);
-            });
-            
-        } catch (error) {
-            console.error('Erro ao carregar serviços:', error);
-        }
-    }
-
-    async function carregarAnotacoes() {
-        try {
-            const anotacoesRef = doc(db, "anotacoes", currentUser.uid);
-            const anotacoesDoc = await getDoc(anotacoesRef);
-            
-            if (anotacoesDoc.exists()) {
-                const data = anotacoesDoc.data();
-                if (anotacoesText) {
-                    anotacoesText.value = data.texto || '';
-                    anotacoesStatus.textContent = 'Salvo automaticamente';
-                }
-            }
-            
-        } catch (error) {
-            console.error('Erro ao carregar anotações:', error);
-        }
-    }
-
-    async function salvarAnotacoes() {
-        if (!currentUser || !anotacoesText) return;
-        
-        try {
-            const anotacoesRef = doc(db, "anotacoes", currentUser.uid);
-            const anotacoesData = {
-                texto: anotacoesText.value,
-                profissionalId: currentUser.uid,
-                atualizadoEm: serverTimestamp()
-            };
-            
-            await updateDoc(anotacoesRef, anotacoesData, { merge: true });
-            anotacoesStatus.textContent = 'Salvo ✓';
-            
-            setTimeout(() => {
-                anotacoesStatus.textContent = 'Salvando automaticamente...';
-            }, 2000);
-            
-        } catch (error) {
-            console.error('Erro ao salvar anotações:', error);
-            anotacoesStatus.textContent = 'Erro ao salvar';
-        }
-    }
-
-    // ============================================
-    // CALENDÁRIO
-    // ============================================
-    function inicializarCalendario() {
-        if (!calendarEl) return;
-        
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'pt-br',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            buttonText: {
-                today: 'Hoje',
-                month: 'Mês',
-                week: 'Semana',
-                day: 'Dia'
-            },
-            events: compromissos.map(comp => ({
-                id: comp.id,
-                title: comp.titulo,
-                start: `${comp.data}T${comp.horaInicio}`,
-                end: comp.horaFim ? `${comp.data}T${comp.horaFim}` : null,
-                extendedProps: {
-                    tipo: comp.tipo,
-                    status: comp.status,
-                    cliente: comp.clienteNome || '',
-                    local: comp.local || '',
-                    anotacoes: comp.anotacoes || ''
-                },
-                backgroundColor: getEventColor(comp.tipo),
-                borderColor: getEventColor(comp.tipo),
-                textColor: 'white'
-            })),
-            eventClick: function(info) {
-                const compromisso = compromissos.find(c => c.id === info.event.id);
-                if (compromisso) {
-                    editarCompromisso(compromisso.id);
-                }
-            },
-            dateClick: function(info) {
-                abrirModalCompromissoComData(info.dateStr);
-            },
-            height: 'auto',
-            contentHeight: 'auto',
-            dayMaxEventRows: 3,
-            eventTimeFormat: {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            }
-        });
-        
-        calendar.render();
-    }
-
-    function getEventColor(tipo) {
-        switch(tipo) {
-            case 'servico': return '#44689a';
-            case 'visita': return '#3498db';
-            case 'reuniao': return '#f39c12';
-            case 'outro': return '#7f8c8d';
-            default: return '#44689a';
-        }
-    }
-
-    function atualizarCalendario() {
-        if (!calendar) return;
-        
-        calendar.removeAllEvents();
-        compromissos.forEach(comp => {
-            calendar.addEvent({
-                id: comp.id,
-                title: comp.titulo,
-                start: `${comp.data}T${comp.horaInicio}`,
-                end: comp.horaFim ? `${comp.data}T${comp.horaFim}` : null,
-                extendedProps: {
-                    tipo: comp.tipo,
-                    status: comp.status,
-                    cliente: comp.clienteNome || '',
-                    local: comp.local || '',
-                    anotacoes: comp.anotacoes || ''
-                },
-                backgroundColor: getEventColor(comp.tipo),
-                borderColor: getEventColor(comp.tipo),
-                textColor: 'white'
-            });
-        });
-    }
-
-    // ============================================
-    // LISTA DE COMPROMISSOS - ATUALIZADA COM BOTÕES
-    // ============================================
-    function atualizarListaCompromissos() {
-        if (!compromissosList) return;
-        
-        const statusFilter = filterStatus ? filterStatus.value : '';
-        
-        let compromissosFiltrados = compromissos;
-        if (statusFilter) {
-            compromissosFiltrados = compromissos.filter(c => c.status === statusFilter);
-        }
-        
-        compromissosList.innerHTML = '';
-        
-        if (compromissosFiltrados.length === 0) {
-            const emptyState = document.createElement('div');
-            emptyState.className = 'empty-state';
-            emptyState.innerHTML = `
-                <i class="fas fa-calendar-check"></i>
-                <h4>Nenhum compromisso encontrado</h4>
-                <p>${statusFilter ? 'Tente ajustar o filtro' : 'Comece criando seu primeiro compromisso'}</p>
-            `;
-            compromissosList.appendChild(emptyState);
-            return;
-        }
-        
-        compromissosFiltrados.forEach(comp => {
-            const card = criarCardCompromisso(comp);
-            compromissosList.appendChild(card);
-        });
-    }
-
-    function criarCardCompromisso(comp) {
-        const card = document.createElement('div');
-        card.className = `compromisso-card ${comp.tipo}`;
-        card.setAttribute('data-id', comp.id);
-        
-        const dataObj = new Date(comp.data);
-        const dataFormatada = dataObj.toLocaleDateString('pt-BR');
-        const horaFormatada = comp.horaInicio ? comp.horaInicio.substring(0, 5) : '';
-        
-        let clienteNome = 'Sem cliente';
-        if (comp.clienteId && clientes.length > 0) {
-            const cliente = clientes.find(c => c.id === comp.clienteId);
-            if (cliente) {
-                clienteNome = cliente.nome || cliente.apelido || 'Cliente';
-            }
-        }
-        
-        let servicoNome = '';
-        if (comp.servicoId && servicos.length > 0) {
-            const servico = servicos.find(s => s.id === comp.servicoId);
-            if (servico) {
-                servicoNome = servico.nome;
-            }
-        }
-        
-        const tipoText = {
-            'servico': '🔧 Serviço',
-            'visita': '📍 Visita',
-            'reuniao': '🤝 Reunião',
-            'outro': '📌 Outro'
-        }[comp.tipo] || '📌 Compromisso';
-        
-        const statusText = {
-            'confirmado': 'Confirmado',
-            'pendente': 'Pendente',
-            'cancelado': 'Cancelado'
-        }[comp.status] || 'Pendente';
-        
-        const statusClass = {
-            'confirmado': 'confirmado',
-            'pendente': 'pendente',
-            'cancelado': 'cancelado'
-        }[comp.status] || 'pendente';
-        
-        card.innerHTML = `
-            <div class="compromisso-time">
-                <i class="far fa-clock"></i>
-                <span>${dataFormatada} • ${horaFormatada}</span>
-                <span class="compromisso-badge ${statusClass} ms-auto">${statusText}</span>
-            </div>
-            <div class="compromisso-title">${comp.titulo}</div>
-            <div class="compromisso-details">
-                <span><i class="fas fa-user"></i> ${clienteNome}</span>
-                ${servicoNome ? `<span><i class="fas fa-tools"></i> ${servicoNome}</span>` : ''}
-                ${comp.local ? `<span><i class="fas fa-map-marker-alt"></i> ${comp.local.substring(0, 30)}${comp.local.length > 30 ? '...' : ''}</span>` : ''}
-                ${comp.pedidoNumero ? `<span><i class="fas fa-clipboard-list"></i> ${comp.pedidoNumero}</span>` : ''}
-                <span><i class="fas fa-tag"></i> ${tipoText}</span>
-            </div>
-            ${comp.anotacoes ? `<div class="mt-2 text-muted small"><i class="fas fa-sticky-note"></i> ${comp.anotacoes.substring(0, 80)}${comp.anotacoes.length > 80 ? '...' : ''}</div>` : ''}
-            
-            <!-- BOTÕES DE AÇÃO - NOVO -->
-            <div class="compromisso-actions">
-                <button class="btn-compromisso btn-editar-compromisso" onclick="event.stopPropagation(); editarCompromisso('${comp.id}')">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="btn-compromisso btn-excluir-compromisso" onclick="event.stopPropagation(); excluirCompromisso('${comp.id}')">
-                    <i class="fas fa-trash"></i> Excluir
-                </button>
-            </div>
-        `;
-        
-        card.addEventListener('click', (e) => {
-            // Não abrir edição se clicou em um botão
-            if (!e.target.closest('.btn-compromisso')) {
-                editarCompromisso(comp.id);
-            }
-        });
-        
-        return card;
-    }
-
-    // ============================================
-    // FUNÇÕES GLOBAIS - NOVA: excluirCompromisso
-    // ============================================
-    window.excluirCompromisso = async function(id) {
-        if (!confirm('Tem certeza que deseja excluir este compromisso?\n\nEsta ação não pode ser desfeita.')) {
-            return;
-        }
-        
+// ============================================
+// INICIALIZAÇÃO
+// ============================================
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
         try {
             showLoading();
+            const userRef = doc(db, "usuarios", user.uid);
+            const userDoc = await getDoc(userRef);
             
-            const compRef = doc(db, "compromissos", id);
-            await deleteDoc(compRef);
-            
-            // Remover localmente
-            const index = compromissos.findIndex(c => c.id === id);
-            if (index !== -1) {
-                compromissos.splice(index, 1);
+            if (userDoc.exists()) {
+                userData = userDoc.data();
+                atualizarInterfaceUsuario(userData);
+                await carregarDadosIniciais();
+                inicializarSistema();
             }
-            
-            // Atualizar interface
-            atualizarCalendario();
-            atualizarListaCompromissos();
-            
-            showNotification('Compromisso excluído com sucesso!', 'success');
-            
         } catch (error) {
-            console.error('Erro ao excluir compromisso:', error);
-            showNotification('Erro ao excluir compromisso. Tente novamente.', 'error');
+            console.error('Erro:', error);
+            showNotification('Erro ao carregar dados', 'error');
         } finally {
             hideLoading();
         }
-    };
+    } else {
+        window.location.href = 'login.html';
+    }
+});
 
-    // ============================================
-    // CRUD COMPROMISSOS
-    // ============================================
-    window.abrirModalCompromisso = function(compId = null) {
-        resetarModal();
+function atualizarInterfaceUsuario(data) {
+    if (data.apelido) {
+        userName.textContent = `Olá, ${data.apelido}`;
+        userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+    }
+    
+    if (data.idScanHub) {
+        userId.textContent = data.idScanHub;
+    }
+}
+
+async function carregarDadosIniciais() {
+    await Promise.all([
+        carregarCompromissos(),
+        carregarClientes(),
+        carregarServicos(),
+        carregarAnotacoes()
+    ]);
+}
+
+function inicializarSistema() {
+    inicializarCalendario();
+    inicializarEventListeners();
+    inicializarFormulario();
+    atualizarListaCompromissos();
+}
+
+// ============================================
+// CARREGAMENTO DE DADOS
+// ============================================
+async function carregarCompromissos() {
+    try {
+        const q = query(
+            collection(db, "compromissos"),
+            where("profissionalId", "==", currentUser.uid),
+            orderBy("data", "asc")
+        );
         
-        if (compId) {
-            // Modo edição
-            const comp = compromissos.find(c => c.id === compId);
-            if (!comp) return;
-            
-            preencherModal(comp);
-            modalTitle.textContent = 'Editar Compromisso';
-        } else {
-            // Modo criação
-            modalTitle.textContent = 'Novo Compromisso';
-            
-            // Preencher data e hora atual
-            const hoje = new Date();
-            data.value = hoje.toISOString().split('T')[0];
-            horaInicio.value = hoje.getHours().toString().padStart(2, '0') + ':00';
+        const querySnapshot = await getDocs(q);
+        compromissos = [];
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            compromissos.push({
+                id: doc.id,
+                ...data,
+                data: data.data || '',
+                horaInicio: data.horaInicio || '',
+                horaFim: data.horaFim || '',
+                criadoEm: data.criadoEm || null,
+                atualizadoEm: data.atualizadoEm || null
+            });
+        });
+        
+        // Ordenar por data e hora
+        compromissos.sort((a, b) => {
+            const dataA = new Date(`${a.data}T${a.horaInicio}`);
+            const dataB = new Date(`${b.data}T${b.horaInicio}`);
+            return dataA - dataB;
+        });
+        
+    } catch (error) {
+        console.error('Erro ao carregar compromissos:', error);
+        compromissos = [];
+    }
+}
+
+async function carregarClientes() {
+    try {
+        const q = query(
+            collection(db, "clientes"),
+            where("profissionalId", "==", currentUser.uid),
+            orderBy("nome", "asc")
+        );
+        
+        const querySnapshot = await getDocs(q);
+        clientes = [];
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            clientes.push({
+                id: doc.id,
+                ...data
+            });
+        });
+        
+        // NÃO vamos mais popular select, pois agora usamos input de texto
+        // Mantemos os dados para referência se precisar
+        
+    } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+    }
+}
+
+async function carregarServicos() {
+    try {
+        const q = query(
+            collection(db, "servicos"),
+            where("profissionalId", "==", currentUser.uid),
+            where("status", "==", "ativo"),
+            orderBy("nome", "asc")
+        );
+        
+        const querySnapshot = await getDocs(q);
+        servicos = [];
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            servicos.push({
+                id: doc.id,
+                ...data
+            });
+        });
+        
+        // NÃO vamos mais popular select, pois agora usamos input de texto
+        // Mantemos os dados para referência se precisar
+        
+    } catch (error) {
+        console.error('Erro ao carregar serviços:', error);
+    }
+}
+
+async function carregarAnotacoes() {
+    try {
+        const anotacoesRef = doc(db, "anotacoes", currentUser.uid);
+        const anotacoesDoc = await getDoc(anotacoesRef);
+        
+        if (anotacoesDoc.exists()) {
+            const data = anotacoesDoc.data();
+            if (anotacoesText) {
+                anotacoesText.value = data.texto || '';
+                anotacoesStatus.textContent = 'Salvo automaticamente';
+            }
         }
         
-        modalCompromisso.show();
-    };
-
-    window.abrirModalCompromissoComData = function(dateStr) {
-        resetarModal();
-        modalTitle.textContent = 'Novo Compromisso';
-        data.value = dateStr;
-        
-        // Hora padrão 09:00
-        horaInicio.value = '09:00';
-        
-        modalCompromisso.show();
-    };
-
-    function resetarModal() {
-        formCompromisso.reset();
-        compromissoId.value = '';
-        
-        // Preencher data e hora padrão
-        const hoje = new Date();
-        if (!data.value) data.value = hoje.toISOString().split('T')[0];
-        if (!horaInicio.value) horaInicio.value = '09:00';
-        
-        // Status padrão
-        status.value = 'pendente';
-        tipo.value = 'servico';
+    } catch (error) {
+        console.error('Erro ao carregar anotações:', error);
     }
+}
 
-    function preencherModal(comp) {
+async function salvarAnotacoes() {
+    if (!currentUser || !anotacoesText) return;
+    
+    try {
+        const anotacoesRef = doc(db, "anotacoes", currentUser.uid);
+        const anotacoesData = {
+            texto: anotacoesText.value,
+            profissionalId: currentUser.uid,
+            atualizadoEm: serverTimestamp()
+        };
+        
+        await updateDoc(anotacoesRef, anotacoesData, { merge: true });
+        anotacoesStatus.textContent = 'Salvo ✓';
+        
+        setTimeout(() => {
+            anotacoesStatus.textContent = 'Salvando automaticamente...';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro ao salvar anotações:', error);
+        anotacoesStatus.textContent = 'Erro ao salvar';
+    }
+}
+
+// ============================================
+// CALENDÁRIO
+// ============================================
+function inicializarCalendario() {
+    if (!calendarEl) return;
+    
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            day: 'Dia'
+        },
+        events: compromissos.map(comp => ({
+            id: comp.id,
+            title: comp.titulo,
+            start: `${comp.data}T${comp.horaInicio}`,
+            end: comp.horaFim ? `${comp.data}T${comp.horaFim}` : null,
+            extendedProps: {
+                tipo: comp.tipo,
+                status: comp.status,
+                cliente: comp.clienteNome || comp.cliente || '',
+                servico: comp.servicoNome || comp.servico || '',
+                local: comp.local || '',
+                anotacoes: comp.anotacoes || ''
+            },
+            backgroundColor: getEventColor(comp.tipo),
+            borderColor: getEventColor(comp.tipo),
+            textColor: 'white'
+        })),
+        eventClick: function(info) {
+            const compromisso = compromissos.find(c => c.id === info.event.id);
+            if (compromisso) {
+                editarCompromisso(compromisso.id);
+            }
+        },
+        dateClick: function(info) {
+            abrirModalCompromissoComData(info.dateStr);
+        },
+        height: 'auto',
+        contentHeight: 'auto',
+        dayMaxEventRows: 3,
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }
+    });
+    
+    calendar.render();
+}
+
+function getEventColor(tipo) {
+    switch(tipo) {
+        case 'servico': return '#44689a';
+        case 'visita': return '#3498db';
+        case 'reuniao': return '#f39c12';
+        case 'outro': return '#7f8c8d';
+        default: return '#44689a';
+    }
+}
+
+function atualizarCalendario() {
+    if (!calendar) return;
+    
+    calendar.removeAllEvents();
+    compromissos.forEach(comp => {
+        calendar.addEvent({
+            id: comp.id,
+            title: comp.titulo,
+            start: `${comp.data}T${comp.horaInicio}`,
+            end: comp.horaFim ? `${comp.data}T${comp.horaFim}` : null,
+            extendedProps: {
+                tipo: comp.tipo,
+                status: comp.status,
+                cliente: comp.clienteNome || comp.cliente || '',
+                servico: comp.servicoNome || comp.servico || '',
+                local: comp.local || '',
+                anotacoes: comp.anotacoes || ''
+            },
+            backgroundColor: getEventColor(comp.tipo),
+            borderColor: getEventColor(comp.tipo),
+            textColor: 'white'
+        });
+    });
+}
+
+// ============================================
+// LISTA DE COMPROMISSOS
+// ============================================
+function atualizarListaCompromissos() {
+    if (!compromissosList) return;
+    
+    const statusFilter = filterStatus ? filterStatus.value : '';
+    
+    let compromissosFiltrados = compromissos;
+    if (statusFilter) {
+        compromissosFiltrados = compromissos.filter(c => c.status === statusFilter);
+    }
+    
+    compromissosList.innerHTML = '';
+    
+    if (compromissosFiltrados.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.innerHTML = `
+            <i class="fas fa-calendar-check"></i>
+            <h4>Nenhum compromisso encontrado</h4>
+            <p>${statusFilter ? 'Tente ajustar o filtro' : 'Comece criando seu primeiro compromisso'}</p>
+        `;
+        compromissosList.appendChild(emptyState);
+        return;
+    }
+    
+    compromissosFiltrados.forEach(comp => {
+        const card = criarCardCompromisso(comp);
+        compromissosList.appendChild(card);
+    });
+}
+
+function criarCardCompromisso(comp) {
+    const card = document.createElement('div');
+    card.className = `compromisso-card ${comp.tipo}`;
+    card.setAttribute('data-id', comp.id);
+    
+    const dataObj = new Date(comp.data);
+    const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+    const horaFormatada = comp.horaInicio ? comp.horaInicio.substring(0, 5) : '';
+    
+    // Agora pegamos os nomes diretos dos campos clienteNome/cliente e servicoNome/servico
+    const clienteNome = comp.clienteNome || comp.cliente || 'Sem cliente';
+    const servicoNome = comp.servicoNome || comp.servico || '';
+    
+    const tipoText = {
+        'servico': '🔧 Serviço',
+        'visita': '📍 Visita',
+        'reuniao': '🤝 Reunião',
+        'outro': '📌 Outro'
+    }[comp.tipo] || '📌 Compromisso';
+    
+    const statusText = {
+        'confirmado': 'Confirmado',
+        'pendente': 'Pendente',
+        'cancelado': 'Cancelado'
+    }[comp.status] || 'Pendente';
+    
+    const statusClass = {
+        'confirmado': 'confirmado',
+        'pendente': 'pendente',
+        'cancelado': 'cancelado'
+    }[comp.status] || 'pendente';
+    
+    card.innerHTML = `
+        <div class="compromisso-time">
+            <i class="far fa-clock"></i>
+            <span>${dataFormatada} • ${horaFormatada}</span>
+            <span class="compromisso-badge ${statusClass} ms-auto">${statusText}</span>
+        </div>
+        <div class="compromisso-title">${comp.titulo}</div>
+        <div class="compromisso-details">
+            <span><i class="fas fa-user"></i> ${clienteNome}</span>
+            ${servicoNome ? `<span><i class="fas fa-tools"></i> ${servicoNome}</span>` : ''}
+            ${comp.local ? `<span><i class="fas fa-map-marker-alt"></i> ${comp.local.substring(0, 30)}${comp.local.length > 30 ? '...' : ''}</span>` : ''}
+            ${comp.pedidoNumero ? `<span><i class="fas fa-clipboard-list"></i> ${comp.pedidoNumero}</span>` : ''}
+            <span><i class="fas fa-tag"></i> ${tipoText}</span>
+        </div>
+        ${comp.anotacoes ? `<div class="mt-2 text-muted small"><i class="fas fa-sticky-note"></i> ${comp.anotacoes.substring(0, 80)}${comp.anotacoes.length > 80 ? '...' : ''}</div>` : ''}
+        
+        <!-- BOTÕES DE AÇÃO -->
+        <div class="compromisso-actions">
+            <button class="btn-compromisso btn-editar-compromisso" onclick="event.stopPropagation(); editarCompromisso('${comp.id}')">
+                <i class="fas fa-edit"></i> Editar
+            </button>
+            <button class="btn-compromisso btn-excluir-compromisso" onclick="event.stopPropagation(); excluirCompromisso('${comp.id}')">
+                <i class="fas fa-trash"></i> Excluir
+            </button>
+        </div>
+    `;
+    
+    card.addEventListener('click', (e) => {
+        // Não abrir edição se clicou em um botão
+        if (!e.target.closest('.btn-compromisso')) {
+            editarCompromisso(comp.id);
+        }
+    });
+    
+    return card;
+}
+
+// ============================================
+// FUNÇÕES GLOBAIS
+// ============================================
+window.excluirCompromisso = async function(id) {
+    if (!confirm('Tem certeza que deseja excluir este compromisso?\n\nEsta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    try {
+        showLoading();
+        
+        const compRef = doc(db, "compromissos", id);
+        await deleteDoc(compRef);
+        
+        // Remover localmente
+        const index = compromissos.findIndex(c => c.id === id);
+        if (index !== -1) {
+            compromissos.splice(index, 1);
+        }
+        
+        // Atualizar interface
+        atualizarCalendario();
+        atualizarListaCompromissos();
+        
+        showNotification('Compromisso excluído com sucesso!', 'success');
+        
+    } catch (error) {
+        console.error('Erro ao excluir compromisso:', error);
+        showNotification('Erro ao excluir compromisso. Tente novamente.', 'error');
+    } finally {
+        hideLoading();
+    }
+};
+
+// ============================================
+// CRUD COMPROMISSOS - AJUSTADO PARA INPUTS DE TEXTO
+// ============================================
+window.abrirModalCompromisso = function(compId = null) {
+    resetarModal();
+    
+    if (compId) {
+        // Modo edição
+        const comp = compromissos.find(c => c.id === compId);
         if (!comp) return;
         
-        compromissoId.value = comp.id;
-        titulo.value = comp.titulo || '';
-        tipo.value = comp.tipo || 'servico';
-        data.value = comp.data || '';
-        horaInicio.value = comp.horaInicio || '';
-        horaFim.value = comp.horaFim || '';
-        clienteId.value = comp.clienteId || '';
-        servicoId.value = comp.servicoId || '';
-        pedidoNumero.value = comp.pedidoNumero || '';
-        status.value = comp.status || 'pendente';
-        local.value = comp.local || '';
-        anotacoesField.value = comp.anotacoes || '';
-        lembrete.value = comp.lembrete || '';
+        preencherModal(comp);
+        modalTitle.textContent = 'Editar Compromisso';
+    } else {
+        // Modo criação
+        modalTitle.textContent = 'Novo Compromisso';
+        
+        // Preencher data e hora atual
+        const hoje = new Date();
+        data.value = hoje.toISOString().split('T')[0];
+        horaInicio.value = hoje.getHours().toString().padStart(2, '0') + ':00';
     }
+    
+    modalCompromisso.show();
+};
 
-    async function salvarCompromisso() {
-        // Validação
-        if (!titulo.value.trim()) {
-            showNotification('Informe um título', 'warning');
-            titulo.focus();
-            return;
+window.abrirModalCompromissoComData = function(dateStr) {
+    resetarModal();
+    modalTitle.textContent = 'Novo Compromisso';
+    data.value = dateStr;
+    
+    // Hora padrão 09:00
+    horaInicio.value = '09:00';
+    
+    modalCompromisso.show();
+};
+
+function resetarModal() {
+    formCompromisso.reset();
+    compromissoId.value = '';
+    
+    // Remover atributos data-*
+    if (cliente) {
+        cliente.removeAttribute('data-cliente-id');
+    }
+    if (servico) {
+        servico.removeAttribute('data-servico-id');
+    }
+    
+    // Preencher data e hora padrão
+    const hoje = new Date();
+    if (!data.value) data.value = hoje.toISOString().split('T')[0];
+    if (!horaInicio.value) horaInicio.value = '09:00';
+    
+    // Status padrão
+    status.value = 'pendente';
+    tipo.value = 'servico';
+}
+
+function preencherModal(comp) {
+    if (!comp) return;
+    
+    compromissoId.value = comp.id;
+    titulo.value = comp.titulo || '';
+    tipo.value = comp.tipo || 'servico';
+    data.value = comp.data || '';
+    horaInicio.value = comp.horaInicio || '';
+    horaFim.value = comp.horaFim || '';
+    
+    // Agora usamos os inputs de texto simples
+    cliente.value = comp.clienteNome || comp.cliente || '';
+    servico.value = comp.servicoNome || comp.servico || '';
+    
+    pedidoNumero.value = comp.pedidoNumero || '';
+    status.value = comp.status || 'pendente';
+    local.value = comp.local || '';
+    anotacoesField.value = comp.anotacoes || '';
+    lembrete.value = comp.lembrete || '';
+}
+
+async function salvarCompromisso() {
+    // Validação
+    if (!titulo.value.trim()) {
+        showNotification('Informe um título', 'warning');
+        titulo.focus();
+        return;
+    }
+    
+    if (!data.value) {
+        showNotification('Informe a data', 'warning');
+        data.focus();
+        return;
+    }
+    
+    if (!horaInicio.value) {
+        showNotification('Informe a hora de início', 'warning');
+        horaInicio.focus();
+        return;
+    }
+    
+    if (!anotacoesField.value.trim()) {
+        showNotification('Informe as anotações/detalhes', 'warning');
+        anotacoesField.focus();
+        return;
+    }
+    
+    try {
+        showLoading();
+        if (btnSalvarCompromisso) {
+            btnSalvarCompromisso.disabled = true;
+            btnSalvarCompromisso.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
         }
         
-        if (!data.value) {
-            showNotification('Informe a data', 'warning');
-            data.focus();
-            return;
+        // Preparar dados - SIMPLIFICADO PARA INPUTS DE TEXTO
+        const compromissoData = {
+            titulo: titulo.value.trim(),
+            tipo: tipo.value,
+            data: data.value,
+            horaInicio: horaInicio.value,
+            horaFim: horaFim.value || null,
+            
+            // Guarda o texto digitado diretamente
+            cliente: cliente.value.trim() || null,       // ← Texto digitado
+            servico: servico.value.trim() || null,       // ← Texto digitado
+            
+            // Mantém compatibilidade com versão antiga se necessário
+            clienteNome: cliente.value.trim() || null,
+            servicoNome: servico.value.trim() || null,
+            
+            pedidoNumero: pedidoNumero.value || null,
+            status: status.value,
+            local: local.value.trim() || null,
+            anotacoes: anotacoesField.value.trim(),
+            lembrete: lembrete.value || null,
+            profissionalId: currentUser.uid,
+            profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
+            atualizadoEm: serverTimestamp()
+        };
+        
+        const compId = compromissoId.value;
+        
+        if (compId) {
+            // Atualizar
+            const compRef = doc(db, "compromissos", compId);
+            await updateDoc(compRef, compromissoData);
+            
+            // Atualizar localmente
+            const index = compromissos.findIndex(c => c.id === compId);
+            if (index !== -1) {
+                compromissos[index] = { ...compromissos[index], ...compromissoData };
+            }
+            
+            showNotification('Compromisso atualizado com sucesso!', 'success');
+        } else {
+            // Criar novo
+            compromissoData.criadoEm = serverTimestamp();
+            const docRef = await addDoc(collection(db, "compromissos"), compromissoData);
+            compromissoData.id = docRef.id;
+            compromissos.push(compromissoData);
+            
+            showNotification('Compromisso criado com sucesso!', 'success');
         }
         
-        if (!horaInicio.value) {
-            showNotification('Informe a hora de início', 'warning');
-            horaInicio.focus();
-            return;
-        }
+        // Fechar modal
+        modalCompromisso.hide();
         
-        if (!anotacoesField.value.trim()) {
-            showNotification('Informe as anotações/detalhes', 'warning');
-            anotacoesField.focus();
-            return;
-        }
+        // Atualizar interface
+        atualizarCalendario();
+        atualizarListaCompromissos();
         
-        try {
-            showLoading();
-            if (btnSalvarCompromisso) {
-                btnSalvarCompromisso.disabled = true;
-                btnSalvarCompromisso.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
-            }
-            
-            // Preparar dados
-            const compromissoData = {
-                titulo: titulo.value.trim(),
-                tipo: tipo.value,
-                data: data.value,
-                horaInicio: horaInicio.value,
-                horaFim: horaFim.value || null,
-                clienteId: clienteId.value || null,
-                servicoId: servicoId.value || null,
-                pedidoNumero: pedidoNumero.value || null,
-                status: status.value,
-                local: local.value.trim() || null,
-                anotacoes: anotacoesField.value.trim(),
-                lembrete: lembrete.value || null,
-                profissionalId: currentUser.uid,
-                profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
-                atualizadoEm: serverTimestamp()
-            };
-            
-            // Adicionar nome do cliente se selecionado
-            if (clienteId.value && clientes.length > 0) {
-                const cliente = clientes.find(c => c.id === clienteId.value);
-                if (cliente) {
-                    compromissoData.clienteNome = cliente.nome || cliente.apelido || 'Cliente';
-                }
-            }
-            
-            // Adicionar nome do serviço se selecionado
-            if (servicoId.value && servicos.length > 0) {
-                const servico = servicos.find(s => s.id === servicoId.value);
-                if (servico) {
-                    compromissoData.servicoNome = servico.nome;
-                }
-            }
-            
-            const compId = compromissoId.value;
-            
-            if (compId) {
-                // Atualizar
-                const compRef = doc(db, "compromissos", compId);
-                await updateDoc(compRef, compromissoData);
-                
-                // Atualizar localmente
-                const index = compromissos.findIndex(c => c.id === compId);
-                if (index !== -1) {
-                    compromissos[index] = { ...compromissos[index], ...compromissoData };
-                }
-                
-                showNotification('Compromisso atualizado com sucesso!', 'success');
-            } else {
-                // Criar novo
-                compromissoData.criadoEm = serverTimestamp();
-                const docRef = await addDoc(collection(db, "compromissos"), compromissoData);
-                compromissoData.id = docRef.id;
-                compromissos.push(compromissoData);
-                
-                showNotification('Compromisso criado com sucesso!', 'success');
-            }
-            
-            // Fechar modal
-            modalCompromisso.hide();
-            
-            // Atualizar interface
-            atualizarCalendario();
-            atualizarListaCompromissos();
-            
-        } catch (error) {
-            console.error('Erro ao salvar compromisso:', error);
-            showNotification('Erro ao salvar compromisso. Tente novamente.', 'error');
-        } finally {
-            hideLoading();
-            if (btnSalvarCompromisso) {
-                btnSalvarCompromisso.disabled = false;
-                btnSalvarCompromisso.innerHTML = '<i class="fas fa-save me-2"></i>Salvar';
-            }
+    } catch (error) {
+        console.error('Erro ao salvar compromisso:', error);
+        showNotification('Erro ao salvar compromisso. Tente novamente.', 'error');
+    } finally {
+        hideLoading();
+        if (btnSalvarCompromisso) {
+            btnSalvarCompromisso.disabled = false;
+            btnSalvarCompromisso.innerHTML = '<i class="fas fa-save me-2"></i>Salvar';
         }
     }
+}
 
-    window.editarCompromisso = function(id) {
-        abrirModalCompromisso(id);
-    };
+window.editarCompromisso = function(id) {
+    abrirModalCompromisso(id);
+};
 
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-    function inicializarEventListeners() {
-        // Menu mobile
-        if (menuToggle) {
-            menuToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dashboardMenu.classList.toggle('show');
-                const icon = menuToggle.querySelector('i');
-                if (icon) {
-                    if (dashboardMenu.classList.contains('show')) {
-                        icon.classList.remove('fa-bars');
-                        icon.classList.add('fa-times');
-                    } else {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
-                    }
-                }
-            });
-        }
-        
-        // Fechar menu ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (dashboardMenu && menuToggle) {
-                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                    dashboardMenu.classList.remove('show');
-                    const icon = menuToggle.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
-                    }
+// ============================================
+// EVENT LISTENERS
+// ============================================
+function inicializarEventListeners() {
+    // Menu mobile
+    if (menuToggle) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dashboardMenu.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                if (dashboardMenu.classList.contains('show')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
                 }
             }
         });
-        
-        // Logout
-        if (btnLogout) {
-            btnLogout.addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    window.location.href = 'login.html';
-                } catch {
-                    showNotification('Erro ao sair. Tente novamente.', 'error');
-                }
-            });
-        }
-        
-        // Tabs da agenda
-        if (agendaTabs) {
-            const tabBtns = agendaTabs.querySelectorAll('.agenda-tab');
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const view = this.getAttribute('data-view');
-                    
-                    // Esconder todas as views
-                    viewCalendario.classList.add('d-none');
-                    viewLista.classList.add('d-none');
-                    viewAnotacoes.classList.add('d-none');
-                    
-                    // Mostrar view selecionada
-                    document.getElementById(`view${view.charAt(0).toUpperCase() + view.slice(1)}`).classList.remove('d-none');
-                });
-            });
-        }
-        
-        // Filtro de status
-        if (filterStatus) {
-            filterStatus.addEventListener('change', atualizarListaCompromissos);
-        }
-        
-        // Salvar compromisso
-        if (btnSalvarCompromisso) {
-            btnSalvarCompromisso.addEventListener('click', salvarCompromisso);
-        }
-        
-        // Salvar anotações automaticamente
-        if (anotacoesText) {
-            anotacoesText.addEventListener('input', () => {
-                anotacoesStatus.textContent = 'Salvando...';
-                
-                clearTimeout(anotacoesTimeout);
-                anotacoesTimeout = setTimeout(salvarAnotacoes, 1000);
-            });
-        }
     }
-
-    function inicializarFormulario() {
-        // Data mínima: hoje
-        const hoje = new Date().toISOString().split('T')[0];
-        if (data) {
-            data.min = hoje;
-        }
-    }
-
-    // ============================================
-    // FUNÇÕES AUXILIARES
-    // ============================================
-    function showLoading() {
-        if (loadingOverlay) {
-            loadingOverlay.classList.add('active');
-        }
-    }
-
-    function hideLoading() {
-        if (loadingOverlay) {
-            loadingOverlay.classList.remove('active');
-        }
-    }
-
-    function showNotification(message, type = 'success') {
-        // Remover notificações anteriores
-        const existingNotifications = document.querySelectorAll('.notification');
-        existingNotifications.forEach(n => n.remove());
-        
-        // Criar nova notificação
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-            ${message}
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Remover após 5 segundos
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
-    }
-
-    // Inicializar quando o DOM carregar
-    document.addEventListener('DOMContentLoaded', function() {
-        // Adicionar estilo para notificações
-        const style = document.createElement('style');
-        style.textContent = `
-            .notification {
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                padding: 15px 25px;
-                border-radius: 10px;
-                color: white;
-                font-weight: 500;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-                z-index: 9999;
-                animation: slideIn 0.3s ease;
-                max-width: 90vw;
-                word-break: break-word;
-                display: flex;
-                align-items: center;
-            }
-            .notification.success {
-                background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-            }
-            .notification.error {
-                background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            }
-            .notification.warning {
-                background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            }
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
+    
+    // Fechar menu ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (dashboardMenu && menuToggle) {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
+                const icon = menuToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
                 }
             }
-        `;
-        document.head.appendChild(style);
-        
-        // Configurar data e hora iniciais
-        const hoje = new Date();
-        if (data) data.value = hoje.toISOString().split('T')[0];
-        if (horaInicio) horaInicio.value = '09:00';
+        }
     });
+    
+    // Logout
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch {
+                showNotification('Erro ao sair. Tente novamente.', 'error');
+            }
+        });
+    }
+    
+    // Tabs da agenda
+    if (agendaTabs) {
+        const tabBtns = agendaTabs.querySelectorAll('.agenda-tab');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const view = this.getAttribute('data-view');
+                
+                // Esconder todas as views
+                viewCalendario.classList.add('d-none');
+                viewLista.classList.add('d-none');
+                viewAnotacoes.classList.add('d-none');
+                
+                // Mostrar view selecionada
+                document.getElementById(`view${view.charAt(0).toUpperCase() + view.slice(1)}`).classList.remove('d-none');
+            });
+        });
+    }
+    
+    // Filtro de status
+    if (filterStatus) {
+        filterStatus.addEventListener('change', atualizarListaCompromissos);
+    }
+    
+    // Salvar compromisso
+    if (btnSalvarCompromisso) {
+        btnSalvarCompromisso.addEventListener('click', salvarCompromisso);
+    }
+    
+    // Salvar anotações automaticamente
+    if (anotacoesText) {
+        anotacoesText.addEventListener('input', () => {
+            anotacoesStatus.textContent = 'Salvando...';
+            
+            clearTimeout(anotacoesTimeout);
+            anotacoesTimeout = setTimeout(salvarAnotacoes, 1000);
+        });
+    }
+}
+
+function inicializarFormulario() {
+    // Data mínima: hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    if (data) {
+        data.min = hoje;
+    }
+}
+
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+function showLoading() {
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('active');
+    }
+}
+
+function hideLoading() {
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+    }
+}
+
+function showNotification(message, type = 'success') {
+    // Remover notificações anteriores
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    // Criar nova notificação
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remover após 5 segundos
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Inicializar quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar estilo para notificações
+    const style = document.createElement('style');
+    style.textContent = `
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            max-width: 90vw;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+        }
+        .notification.success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Configurar data e hora iniciais
+    const hoje = new Date();
+    if (data) data.value = hoje.toISOString().split('T')[0];
+    if (horaInicio) horaInicio.value = '09:00';
+});
 </script>
 </body>
 </html>
