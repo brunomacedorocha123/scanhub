@@ -170,7 +170,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
@@ -213,25 +213,20 @@
             color: var(--dark-color);
         }
 
-        /* Gráficos */
-        .graficos-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .grafico-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .grafico-card h5 {
-            margin-bottom: 20px;
-            color: var(--dark-color);
+        /* Botões Principais */
+        .btn-primary-action {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
         }
 
         /* Calculadora Flutuante */
@@ -442,22 +437,6 @@
             color: white;
         }
 
-        /* Botões Principais */
-        .btn-primary-action {
-            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
-        }
-
         /* Modal */
         .modal-content {
             border-radius: 15px;
@@ -503,10 +482,6 @@
             
             .mobile-menu-toggle {
                 display: block;
-            }
-            
-            .graficos-container {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -720,22 +695,6 @@
                 <i class="fas fa-calendar-times"></i>
                 <h3 id="aPagar">R$ 0,00</h3>
                 <p>A Pagar (7 dias)</p>
-            </div>
-        </div>
-
-        <!-- Gráficos -->
-        <div class="graficos-container">
-            <div class="grafico-card">
-                <h5>Fluxo de Caixa - Últimos 6 Meses</h5>
-                <canvas id="graficoFluxoCaixa"></canvas>
-            </div>
-            <div class="grafico-card">
-                <h5>Distribuição de Despesas</h5>
-                <canvas id="graficoDespesas"></canvas>
-            </div>
-            <div class="grafico-card">
-                <h5>Comparativo Receita x Despesa</h5>
-                <canvas id="graficoComparativo"></canvas>
             </div>
         </div>
 
@@ -1067,7 +1026,6 @@
                     atualizarInterfaceUsuario(userData);
                     await carregarMovimentacoes();
                     inicializarSistema();
-                    inicializarGraficos();
                 }
             } catch (error) {
                 // Silenciar erro
@@ -1406,230 +1364,6 @@
         aPagar.textContent = formatarMoeda(totalAPagar7dias);
     }
 
-    function inicializarGraficos() {
-        try {
-            // Preparar dados dos últimos 6 meses
-            const meses = getUltimos6Meses();
-            const dadosReceitas = gerarDadosPorMes('receita');
-            const dadosDespesas = gerarDadosPorMes('despesa');
-            
-            // Gráfico de Fluxo de Caixa
-            const ctxFluxo = document.getElementById('graficoFluxoCaixa');
-            if (ctxFluxo) {
-                new Chart(ctxFluxo.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: meses,
-                        datasets: [
-                            {
-                                label: 'Receitas',
-                                data: dadosReceitas,
-                                borderColor: '#27ae60',
-                                backgroundColor: 'rgba(39, 174, 96, 0.1)',
-                                tension: 0.4,
-                                fill: true,
-                                borderWidth: 2
-                            },
-                            {
-                                label: 'Despesas',
-                                data: dadosDespesas,
-                                borderColor: '#e74c3c',
-                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                                tension: 0.4,
-                                fill: true,
-                                borderWidth: 2
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: ${formatarMoeda(context.raw)}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'R$ ' + value.toLocaleString('pt-BR');
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Gráfico de Distribuição de Despesas
-            const ctxDespesas = document.getElementById('graficoDespesas');
-            if (ctxDespesas) {
-                const dadosCategorias = getDadosCategoriasDespesa();
-                new Chart(ctxDespesas.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: dadosCategorias.labels,
-                        datasets: [{
-                            data: dadosCategorias.valores,
-                            backgroundColor: dadosCategorias.cores,
-                            borderWidth: 1,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.label}: ${formatarMoeda(context.raw)}`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Gráfico Comparativo
-            const ctxComparativo = document.getElementById('graficoComparativo');
-            if (ctxComparativo) {
-                new Chart(ctxComparativo.getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: meses,
-                        datasets: [
-                            {
-                                label: 'Receitas',
-                                data: dadosReceitas,
-                                backgroundColor: 'rgba(39, 174, 96, 0.7)',
-                                borderColor: '#27ae60',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'Despesas',
-                                data: dadosDespesas,
-                                backgroundColor: 'rgba(231, 76, 60, 0.7)',
-                                borderColor: '#e74c3c',
-                                borderWidth: 1
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'R$ ' + value.toLocaleString('pt-BR');
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        } catch (error) {
-            // Silenciar erro de gráficos
-        }
-    }
-
-    function getDadosCategoriasDespesa() {
-        const hoje = new Date();
-        const mesAtual = hoje.getMonth();
-        const anoAtual = hoje.getFullYear();
-        
-        const categoriasDespesa = {
-            'material': 0,
-            'marketing': 0,
-            'transporte': 0,
-            'imposto': 0,
-            'salario': 0,
-            'aluguel': 0,
-            'outros': 0
-        };
-        
-        // Calcular totais por categoria
-        movimentacoes.forEach(mov => {
-            if (mov.tipo === 'despesa') {
-                try {
-                    const dataMov = new Date(mov.data);
-                    if (dataMov.getMonth() === mesAtual && dataMov.getFullYear() === anoAtual) {
-                        const categoria = mov.categoria || 'outros';
-                        categoriasDespesa[categoria] = (categoriasDespesa[categoria] || 0) + (mov.valor || 0);
-                    }
-                } catch {
-                    // Ignorar erro de data
-                }
-            }
-        });
-        
-        // Preparar dados para o gráfico
-        const labels = [];
-        const valores = [];
-        const cores = ['#e74c3c', '#9b59b6', '#f39c12', '#34495e', '#1abc9c', '#d35400', '#7f8c8d'];
-        
-        Object.entries(categoriasDespesa).forEach(([categoria, valor], index) => {
-            if (valor > 0) {
-                labels.push(getCategoriaNome(categoria));
-                valores.push(valor);
-            }
-        });
-        
-        return {
-            labels: labels,
-            valores: valores,
-            cores: cores.slice(0, labels.length)
-        };
-    }
-
-    function gerarDadosPorMes(tipo) {
-        const hoje = new Date();
-        const dados = [];
-        
-        for (let i = 5; i >= 0; i--) {
-            const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-            const mes = data.getMonth();
-            const ano = data.getFullYear();
-            
-            const total = movimentacoes
-                .filter(m => {
-                    if (m.tipo !== tipo) return false;
-                    if (!m.data) return false;
-                    
-                    try {
-                        const dataMov = new Date(m.data);
-                        return dataMov.getMonth() === mes && 
-                               dataMov.getFullYear() === ano;
-                    } catch {
-                        return false;
-                    }
-                })
-                .reduce((sum, m) => sum + (m.valor || 0), 0);
-            
-            dados.push(total);
-        }
-        
-        return dados;
-    }
-
     // ============================================
     // CALCULADORA
     // ============================================
@@ -1875,7 +1609,6 @@
             // Atualizar interface
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
-            inicializarGraficos();
             
         } catch (error) {
             showNotification('Erro ao salvar movimentação. Tente novamente.', 'error');
@@ -1900,7 +1633,6 @@
             // Atualizar interface
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
-            inicializarGraficos();
             
             showNotification('Movimentação excluída com sucesso!', 'success');
         } catch (error) {
@@ -2112,19 +1844,6 @@
             style: 'currency',
             currency: 'BRL'
         }).format(valor);
-    }
-
-    function getUltimos6Meses() {
-        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        const hoje = new Date();
-        const ultimosMeses = [];
-        
-        for (let i = 5; i >= 0; i--) {
-            const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-            ultimosMeses.push(`${meses[data.getMonth()]}/${data.getFullYear().toString().slice(2)}`);
-        }
-        
-        return ultimosMeses;
     }
 
     function showNotification(message, type = 'success') {
