@@ -1108,109 +1108,23 @@
 
     async function carregarMovimentacoes() {
         try {
-            // PRIMEIRO: Tentar carregar com filtro profissionalId
-            const q = query(
-                collection(db, "movimentacoes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("data", "desc")
-            );
-            
-            const querySnapshot = await getDocs(q);
+            // Primeiro: Tentar carregar TODAS as movimentações
+            const movimentacoesRef = collection(db, "movimentacoes");
+            const querySnapshot = await getDocs(movimentacoesRef);
             movimentacoes = [];
             
+            // Filtrar apenas as do usuário atual
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 
-                // Verificar se tem todos os campos necessários
-                if (!data || typeof data !== 'object') return;
-                
-                // Processar dados da movimentação
-                const movimentacao = {
-                    id: doc.id,
-                    tipo: data.tipo || 'receita',
-                    descricao: data.descricao || 'Sem descrição',
-                    categoria: data.categoria || 'outros',
-                    valor: data.valor || 0,
-                    status: data.status || 'pendente',
-                    formaPagamento: data.formaPagamento || '',
-                    observacoes: data.observacoes || '',
-                    despesaFixa: data.despesaFixa || false,
-                    profissionalId: data.profissionalId || currentUser.uid
-                };
-                
-                // Processar data
-                if (data.data) {
-                    if (data.data.toDate && typeof data.data.toDate === 'function') {
-                        // É um Timestamp do Firebase
-                        movimentacao.data = data.data.toDate().toISOString().split('T')[0];
-                    } else if (typeof data.data === 'string') {
-                        // Já é uma string
-                        movimentacao.data = data.data;
-                    } else {
-                        movimentacao.data = '';
-                    }
-                } else {
-                    movimentacao.data = '';
-                }
-                
-                // Processar vencimento
-                if (data.vencimento) {
-                    if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
-                        // É um Timestamp do Firebase
-                        movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
-                    } else if (typeof data.vencimento === 'string') {
-                        // Já é uma string
-                        movimentacao.vencimento = data.vencimento;
-                    } else {
-                        movimentacao.vencimento = '';
-                    }
-                } else {
-                    movimentacao.vencimento = '';
-                }
-                
-                movimentacoes.push(movimentacao);
-            });
-            
-            // SEGUNDO: Se não encontrou nada, tentar método alternativo
-            if (movimentacoes.length === 0) {
-                await carregarMovimentacoesAlternativo();
-            }
-            
-            // TERCEIRO: Verificar atrasados
-            await verificarAtrasados();
-            
-            // QUARTO: Atualizar interface
-            atualizarTabelaMovimentacoes();
-            atualizarEstatisticas();
-            
-        } catch (error) {
-            // Se der erro na consulta com filtro, tentar método alternativo
-            await carregarMovimentacoesAlternativo();
-        }
-    }
-
-    async function carregarMovimentacoesAlternativo() {
-        try {
-            // Carregar TODAS as movimentações sem filtro
-            const movimentacoesRef = collection(db, "movimentacoes");
-            const allDocs = await getDocs(movimentacoesRef);
-            
-            movimentacoes = [];
-            
-            allDocs.forEach((doc) => {
-                const data = doc.data();
-                
                 // Verificar se é do usuário atual
-                // Pode ser que o campo tenha nome diferente
-                const userIdMatch = 
+                const isUserMovimentacao = 
                     data.profissionalId === currentUser.uid ||
                     data.userId === currentUser.uid ||
-                    data.user === currentUser.uid ||
-                    data.profissional === currentUser.uid ||
-                    data.uid === currentUser.uid;
+                    data.user === currentUser.uid;
                 
-                if (userIdMatch) {
-                    // Processar dados
+                if (isUserMovimentacao && data) {
+                    // Processar dados da movimentação
                     const movimentacao = {
                         id: doc.id,
                         tipo: data.tipo || 'receita',
@@ -1220,33 +1134,38 @@
                         status: data.status || 'pendente',
                         formaPagamento: data.formaPagamento || '',
                         observacoes: data.observacoes || '',
-                        despesaFixa: data.despesaFixa || false
+                        despesaFixa: data.despesaFixa || false,
+                        profissionalId: data.profissionalId || currentUser.uid
                     };
                     
                     // Processar data
                     if (data.data) {
                         if (data.data.toDate && typeof data.data.toDate === 'function') {
+                            // É um Timestamp do Firebase
                             movimentacao.data = data.data.toDate().toISOString().split('T')[0];
                         } else if (typeof data.data === 'string') {
+                            // Já é uma string
                             movimentacao.data = data.data;
                         } else {
-                            movimentacao.data = '';
+                            movimentacao.data = new Date().toISOString().split('T')[0];
                         }
                     } else {
-                        movimentacao.data = '';
+                        movimentacao.data = new Date().toISOString().split('T')[0];
                     }
                     
                     // Processar vencimento
                     if (data.vencimento) {
                         if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
+                            // É um Timestamp do Firebase
                             movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
                         } else if (typeof data.vencimento === 'string') {
+                            // Já é uma string
                             movimentacao.vencimento = data.vencimento;
                         } else {
-                            movimentacao.vencimento = '';
+                            movimentacao.vencimento = new Date().toISOString().split('T')[0];
                         }
                     } else {
-                        movimentacao.vencimento = '';
+                        movimentacao.vencimento = new Date().toISOString().split('T')[0];
                     }
                     
                     movimentacoes.push(movimentacao);
@@ -1260,8 +1179,15 @@
                 return dateB - dateA;
             });
             
+            // Verificar atrasados
+            await verificarAtrasados();
+            
+            // Atualizar interface
+            atualizarTabelaMovimentacoes();
+            atualizarEstatisticas();
+            
         } catch (error) {
-            // Se ainda der erro, manter array vazio
+            // Se der erro, inicializar array vazio
             movimentacoes = [];
         }
     }
