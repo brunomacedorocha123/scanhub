@@ -1119,15 +1119,16 @@
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
+                
+                // Processar datas do Firebase
                 let dataMov = data.data;
                 let dataVencimento = data.vencimento;
                 
-                // Converter Timestamps para string se necessário
-                if (dataMov && typeof dataMov.toDate === 'function') {
+                if (dataMov && dataMov.toDate) {
                     dataMov = dataMov.toDate().toISOString().split('T')[0];
                 }
                 
-                if (dataVencimento && typeof dataVencimento.toDate === 'function') {
+                if (dataVencimento && dataVencimento.toDate) {
                     dataVencimento = dataVencimento.toDate().toISOString().split('T')[0];
                 }
                 
@@ -1163,7 +1164,7 @@
                     
                     mov.status = 'atrasado';
                 } catch (error) {
-                    // Silenciar erro, continuar com outras movimentações
+                    // Continuar com outras movimentações
                 }
             }
         }
@@ -1248,6 +1249,9 @@
                     <div class="action-buttons">
                         <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')" title="Editar">
                             <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action-sm btn-pdf" onclick="exportarPDFIndividual('${mov.id}')" title="Exportar PDF">
+                            <i class="fas fa-file-pdf"></i>
                         </button>
                         <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')" title="Excluir">
                             <i class="fas fa-trash"></i>
@@ -1900,7 +1904,7 @@
         // Cabeçalho
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
-        doc.text('RELATÓRIO FINANCEIRO - SCANHUB', pageWidth/2, y, { align: 'center' });
+        doc.text('RELATÓRIO FINANCEIRO COMPLETO - SCANHUB', pageWidth/2, y, { align: 'center' });
         y += 10;
         
         doc.setFontSize(10);
@@ -1938,7 +1942,7 @@
         // Movimentações
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text('MOVIMENTAÇÕES', margin, y);
+        doc.text('TODAS AS MOVIMENTAÇÕES', margin, y);
         y += 10;
         
         // Adicionar movimentações
@@ -1946,20 +1950,126 @@
             if (y > 250) {
                 doc.addPage();
                 y = margin;
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('CONTINUAÇÃO DO RELATÓRIO', margin, y);
+                y += 10;
             }
             
             const categoriaNome = getCategoriaNome(mov.categoria);
             const valor = formatarMoeda(mov.valor);
+            const status = mov.status === 'pago' ? 'Pago/Recebido' : 
+                          mov.status === 'pendente' ? 'Pendente' : 'Atrasado';
             
             doc.setFontSize(9);
             doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
-            doc.text(`${categoriaNome}`, pageWidth/2 - 20, y);
-            doc.text(`${mov.tipo === 'receita' ? '+' : '-'} ${valor}`, pageWidth - margin, y, { align: 'right' });
-            y += 6;
+            doc.text(`Categoria: ${categoriaNome}`, margin + 100, y);
+            doc.text(`Status: ${status}`, pageWidth - 80, y);
+            y += 5;
+            
+            doc.text(`Valor: ${mov.tipo === 'receita' ? '+' : '-'} ${valor}`, margin, y);
+            doc.text(`Vencimento: ${formatarData(mov.vencimento)}`, pageWidth - 80, y);
+            y += 8;
+            
+            // Linha divisória
+            doc.setLineWidth(0.1);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 5;
         });
         
-        doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
-        showNotification('Relatório PDF gerado com sucesso!', 'success');
+        const fileName = `Relatorio-Financeiro-Completo-${new Date().toISOString().slice(0,10)}.pdf`;
+        doc.save(fileName);
+        showNotification('Relatório completo exportado com sucesso!', 'success');
+    };
+
+    window.exportarPDFIndividual = function(id) {
+        const mov = movimentacoes.find(m => m.id === id);
+        if (!mov) {
+            showNotification('Movimentação não encontrada!', 'error');
+            return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.width;
+        let y = margin;
+        
+        // Cabeçalho
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('COMPROVANTE FINANCEIRO - SCANHUB', pageWidth/2, y, { align: 'center' });
+        y += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
+        doc.text(`Data do Comprovante: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
+        y += 15;
+        
+        // Informações da Movimentação
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('INFORMAÇÕES DA MOVIMENTAÇÃO', pageWidth/2, y, { align: 'center' });
+        y += 15;
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        
+        const tipoTexto = mov.tipo === 'receita' ? 'RECEITA' : 'DESPESA';
+        const categoriaNome = getCategoriaNome(mov.categoria);
+        const statusTexto = mov.status === 'pago' ? 'PAGO/RECEBIDO' : 
+                           mov.status === 'pendente' ? 'PENDENTE' : 'ATRASADO';
+        
+        const dados = [
+            ['Tipo:', tipoTexto],
+            ['Data:', formatarData(mov.data)],
+            ['Vencimento:', formatarData(mov.vencimento)],
+            ['Descrição:', mov.descricao || 'Sem descrição'],
+            ['Categoria:', categoriaNome],
+            ['Status:', statusTexto],
+            ['Forma de Pagamento:', mov.formaPagamento || 'Não informado'],
+            ['Observações:', mov.observacoes || 'Nenhuma']
+        ];
+        
+        dados.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, margin, y);
+            doc.setFont('helvetica', 'normal');
+            
+            if (value.length > 40) {
+                // Quebrar texto longo
+                const lines = doc.splitTextToSize(value, pageWidth - margin - 60);
+                doc.text(lines, margin + 40, y);
+                y += (lines.length * 6);
+            } else {
+                doc.text(value, margin + 40, y);
+                y += 10;
+            }
+        });
+        
+        y += 10;
+        
+        // Valor
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        const valorTexto = `${mov.tipo === 'receita' ? 'RECEITA: +' : 'DESPESA: -'} ${formatarMoeda(mov.valor)}`;
+        doc.text(valorTexto, pageWidth/2, y, { align: 'center' });
+        
+        y += 20;
+        
+        // Rodapé com assinatura
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 10;
+        doc.text('Assinatura do Profissional:', margin, y);
+        doc.text('Data: ____________________', pageWidth - margin, y, { align: 'right' });
+        
+        const fileName = `Comprovante-${mov.tipo}-${formatarData(mov.data).replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+        showNotification('Comprovante individual exportado com sucesso!', 'success');
     };
 
     // ============================================
