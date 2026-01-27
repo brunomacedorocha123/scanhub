@@ -922,7 +922,7 @@
         </div>
     </div>
 
-    <!-- Calculadora Flutuante -->
+   <!-- Calculadora Flutuante -->
 <div class="calculadora-flutuante">
     <div class="calculadora-panel" id="calculadoraPanel">
         <div class="calculadora-display" id="calcDisplay">0</div>
@@ -947,13 +947,13 @@
             
             <!-- Quarta linha -->
             <button class="calc-btn" onclick="calcInput('0')">0</button>
-            <button class="calc-btn" onclick="calcInput('.')">.</button>
-            <button class="calc-btn" onclick="calcClear()">C</button>
+            <button class="calc-btn" onclick="calcPonto()">.</button>
+            <button class="calc-btn" onclick="calcLimpar()">C</button>
             <button class="calc-btn operador" onclick="calcOperador('+')">+</button>
             
             <!-- Quinta linha -->
             <button class="calc-btn" onclick="calcPorcentagem()">%</button>
-            <button class="calc-btn calcular" onclick="calcCalculate()">=</button>
+            <button class="calc-btn calcular" onclick="calcCalcular()">=</button>
         </div>
     </div>
     <button class="calculadora-btn" id="toggleCalculadora">
@@ -1206,11 +1206,11 @@
     let pedidos = [];
     let tipoAtualAba = 'todas';
     
-    // Variáveis da Calculadora
-    let calculadoraValue = '0';
-    let calculadoraOperador = '';
-    let calculadoraValorAnterior = '';
-    let calculadoraAguardandoOperador = false;
+    // Variáveis da Calculadora - NOVA VERSÃO SIMPLES
+    let calcDisplay = '0';
+    let calcValor1 = null;
+    let calcOperador = null;
+    let calcAguardandoValor2 = false;
 
     // ============================================
     // ELEMENTOS DOM
@@ -1263,7 +1263,7 @@
     // Calculadora
     const calculadoraPanel = document.getElementById('calculadoraPanel');
     const toggleCalculadora = document.getElementById('toggleCalculadora');
-    const calcDisplay = document.getElementById('calcDisplay');
+    const calcDisplayElement = document.getElementById('calcDisplay');
 
     // ============================================
     // INICIALIZAÇÃO DO SISTEMA
@@ -1312,12 +1312,133 @@
     }
 
     // ============================================
-    // CARREGAMENTO DE DADOS - CORRIGIDO
+    // CALCULADORA CORRIGIDA - FUNCIONA IGUAL À DO CELULAR
+    // ============================================
+
+    function inicializarCalculadora() {
+        if (!toggleCalculadora) return;
+        
+        toggleCalculadora.addEventListener('click', () => {
+            calculadoraPanel.classList.toggle('show');
+        });
+        
+        // Fechar calculadora ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (calculadoraPanel && !calculadoraPanel.contains(e.target) && 
+                toggleCalculadora && !toggleCalculadora.contains(e.target)) {
+                calculadoraPanel.classList.remove('show');
+            }
+        });
+        
+        // Inicializar display
+        calcDisplayElement.textContent = calcDisplay;
+    }
+
+    // FUNÇÃO PARA DIGITAR NÚMEROS
+    window.calcInput = function(valor) {
+        if (calcAguardandoValor2) {
+            calcDisplay = valor;
+            calcAguardandoValor2 = false;
+        } else {
+            calcDisplay = calcDisplay === '0' ? valor : calcDisplay + valor;
+        }
+        calcDisplayElement.textContent = calcDisplay;
+    };
+
+    // FUNÇÃO PARA PONTO DECIMAL
+    window.calcPonto = function() {
+        if (calcAguardandoValor2) {
+            calcDisplay = '0.';
+            calcAguardandoValor2 = false;
+        } else if (calcDisplay.indexOf('.') === -1) {
+            calcDisplay += '.';
+        }
+        calcDisplayElement.textContent = calcDisplay;
+    };
+
+    // FUNÇÃO PARA OPERADORES (+, -, ×, ÷)
+    window.calcOperador = function(operadorSelecionado) {
+        const valorDisplay = parseFloat(calcDisplay);
+        
+        if (calcValor1 === null) {
+            calcValor1 = valorDisplay;
+        } else if (calcOperador) {
+            const resultado = calcular(calcValor1, parseFloat(calcDisplay), calcOperador);
+            calcDisplay = String(resultado);
+            calcDisplayElement.textContent = calcDisplay;
+            calcValor1 = resultado;
+        }
+        
+        calcAguardandoValor2 = true;
+        calcOperador = operadorSelecionado;
+    };
+
+    // FUNÇÃO PARA CALCULAR RESULTADO
+    window.calcCalcular = function() {
+        if (calcValor1 === null || calcOperador === null) {
+            return;
+        }
+        
+        const valor2 = parseFloat(calcDisplay);
+        const resultado = calcular(calcValor1, valor2, calcOperador);
+        
+        calcDisplay = String(resultado);
+        calcDisplayElement.textContent = calcDisplay;
+        
+        // Resetar para próximo cálculo
+        calcValor1 = resultado;
+        calcOperador = null;
+        calcAguardandoValor2 = true;
+    };
+
+    // FUNÇÃO PARA PORCENTAGEM (como no celular)
+    window.calcPorcentagem = function() {
+        const valor = parseFloat(calcDisplay);
+        
+        if (calcValor1 !== null && calcOperador) {
+            // Se já tem um operador, calcula porcentagem do primeiro valor
+            const porcentagem = (calcValor1 * valor) / 100;
+            calcDisplay = String(porcentagem);
+        } else {
+            // Se não, calcula porcentagem simples
+            calcDisplay = String(valor / 100);
+        }
+        
+        calcDisplayElement.textContent = calcDisplay;
+    };
+
+    // FUNÇÃO PARA LIMPAR
+    window.calcLimpar = function() {
+        calcDisplay = '0';
+        calcValor1 = null;
+        calcOperador = null;
+        calcAguardandoValor2 = false;
+        calcDisplayElement.textContent = calcDisplay;
+    };
+
+    // FUNÇÃO AUXILIAR PARA CÁLCULOS
+    function calcular(valor1, valor2, operador) {
+        switch(operador) {
+            case '+':
+                return valor1 + valor2;
+            case '-':
+                return valor1 - valor2;
+            case '×':
+                return valor1 * valor2;
+            case '÷':
+                return valor2 !== 0 ? valor1 / valor2 : 0;
+            default:
+                return valor2;
+        }
+    }
+
+    // ============================================
+    // CARREGAMENTO DE DADOS
     // ============================================
 
     async function carregarDadosIniciais() {
         try {
-            await carregarCategorias(); // Carregar categorias primeiro
+            await carregarCategorias();
             await carregarMovimentacoes();
             await carregarClientes();
             await carregarPedidos();
@@ -1326,7 +1447,6 @@
             atualizarEstatisticas();
         } catch (error) {
             console.error('Erro ao carregar dados iniciais:', error);
-            alert('Erro ao carregar dados. Por favor, recarregue a página.');
         }
     }
 
@@ -1348,7 +1468,6 @@
                 });
             });
             
-            console.log(`Carregadas ${movimentacoes.length} movimentações`);
             atualizarTabelaMovimentacoes();
         } catch (error) {
             console.error('Erro ao carregar movimentações:', error);
@@ -1366,56 +1485,35 @@
             categorias = [];
             
             querySnapshot.forEach((doc) => {
-                const categoriaData = doc.data();
                 categorias.push({
                     id: doc.id,
-                    ...categoriaData
+                    ...doc.data()
                 });
             });
             
-            console.log(`Carregadas ${categorias.length} categorias`);
-            
-            // Se não houver categorias, criar as padrão
+            // Se não houver categorias, criar uma padrão
             if (categorias.length === 0) {
-                await criarCategoriasPadrao();
+                await criarCategoriaPadrao();
             }
         } catch (error) {
             console.error('Erro ao carregar categorias:', error);
         }
     }
 
-    async function criarCategoriasPadrao() {
-        const categoriasPadrao = [
-            { nome: "Serviços Prestados", tipo: "receita", cor: "#27ae60", orcamento: 0 },
-            { nome: "Venda de Produtos", tipo: "receita", cor: "#2ecc71", orcamento: 0 },
-            { nome: "Materiais/Insumos", tipo: "despesa", cor: "#e74c3c", orcamento: 0 },
-            { nome: "Marketing", tipo: "despesa", cor: "#9b59b6", orcamento: 0 },
-            { nome: "Transporte", tipo: "despesa", cor: "#f39c12", orcamento: 0 },
-            { nome: "Impostos", tipo: "despesa", cor: "#34495e", orcamento: 0 },
-            { nome: "Salários", tipo: "despesa", cor: "#1abc9c", orcamento: 0 },
-            { nome: "Aluguel", tipo: "despesa", cor: "#d35400", orcamento: 0 },
-            { nome: "Outras Receitas", tipo: "receita", cor: "#3498db", orcamento: 0 },
-            { nome: "Outras Despesas", tipo: "despesa", cor: "#95a5a6", orcamento: 0 }
-        ];
-        
-        console.log('Criando categorias padrão...');
-        
-        for (const categoria of categoriasPadrao) {
-            try {
-                await addDoc(collection(db, "categorias"), {
-                    ...categoria,
-                    profissionalId: currentUser.uid,
-                    criadoEm: serverTimestamp(),
-                    atualizadoEm: serverTimestamp()
-                });
-                console.log(`Categoria criada: ${categoria.nome}`);
-            } catch (error) {
-                console.error(`Erro ao criar categoria ${categoria.nome}:`, error);
-            }
+    async function criarCategoriaPadrao() {
+        try {
+            await addDoc(collection(db, "categorias"), {
+                nome: "Sem Categoria",
+                tipo: "ambos",
+                cor: "#6c757d",
+                profissionalId: currentUser.uid,
+                criadoEm: serverTimestamp()
+            });
+            
+            await carregarCategorias();
+        } catch (error) {
+            console.error('Erro ao criar categoria padrão:', error);
         }
-        
-        // Recarregar categorias
-        await carregarCategorias();
     }
 
     async function carregarClientes() {
@@ -1435,8 +1533,6 @@
                     ...doc.data()
                 });
             });
-            
-            console.log(`Carregados ${clientes.length} clientes`);
         } catch (error) {
             console.error('Erro ao carregar clientes:', error);
         }
@@ -1446,8 +1542,7 @@
         try {
             const q = query(
                 collection(db, "pedidos"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("dataPedido", "desc")
+                where("profissionalId", "==", currentUser.uid)
             );
             
             const querySnapshot = await getDocs(q);
@@ -1459,89 +1554,39 @@
                     ...doc.data()
                 });
             });
-            
-            console.log(`Carregados ${pedidos.length} pedidos`);
         } catch (error) {
             console.error('Erro ao carregar pedidos:', error);
         }
     }
 
     function atualizarFiltros() {
-        console.log('Atualizando filtros com', categorias.length, 'categorias');
-        
         // Atualizar filtro de categorias
         filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
         const categoriaSelect = document.getElementById('categoria');
         
         if (categoriaSelect) {
-            categoriaSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
+            categoriaSelect.innerHTML = '<option value="">Selecione ou deixe em branco</option>';
             
-            // Separar categorias por tipo para melhor organização
-            const receitas = categorias.filter(c => c.tipo === 'receita');
-            const despesas = categorias.filter(c => c.tipo === 'despesa');
-            
-            // Adicionar receitas
-            if (receitas.length > 0) {
-                const optgroupReceitas = document.createElement('optgroup');
-                optgroupReceitas.label = 'Receitas';
-                categoriaSelect.appendChild(optgroupReceitas);
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.id;
+                option.textContent = categoria.nome;
+                option.style.color = categoria.cor || '#333';
                 
-                receitas.forEach(categoria => {
-                    const option = document.createElement('option');
-                    option.value = categoria.id;
-                    option.textContent = categoria.nome;
-                    option.style.color = categoria.cor || '#27ae60';
-                    optgroupReceitas.appendChild(option);
-                });
-            }
-            
-            // Adicionar despesas
-            if (despesas.length > 0) {
-                const optgroupDespesas = document.createElement('optgroup');
-                optgroupDespesas.label = 'Despesas';
-                categoriaSelect.appendChild(optgroupDespesas);
-                
-                despesas.forEach(categoria => {
-                    const option = document.createElement('option');
-                    option.value = categoria.id;
-                    option.textContent = categoria.nome;
-                    option.style.color = categoria.cor || '#e74c3c';
-                    optgroupDespesas.appendChild(option);
-                });
-            }
+                filterCategoria.appendChild(option.cloneNode(true));
+                categoriaSelect.appendChild(option.cloneNode(true));
+            });
         }
-        
-        // Atualizar filtro de categorias no filtro principal
-        filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
-        categorias.forEach(categoria => {
-            const option = document.createElement('option');
-            option.value = categoria.id;
-            option.textContent = categoria.nome;
-            option.style.color = categoria.cor || '#333';
-            filterCategoria.appendChild(option);
-        });
         
         // Atualizar filtro de clientes
         const clienteSelect = document.getElementById('cliente');
         if (clienteSelect) {
-            clienteSelect.innerHTML = '<option value="">Selecione um cliente (opcional)...</option>';
+            clienteSelect.innerHTML = '<option value="">Selecione (opcional)</option>';
             clientes.forEach(cliente => {
                 const option = document.createElement('option');
                 option.value = cliente.id;
                 option.textContent = cliente.nome;
                 clienteSelect.appendChild(option);
-            });
-        }
-        
-        // Atualizar filtro de pedidos
-        const pedidoSelect = document.getElementById('pedidoRelacionado');
-        if (pedidoSelect) {
-            pedidoSelect.innerHTML = '<option value="">Selecione um pedido (opcional)...</option>';
-            pedidos.forEach(pedido => {
-                const option = document.createElement('option');
-                option.value = pedido.id;
-                option.textContent = pedido.numeroPedido || `Pedido ${pedido.id.substring(0, 8)}`;
-                pedidoSelect.appendChild(option);
             });
         }
     }
@@ -1557,11 +1602,9 @@
                 this.classList.add('active');
                 tipoAtualAba = this.getAttribute('data-tipo');
                 
-                // Mostrar/ocultar seções
                 categoriasSection.style.display = tipoAtualAba === 'categorias' ? 'block' : 'none';
                 relatoriosSection.style.display = tipoAtualAba === 'relatorios' ? 'block' : 'none';
                 
-                // Atualizar tabela apropriada
                 if (tipoAtualAba === 'categorias') {
                     atualizarTabelaCategorias();
                 } else {
@@ -1570,104 +1613,6 @@
             });
         });
     }
-
-    // ============================================
-    // CALCULADORA - CORRIGIDA
-    // ============================================
-
-    function inicializarCalculadora() {
-        if (!toggleCalculadora) return;
-        
-        toggleCalculadora.addEventListener('click', () => {
-            calculadoraPanel.classList.toggle('show');
-        });
-        
-        // Fechar calculadora ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (calculadoraPanel && !calculadoraPanel.contains(e.target) && 
-                toggleCalculadora && !toggleCalculadora.contains(e.target)) {
-                calculadoraPanel.classList.remove('show');
-            }
-        });
-        
-        // Inicializar display
-        calcDisplay.textContent = calculadoraValue;
-    }
-
-    window.calcInput = function(value) {
-        if (calculadoraAguardandoOperador) {
-            calculadoraValue = value;
-            calculadoraAguardandoOperador = false;
-        } else {
-            calculadoraValue = calculadoraValue === '0' ? value : calculadoraValue + value;
-        }
-        
-        // Limitar o número de caracteres
-        if (calculadoraValue.length > 12) {
-            calculadoraValue = calculadoraValue.substring(0, 12);
-        }
-        
-        calcDisplay.textContent = calculadoraValue;
-    };
-
-    window.calcClear = function() {
-        calculadoraValue = '0';
-        calculadoraOperador = '';
-        calculadoraValorAnterior = '';
-        calculadoraAguardandoOperador = false;
-        calcDisplay.textContent = calculadoraValue;
-    };
-
-    window.calcCalculate = function() {
-        if (calculadoraOperador && calculadoraValorAnterior !== '') {
-            let resultado;
-            const valorAtual = parseFloat(calculadoraValue.replace(',', '.'));
-            const valorAnterior = parseFloat(calculadoraValorAnterior.replace(',', '.'));
-            
-            switch(calculadoraOperador) {
-                case '+':
-                    resultado = valorAnterior + valorAtual;
-                    break;
-                case '-':
-                    resultado = valorAnterior - valorAtual;
-                    break;
-                case '×':
-                    resultado = valorAnterior * valorAtual;
-                    break;
-                case '÷':
-                    resultado = valorAtual !== 0 ? valorAnterior / valorAtual : 0;
-                    break;
-                default:
-                    resultado = valorAtual;
-            }
-            
-            calculadoraValue = resultado.toString().replace('.', ',');
-            calculadoraOperador = '';
-            calculadoraValorAnterior = '';
-            calculadoraAguardandoOperador = true;
-            calcDisplay.textContent = calculadoraValue;
-        }
-    };
-
-    // Função para operadores
-    window.calcOperador = function(operador) {
-        if (calculadoraValue !== '0') {
-            if (calculadoraOperador && calculadoraValorAnterior !== '') {
-                calcCalculate();
-            }
-            calculadoraValorAnterior = calculadoraValue;
-            calculadoraOperador = operador;
-            calculadoraAguardandoOperador = true;
-        }
-    };
-
-    // Função para porcentagem
-    window.calcPorcentagem = function() {
-        const valor = parseFloat(calculadoraValue.replace(',', '.'));
-        const resultado = valor / 100;
-        calculadoraValue = resultado.toString().replace('.', ',');
-        calcDisplay.textContent = calculadoraValue;
-    };
 
     // ============================================
     // TABELA DE MOVIMENTAÇÕES
@@ -1680,7 +1625,6 @@
         const mesFilter = filterMes.value;
         const categoriaFilter = filterCategoria.value;
         
-        // Filtrar por tipo da aba
         let movimentacoesFiltradas = movimentacoes;
         
         if (tipoAtualAba === 'receitas') {
@@ -1689,7 +1633,6 @@
             movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'despesa');
         }
         
-        // Aplicar filtros adicionais
         movimentacoesFiltradas = movimentacoesFiltradas.filter(mov => {
             const matchSearch = !searchTerm || 
                 (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
@@ -1708,7 +1651,6 @@
             return matchSearch && matchTipo && matchStatus && matchMes && matchCategoria;
         });
         
-        // Limpar tabela
         movimentacoesTable.innerHTML = '';
         
         if (movimentacoesFiltradas.length === 0) {
@@ -1716,7 +1658,6 @@
             return;
         }
         
-        // Preencher tabela
         movimentacoesFiltradas.forEach(mov => {
             const categoria = categorias.find(c => c.id === mov.categoriaId);
             const row = document.createElement('tr');
@@ -1725,7 +1666,6 @@
             const vencimentoFormatado = formatarData(mov.vencimento);
             const valorFormatado = formatarMoeda(mov.valor);
             
-            // Determinar estilo baseado no tipo
             const tipoBadge = mov.tipo === 'receita' 
                 ? '<span class="badge-status status-pago"><i class="fas fa-arrow-down me-1"></i>Receita</span>'
                 : '<span class="badge-status status-atrasado"><i class="fas fa-arrow-up me-1"></i>Despesa</span>';
@@ -1755,9 +1695,6 @@
                         <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-action-sm btn-recibo" onclick="exportarMovimentacaoPDF('${mov.id}')">
-                            <i class="fas fa-file-pdf"></i>
-                        </button>
                         <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -1765,7 +1702,6 @@
                 </td>
             `;
             
-            // Destacar linhas atrasadas
             if (mov.status === 'atrasado') {
                 row.style.backgroundColor = '#fff5f5';
             }
@@ -1806,79 +1742,20 @@
             return;
         }
         
-        // Calcular totais por categoria
-        const hoje = new Date();
-        const mesAtual = hoje.getMonth();
-        const anoAtual = hoje.getFullYear();
-        
         categorias.forEach(categoria => {
-            // Filtrar movimentações desta categoria no mês atual
-            const movimentacoesCategoria = movimentacoes.filter(mov => {
-                if (mov.categoriaId !== categoria.id) return false;
-                
-                if (!mov.data) return false;
-                const dataMov = new Date(mov.data);
-                return dataMov.getMonth() === mesAtual && 
-                       dataMov.getFullYear() === anoAtual;
-            });
-            
-            // Calcular total
-            const total = movimentacoesCategoria.reduce((sum, mov) => {
-                return sum + (mov.valor || 0);
-            }, 0);
-            
-            // Calcular porcentagem do orçamento
-            let porcentagem = 0;
-            if (categoria.orcamento && categoria.orcamento > 0) {
-                porcentagem = Math.min(100, Math.round((total / categoria.orcamento) * 100));
-            }
-            
-            // Determinar status
-            let status = 'normal';
-            let statusText = 'Normal';
-            let statusClass = 'text-success';
-            
-            if (categoria.orcamento && categoria.orcamento > 0) {
-                if (porcentagem >= 100) {
-                    status = 'excedido';
-                    statusText = 'Excedido';
-                    statusClass = 'text-danger';
-                } else if (porcentagem >= 80) {
-                    status = 'alerta';
-                    statusText = 'Alerta';
-                    statusClass = 'text-warning';
-                }
-            }
-            
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>
                     <span class="badge" style="background: ${categoria.cor || '#3498db'}">
-                        <i class="fas ${categoria.tipo === 'receita' ? 'fa-arrow-down' : 'fa-arrow-up'} me-1"></i>
                         ${categoria.nome}
                     </span>
                 </td>
                 <td>
-                    <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : 'bg-danger'}">
-                        ${categoria.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                    <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : categoria.tipo === 'despesa' ? 'bg-danger' : 'bg-secondary'}">
+                        ${categoria.tipo === 'receita' ? 'Receita' : categoria.tipo === 'despesa' ? 'Despesa' : 'Ambos'}
                     </span>
                 </td>
-                <td class="fw-bold ${categoria.tipo === 'receita' ? 'text-success' : 'text-danger'}">
-                    ${formatarMoeda(total)}
-                </td>
                 <td>${categoria.orcamento ? formatarMoeda(categoria.orcamento) : 'Sem limite'}</td>
-                <td>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar ${porcentagem >= 100 ? 'bg-danger' : porcentagem >= 80 ? 'bg-warning' : 'bg-success'}" 
-                             style="width: ${porcentagem}%"></div>
-                    </div>
-                    <small>${porcentagem}%</small>
-                </td>
-                <td class="${statusClass}">
-                    <i class="fas ${status === 'excedido' ? 'fa-exclamation-triangle' : 
-                                   status === 'alerta' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-1"></i>
-                    ${statusText}
-                </td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-action-sm" onclick="editarCategoria('${categoria.id}')">
@@ -1904,15 +1781,6 @@
         const mesAtual = hoje.getMonth();
         const anoAtual = hoje.getFullYear();
         
-        // Filtrar movimentações do mês atual
-        const movimentacoesMes = movimentacoes.filter(mov => {
-            if (!mov.data) return false;
-            const dataMov = new Date(mov.data);
-            return dataMov.getMonth() === mesAtual && 
-                   dataMov.getFullYear() === anoAtual;
-        });
-        
-        // Calcular valores
         let totalReceita = 0;
         let totalDespesa = 0;
         let totalAtrasados = 0;
@@ -1925,7 +1793,6 @@
             if (mov.tipo === 'receita') {
                 totalReceita += valor;
                 
-                // A receber nos próximos 7 dias
                 if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
                     const vencimento = new Date(mov.vencimento);
                     const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
@@ -1934,14 +1801,12 @@
                     }
                 }
                 
-                // Atrasados
                 if (mov.status === 'atrasado') {
                     totalAtrasados += valor;
                 }
             } else if (mov.tipo === 'despesa') {
                 totalDespesa += valor;
                 
-                // A pagar nos próximos 7 dias
                 if ((mov.status === 'pendente' || mov.status === 'atrasado') && mov.vencimento) {
                     const vencimento = new Date(mov.vencimento);
                     const diferencaDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
@@ -1954,7 +1819,6 @@
         
         const saldo = totalReceita - totalDespesa;
         
-        // Atualizar elementos
         saldoAtual.textContent = formatarMoeda(saldo);
         receitaMes.textContent = formatarMoeda(totalReceita);
         despesaMes.textContent = formatarMoeda(totalDespesa);
@@ -1964,19 +1828,14 @@
     }
 
     function inicializarGraficos() {
-        // Verificar se os elementos existem
         const canvasFluxo = document.getElementById('graficoFluxoCaixa');
         const canvasDespesas = document.getElementById('graficoDespesas');
         const canvasComparativo = document.getElementById('graficoComparativo');
         
-        if (!canvasFluxo || !canvasDespesas || !canvasComparativo) {
-            console.warn('Elementos de gráfico não encontrados');
-            return;
-        }
+        if (!canvasFluxo || !canvasDespesas || !canvasComparativo) return;
         
-        // Gráfico de Fluxo de Caixa (últimos 6 meses)
-        const ctxFluxo = canvasFluxo.getContext('2d');
-        new Chart(ctxFluxo, {
+        // Gráfico de Fluxo de Caixa
+        new Chart(canvasFluxo.getContext('2d'), {
             type: 'line',
             data: {
                 labels: getUltimos6Meses(),
@@ -1999,49 +1858,24 @@
                     }
                 ]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: false
-                    }
-                }
-            }
+            options: { responsive: true }
         });
         
-        // Gráfico de Distribuição de Despesas
-        const ctxDespesas = canvasDespesas.getContext('2d');
-        new Chart(ctxDespesas, {
+        // Gráfico de Despesas
+        new Chart(canvasDespesas.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Materiais', 'Marketing', 'Transporte', 'Impostos', 'Outros'],
                 datasets: [{
                     data: [40, 20, 15, 15, 10],
-                    backgroundColor: [
-                        '#e74c3c',
-                        '#9b59b6',
-                        '#f39c12',
-                        '#34495e',
-                        '#bdc3c7'
-                    ]
+                    backgroundColor: ['#e74c3c', '#9b59b6', '#f39c12', '#34495e', '#bdc3c7']
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                    }
-                }
-            }
+            options: { responsive: true }
         });
         
         // Gráfico Comparativo
-        const ctxComparativo = canvasComparativo.getContext('2d');
-        new Chart(ctxComparativo, {
+        new Chart(canvasComparativo.getContext('2d'), {
             type: 'bar',
             data: {
                 labels: getUltimos6Meses(),
@@ -2062,24 +1896,7 @@
                     }
                 ]
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                }
-            }
+            options: { responsive: true }
         });
     }
 
@@ -2093,14 +1910,11 @@
         
         modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
         
-        // Resetar formulário
         formMovimentacao.reset();
         document.getElementById('movimentacaoId').value = '';
         
-        // Definir tipo
         tipoMovimentacao.value = tipo;
         
-        // Ativar botão correto
         tipoMovBtns.forEach(btn => {
             btn.classList.remove('active');
             if (btn.getAttribute('data-tipo') === tipo) {
@@ -2108,7 +1922,6 @@
             }
         });
         
-        // Mostrar/ocultar campos específicos
         if (tipo === 'despesa') {
             despesaFields.style.display = 'block';
             receitaFields.style.display = 'none';
@@ -2117,33 +1930,9 @@
             receitaFields.style.display = 'block';
         }
         
-        // Configurar data atual
         const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('dataMovimentacao').value = hoje;
         document.getElementById('vencimento').value = hoje;
-        
-        // Carregar categorias no select
-        const categoriaSelect = document.getElementById('categoria');
-        categoriaSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
-        
-        // Filtrar categorias por tipo
-        const categoriasFiltradas = categorias.filter(c => c.tipo === tipo);
-        
-        if (categoriasFiltradas.length > 0) {
-            categoriasFiltradas.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria.id;
-                option.textContent = categoria.nome;
-                option.style.color = categoria.cor || '#333';
-                categoriaSelect.appendChild(option);
-            });
-        } else {
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = 'Nenhuma categoria disponível';
-            option.disabled = true;
-            categoriaSelect.appendChild(option);
-        }
         
         modalMovimentacao.show();
     };
@@ -2159,7 +1948,6 @@
         const modalTitle = document.getElementById('modalTitle');
         modalTitle.textContent = `Detalhes da ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
         
-        // Preencher dados
         document.getElementById('movimentacaoId').value = mov.id;
         document.getElementById('descricao').value = mov.descricao || '';
         document.getElementById('valor').value = mov.valor || 0;
@@ -2173,14 +1961,10 @@
         document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
         document.getElementById('cliente').value = mov.clienteId || '';
         document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
-        document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-        document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
         
-        // Selecionar a categoria correta
         const categoriaSelect = document.getElementById('categoria');
         categoriaSelect.value = mov.categoriaId || '';
         
-        // Desabilitar todos os campos
         const inputs = formMovimentacao.querySelectorAll('input, select, textarea, button');
         inputs.forEach(input => {
             input.disabled = true;
@@ -2201,7 +1985,6 @@
         const modalTitle = document.getElementById('modalTitle');
         modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
         
-        // Preencher dados
         document.getElementById('movimentacaoId').value = mov.id;
         document.getElementById('descricao').value = mov.descricao || '';
         document.getElementById('valor').value = mov.valor || 0;
@@ -2215,26 +1998,10 @@
         document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
         document.getElementById('cliente').value = mov.clienteId || '';
         document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
-        document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-        document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
         
-        // Carregar categorias no select e selecionar a correta
         const categoriaSelect = document.getElementById('categoria');
-        const categoriasFiltradas = categorias.filter(c => c.tipo === mov.tipo);
-        
-        if (categoriasFiltradas.length > 0) {
-            categoriasFiltradas.forEach(categoria => {
-                const option = document.createElement('option');
-                option.value = categoria.id;
-                option.textContent = categoria.nome;
-                option.style.color = categoria.cor || '#333';
-                categoriaSelect.appendChild(option);
-            });
-        }
-        
         categoriaSelect.value = mov.categoriaId || '';
         
-        // Habilitar todos os campos
         const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
             input.disabled = false;
@@ -2245,10 +2012,8 @@
     };
 
     async function salvarMovimentacao() {
-        // Validação básica
         const descricao = document.getElementById('descricao').value.trim();
         const valor = parseFloat(document.getElementById('valor').value);
-        const categoriaId = document.getElementById('categoria').value;
         
         if (!descricao) {
             alert('Informe uma descrição.');
@@ -2262,24 +2027,11 @@
             return;
         }
         
-        if (!categoriaId) {
-            alert('Selecione uma categoria.');
-            document.getElementById('categoria').focus();
-            return;
-        }
-        
         try {
-            const categoriaSelecionada = categorias.find(c => c.id === categoriaId);
-            if (!categoriaSelecionada) {
-                alert('Categoria selecionada não encontrada.');
-                return;
-            }
-            
             const movData = {
                 tipo: tipoMovimentacao.value,
                 descricao: descricao,
-                categoriaId: categoriaId,
-                categoriaNome: categoriaSelecionada.nome,
+                categoriaId: document.getElementById('categoria').value || '',
                 valor: valor,
                 status: document.getElementById('status').value,
                 data: document.getElementById('dataMovimentacao').value,
@@ -2287,14 +2039,11 @@
                 formaPagamento: document.getElementById('formaPagamento').value || '',
                 recorrencia: document.getElementById('recorrencia').value,
                 observacoes: document.getElementById('observacoes').value || '',
-                despesaFixa: document.getElementById('despesaFixa').checked,
-                gerarLembrete: document.getElementById('gerarLembrete').checked,
                 profissionalId: currentUser.uid,
                 profissionalNome: userData?.nomeCompleto || userData?.apelido || 'Profissional',
                 atualizadoEm: serverTimestamp()
             };
             
-            // Adicionar campos específicos
             if (tipoMovimentacao.value === 'despesa') {
                 movData.fornecedor = document.getElementById('fornecedor').value || '';
                 movData.numeroDocumento = document.getElementById('numeroDocumento').value || '';
@@ -2306,11 +2055,9 @@
             const movId = document.getElementById('movimentacaoId').value;
             
             if (movId) {
-                // Atualizar
                 const movRef = doc(db, "movimentacoes", movId);
                 await updateDoc(movRef, movData);
                 
-                // Atualizar localmente
                 const index = movimentacoes.findIndex(m => m.id === movId);
                 if (index !== -1) {
                     movimentacoes[index] = { ...movimentacoes[index], ...movData };
@@ -2318,7 +2065,6 @@
                 
                 alert('Movimentação atualizada com sucesso!');
             } else {
-                // Nova movimentação
                 movData.criadoEm = serverTimestamp();
                 const docRef = await addDoc(collection(db, "movimentacoes"), movData);
                 movData.id = docRef.id;
@@ -2329,7 +2075,6 @@
             
             modalMovimentacao.hide();
             
-            // Atualizar interface
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
             if (tipoAtualAba === 'categorias') {
@@ -2351,13 +2096,11 @@
             const movRef = doc(db, "movimentacoes", id);
             await deleteDoc(movRef);
             
-            // Remover da lista local
             const index = movimentacoes.findIndex(m => m.id === id);
             if (index !== -1) {
                 movimentacoes.splice(index, 1);
             }
             
-            // Atualizar interface
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
             if (tipoAtualAba === 'categorias') {
@@ -2378,8 +2121,7 @@
     window.abrirModalCategoria = function() {
         document.getElementById('formCategoria').reset();
         document.getElementById('nomeCategoria').value = '';
-        document.getElementById('tipoCategoria').value = 'despesa';
-        document.getElementById('orcamentoCategoria').value = '';
+        document.getElementById('tipoCategoria').value = 'ambos';
         document.getElementById('corCategoria').value = '#3498db';
         
         const btnSalvar = document.getElementById('btnSalvarCategoria');
@@ -2397,8 +2139,7 @@
         }
         
         document.getElementById('nomeCategoria').value = categoria.nome;
-        document.getElementById('tipoCategoria').value = categoria.tipo;
-        document.getElementById('orcamentoCategoria').value = categoria.orcamento || '';
+        document.getElementById('tipoCategoria').value = categoria.tipo || 'ambos';
         document.getElementById('corCategoria').value = categoria.cor || '#3498db';
         
         const btnSalvar = document.getElementById('btnSalvarCategoria');
@@ -2410,9 +2151,6 @@
 
     async function salvarCategoria(categoriaId = null) {
         const nome = document.getElementById('nomeCategoria').value.trim();
-        const tipo = document.getElementById('tipoCategoria').value;
-        const orcamento = document.getElementById('orcamentoCategoria').value;
-        const cor = document.getElementById('corCategoria').value;
         
         if (!nome) {
             alert('Informe um nome para a categoria.');
@@ -2423,24 +2161,16 @@
         try {
             const categoriaData = {
                 nome: nome,
-                tipo: tipo,
-                cor: cor,
+                tipo: document.getElementById('tipoCategoria').value,
+                cor: document.getElementById('corCategoria').value,
                 profissionalId: currentUser.uid,
                 atualizadoEm: serverTimestamp()
             };
             
-            if (orcamento && orcamento > 0) {
-                categoriaData.orcamento = parseFloat(orcamento);
-            } else {
-                categoriaData.orcamento = 0;
-            }
-            
             if (categoriaId) {
-                // Atualizar categoria existente
                 const catRef = doc(db, "categorias", categoriaId);
                 await updateDoc(catRef, categoriaData);
                 
-                // Atualizar localmente
                 const index = categorias.findIndex(c => c.id === categoriaId);
                 if (index !== -1) {
                     categorias[index] = { ...categorias[index], ...categoriaData };
@@ -2448,7 +2178,6 @@
                 
                 alert('Categoria atualizada com sucesso!');
             } else {
-                // Nova categoria
                 categoriaData.criadoEm = serverTimestamp();
                 const docRef = await addDoc(collection(db, "categorias"), categoriaData);
                 categoriaData.id = docRef.id;
@@ -2459,7 +2188,6 @@
             
             modalCategoria.hide();
             
-            // Atualizar interface
             atualizarFiltros();
             if (tipoAtualAba === 'categorias') {
                 atualizarTabelaCategorias();
@@ -2472,7 +2200,6 @@
     }
 
     window.excluirCategoria = async function(id) {
-        // Verificar se há movimentações usando esta categoria
         const movimentacoesComCategoria = movimentacoes.filter(m => m.categoriaId === id);
         
         if (movimentacoesComCategoria.length > 0) {
@@ -2488,13 +2215,11 @@
             const catRef = doc(db, "categorias", id);
             await deleteDoc(catRef);
             
-            // Remover da lista local
             const index = categorias.findIndex(c => c.id === id);
             if (index !== -1) {
                 categorias.splice(index, 1);
             }
             
-            // Atualizar interface
             atualizarFiltros();
             if (tipoAtualAba === 'categorias') {
                 atualizarTabelaCategorias();
@@ -2505,159 +2230,6 @@
             console.error('Erro ao excluir categoria:', error);
             alert('Erro ao excluir categoria. Tente novamente.');
         }
-    };
-
-    // ============================================
-    // EXPORTAÇÃO E RELATÓRIOS
-    // ============================================
-
-    window.exportarPDF = function() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const margin = 20;
-        const pageWidth = doc.internal.pageSize.width;
-        let y = margin;
-        
-        // Cabeçalho
-        doc.setFontSize(20);
-        doc.setFont('helvetica', 'bold');
-        doc.text('RELATÓRIO FINANCEIRO', pageWidth/2, y, { align: 'center' });
-        y += 10;
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, margin, y);
-        doc.text(`Período: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
-        y += 15;
-        
-        // Resumo
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('RESUMO FINANCEIRO', margin, y);
-        y += 10;
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Saldo Atual: ${saldoAtual.textContent}`, margin, y);
-        y += 7;
-        doc.text(`Receita do Mês: ${receitaMes.textContent}`, margin, y);
-        y += 7;
-        doc.text(`Despesas do Mês: ${despesaMes.textContent}`, margin, y);
-        y += 7;
-        doc.text(`A Receber (7 dias): ${aReceber.textContent}`, margin, y);
-        y += 7;
-        doc.text(`A Pagar (7 dias): ${aPagar.textContent}`, margin, y);
-        y += 15;
-        
-        // Movimentações recentes
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('ÚLTIMAS MOVIMENTAÇÕES', margin, y);
-        y += 10;
-        
-        const movimentacoesRecentes = movimentacoes.slice(0, 10);
-        
-        movimentacoesRecentes.forEach((mov, index) => {
-            if (y > 250) {
-                doc.addPage();
-                y = margin;
-            }
-            
-            const categoria = categorias.find(c => c.id === mov.categoriaId);
-            const tipo = mov.tipo === 'receita' ? 'Receita' : 'Despesa';
-            const sinal = mov.tipo === 'receita' ? '+' : '-';
-            const valor = formatarMoeda(mov.valor);
-            
-            doc.setFontSize(9);
-            doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
-            doc.text(`${categoria?.nome || 'Sem categoria'}`, pageWidth/2, y);
-            doc.text(`${sinal} ${valor}`, pageWidth - margin, y, { align: 'right' });
-            y += 6;
-        });
-        
-        doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
-    };
-
-    window.exportarMovimentacaoPDF = async function(id) {
-        const mov = movimentacoes.find(m => m.id === id);
-        if (!mov) {
-            alert('Movimentação não encontrada.');
-            return;
-        }
-        
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const margin = 20;
-        const pageWidth = doc.internal.pageSize.width;
-        let y = margin;
-        
-        // Cabeçalho
-        doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text(mov.tipo === 'receita' ? 'COMPROVANTE DE RECEITA' : 'COMPROVANTE DE DESPESA', pageWidth/2, y, { align: 'center' });
-        y += 10;
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
-        y += 15;
-        
-        // Dados da movimentação
-        const categoria = categorias.find(c => c.id === mov.categoriaId);
-        
-        const dados = [
-            ['Descrição:', mov.descricao],
-            ['Tipo:', mov.tipo === 'receita' ? 'Receita' : 'Despesa'],
-            ['Categoria:', categoria?.nome || '---'],
-            ['Valor:', formatarMoeda(mov.valor)],
-            ['Status:', getStatusTexto(mov.status)],
-            ['Data:', formatarData(mov.data)],
-            ['Vencimento:', formatarData(mov.vencimento)],
-            ['Forma de Pagamento:', getFormaPagamentoTexto(mov.formaPagamento)],
-            ['Recorrência:', getRecorrenciaTexto(mov.recorrencia)]
-        ];
-        
-        doc.setFont('helvetica', 'bold');
-        dados.forEach(([label, value]) => {
-            if (y > 250) {
-                doc.addPage();
-                y = margin;
-            }
-            
-            doc.text(label, margin, y);
-            doc.setFont('helvetica', 'normal');
-            doc.text(value || '---', margin + 50, y);
-            doc.setFont('helvetica', 'bold');
-            y += 8;
-        });
-        
-        y += 5;
-        doc.setFont('helvetica', 'normal');
-        doc.text('Observações:', margin, y);
-        y += 8;
-        
-        if (mov.observacoes) {
-            const obsLines = doc.splitTextToSize(mov.observacoes, pageWidth - 2*margin);
-            obsLines.forEach(line => {
-                doc.text(line, margin, y);
-                y += 5;
-            });
-        } else {
-            doc.text('Nenhuma observação.', margin, y);
-            y += 5;
-        }
-        
-        y += 15;
-        doc.setLineWidth(0.5);
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 10;
-        
-        doc.setFontSize(9);
-        doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
-        
-        doc.save(`${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}-${mov.id.substring(0,8)}.pdf`);
     };
 
     // ============================================
@@ -2683,39 +2255,6 @@
         }).format(valor);
     }
 
-    function getStatusTexto(status) {
-        const textos = {
-            'pago': 'Pago/Recebido',
-            'pendente': 'Pendente',
-            'atrasado': 'Atrasado'
-        };
-        return textos[status] || status;
-    }
-
-    function getFormaPagamentoTexto(forma) {
-        const formas = {
-            'dinheiro': 'Dinheiro',
-            'pix': 'PIX',
-            'cartao_credito': 'Cartão de Crédito',
-            'cartao_debito': 'Cartão de Débito',
-            'boleto': 'Boleto',
-            'transferencia': 'Transferência',
-            'outros': 'Outros'
-        };
-        return formas[forma] || forma;
-    }
-
-    function getRecorrenciaTexto(recorrencia) {
-        const textos = {
-            'unica': 'Única',
-            'semanal': 'Semanal',
-            'mensal': 'Mensal',
-            'trimestral': 'Trimestral',
-            'anual': 'Anual'
-        };
-        return textos[recorrencia] || recorrencia;
-    }
-
     function getUltimos6Meses() {
         const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
         const hoje = new Date();
@@ -2738,7 +2277,7 @@
     }
 
     // ============================================
-    // EVENT LISTENERS E INICIALIZAÇÃO
+    // EVENT LISTENERS
     // ============================================
 
     function inicializarEventListeners() {
@@ -2807,7 +2346,6 @@
                     const tipo = this.getAttribute('data-tipo');
                     tipoMovimentacao.value = tipo;
                     
-                    // Mostrar/ocultar campos específicos
                     if (tipo === 'despesa') {
                         despesaFields.style.display = 'block';
                         receitaFields.style.display = 'none';
@@ -2815,30 +2353,12 @@
                         despesaFields.style.display = 'none';
                         receitaFields.style.display = 'block';
                     }
-                    
-                    // Atualizar categorias no select
-                    const categoriaSelect = document.getElementById('categoria');
-                    if (categoriaSelect) {
-                        categoriaSelect.innerHTML = '<option value="">Selecione uma categoria...</option>';
-                        const categoriasFiltradas = categorias.filter(c => c.tipo === tipo);
-                        
-                        if (categoriasFiltradas.length > 0) {
-                            categoriasFiltradas.forEach(categoria => {
-                                const option = document.createElement('option');
-                                option.value = categoria.id;
-                                option.textContent = categoria.nome;
-                                option.style.color = categoria.cor || '#333';
-                                categoriaSelect.appendChild(option);
-                            });
-                        }
-                    }
                 });
             });
         }
     }
 
     function inicializarModais() {
-        // Configurar data padrão
         const hoje = new Date().toISOString().split('T')[0];
         const vencimento = document.getElementById('vencimento');
         if (vencimento) {
@@ -2848,62 +2368,27 @@
     }
 
     // ============================================
-    // FUNÇÕES ADICIONAIS
+    // FUNÇÕES DE EXPORTAÇÃO
     // ============================================
 
     window.aplicarFiltros = function() {
         atualizarTabelaMovimentacoes();
     };
 
-    window.exportarCSV = function() {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Data,Tipo,Descrição,Categoria,Valor,Status,Vencimento,Observações\n";
+    window.exportarPDF = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
         
-        movimentacoes.forEach(mov => {
-            const categoria = categorias.find(c => c.id === mov.categoriaId);
-            const linha = [
-                formatarData(mov.data),
-                mov.tipo === 'receita' ? 'Receita' : 'Despesa',
-                `"${mov.descricao || ''}"`,
-                categoria?.nome || 'Sem categoria',
-                mov.valor,
-                getStatusTexto(mov.status),
-                formatarData(mov.vencimento),
-                `"${mov.observacoes || ''}"`
-            ].join(',');
-            
-            csvContent += linha + "\n";
-        });
+        doc.setFontSize(20);
+        doc.text('RELATÓRIO FINANCEIRO', 105, 20, { align: 'center' });
         
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `financeiro-${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    window.exportarRelatorio = function() {
-        exportarPDF();
-    };
-
-    window.gerarRelatorioCompleto = function() {
-        alert('Relatório completo gerado e salvo como PDF!');
-        exportarPDF();
-    };
-
-    window.gerarRelatorioSimples = function() {
-        alert('Relatório resumido gerado!');
-        // Aqui você pode implementar um relatório diferente
-    };
-
-    window.gerarProjecao = function() {
-        alert('Projeção futura gerada!');
+        doc.setFontSize(12);
+        doc.text(`Saldo Atual: ${saldoAtual.textContent}`, 20, 40);
+        doc.text(`Receita do Mês: ${receitaMes.textContent}`, 20, 50);
+        doc.text(`Despesas do Mês: ${despesaMes.textContent}`, 20, 60);
         
+        doc.save(`relatorio-${new Date().toISOString().slice(0,10)}.pdf`);
     };
-
-    
 
 </script>
 </body>
