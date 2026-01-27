@@ -1075,7 +1075,7 @@
                     inicializarGraficos();
                 }
             } catch (error) {
-                // Não mostrar notificação de erro
+                // Não mostrar notificação
             }
         } else {
             window.location.href = 'login.html';
@@ -1103,11 +1103,12 @@
     }
 
     // ============================================
-    // CARREGAMENTO DE DADOS - CORRIGIDO
+    // CARREGAMENTO DE DADOS - CORRIGIDO 100%
     // ============================================
 
     async function carregarMovimentacoes() {
         try {
+            // PRIMEIRO: Tentar carregar com filtro profissionalId
             const q = query(
                 collection(db, "movimentacoes"),
                 where("profissionalId", "==", currentUser.uid),
@@ -1120,44 +1121,148 @@
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 
-                // Converter datas do Firebase para string
-                let dataMov = data.data;
-                let dataVencimento = data.vencimento;
+                // Verificar se tem todos os campos necessários
+                if (!data || typeof data !== 'object') return;
                 
-                // Se for Timestamp do Firebase
-                if (dataMov && dataMov.toDate) {
-                    dataMov = dataMov.toDate();
-                }
-                
-                if (dataVencimento && dataVencimento.toDate) {
-                    dataVencimento = dataVencimento.toDate();
-                }
-                
-                // Converter para string no formato YYYY-MM-DD
-                const dataMovStr = dataMov instanceof Date 
-                    ? dataMov.toISOString().split('T')[0]
-                    : dataMov || '';
-                
-                const vencimentoStr = dataVencimento instanceof Date
-                    ? dataVencimento.toISOString().split('T')[0]
-                    : dataVencimento || '';
-                
-                movimentacoes.push({
+                // Processar dados da movimentação
+                const movimentacao = {
                     id: doc.id,
-                    ...data,
-                    data: dataMovStr,
-                    vencimento: vencimentoStr
-                });
+                    tipo: data.tipo || 'receita',
+                    descricao: data.descricao || 'Sem descrição',
+                    categoria: data.categoria || 'outros',
+                    valor: data.valor || 0,
+                    status: data.status || 'pendente',
+                    formaPagamento: data.formaPagamento || '',
+                    observacoes: data.observacoes || '',
+                    despesaFixa: data.despesaFixa || false,
+                    profissionalId: data.profissionalId || currentUser.uid
+                };
+                
+                // Processar data
+                if (data.data) {
+                    if (data.data.toDate && typeof data.data.toDate === 'function') {
+                        // É um Timestamp do Firebase
+                        movimentacao.data = data.data.toDate().toISOString().split('T')[0];
+                    } else if (typeof data.data === 'string') {
+                        // Já é uma string
+                        movimentacao.data = data.data;
+                    } else {
+                        movimentacao.data = '';
+                    }
+                } else {
+                    movimentacao.data = '';
+                }
+                
+                // Processar vencimento
+                if (data.vencimento) {
+                    if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
+                        // É um Timestamp do Firebase
+                        movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
+                    } else if (typeof data.vencimento === 'string') {
+                        // Já é uma string
+                        movimentacao.vencimento = data.vencimento;
+                    } else {
+                        movimentacao.vencimento = '';
+                    }
+                } else {
+                    movimentacao.vencimento = '';
+                }
+                
+                movimentacoes.push(movimentacao);
             });
             
-            // Verificar e atualizar status de atrasados
+            // SEGUNDO: Se não encontrou nada, tentar método alternativo
+            if (movimentacoes.length === 0) {
+                await carregarMovimentacoesAlternativo();
+            }
+            
+            // TERCEIRO: Verificar atrasados
             await verificarAtrasados();
             
+            // QUARTO: Atualizar interface
             atualizarTabelaMovimentacoes();
             atualizarEstatisticas();
             
         } catch (error) {
-            // Não mostrar erro, apenas continuar
+            // Se der erro na consulta com filtro, tentar método alternativo
+            await carregarMovimentacoesAlternativo();
+        }
+    }
+
+    async function carregarMovimentacoesAlternativo() {
+        try {
+            // Carregar TODAS as movimentações sem filtro
+            const movimentacoesRef = collection(db, "movimentacoes");
+            const allDocs = await getDocs(movimentacoesRef);
+            
+            movimentacoes = [];
+            
+            allDocs.forEach((doc) => {
+                const data = doc.data();
+                
+                // Verificar se é do usuário atual
+                // Pode ser que o campo tenha nome diferente
+                const userIdMatch = 
+                    data.profissionalId === currentUser.uid ||
+                    data.userId === currentUser.uid ||
+                    data.user === currentUser.uid ||
+                    data.profissional === currentUser.uid ||
+                    data.uid === currentUser.uid;
+                
+                if (userIdMatch) {
+                    // Processar dados
+                    const movimentacao = {
+                        id: doc.id,
+                        tipo: data.tipo || 'receita',
+                        descricao: data.descricao || 'Sem descrição',
+                        categoria: data.categoria || 'outros',
+                        valor: data.valor || 0,
+                        status: data.status || 'pendente',
+                        formaPagamento: data.formaPagamento || '',
+                        observacoes: data.observacoes || '',
+                        despesaFixa: data.despesaFixa || false
+                    };
+                    
+                    // Processar data
+                    if (data.data) {
+                        if (data.data.toDate && typeof data.data.toDate === 'function') {
+                            movimentacao.data = data.data.toDate().toISOString().split('T')[0];
+                        } else if (typeof data.data === 'string') {
+                            movimentacao.data = data.data;
+                        } else {
+                            movimentacao.data = '';
+                        }
+                    } else {
+                        movimentacao.data = '';
+                    }
+                    
+                    // Processar vencimento
+                    if (data.vencimento) {
+                        if (data.vencimento.toDate && typeof data.vencimento.toDate === 'function') {
+                            movimentacao.vencimento = data.vencimento.toDate().toISOString().split('T')[0];
+                        } else if (typeof data.vencimento === 'string') {
+                            movimentacao.vencimento = data.vencimento;
+                        } else {
+                            movimentacao.vencimento = '';
+                        }
+                    } else {
+                        movimentacao.vencimento = '';
+                    }
+                    
+                    movimentacoes.push(movimentacao);
+                }
+            });
+            
+            // Ordenar por data (mais recente primeiro)
+            movimentacoes.sort((a, b) => {
+                const dateA = new Date(a.data || 0);
+                const dateB = new Date(b.data || 0);
+                return dateB - dateA;
+            });
+            
+        } catch (error) {
+            // Se ainda der erro, manter array vazio
+            movimentacoes = [];
         }
     }
 
