@@ -287,6 +287,7 @@
             margin-bottom: 15px;
             min-height: 60px;
             word-break: break-all;
+            border: 1px solid #ddd;
         }
 
         .calculadora-botoes {
@@ -304,10 +305,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            font-size: 1rem;
         }
 
         .calc-btn:hover {
             background: #e9ecef;
+            transform: translateY(-1px);
         }
 
         .calc-btn.operador {
@@ -315,10 +318,27 @@
             color: white;
         }
 
+        .calc-btn.operador:hover {
+            background: #2980b9;
+        }
+
         .calc-btn.calcular {
             background: #27ae60;
             color: white;
             grid-column: span 2;
+        }
+
+        .calc-btn.calcular:hover {
+            background: #219653;
+        }
+
+        .calc-btn.limpar {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .calc-btn.limpar:hover {
+            background: #c0392b;
         }
 
         /* Abas Financeiro */
@@ -922,44 +942,39 @@
         </div>
     </div>
 
-   <!-- Calculadora Flutuante -->
-<div class="calculadora-flutuante">
-    <div class="calculadora-panel" id="calculadoraPanel">
-        <div class="calculadora-display" id="calcDisplay">0</div>
-        <div class="calculadora-botoes">
-            <!-- Primeira linha -->
-            <button class="calc-btn" onclick="calcInput('7')">7</button>
-            <button class="calc-btn" onclick="calcInput('8')">8</button>
-            <button class="calc-btn" onclick="calcInput('9')">9</button>
-            <button class="calc-btn operador" onclick="calcOperador('÷')">÷</button>
-            
-            <!-- Segunda linha -->
-            <button class="calc-btn" onclick="calcInput('4')">4</button>
-            <button class="calc-btn" onclick="calcInput('5')">5</button>
-            <button class="calc-btn" onclick="calcInput('6')">6</button>
-            <button class="calc-btn operador" onclick="calcOperador('×')">×</button>
-            
-            <!-- Terceira linha -->
-            <button class="calc-btn" onclick="calcInput('1')">1</button>
-            <button class="calc-btn" onclick="calcInput('2')">2</button>
-            <button class="calc-btn" onclick="calcInput('3')">3</button>
-            <button class="calc-btn operador" onclick="calcOperador('-')">-</button>
-            
-            <!-- Quarta linha -->
-            <button class="calc-btn" onclick="calcInput('0')">0</button>
-            <button class="calc-btn" onclick="calcPonto()">.</button>
-            <button class="calc-btn" onclick="calcLimpar()">C</button>
-            <button class="calc-btn operador" onclick="calcOperador('+')">+</button>
-            
-            <!-- Quinta linha -->
-            <button class="calc-btn" onclick="calcPorcentagem()">%</button>
-            <button class="calc-btn calcular" onclick="calcCalcular()">=</button>
+    <!-- Calculadora Flutuante -->
+    <div class="calculadora-flutuante">
+        <div class="calculadora-panel" id="calculadoraPanel">
+            <div class="calculadora-display" id="calcDisplay">0</div>
+            <div class="calculadora-botoes">
+                <button class="calc-btn limpar" onclick="calcLimpar()">C</button>
+                <button class="calc-btn" onclick="calcPorcentagem()">%</button>
+                <button class="calc-btn operador" onclick="calcOperador('/')">÷</button>
+                
+                <button class="calc-btn" onclick="calcAdicionarNumero('7')">7</button>
+                <button class="calc-btn" onclick="calcAdicionarNumero('8')">8</button>
+                <button class="calc-btn" onclick="calcAdicionarNumero('9')">9</button>
+                <button class="calc-btn operador" onclick="calcOperador('*')">×</button>
+                
+                <button class="calc-btn" onclick="calcAdicionarNumero('4')">4</button>
+                <button class="calc-btn" onclick="calcAdicionarNumero('5')">5</button>
+                <button class="calc-btn" onclick="calcAdicionarNumero('6')">6</button>
+                <button class="calc-btn operador" onclick="calcOperador('-')">-</button>
+                
+                <button class="calc-btn" onclick="calcAdicionarNumero('1')">1</button>
+                <button class="calc-btn" onclick="calcAdicionarNumero('2')">2</button>
+                <button class="calc-btn" onclick="calcAdicionarNumero('3')">3</button>
+                <button class="calc-btn operador" onclick="calcOperador('+')">+</button>
+                
+                <button class="calc-btn" onclick="calcAdicionarNumero('0')">0</button>
+                <button class="calc-btn" onclick="calcPonto()">,</button>
+                <button class="calc-btn calcular" onclick="calcCalcular()">=</button>
+            </div>
         </div>
+        <button class="calculadora-btn" id="toggleCalculadora">
+            <i class="fas fa-calculator"></i>
+        </button>
     </div>
-    <button class="calculadora-btn" id="toggleCalculadora">
-        <i class="fas fa-calculator"></i>
-    </button>
-</div>
 
     <!-- Modal Movimentação -->
     <div class="modal fade" id="modalMovimentacao" tabindex="-1" aria-hidden="true">
@@ -1206,11 +1221,13 @@
     let pedidos = [];
     let tipoAtualAba = 'todas';
     
-    // Variáveis da Calculadora - NOVA VERSÃO SIMPLES
+    // Variáveis da Calculadora - CORRIGIDA
     let calcDisplay = '0';
     let calcValor1 = null;
+    let calcValor2 = null;
     let calcOperador = null;
     let calcAguardandoValor2 = false;
+    let calcLimparDisplay = false;
 
     // ============================================
     // ELEMENTOS DOM
@@ -1312,7 +1329,7 @@
     }
 
     // ============================================
-    // CALCULADORA CORRIGIDA - FUNCIONA IGUAL À DO CELULAR
+    // CALCULADORA 100% FUNCIONAL - COMO DO CELULAR
     // ============================================
 
     function inicializarCalculadora() {
@@ -1334,87 +1351,89 @@
         calcDisplayElement.textContent = calcDisplay;
     }
 
-    // FUNÇÃO PARA DIGITAR NÚMEROS
-    window.calcInput = function(valor) {
-        if (calcAguardandoValor2) {
-            calcDisplay = valor;
-            calcAguardandoValor2 = false;
+    // FUNÇÃO PARA ADICIONAR NÚMEROS
+    function calcAdicionarNumero(numero) {
+        if (calcLimparDisplay) {
+            calcDisplay = numero;
+            calcLimparDisplay = false;
         } else {
-            calcDisplay = calcDisplay === '0' ? valor : calcDisplay + valor;
+            calcDisplay = calcDisplay === '0' ? numero : calcDisplay + numero;
         }
         calcDisplayElement.textContent = calcDisplay;
-    };
+    }
 
-    // FUNÇÃO PARA PONTO DECIMAL
-    window.calcPonto = function() {
-        if (calcAguardandoValor2) {
+    // FUNÇÃO PARA PONTO DECIMAL (vírgula)
+    function calcPonto() {
+        if (calcLimparDisplay) {
             calcDisplay = '0.';
-            calcAguardandoValor2 = false;
-        } else if (calcDisplay.indexOf('.') === -1) {
+            calcLimparDisplay = false;
+        } else if (!calcDisplay.includes('.')) {
             calcDisplay += '.';
         }
         calcDisplayElement.textContent = calcDisplay;
-    };
+    }
 
     // FUNÇÃO PARA OPERADORES (+, -, ×, ÷)
-    window.calcOperador = function(operadorSelecionado) {
-        const valorDisplay = parseFloat(calcDisplay);
+    function calcOperador(operadorSelecionado) {
+        const valorDisplay = parseFloat(calcDisplay.replace(',', '.'));
         
         if (calcValor1 === null) {
             calcValor1 = valorDisplay;
         } else if (calcOperador) {
-            const resultado = calcular(calcValor1, parseFloat(calcDisplay), calcOperador);
-            calcDisplay = String(resultado);
+            const resultado = calcular(calcValor1, valorDisplay, calcOperador);
+            calcDisplay = String(resultado).replace('.', ',');
             calcDisplayElement.textContent = calcDisplay;
             calcValor1 = resultado;
         }
         
-        calcAguardandoValor2 = true;
         calcOperador = operadorSelecionado;
-    };
+        calcLimparDisplay = true;
+    }
 
     // FUNÇÃO PARA CALCULAR RESULTADO
-    window.calcCalcular = function() {
+    function calcCalcular() {
         if (calcValor1 === null || calcOperador === null) {
             return;
         }
         
-        const valor2 = parseFloat(calcDisplay);
+        const valor2 = parseFloat(calcDisplay.replace(',', '.'));
         const resultado = calcular(calcValor1, valor2, calcOperador);
         
-        calcDisplay = String(resultado);
+        calcDisplay = String(resultado).replace('.', ',');
         calcDisplayElement.textContent = calcDisplay;
         
         // Resetar para próximo cálculo
         calcValor1 = resultado;
         calcOperador = null;
-        calcAguardandoValor2 = true;
-    };
+        calcLimparDisplay = true;
+    }
 
     // FUNÇÃO PARA PORCENTAGEM (como no celular)
-    window.calcPorcentagem = function() {
-        const valor = parseFloat(calcDisplay);
+    function calcPorcentagem() {
+        const valor = parseFloat(calcDisplay.replace(',', '.'));
         
         if (calcValor1 !== null && calcOperador) {
             // Se já tem um operador, calcula porcentagem do primeiro valor
             const porcentagem = (calcValor1 * valor) / 100;
-            calcDisplay = String(porcentagem);
+            calcDisplay = String(porcentagem).replace('.', ',');
         } else {
             // Se não, calcula porcentagem simples
-            calcDisplay = String(valor / 100);
+            calcDisplay = String(valor / 100).replace('.', ',');
         }
         
         calcDisplayElement.textContent = calcDisplay;
-    };
+        calcLimparDisplay = true;
+    }
 
     // FUNÇÃO PARA LIMPAR
-    window.calcLimpar = function() {
+    function calcLimpar() {
         calcDisplay = '0';
         calcValor1 = null;
+        calcValor2 = null;
         calcOperador = null;
-        calcAguardandoValor2 = false;
+        calcLimparDisplay = false;
         calcDisplayElement.textContent = calcDisplay;
-    };
+    }
 
     // FUNÇÃO AUXILIAR PARA CÁLCULOS
     function calcular(valor1, valor2, operador) {
@@ -1423,14 +1442,22 @@
                 return valor1 + valor2;
             case '-':
                 return valor1 - valor2;
-            case '×':
+            case '*':
                 return valor1 * valor2;
-            case '÷':
+            case '/':
                 return valor2 !== 0 ? valor1 / valor2 : 0;
             default:
                 return valor2;
         }
     }
+
+    // EXPORTAR FUNÇÕES PARA O HTML
+    window.calcAdicionarNumero = calcAdicionarNumero;
+    window.calcPonto = calcPonto;
+    window.calcOperador = calcOperador;
+    window.calcCalcular = calcCalcular;
+    window.calcPorcentagem = calcPorcentagem;
+    window.calcLimpar = calcLimpar;
 
     // ============================================
     // CARREGAMENTO DE DADOS
@@ -1462,9 +1489,13 @@
             movimentacoes = [];
             
             querySnapshot.forEach((doc) => {
+                const data = doc.data();
                 movimentacoes.push({
                     id: doc.id,
-                    ...doc.data()
+                    ...data,
+                    // Garantir que as datas sejam strings para evitar erros
+                    data: data.data ? data.data.toDate().toISOString().split('T')[0] : '',
+                    vencimento: data.vencimento ? data.vencimento.toDate().toISOString().split('T')[0] : ''
                 });
             });
             
@@ -1491,28 +1522,41 @@
                 });
             });
             
-            // Se não houver categorias, criar uma padrão
+            // Se não houver categorias, criar categorias padrão
             if (categorias.length === 0) {
-                await criarCategoriaPadrao();
+                await criarCategoriasPadrao();
             }
         } catch (error) {
             console.error('Erro ao carregar categorias:', error);
         }
     }
 
-    async function criarCategoriaPadrao() {
+    async function criarCategoriasPadrao() {
+        const categoriasPadrao = [
+            { nome: "Salário", tipo: "receita", cor: "#27ae60" },
+            { nome: "Freelance", tipo: "receita", cor: "#2ecc71" },
+            { nome: "Venda de Produtos", tipo: "receita", cor: "#3498db" },
+            { nome: "Aluguel", tipo: "despesa", cor: "#e74c3c" },
+            { nome: "Contas de Luz/Água", tipo: "despesa", cor: "#f39c12" },
+            { nome: "Internet/Telefone", tipo: "despesa", cor: "#9b59b6" },
+            { nome: "Transporte", tipo: "despesa", cor: "#34495e" },
+            { nome: "Alimentação", tipo: "despesa", cor: "#1abc9c" },
+            { nome: "Materiais de Trabalho", tipo: "despesa", cor: "#d35400" },
+            { nome: "Marketing/Publicidade", tipo: "despesa", cor: "#c0392b" }
+        ];
+        
         try {
-            await addDoc(collection(db, "categorias"), {
-                nome: "Sem Categoria",
-                tipo: "ambos",
-                cor: "#6c757d",
-                profissionalId: currentUser.uid,
-                criadoEm: serverTimestamp()
-            });
+            for (const categoria of categoriasPadrao) {
+                await addDoc(collection(db, "categorias"), {
+                    ...categoria,
+                    profissionalId: currentUser.uid,
+                    criadoEm: serverTimestamp()
+                });
+            }
             
             await carregarCategorias();
         } catch (error) {
-            console.error('Erro ao criar categoria padrão:', error);
+            console.error('Erro ao criar categorias padrão:', error);
         }
     }
 
@@ -1561,20 +1605,28 @@
 
     function atualizarFiltros() {
         // Atualizar filtro de categorias
-        filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
+        const filterCategoriaSelect = document.getElementById('filterCategoria');
         const categoriaSelect = document.getElementById('categoria');
         
-        if (categoriaSelect) {
-            categoriaSelect.innerHTML = '<option value="">Selecione ou deixe em branco</option>';
-            
+        if (filterCategoriaSelect) {
+            filterCategoriaSelect.innerHTML = '<option value="">Todas categorias</option>';
             categorias.forEach(categoria => {
                 const option = document.createElement('option');
                 option.value = categoria.id;
                 option.textContent = categoria.nome;
                 option.style.color = categoria.cor || '#333';
-                
-                filterCategoria.appendChild(option.cloneNode(true));
-                categoriaSelect.appendChild(option.cloneNode(true));
+                filterCategoriaSelect.appendChild(option);
+            });
+        }
+        
+        if (categoriaSelect) {
+            categoriaSelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+            categorias.forEach(categoria => {
+                const option = document.createElement('option');
+                option.value = categoria.id;
+                option.textContent = categoria.nome;
+                option.style.color = categoria.cor || '#333';
+                categoriaSelect.appendChild(option);
             });
         }
         
@@ -1587,6 +1639,18 @@
                 option.value = cliente.id;
                 option.textContent = cliente.nome;
                 clienteSelect.appendChild(option);
+            });
+        }
+        
+        // Atualizar filtro de pedidos
+        const pedidoSelect = document.getElementById('pedidoRelacionado');
+        if (pedidoSelect) {
+            pedidoSelect.innerHTML = '<option value="">Selecione (opcional)</option>';
+            pedidos.forEach(pedido => {
+                const option = document.createElement('option');
+                option.value = pedido.id;
+                option.textContent = `Pedido #${pedido.numeroPedido || pedido.id.substring(0, 8)} - ${pedido.clienteNome || 'Sem nome'}`;
+                pedidoSelect.appendChild(option);
             });
         }
     }
@@ -1654,7 +1718,8 @@
         movimentacoesTable.innerHTML = '';
         
         if (movimentacoesFiltradas.length === 0) {
-            movimentacoesTable.appendChild(emptyState.cloneNode(true));
+            const emptyRow = emptyState.cloneNode(true);
+            movimentacoesTable.appendChild(emptyRow);
             return;
         }
         
@@ -1736,13 +1801,33 @@
                     <td colspan="7" class="text-center py-4 text-muted">
                         <i class="fas fa-tags fa-2x mb-2"></i>
                         <p>Nenhuma categoria cadastrada</p>
+                        <button class="btn btn-primary-action btn-sm mt-2" onclick="abrirModalCategoria()">
+                            <i class="fas fa-plus"></i> Criar Primeira Categoria
+                        </button>
                     </td>
                 </tr>
             `;
             return;
         }
         
+        // Calcular totais por categoria
+        const totaisCategorias = {};
         categorias.forEach(categoria => {
+            totaisCategorias[categoria.id] = 0;
+        });
+        
+        movimentacoes.forEach(mov => {
+            if (mov.categoriaId && totaisCategorias[mov.categoriaId] !== undefined) {
+                totaisCategorias[mov.categoriaId] += mov.valor || 0;
+            }
+        });
+        
+        const totalGeral = Object.values(totaisCategorias).reduce((a, b) => a + b, 0);
+        
+        categorias.forEach(categoria => {
+            const totalCategoria = totaisCategorias[categoria.id] || 0;
+            const porcentagem = totalGeral > 0 ? (totalCategoria / totalGeral * 100).toFixed(1) : 0;
+            
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>
@@ -1751,11 +1836,18 @@
                     </span>
                 </td>
                 <td>
-                    <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : categoria.tipo === 'despesa' ? 'bg-danger' : 'bg-secondary'}">
-                        ${categoria.tipo === 'receita' ? 'Receita' : categoria.tipo === 'despesa' ? 'Despesa' : 'Ambos'}
+                    <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : 'bg-danger'}">
+                        ${categoria.tipo === 'receita' ? 'Receita' : 'Despesa'}
                     </span>
                 </td>
+                <td>${formatarMoeda(totalCategoria)}</td>
                 <td>${categoria.orcamento ? formatarMoeda(categoria.orcamento) : 'Sem limite'}</td>
+                <td>${porcentagem}%</td>
+                <td>
+                    <span class="badge ${categoria.orcamento && totalCategoria > categoria.orcamento ? 'bg-danger' : 'bg-success'}">
+                        ${categoria.orcamento && totalCategoria > categoria.orcamento ? 'Acima' : 'Normal'}
+                    </span>
+                </td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-action-sm" onclick="editarCategoria('${categoria.id}')">
@@ -1813,6 +1905,10 @@
                     if (diferencaDias <= 7 && diferencaDias >= 0) {
                         totalAPagar7dias += valor;
                     }
+                }
+                
+                if (mov.status === 'atrasado') {
+                    totalAtrasados += valor;
                 }
             }
         });
@@ -1933,6 +2029,16 @@
         const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('dataMovimentacao').value = hoje;
         document.getElementById('vencimento').value = hoje;
+        document.getElementById('status').value = 'pendente';
+        
+        // Habilitar todos os campos
+        const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+        
+        btnSalvarMovimentacao.textContent = 'Salvar';
+        btnSalvarMovimentacao.onclick = salvarMovimentacao;
         
         modalMovimentacao.show();
     };
@@ -1965,7 +2071,8 @@
         const categoriaSelect = document.getElementById('categoria');
         categoriaSelect.value = mov.categoriaId || '';
         
-        const inputs = formMovimentacao.querySelectorAll('input, select, textarea, button');
+        // Desabilitar todos os campos para visualização
+        const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
             input.disabled = true;
         });
@@ -2002,6 +2109,7 @@
         const categoriaSelect = document.getElementById('categoria');
         categoriaSelect.value = mov.categoriaId || '';
         
+        // Habilitar todos os campos para edição
         const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
             input.disabled = false;
@@ -2014,16 +2122,24 @@
     async function salvarMovimentacao() {
         const descricao = document.getElementById('descricao').value.trim();
         const valor = parseFloat(document.getElementById('valor').value);
+        const categoriaId = document.getElementById('categoria').value;
         
+        // Validação corrigida
         if (!descricao) {
-            alert('Informe uma descrição.');
+            alert('Informe uma descrição para a movimentação.');
             document.getElementById('descricao').focus();
             return;
         }
         
-        if (!valor || valor <= 0 || isNaN(valor)) {
+        if (!valor || isNaN(valor) || valor <= 0) {
             alert('Informe um valor válido maior que zero.');
             document.getElementById('valor').focus();
+            return;
+        }
+        
+        if (!categoriaId) {
+            alert('Selecione uma categoria.');
+            document.getElementById('categoria').focus();
             return;
         }
         
@@ -2031,7 +2147,7 @@
             const movData = {
                 tipo: tipoMovimentacao.value,
                 descricao: descricao,
-                categoriaId: document.getElementById('categoria').value || '',
+                categoriaId: categoriaId,
                 valor: valor,
                 status: document.getElementById('status').value,
                 data: document.getElementById('dataMovimentacao').value,
@@ -2055,6 +2171,7 @@
             const movId = document.getElementById('movimentacaoId').value;
             
             if (movId) {
+                // Atualizar movimentação existente
                 const movRef = doc(db, "movimentacoes", movId);
                 await updateDoc(movRef, movData);
                 
@@ -2065,6 +2182,7 @@
                 
                 alert('Movimentação atualizada com sucesso!');
             } else {
+                // Criar nova movimentação
                 movData.criadoEm = serverTimestamp();
                 const docRef = await addDoc(collection(db, "movimentacoes"), movData);
                 movData.id = docRef.id;
@@ -2083,7 +2201,7 @@
             
         } catch (error) {
             console.error('Erro ao salvar movimentação:', error);
-            alert('Erro ao salvar movimentação. Tente novamente.');
+            alert('Erro ao salvar movimentação: ' + error.message);
         }
     }
 
@@ -2110,7 +2228,7 @@
             alert('Movimentação excluída com sucesso!');
         } catch (error) {
             console.error('Erro ao excluir movimentação:', error);
-            alert('Erro ao excluir movimentação. Tente novamente.');
+            alert('Erro ao excluir movimentação: ' + error.message);
         }
     };
 
@@ -2118,39 +2236,38 @@
     // FUNÇÕES DE CATEGORIA
     // ============================================
 
-    window.abrirModalCategoria = function() {
+    window.abrirModalCategoria = function(categoriaId = null) {
         document.getElementById('formCategoria').reset();
         document.getElementById('nomeCategoria').value = '';
-        document.getElementById('tipoCategoria').value = 'ambos';
+        document.getElementById('tipoCategoria').value = 'despesa';
         document.getElementById('corCategoria').value = '#3498db';
         
         const btnSalvar = document.getElementById('btnSalvarCategoria');
         btnSalvar.textContent = 'Salvar';
-        btnSalvar.onclick = () => salvarCategoria();
+        btnSalvar.onclick = () => salvarCategoria(categoriaId);
+        
+        // Se for edição, carregar dados
+        if (categoriaId) {
+            const categoria = categorias.find(c => c.id === categoriaId);
+            if (categoria) {
+                document.getElementById('nomeCategoria').value = categoria.nome;
+                document.getElementById('tipoCategoria').value = categoria.tipo || 'despesa';
+                document.getElementById('corCategoria').value = categoria.cor || '#3498db';
+                document.getElementById('orcamentoCategoria').value = categoria.orcamento || '';
+                btnSalvar.textContent = 'Atualizar';
+            }
+        }
         
         modalCategoria.show();
     };
 
     window.editarCategoria = function(id) {
-        const categoria = categorias.find(c => c.id === id);
-        if (!categoria) {
-            alert('Categoria não encontrada!');
-            return;
-        }
-        
-        document.getElementById('nomeCategoria').value = categoria.nome;
-        document.getElementById('tipoCategoria').value = categoria.tipo || 'ambos';
-        document.getElementById('corCategoria').value = categoria.cor || '#3498db';
-        
-        const btnSalvar = document.getElementById('btnSalvarCategoria');
-        btnSalvar.textContent = 'Atualizar';
-        btnSalvar.onclick = () => salvarCategoria(id);
-        
-        modalCategoria.show();
+        abrirModalCategoria(id);
     };
 
     async function salvarCategoria(categoriaId = null) {
         const nome = document.getElementById('nomeCategoria').value.trim();
+        const tipo = document.getElementById('tipoCategoria').value;
         
         if (!nome) {
             alert('Informe um nome para a categoria.');
@@ -2158,16 +2275,27 @@
             return;
         }
         
+        if (!tipo) {
+            alert('Selecione um tipo para a categoria.');
+            return;
+        }
+        
         try {
             const categoriaData = {
                 nome: nome,
-                tipo: document.getElementById('tipoCategoria').value,
+                tipo: tipo,
                 cor: document.getElementById('corCategoria').value,
                 profissionalId: currentUser.uid,
                 atualizadoEm: serverTimestamp()
             };
             
+            const orcamento = parseFloat(document.getElementById('orcamentoCategoria').value);
+            if (!isNaN(orcamento) && orcamento > 0) {
+                categoriaData.orcamento = orcamento;
+            }
+            
             if (categoriaId) {
+                // Atualizar categoria existente
                 const catRef = doc(db, "categorias", categoriaId);
                 await updateDoc(catRef, categoriaData);
                 
@@ -2178,6 +2306,7 @@
                 
                 alert('Categoria atualizada com sucesso!');
             } else {
+                // Criar nova categoria
                 categoriaData.criadoEm = serverTimestamp();
                 const docRef = await addDoc(collection(db, "categorias"), categoriaData);
                 categoriaData.id = docRef.id;
@@ -2195,7 +2324,7 @@
             
         } catch (error) {
             console.error('Erro ao salvar categoria:', error);
-            alert('Erro ao salvar categoria. Tente novamente.');
+            alert('Erro ao salvar categoria: ' + error.message);
         }
     }
 
@@ -2228,7 +2357,7 @@
             alert('Categoria excluída com sucesso!');
         } catch (error) {
             console.error('Erro ao excluir categoria:', error);
-            alert('Erro ao excluir categoria. Tente novamente.');
+            alert('Erro ao excluir categoria: ' + error.message);
         }
     };
 
@@ -2356,6 +2485,14 @@
                 });
             });
         }
+        
+        // Formulário de movimentação - prevenir submit padrão
+        if (formMovimentacao) {
+            formMovimentacao.addEventListener('submit', (e) => {
+                e.preventDefault();
+                salvarMovimentacao();
+            });
+        }
     }
 
     function inicializarModais() {
@@ -2380,16 +2517,89 @@
         const doc = new jsPDF();
         
         doc.setFontSize(20);
-        doc.text('RELATÓRIO FINANCEIRO', 105, 20, { align: 'center' });
+        doc.text('RELATÓRIO FINANCEIRO - SCANHUB', 105, 20, { align: 'center' });
         
         doc.setFontSize(12);
-        doc.text(`Saldo Atual: ${saldoAtual.textContent}`, 20, 40);
-        doc.text(`Receita do Mês: ${receitaMes.textContent}`, 20, 50);
-        doc.text(`Despesas do Mês: ${despesaMes.textContent}`, 20, 60);
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 20, 35);
+        doc.text(`Profissional: ${userData?.nomeCompleto || userData?.apelido || '---'}`, 20, 45);
         
-        doc.save(`relatorio-${new Date().toISOString().slice(0,10)}.pdf`);
+        doc.text(`Saldo Atual: ${saldoAtual.textContent}`, 20, 60);
+        doc.text(`Receita do Mês: ${receitaMes.textContent}`, 20, 70);
+        doc.text(`Despesas do Mês: ${despesaMes.textContent}`, 20, 80);
+        doc.text(`Atrasados: ${atrasados.textContent}`, 20, 90);
+        
+        doc.save(`relatorio-financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
+        
+        alert('Relatório PDF gerado com sucesso!');
     };
 
-</script>
+    window.exportarCSV = function() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Data,Tipo,Descrição,Categoria,Valor,Status,Vencimento\n";
+        
+        movimentacoes.forEach(mov => {
+            const categoria = categorias.find(c => c.id === mov.categoriaId);
+            const linha = [
+                formatarData(mov.data),
+                mov.tipo === 'receita' ? 'Receita' : 'Despesa',
+                `"${mov.descricao || ''}"`,
+                categoria?.nome || 'Sem categoria',
+                mov.valor,
+                mov.status,
+                formatarData(mov.vencimento)
+            ].join(',');
+            
+            csvContent += linha + "\n";
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `movimentacoes-${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        alert('Arquivo CSV gerado com sucesso!');
+    };
+
+    window.exportarRelatorio = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(20);
+        doc.text('RELATÓRIO DETALHADO - SCANHUB', 105, 20, { align: 'center' });
+        
+        doc.setFontSize(12);
+        doc.text(`Período: ${new Date().toLocaleDateString('pt-BR')}`, 20, 35);
+        doc.text(`Total de Movimentações: ${movimentacoes.length}`, 20, 45);
+        
+        let y = 60;
+        movimentacoes.forEach((mov, index) => {
+            if (y > 250) {
+                doc.addPage();
+                y = 20;
+            }
+            
+            const categoria = categorias.find(c => c.id === mov.categoriaId);
+            doc.text(`${index + 1}. ${formatarData(mov.data)} - ${mov.descricao || 'Sem descrição'}`, 20, y);
+            doc.text(`   Tipo: ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`, 25, y + 5);
+            doc.text(`   Valor: ${formatarMoeda(mov.valor)}`, 25, y + 10);
+            doc.text(`   Categoria: ${categoria?.nome || 'Sem categoria'}`, 25, y + 15);
+            
+            y += 25;
+        });
+        
+        doc.save(`relatorio-detalhado-${new Date().toISOString().slice(0,10)}.pdf`);
+        
+        alert('Relatório detalhado gerado com sucesso!');
+    };
+
+    // Inicializar
+    window.addEventListener('DOMContentLoaded', () => {
+        inicializarEventListeners();
+    });
+
+    </script>
 </body>
 </html>
