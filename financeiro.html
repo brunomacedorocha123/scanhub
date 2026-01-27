@@ -19,16 +19,14 @@
     
     <!-- jsPDF para PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         :root {
             --primary-color: #44689a;
-            --secondary-color: #33c47;
+            --secondary-color: #FF6B35;
             --light-color: #e8ecef;
             --dark-color: #2c3e50;
             --white: #ffffff;
-            --gradient: linear-gradient(135deg, #44689a 0%, #33c47 100%);
             --receita-color: #27ae60;
             --despesa-color: #e74c3c;
             --saldo-color: #3498db;
@@ -84,6 +82,7 @@
             padding: 0 15px;
             flex-wrap: wrap;
             background: white;
+            border-top: 1px solid #eee;
         }
 
         .dashboard-menu li {
@@ -323,44 +322,6 @@
             grid-column: span 2;
         }
 
-        /* Abas Financeiro */
-        .financeiro-tabs {
-            display: flex;
-            gap: 5px;
-            background: #f8f9fa;
-            padding: 5px;
-            border-radius: 10px;
-            border: 1px solid #e8ecef;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            padding: 12px 20px;
-            border: none;
-            background: transparent;
-            color: #666;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .tab-btn:hover {
-            background: rgba(68, 104, 154, 0.1);
-            color: var(--primary-color);
-        }
-
-        .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 8px rgba(68, 104, 154, 0.3);
-        }
-
         /* Search and Filter */
         .search-filter-container {
             background: white;
@@ -517,12 +478,6 @@
         }
 
         /* Responsivo */
-        @media (max-width: 1200px) {
-            .navbar-brand-dashboard {
-                transform: scale(2);
-            }
-        }
-
         @media (max-width: 992px) {
             .navbar-brand-dashboard {
                 transform: scale(1.8);
@@ -564,16 +519,6 @@
                 padding: 15px;
             }
             
-            .financeiro-tabs {
-                flex-wrap: wrap;
-            }
-            
-            .tab-btn {
-                flex: 1 0 calc(50% - 10px);
-                padding: 10px 15px;
-                font-size: 0.85rem;
-            }
-            
             .calculadora-panel {
                 width: calc(100vw - 40px);
                 right: -100px;
@@ -583,14 +528,6 @@
         @media (max-width: 576px) {
             .stats-financeiro {
                 grid-template-columns: 1fr;
-            }
-            
-            .tab-btn span {
-                font-size: 0.8rem;
-            }
-            
-            .tab-btn i {
-                display: none;
             }
             
             .calculadora-panel {
@@ -607,35 +544,6 @@
             font-size: 1.5rem;
             color: var(--dark-color);
             padding: 5px 10px;
-        }
-
-        /* Progress Bar Personalizada */
-        .progress {
-            height: 8px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background-color: #27ae60;
-            transition: width 0.6s ease;
-        }
-
-        /* Animação de loading */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Notificações */
@@ -674,6 +582,22 @@
                 opacity: 1;
             }
         }
+
+        /* Categorias simples */
+        .categoria-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .categoria-receita { background: #27ae60; }
+        .categoria-despesa { background: #e74c3c; }
+        .categoria-servico { background: #3498db; }
+        .categoria-material { background: #9b59b6; }
+        .categoria-outros { background: #7f8c8d; }
     </style>
 </head>
 <body>
@@ -754,18 +678,6 @@
                     <span>Pedidos</span>
                 </a>
             </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-crown"></i>
-                    <span>Assinatura</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-cog"></i>
-                    <span>Configurações</span>
-                </a>
-            </li>
         </ul>
     </div>
 
@@ -827,30 +739,6 @@
             </div>
         </div>
 
-        <!-- Abas -->
-        <div class="financeiro-tabs" id="financeiroTabs">
-            <button class="tab-btn active" data-tipo="todas">
-                <i class="fas fa-list"></i>
-                <span>Todas Movimentações</span>
-            </button>
-            <button class="tab-btn" data-tipo="receitas">
-                <i class="fas fa-arrow-down"></i>
-                <span>Receitas</span>
-            </button>
-            <button class="tab-btn" data-tipo="despesas">
-                <i class="fas fa-arrow-up"></i>
-                <span>Despesas</span>
-            </button>
-            <button class="tab-btn" data-tipo="categorias">
-                <i class="fas fa-tags"></i>
-                <span>Categorias</span>
-            </button>
-            <button class="tab-btn" data-tipo="relatorios">
-                <i class="fas fa-file-alt"></i>
-                <span>Relatórios</span>
-            </button>
-        </div>
-
         <!-- Botões Principais -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -864,36 +752,29 @@
                 <button class="btn btn-primary-action" onclick="abrirModalMovimentacao('despesa')">
                     <i class="fas fa-minus-circle"></i> Nova Despesa
                 </button>
-                <div class="dropdown">
-                    <button class="btn btn-primary-action dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-download"></i> Exportar
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> PDF Completo</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> CSV para Excel</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportarRelatorio()"><i class="fas fa-chart-bar"></i> Relatório Detalhado</a></li>
-                    </ul>
-                </div>
+                <button class="btn btn-primary-action" onclick="exportarPDF()">
+                    <i class="fas fa-download"></i> Exportar PDF
+                </button>
             </div>
         </div>
 
         <!-- Search and Filter -->
         <div class="search-filter-container">
             <div class="row g-3">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" class="form-control" id="searchMovimentacoes" placeholder="Buscar por descrição...">
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <select class="form-select" id="filterTipo">
                         <option value="">Todos tipos</option>
                         <option value="receita">Receitas</option>
                         <option value="despesa">Despesas</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <select class="form-select" id="filterStatus">
                         <option value="">Todos status</option>
                         <option value="pago">Pago/Recebido</option>
@@ -918,17 +799,6 @@
                         <option value="12">Dezembro</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="filterCategoria">
-                        <option value="">Todas categorias</option>
-                        <!-- Categorias serão carregadas aqui -->
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -945,14 +815,12 @@
                             <th>Valor</th>
                             <th>Status</th>
                             <th>Vencimento</th>
-                            <th>Observações</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="movimentacoesTable">
-                        <!-- Movimentações serão carregadas aqui -->
                         <tr id="emptyState">
-                            <td colspan="9" class="text-center py-5">
+                            <td colspan="8" class="text-center py-5">
                                 <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
                                 <h5 class="text-muted">Nenhuma movimentação cadastrada</h5>
                                 <p class="text-muted mb-0">Comece cadastrando sua primeira receita ou despesa</p>
@@ -960,72 +828,6 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- Resumo por Categoria -->
-        <div class="table-container mt-4" id="categoriasSection" style="display: none;">
-            <div class="d-flex justify-content-between align-items-center p-3">
-                <h5 class="mb-0">Categorias de Despesas</h5>
-                <button class="btn btn-primary-action btn-sm" onclick="abrirModalCategoria()">
-                    <i class="fas fa-plus"></i> Nova Categoria
-                </button>
-            </div>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Categoria</th>
-                            <th>Tipo</th>
-                            <th>Valor Mensal</th>
-                            <th>Orçamento</th>
-                            <th>% do Total</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="categoriasTable">
-                        <!-- Categorias serão carregadas aqui -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Seção de Relatórios -->
-        <div class="row mt-4" id="relatoriosSection" style="display: none;">
-            <div class="col-md-4">
-                <div class="grafico-card h-100">
-                    <h5>Relatório Rápido</h5>
-                    <div class="mb-3">
-                        <label class="form-label">Período</label>
-                        <select class="form-select" id="periodoRelatorio">
-                            <option value="este_mes">Este Mês</option>
-                            <option value="ultimo_mes">Último Mês</option>
-                            <option value="ultimos_3_meses">Últimos 3 Meses</option>
-                            <option value="este_ano">Este Ano</option>
-                            <option value="personalizado">Personalizado</option>
-                        </select>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary-action" onclick="gerarRelatorioCompleto()">
-                            <i class="fas fa-file-pdf"></i> Gerar Relatório Completo
-                        </button>
-                        <button class="btn btn-outline-primary" onclick="gerarRelatorioSimples()">
-                            <i class="fas fa-chart-pie"></i> Relatório Resumido
-                        </button>
-                        <button class="btn btn-outline-success" onclick="gerarProjecao()">
-                            <i class="fas fa-chart-line"></i> Projeção Futura
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="grafico-card h-100">
-                    <h5>Pré-visualização do Relatório</h5>
-                    <div id="previewRelatorio" class="p-3 border rounded" style="min-height: 300px;">
-                        <p class="text-muted">Selecione um tipo de relatório para visualizar</p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1100,7 +902,15 @@
                                 <label class="form-label">Categoria *</label>
                                 <select class="form-select" id="categoria" required>
                                     <option value="">Selecione...</option>
-                                    <!-- Categorias serão carregadas aqui -->
+                                    <option value="servico" class="categoria-receita">Serviço Prestado</option>
+                                    <option value="produto" class="categoria-receita">Venda de Produto</option>
+                                    <option value="material" class="categoria-despesa">Material/Insumo</option>
+                                    <option value="marketing" class="categoria-despesa">Marketing</option>
+                                    <option value="transporte" class="categoria-despesa">Transporte</option>
+                                    <option value="imposto" class="categoria-despesa">Imposto</option>
+                                    <option value="salario" class="categoria-despesa">Salário</option>
+                                    <option value="aluguel" class="categoria-despesa">Aluguel</option>
+                                    <option value="outros" class="categoria-outros">Outros</option>
                                 </select>
                             </div>
                         </div>
@@ -1139,20 +949,9 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Recorrência</label>
-                                <select class="form-select" id="recorrencia">
-                                    <option value="unica">Única</option>
-                                    <option value="semanal">Semanal</option>
-                                    <option value="mensal">Mensal</option>
-                                    <option value="trimestral">Trimestral</option>
-                                    <option value="anual">Anual</option>
-                                </select>
+                                <label class="form-label">Observações</label>
+                                <textarea class="form-control" id="observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Observações</label>
-                            <textarea class="form-control" id="observacoes" rows="3" placeholder="Observações adicionais..."></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -1162,92 +961,12 @@
                                     Esta é uma despesa fixa mensal
                                 </label>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="gerarLembrete">
-                                <label class="form-check-label" for="gerarLembrete">
-                                    Gerar lembrete próximo ao vencimento
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Para despesas -->
-                        <div id="despesaFields" style="display: none;">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Fornecedor/Responsável</label>
-                                    <input type="text" class="form-control" id="fornecedor" placeholder="Nome do fornecedor">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Número do Documento</label>
-                                    <input type="text" class="form-control" id="numeroDocumento" placeholder="NF, Boleto, etc.">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Para receitas -->
-                        <div id="receitaFields">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Cliente (opcional)</label>
-                                    <select class="form-select" id="cliente">
-                                        <option value="">Selecione um cliente...</option>
-                                        <!-- Clientes serão carregados aqui -->
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Pedido Relacionado (opcional)</label>
-                                    <select class="form-select" id="pedidoRelacionado">
-                                        <option value="">Selecione um pedido...</option>
-                                        <!-- Pedidos serão carregados aqui -->
-                                    </select>
-                                </div>
-                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary-action" id="btnSalvarMovimentacao">Salvar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Categoria -->
-    <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nova Categoria</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formCategoria">
-                        <div class="mb-3">
-                            <label class="form-label">Nome da Categoria *</label>
-                            <input type="text" class="form-control" id="nomeCategoria" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tipo *</label>
-                            <select class="form-select" id="tipoCategoria" required>
-                                <option value="despesa">Despesa</option>
-                                <option value="receita">Receita</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Orçamento Mensal (opcional)</label>
-                            <input type="number" class="form-control" id="orcamentoCategoria" min="0" step="0.01">
-                            <small class="text-muted">Define um limite máximo para esta categoria</small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Cor de Identificação</label>
-                            <input type="color" class="form-control form-control-color" id="corCategoria" value="#3498db">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary-action" id="btnSalvarCategoria">Salvar</button>
                 </div>
             </div>
         </div>
@@ -1276,8 +995,7 @@
             query,
             where,
             orderBy,
-            serverTimestamp,
-            Timestamp
+            serverTimestamp
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
         // Firebase Config
@@ -1301,14 +1019,8 @@
         let currentUser = null;
         let userData = null;
         let movimentacoes = [];
-        let categorias = [];
-        let clientes = [];
-        let pedidos = [];
-        let tipoAtualAba = 'todas';
         let calculadoraVisible = false;
         let calculadoraValue = '0';
-        let calculadoraOperador = '';
-        let calculadoraValorAnterior = '0';
 
         // ============================================
         // ELEMENTOS DOM
@@ -1333,30 +1045,10 @@
         const filterTipo = document.getElementById('filterTipo');
         const filterStatus = document.getElementById('filterStatus');
         const filterMes = document.getElementById('filterMes');
-        const filterCategoria = document.getElementById('filterCategoria');
         
         // Tabelas
         const movimentacoesTable = document.getElementById('movimentacoesTable');
         const emptyState = document.getElementById('emptyState');
-        const categoriasTable = document.getElementById('categoriasTable');
-        
-        // Seções
-        const categoriasSection = document.getElementById('categoriasSection');
-        const relatoriosSection = document.getElementById('relatoriosSection');
-        
-        // Abas
-        const financeiroTabs = document.getElementById('financeiroTabs');
-        const tabButtons = financeiroTabs.querySelectorAll('.tab-btn');
-        
-        // Modais
-        const modalMovimentacao = new bootstrap.Modal(document.getElementById('modalMovimentacao'));
-        const modalCategoria = new bootstrap.Modal(document.getElementById('modalCategoria'));
-        const formMovimentacao = document.getElementById('formMovimentacao');
-        const tipoMovBtns = document.querySelectorAll('.tipo-mov-btn');
-        const tipoMovimentacao = document.getElementById('tipoMovimentacao');
-        const despesaFields = document.getElementById('despesaFields');
-        const receitaFields = document.getElementById('receitaFields');
-        const btnSalvarMovimentacao = document.getElementById('btnSalvarMovimentacao');
         
         // Calculadora
         const calculadoraPanel = document.getElementById('calculadoraPanel');
@@ -1378,12 +1070,9 @@
                     if (userDoc.exists()) {
                         userData = userDoc.data();
                         atualizarInterfaceUsuario(userData);
-                        await carregarDadosIniciais();
+                        await carregarMovimentacoes();
                         inicializarSistema();
                         inicializarGraficos();
-                    } else {
-                        // Se não existir no Firestore, redirecionar para registro
-                        window.location.href = 'registro.html';
                     }
                 } catch (error) {
                     console.error('Erro ao carregar dados:', error);
@@ -1396,7 +1085,6 @@
 
         function inicializarSistema() {
             inicializarCalculadora();
-            inicializarAbas();
             inicializarEventListeners();
             inicializarModais();
         }
@@ -1419,23 +1107,6 @@
         // CARREGAMENTO DE DADOS
         // ============================================
 
-        async function carregarDadosIniciais() {
-            try {
-                await Promise.all([
-                    carregarCategorias(),
-                    carregarClientes(),
-                    carregarPedidos(),
-                    carregarMovimentacoes()
-                ]);
-                atualizarFiltros();
-                atualizarEstatisticas();
-                showNotification('Dados carregados com sucesso!', 'success');
-            } catch (error) {
-                console.error('Erro ao carregar dados iniciais:', error);
-                showNotification('Erro ao carregar dados', 'error');
-            }
-        }
-
         async function carregarMovimentacoes() {
             try {
                 const q = query(
@@ -1449,20 +1120,19 @@
                 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Converter Timestamp para string ISO se necessário
-                    const movData = {
+                    movimentacoes.push({
                         id: doc.id,
                         ...data,
                         data: data.data?.toDate?.().toISOString().split('T')[0] || data.data,
                         vencimento: data.vencimento?.toDate?.().toISOString().split('T')[0] || data.vencimento
-                    };
-                    movimentacoes.push(movData);
+                    });
                 });
                 
                 // Verificar e atualizar status de atrasados
                 await verificarAtrasados();
                 
                 atualizarTabelaMovimentacoes();
+                atualizarEstatisticas();
             } catch (error) {
                 console.error('Erro ao carregar movimentações:', error);
                 showNotification('Erro ao carregar movimentações', 'error');
@@ -1471,11 +1141,9 @@
 
         async function verificarAtrasados() {
             const hoje = new Date().toISOString().split('T')[0];
-            let atualizacoes = [];
 
             for (const mov of movimentacoes) {
                 if (mov.status === 'pendente' && mov.vencimento < hoje) {
-                    // Atualizar status para atrasado
                     try {
                         const movRef = doc(db, "movimentacoes", mov.id);
                         await updateDoc(movRef, {
@@ -1484,241 +1152,11 @@
                         });
                         
                         mov.status = 'atrasado';
-                        atualizacoes.push(mov.id);
                     } catch (error) {
                         console.error('Erro ao atualizar status:', error);
                     }
                 }
             }
-
-            if (atualizacoes.length > 0) {
-                console.log(`${atualizacoes.length} movimentações atualizadas para atrasado`);
-            }
-        }
-
-        async function carregarCategorias() {
-            try {
-                const q = query(
-                    collection(db, "categorias"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                categorias = [];
-                
-                querySnapshot.forEach((doc) => {
-                    categorias.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                // Se não houver categorias, criar as padrão
-                if (categorias.length === 0) {
-                    await criarCategoriasPadrao();
-                }
-            } catch (error) {
-                console.error('Erro ao carregar categorias:', error);
-                showNotification('Erro ao carregar categorias', 'error');
-            }
-        }
-
-        async function criarCategoriasPadrao() {
-            const categoriasPadrao = [
-                { nome: "Serviços Prestados", tipo: "receita", cor: "#27ae60", orcamento: 0 },
-                { nome: "Venda de Produtos", tipo: "receita", cor: "#2ecc71", orcamento: 0 },
-                { nome: "Materiais/Insumos", tipo: "despesa", cor: "#e74c3c", orcamento: 0 },
-                { nome: "Marketing", tipo: "despesa", cor: "#9b59b6", orcamento: 0 },
-                { nome: "Transporte", tipo: "despesa", cor: "#f39c12", orcamento: 0 },
-                { nome: "Impostos", tipo: "despesa", cor: "#34495e", orcamento: 0 },
-                { nome: "Salários", tipo: "despesa", cor: "#1abc9c", orcamento: 0 },
-                { nome: "Aluguel", tipo: "despesa", cor: "#d35400", orcamento: 0 },
-                { nome: "Outras Receitas", tipo: "receita", cor: "#3498db", orcamento: 0 },
-                { nome: "Outras Despesas", tipo: "despesa", cor: "#7f8c8d", orcamento: 0 }
-            ];
-            
-            for (const categoria of categoriasPadrao) {
-                try {
-                    await addDoc(collection(db, "categorias"), {
-                        ...categoria,
-                        profissionalId: currentUser.uid,
-                        criadoEm: serverTimestamp(),
-                        atualizadoEm: serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Erro ao criar categoria padrão:', error);
-                }
-            }
-            
-            await carregarCategorias();
-        }
-
-        async function carregarClientes() {
-            try {
-                const q = query(
-                    collection(db, "clientes"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                clientes = [];
-                
-                querySnapshot.forEach((doc) => {
-                    clientes.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-            } catch (error) {
-                console.error('Erro ao carregar clientes:', error);
-            }
-        }
-
-        async function carregarPedidos() {
-            try {
-                const q = query(
-                    collection(db, "pedidos"),
-                    where("profissionalId", "==", currentUser.uid)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                pedidos = [];
-                
-                querySnapshot.forEach((doc) => {
-                    pedidos.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-            } catch (error) {
-                console.error('Erro ao carregar pedidos:', error);
-            }
-        }
-
-        function atualizarFiltros() {
-            // Atualizar filtro de categorias
-            filterCategoria.innerHTML = '<option value="">Todas categorias</option>';
-            const categoriaSelect = document.getElementById('categoria');
-            if (categoriaSelect) {
-                categoriaSelect.innerHTML = '<option value="">Selecione...</option>';
-            }
-            
-            // Separar categorias por tipo
-            const categoriasReceita = categorias.filter(c => c.tipo === 'receita');
-            const categoriasDespesa = categorias.filter(c => c.tipo === 'despesa');
-            
-            // Adicionar categorias de receita
-            if (categoriasReceita.length > 0) {
-                const optgroupReceita = document.createElement('optgroup');
-                optgroupReceita.label = 'Receitas';
-                
-                const optgroupReceitaFiltro = document.createElement('optgroup');
-                optgroupReceitaFiltro.label = 'Receitas';
-                
-                categoriasReceita.forEach(categoria => {
-                    const option = document.createElement('option');
-                    option.value = categoria.id;
-                    option.textContent = categoria.nome;
-                    option.style.color = categoria.cor || '#333';
-                    option.dataset.tipo = 'receita';
-                    
-                    const optionFiltro = option.cloneNode(true);
-                    
-                    optgroupReceita.appendChild(option);
-                    if (filterCategoria) {
-                        optgroupReceitaFiltro.appendChild(optionFiltro);
-                    }
-                });
-                
-                if (categoriaSelect) {
-                    categoriaSelect.appendChild(optgroupReceita);
-                }
-                if (filterCategoria) {
-                    filterCategoria.appendChild(optgroupReceitaFiltro);
-                }
-            }
-            
-            // Adicionar categorias de despesa
-            if (categoriasDespesa.length > 0) {
-                const optgroupDespesa = document.createElement('optgroup');
-                optgroupDespesa.label = 'Despesas';
-                
-                const optgroupDespesaFiltro = document.createElement('optgroup');
-                optgroupDespesaFiltro.label = 'Despesas';
-                
-                categoriasDespesa.forEach(categoria => {
-                    const option = document.createElement('option');
-                    option.value = categoria.id;
-                    option.textContent = categoria.nome;
-                    option.style.color = categoria.cor || '#333';
-                    option.dataset.tipo = 'despesa';
-                    
-                    const optionFiltro = option.cloneNode(true);
-                    
-                    optgroupDespesa.appendChild(option);
-                    if (filterCategoria) {
-                        optgroupDespesaFiltro.appendChild(optionFiltro);
-                    }
-                });
-                
-                if (categoriaSelect) {
-                    categoriaSelect.appendChild(optgroupDespesa);
-                }
-                if (filterCategoria) {
-                    filterCategoria.appendChild(optgroupDespesaFiltro);
-                }
-            }
-            
-            // Atualizar filtro de clientes
-            const clienteSelect = document.getElementById('cliente');
-            if (clienteSelect) {
-                clienteSelect.innerHTML = '<option value="">Selecione um cliente...</option>';
-                clientes.forEach(cliente => {
-                    const option = document.createElement('option');
-                    option.value = cliente.id;
-                    option.textContent = cliente.nome || cliente.email || 'Cliente sem nome';
-                    clienteSelect.appendChild(option);
-                });
-            }
-            
-            // Atualizar filtro de pedidos
-            const pedidoSelect = document.getElementById('pedidoRelacionado');
-            if (pedidoSelect) {
-                pedidoSelect.innerHTML = '<option value="">Selecione um pedido...</option>';
-                pedidos.forEach(pedido => {
-                    const option = document.createElement('option');
-                    option.value = pedido.id;
-                    option.textContent = pedido.numeroPedido || `Pedido ${pedido.id.substring(0, 8)}`;
-                    pedidoSelect.appendChild(option);
-                });
-            }
-        }
-
-        // ============================================
-        // SISTEMA DE ABAS
-        // ============================================
-
-        function inicializarAbas() {
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    tipoAtualAba = this.getAttribute('data-tipo');
-                    
-                    // Mostrar/ocultar seções
-                    categoriasSection.style.display = tipoAtualAba === 'categorias' ? 'block' : 'none';
-                    relatoriosSection.style.display = tipoAtualAba === 'relatorios' ? 'block' : 'none';
-                    
-                    // Atualizar tabela apropriada
-                    if (tipoAtualAba === 'categorias') {
-                        atualizarTabelaCategorias();
-                    } else if (tipoAtualAba === 'relatorios') {
-                        atualizarPreviewRelatorio();
-                    } else {
-                        atualizarTabelaMovimentacoes();
-                    }
-                });
-            });
         }
 
         // ============================================
@@ -1730,25 +1168,14 @@
             const tipoFilter = filterTipo.value;
             const statusFilter = filterStatus.value;
             const mesFilter = filterMes.value;
-            const categoriaFilter = filterCategoria.value;
             
-            // Filtrar por tipo da aba
-            let movimentacoesFiltradas = movimentacoes;
-            
-            if (tipoAtualAba === 'receitas') {
-                movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'receita');
-            } else if (tipoAtualAba === 'despesas') {
-                movimentacoesFiltradas = movimentacoes.filter(m => m.tipo === 'despesa');
-            }
-            
-            // Aplicar filtros adicionais
-            movimentacoesFiltradas = movimentacoesFiltradas.filter(mov => {
+            // Aplicar filtros
+            let movimentacoesFiltradas = movimentacoes.filter(mov => {
                 const matchSearch = !searchTerm || 
                     (mov.descricao && mov.descricao.toLowerCase().includes(searchTerm));
                 
                 const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
                 const matchStatus = !statusFilter || mov.status === statusFilter;
-                const matchCategoria = !categoriaFilter || mov.categoriaId === categoriaFilter;
                 
                 let matchMes = true;
                 if (mesFilter && mov.data) {
@@ -1757,7 +1184,7 @@
                     matchMes = mes.toString() === mesFilter;
                 }
                 
-                return matchSearch && matchTipo && matchStatus && matchMes && matchCategoria;
+                return matchSearch && matchTipo && matchStatus && matchMes;
             });
             
             // Limpar tabela
@@ -1772,12 +1199,15 @@
             
             // Preencher tabela
             movimentacoesFiltradas.forEach(mov => {
-                const categoria = categorias.find(c => c.id === mov.categoriaId);
                 const row = document.createElement('tr');
                 
                 const dataFormatada = formatarData(mov.data);
                 const vencimentoFormatado = formatarData(mov.vencimento);
                 const valorFormatado = formatarMoeda(mov.valor);
+                
+                // Determinar categoria
+                const categoriaClass = getCategoriaClass(mov.categoria);
+                const categoriaNome = getCategoriaNome(mov.categoria);
                 
                 // Determinar estilo baseado no tipo
                 const tipoBadge = mov.tipo === 'receita' 
@@ -1791,8 +1221,8 @@
                     <td>${tipoBadge}</td>
                     <td>${mov.descricao || 'Sem descrição'}</td>
                     <td>
-                        <span class="badge" style="background: ${categoria?.cor || '#ccc'}; color: white">
-                            ${categoria?.nome || 'Sem categoria'}
+                        <span class="categoria-badge ${categoriaClass}">
+                            ${categoriaNome}
                         </span>
                     </td>
                     <td class="${mov.tipo === 'receita' ? 'text-success' : 'text-danger'} fw-bold">
@@ -1800,17 +1230,10 @@
                     </td>
                     <td>${statusBadge}</td>
                     <td>${vencimentoFormatado}</td>
-                    <td><small title="${mov.observacoes || ''}">${mov.observacoes?.substring(0, 30) || ''}${mov.observacoes?.length > 30 ? '...' : ''}</small></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-action-sm btn-ver" onclick="verMovimentacao('${mov.id}')" title="Visualizar">
-                                <i class="fas fa-eye"></i>
-                            </button>
                             <button class="btn-action-sm btn-editar" onclick="editarMovimentacao('${mov.id}')" title="Editar">
                                 <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action-sm btn-recibo" onclick="exportarMovimentacaoPDF('${mov.id}')" title="Exportar PDF">
-                                <i class="fas fa-file-pdf"></i>
                             </button>
                             <button class="btn-action-sm btn-excluir" onclick="excluirMovimentacao('${mov.id}')" title="Excluir">
                                 <i class="fas fa-trash"></i>
@@ -1822,18 +1245,48 @@
                 // Destacar linhas atrasadas
                 if (mov.status === 'atrasado') {
                     row.style.backgroundColor = '#fff5f5';
-                } else if (mov.status === 'pendente') {
-                    row.style.backgroundColor = '#fffef0';
                 }
                 
                 movimentacoesTable.appendChild(row);
             });
         }
 
+        function getCategoriaClass(categoria) {
+            switch(categoria) {
+                case 'servico':
+                case 'produto':
+                    return 'categoria-receita';
+                case 'material':
+                case 'marketing':
+                case 'transporte':
+                case 'imposto':
+                case 'salario':
+                case 'aluguel':
+                    return 'categoria-despesa';
+                default:
+                    return 'categoria-outros';
+            }
+        }
+
+        function getCategoriaNome(categoria) {
+            const categorias = {
+                'servico': 'Serviço',
+                'produto': 'Produto',
+                'material': 'Material',
+                'marketing': 'Marketing',
+                'transporte': 'Transporte',
+                'imposto': 'Imposto',
+                'salario': 'Salário',
+                'aluguel': 'Aluguel',
+                'outros': 'Outros'
+            };
+            return categorias[categoria] || 'Outros';
+        }
+
         function getStatusBadge(status) {
             switch(status) {
                 case 'pago':
-                    return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago/Recebido</span>';
+                    return '<span class="badge-status status-pago"><i class="fas fa-check me-1"></i>Pago</span>';
                 case 'pendente':
                     return '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i>Pendente</span>';
                 case 'atrasado':
@@ -1841,132 +1294,6 @@
                 default:
                     return `<span class="badge-status">${status}</span>`;
             }
-        }
-
-        // ============================================
-        // TABELA DE CATEGORIAS
-        // ============================================
-
-        function atualizarTabelaCategorias() {
-            categoriasTable.innerHTML = '';
-            
-            if (categorias.length === 0) {
-                categoriasTable.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
-                            <i class="fas fa-tags fa-2x mb-2"></i>
-                            <p>Nenhuma categoria cadastrada</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            // Calcular totais por categoria
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
-            
-            // Calcular totais gerais
-            const totalReceitas = movimentacoes
-                .filter(m => m.tipo === 'receita')
-                .reduce((sum, m) => sum + (m.valor || 0), 0);
-            
-            const totalDespesas = movimentacoes
-                .filter(m => m.tipo === 'despesa')
-                .reduce((sum, m) => sum + (m.valor || 0), 0);
-            
-            categorias.forEach(categoria => {
-                // Filtrar movimentações desta categoria no mês atual
-                const movimentacoesCategoria = movimentacoes.filter(mov => {
-                    if (mov.categoriaId !== categoria.id) return false;
-                    
-                    const dataMov = new Date(mov.data);
-                    return dataMov.getMonth() === mesAtual && 
-                           dataMov.getFullYear() === anoAtual;
-                });
-                
-                // Calcular total
-                const total = movimentacoesCategoria.reduce((sum, mov) => {
-                    return sum + (mov.valor || 0);
-                }, 0);
-                
-                // Calcular porcentagem do orçamento
-                let porcentagem = 0;
-                if (categoria.orcamento && categoria.orcamento > 0) {
-                    porcentagem = Math.min(100, Math.round((total / categoria.orcamento) * 100));
-                }
-                
-                // Calcular porcentagem do total
-                let porcentagemTotal = 0;
-                if (categoria.tipo === 'receita' && totalReceitas > 0) {
-                    porcentagemTotal = Math.round((total / totalReceitas) * 100);
-                } else if (categoria.tipo === 'despesa' && totalDespesas > 0) {
-                    porcentagemTotal = Math.round((total / totalDespesas) * 100);
-                }
-                
-                // Determinar status
-                let status = 'normal';
-                let statusText = 'Normal';
-                let statusClass = 'text-success';
-                
-                if (categoria.orcamento && categoria.orcamento > 0) {
-                    if (porcentagem >= 100) {
-                        status = 'excedido';
-                        statusText = 'Excedido';
-                        statusClass = 'text-danger';
-                    } else if (porcentagem >= 80) {
-                        status = 'alerta';
-                        statusText = 'Alerta';
-                        statusClass = 'text-warning';
-                    }
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <span class="badge" style="background: ${categoria.cor || '#3498db'}; color: white">
-                            <i class="fas ${categoria.tipo === 'receita' ? 'fa-arrow-down' : 'fa-arrow-up'} me-1"></i>
-                            ${categoria.nome}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${categoria.tipo === 'receita' ? 'bg-success' : 'bg-danger'}">
-                            ${categoria.tipo === 'receita' ? 'Receita' : 'Despesa'}
-                        </span>
-                    </td>
-                    <td class="fw-bold ${categoria.tipo === 'receita' ? 'text-success' : 'text-danger'}">
-                        ${formatarMoeda(total)}
-                    </td>
-                    <td>${categoria.orcamento ? formatarMoeda(categoria.orcamento) : 'Sem limite'}</td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 8px;">
-                                <div class="progress-bar ${porcentagem >= 100 ? 'bg-danger' : porcentagem >= 80 ? 'bg-warning' : 'bg-success'}" 
-                                     style="width: ${porcentagem}%"></div>
-                            </div>
-                            <small>${porcentagemTotal}%</small>
-                        </div>
-                    </td>
-                    <td class="${statusClass}">
-                        <i class="fas ${status === 'excedido' ? 'fa-exclamation-triangle' : 
-                                       status === 'alerta' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-1"></i>
-                        ${statusText}
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-action-sm" onclick="editarCategoria('${categoria.id}')" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action-sm" onclick="excluirCategoria('${categoria.id}')" title="Excluir">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                categoriasTable.appendChild(row);
-            });
         }
 
         // ============================================
@@ -2184,35 +1511,48 @@
         }
 
         function getDadosCategoriasDespesa() {
-            const categoriasDespesa = categorias.filter(c => c.tipo === 'despesa');
             const hoje = new Date();
             const mesAtual = hoje.getMonth();
             const anoAtual = hoje.getFullYear();
             
-            const dados = {
-                labels: [],
-                valores: [],
-                cores: []
+            const categoriasDespesa = {
+                'material': 0,
+                'marketing': 0,
+                'transporte': 0,
+                'imposto': 0,
+                'salario': 0,
+                'aluguel': 0,
+                'outros': 0
             };
             
-            categoriasDespesa.forEach(categoria => {
-                const total = movimentacoes
-                    .filter(m => {
-                        if (m.categoriaId !== categoria.id || m.tipo !== 'despesa') return false;
-                        const dataMov = new Date(m.data);
-                        return dataMov.getMonth() === mesAtual && 
-                               dataMov.getFullYear() === anoAtual;
-                    })
-                    .reduce((sum, m) => sum + (m.valor || 0), 0);
-                
-                if (total > 0) {
-                    dados.labels.push(categoria.nome);
-                    dados.valores.push(total);
-                    dados.cores.push(categoria.cor || '#bdc3c7');
+            // Calcular totais por categoria
+            movimentacoes.forEach(mov => {
+                if (mov.tipo === 'despesa') {
+                    const dataMov = new Date(mov.data);
+                    if (dataMov.getMonth() === mesAtual && dataMov.getFullYear() === anoAtual) {
+                        const categoria = mov.categoria || 'outros';
+                        categoriasDespesa[categoria] = (categoriasDespesa[categoria] || 0) + (mov.valor || 0);
+                    }
                 }
             });
             
-            return dados;
+            // Preparar dados para o gráfico
+            const labels = [];
+            const valores = [];
+            const cores = ['#e74c3c', '#9b59b6', '#f39c12', '#34495e', '#1abc9c', '#d35400', '#7f8c8d'];
+            
+            Object.entries(categoriasDespesa).forEach(([categoria, valor], index) => {
+                if (valor > 0) {
+                    labels.push(getCategoriaNome(categoria));
+                    valores.push(valor);
+                }
+            });
+            
+            return {
+                labels: labels,
+                valores: valores,
+                cores: cores.slice(0, labels.length)
+            };
         }
 
         function gerarDadosPorMes(tipo) {
@@ -2240,7 +1580,7 @@
         }
 
         // ============================================
-        // CALCULADORA
+        // CALCULADORA - CORRIGIDA 100% FUNCIONAL
         // ============================================
 
         function inicializarCalculadora() {
@@ -2269,34 +1609,51 @@
 
         window.calcClear = function() {
             calculadoraValue = '0';
-            calculadoraOperador = '';
-            calculadoraValorAnterior = '0';
             calcDisplay.textContent = calculadoraValue;
         };
 
+        // FUNÇÃO DE PORCENTAGEM 100% FUNCIONAL
         window.calcPercentage = function() {
             try {
-                let expression = calculadoraValue
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/');
+                let expression = calculadoraValue.replace(/×/g, '*').replace(/÷/g, '/');
                 
-                // Se já tem um operador, calcular porcentagem do valor atual
-                if (['+', '-', '*', '/'].some(op => expression.includes(op))) {
-                    const parts = expression.split(/([+\-*/])/);
-                    if (parts.length >= 3) {
-                        const lastNumber = parts[parts.length - 1];
-                        const percentage = parseFloat(lastNumber) / 100;
-                        parts[parts.length - 1] = percentage.toString();
-                        expression = parts.join('');
-                    }
-                } else {
-                    // Apenas converte para porcentagem
-                    expression = (parseFloat(expression) / 100).toString();
+                // Se não tem operador, apenas calcula porcentagem do número
+                if (!/[+\-*/]/.test(expression)) {
+                    let num = parseFloat(expression) / 100;
+                    calculadoraValue = num.toString();
+                    calcDisplay.textContent = calculadoraValue;
+                    return;
                 }
                 
-                const result = eval(expression) || 0;
-                calculadoraValue = parseFloat(result.toFixed(2)).toString();
-                calcDisplay.textContent = calculadoraValue;
+                // Divide a expressão em partes: número, operador, número
+                let parts = expression.match(/(\d+\.?\d*)([+\-*/])(\d+\.?\d*)/);
+                
+                if (parts && parts.length === 4) {
+                    let num1 = parseFloat(parts[1]);
+                    let operador = parts[2];
+                    let num2 = parseFloat(parts[3]);
+                    
+                    let result;
+                    switch(operador) {
+                        case '+':
+                            result = num1 + (num1 * (num2 / 100));
+                            break;
+                        case '-':
+                            result = num1 - (num1 * (num2 / 100));
+                            break;
+                        case '*':
+                            result = num1 * (num2 / 100);
+                            break;
+                        case '/':
+                            result = num1 / (num2 / 100);
+                            break;
+                        default:
+                            result = 0;
+                    }
+                    
+                    calculadoraValue = result.toString();
+                    calcDisplay.textContent = calculadoraValue;
+                }
             } catch (error) {
                 calculadoraValue = 'Erro';
                 calcDisplay.textContent = calculadoraValue;
@@ -2305,11 +1662,7 @@
 
         window.calcCalculate = function() {
             try {
-                // Substituir símbolos para avaliação
-                let expression = calculadoraValue
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/');
-                
+                let expression = calculadoraValue.replace(/×/g, '*').replace(/÷/g, '/');
                 const result = eval(expression) || 0;
                 calculadoraValue = parseFloat(result.toFixed(2)).toString();
                 calcDisplay.textContent = calculadoraValue;
@@ -2324,119 +1677,32 @@
         // ============================================
 
         window.abrirModalMovimentacao = function(tipo = 'receita') {
-            const modal = document.getElementById('modalMovimentacao');
-            const modalTitle = modal.querySelector('.modal-title');
+            const modalTitle = document.getElementById('modalTitle');
             
             modalTitle.textContent = tipo === 'receita' ? 'Nova Receita' : 'Nova Despesa';
             
             // Resetar formulário
-            formMovimentacao.reset();
+            document.getElementById('formMovimentacao').reset();
             document.getElementById('movimentacaoId').value = '';
             
             // Definir tipo
-            tipoMovimentacao.value = tipo;
+            document.getElementById('tipoMovimentacao').value = tipo;
             
             // Ativar botão correto
-            tipoMovBtns.forEach(btn => {
+            document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.getAttribute('data-tipo') === tipo) {
                     btn.classList.add('active');
                 }
             });
             
-            // Mostrar/ocultar campos específicos
-            if (tipo === 'despesa') {
-                despesaFields.style.display = 'block';
-                receitaFields.style.display = 'none';
-            } else {
-                despesaFields.style.display = 'none';
-                receitaFields.style.display = 'block';
-            }
-            
             // Configurar data atual
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('dataMovimentacao').value = hoje;
             document.getElementById('vencimento').value = hoje;
             
-            // Atualizar categorias no select
-            atualizarSelectCategorias(tipo);
-            
-            // Habilitar botão salvar
-            const btnSalvar = document.getElementById('btnSalvarMovimentacao');
-            btnSalvar.disabled = false;
-            btnSalvar.textContent = 'Salvar';
-            btnSalvar.onclick = salvarMovimentacao;
-            
-            modalMovimentacao.show();
-        };
-
-        function atualizarSelectCategorias(tipo) {
-            const categoriaSelect = document.getElementById('categoria');
-            categoriaSelect.innerHTML = '<option value="">Selecione...</option>';
-            
-            // Filtrar categorias pelo tipo
-            const categoriasFiltradas = categorias.filter(c => c.tipo === tipo);
-            
-            if (categoriasFiltradas.length === 0) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = tipo === 'receita' ? 'Crie uma categoria de receita primeiro' : 'Crie uma categoria de despesa primeiro';
-                option.disabled = true;
-                categoriaSelect.appendChild(option);
-            } else {
-                categoriasFiltradas.forEach(categoria => {
-                    const option = document.createElement('option');
-                    option.value = categoria.id;
-                    option.textContent = categoria.nome;
-                    option.style.color = categoria.cor || '#333';
-                    categoriaSelect.appendChild(option);
-                });
-            }
-        }
-
-        window.verMovimentacao = function(id) {
-            const mov = movimentacoes.find(m => m.id === id);
-            if (!mov) {
-                showNotification('Movimentação não encontrada!', 'error');
-                return;
-            }
-            
-            abrirModalMovimentacao(mov.tipo);
-            const modalTitle = document.getElementById('modalTitle');
-            modalTitle.textContent = `Detalhes da ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
-            
-            // Preencher dados
-            document.getElementById('movimentacaoId').value = mov.id;
-            document.getElementById('descricao').value = mov.descricao || '';
-            document.getElementById('categoria').value = mov.categoriaId || '';
-            document.getElementById('valor').value = mov.valor || 0;
-            document.getElementById('status').value = mov.status || 'pendente';
-            document.getElementById('dataMovimentacao').value = mov.data || '';
-            document.getElementById('vencimento').value = mov.vencimento || '';
-            document.getElementById('formaPagamento').value = mov.formaPagamento || '';
-            document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
-            document.getElementById('observacoes').value = mov.observacoes || '';
-            document.getElementById('fornecedor').value = mov.fornecedor || '';
-            document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
-            document.getElementById('cliente').value = mov.clienteId || '';
-            document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
-            document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-            document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
-            
-            // Desabilitar todos os campos
-            const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.disabled = true;
-            });
-            
-            // Desabilitar botões de tipo
-            tipoMovBtns.forEach(btn => {
-                btn.disabled = true;
-            });
-            
-            const btnSalvar = document.getElementById('btnSalvarMovimentacao');
-            btnSalvar.textContent = 'Fechar';
-            btnSalvar.onclick = () => modalMovimentacao.hide();
+            // Mostrar modal
+            new bootstrap.Modal(document.getElementById('modalMovimentacao')).show();
         };
 
         window.editarMovimentacao = async function(id) {
@@ -2446,43 +1712,39 @@
                 return;
             }
             
-            abrirModalMovimentacao(mov.tipo);
             const modalTitle = document.getElementById('modalTitle');
             modalTitle.textContent = `Editar ${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}`;
             
             // Preencher dados
             document.getElementById('movimentacaoId').value = mov.id;
             document.getElementById('descricao').value = mov.descricao || '';
-            document.getElementById('categoria').value = mov.categoriaId || '';
+            document.getElementById('categoria').value = mov.categoria || 'outros';
             document.getElementById('valor').value = mov.valor || 0;
             document.getElementById('status').value = mov.status || 'pendente';
             document.getElementById('dataMovimentacao').value = mov.data || '';
             document.getElementById('vencimento').value = mov.vencimento || '';
             document.getElementById('formaPagamento').value = mov.formaPagamento || '';
-            document.getElementById('recorrencia').value = mov.recorrencia || 'unica';
             document.getElementById('observacoes').value = mov.observacoes || '';
-            document.getElementById('fornecedor').value = mov.fornecedor || '';
-            document.getElementById('numeroDocumento').value = mov.numeroDocumento || '';
-            document.getElementById('cliente').value = mov.clienteId || '';
-            document.getElementById('pedidoRelacionado').value = mov.pedidoId || '';
             document.getElementById('despesaFixa').checked = mov.despesaFixa || false;
-            document.getElementById('gerarLembrete').checked = mov.gerarLembrete || false;
             
-            // Habilitar todos os campos
-            const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.disabled = false;
+            // Definir tipo
+            document.getElementById('tipoMovimentacao').value = mov.tipo;
+            
+            // Ativar botão correto
+            document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-tipo') === mov.tipo) {
+                    btn.classList.add('active');
+                }
             });
             
-            // Habilitar botões de tipo
-            tipoMovBtns.forEach(btn => {
-                btn.disabled = false;
-            });
-            
-            const btnSalvar = document.getElementById('btnSalvarMovimentacao');
-            btnSalvar.textContent = 'Atualizar';
-            btnSalvar.onclick = salvarMovimentacao;
+            // Mostrar modal
+            new bootstrap.Modal(document.getElementById('modalMovimentacao')).show();
         };
+
+        document.getElementById('btnSalvarMovimentacao').addEventListener('click', async function() {
+            await salvarMovimentacao();
+        });
 
         async function salvarMovimentacao() {
             // Validação básica
@@ -2519,30 +1781,19 @@
             
             try {
                 const movData = {
-                    tipo: tipoMovimentacao.value,
+                    tipo: document.getElementById('tipoMovimentacao').value,
                     descricao: descricao,
-                    categoriaId: categoria,
+                    categoria: categoria,
                     valor: valor,
                     status: document.getElementById('status').value,
                     data: dataMov,
                     vencimento: vencimento,
                     formaPagamento: document.getElementById('formaPagamento').value || '',
-                    recorrencia: document.getElementById('recorrencia').value,
                     observacoes: document.getElementById('observacoes').value || '',
                     despesaFixa: document.getElementById('despesaFixa').checked,
-                    gerarLembrete: document.getElementById('gerarLembrete').checked,
                     profissionalId: currentUser.uid,
                     atualizadoEm: serverTimestamp()
                 };
-                
-                // Adicionar campos específicos
-                if (tipoMovimentacao.value === 'despesa') {
-                    movData.fornecedor = document.getElementById('fornecedor').value || '';
-                    movData.numeroDocumento = document.getElementById('numeroDocumento').value || '';
-                } else {
-                    movData.clienteId = document.getElementById('cliente').value || '';
-                    movData.pedidoId = document.getElementById('pedidoRelacionado').value || '';
-                }
                 
                 const movId = document.getElementById('movimentacaoId').value;
                 
@@ -2568,14 +1819,12 @@
                     showNotification('Movimentação criada com sucesso!', 'success');
                 }
                 
-                modalMovimentacao.hide();
+                // Fechar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalMovimentacao')).hide();
                 
                 // Atualizar interface
                 atualizarTabelaMovimentacoes();
                 atualizarEstatisticas();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
                 inicializarGraficos(); // Atualizar gráficos
                 
             } catch (error) {
@@ -2602,9 +1851,6 @@
                 // Atualizar interface
                 atualizarTabelaMovimentacoes();
                 atualizarEstatisticas();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
                 inicializarGraficos(); // Atualizar gráficos
                 
                 showNotification('Movimentação excluída com sucesso!', 'success');
@@ -2615,147 +1861,7 @@
         };
 
         // ============================================
-        // FUNÇÕES DE CATEGORIA
-        // ============================================
-
-        window.abrirModalCategoria = function() {
-            document.getElementById('formCategoria').reset();
-            document.getElementById('nomeCategoria').value = '';
-            document.getElementById('tipoCategoria').value = 'despesa';
-            document.getElementById('orcamentoCategoria').value = '';
-            document.getElementById('corCategoria').value = '#3498db';
-            
-            const btnSalvar = document.getElementById('btnSalvarCategoria');
-            btnSalvar.textContent = 'Salvar';
-            btnSalvar.onclick = salvarCategoria;
-            
-            modalCategoria.show();
-        };
-
-        window.editarCategoria = function(id) {
-            const categoria = categorias.find(c => c.id === id);
-            if (!categoria) {
-                showNotification('Categoria não encontrada!', 'error');
-                return;
-            }
-            
-            document.getElementById('nomeCategoria').value = categoria.nome;
-            document.getElementById('tipoCategoria').value = categoria.tipo;
-            document.getElementById('orcamentoCategoria').value = categoria.orcamento || '';
-            document.getElementById('corCategoria').value = categoria.cor || '#3498db';
-            
-            const btnSalvar = document.getElementById('btnSalvarCategoria');
-            btnSalvar.textContent = 'Atualizar';
-            btnSalvar.onclick = () => salvarCategoria(id);
-            
-            modalCategoria.show();
-        };
-
-        async function salvarCategoria(categoriaId = null) {
-            const nome = document.getElementById('nomeCategoria').value.trim();
-            const tipo = document.getElementById('tipoCategoria').value;
-            const orcamento = document.getElementById('orcamentoCategoria').value;
-            const cor = document.getElementById('corCategoria').value;
-            
-            if (!nome) {
-                showNotification('Informe um nome para a categoria.', 'warning');
-                return;
-            }
-            
-            if (nome.length < 2) {
-                showNotification('O nome da categoria deve ter pelo menos 2 caracteres.', 'warning');
-                return;
-            }
-            
-            try {
-                const categoriaData = {
-                    nome: nome,
-                    tipo: tipo,
-                    cor: cor,
-                    profissionalId: currentUser.uid,
-                    atualizadoEm: serverTimestamp()
-                };
-                
-                if (orcamento && orcamento > 0) {
-                    categoriaData.orcamento = parseFloat(orcamento);
-                } else {
-                    categoriaData.orcamento = 0;
-                }
-                
-                if (categoriaId) {
-                    // Atualizar categoria existente
-                    const catRef = doc(db, "categorias", categoriaId);
-                    await updateDoc(catRef, categoriaData);
-                    
-                    // Atualizar localmente
-                    const index = categorias.findIndex(c => c.id === categoriaId);
-                    if (index !== -1) {
-                        categorias[index] = { ...categorias[index], ...categoriaData };
-                    }
-                    
-                    showNotification('Categoria atualizada com sucesso!', 'success');
-                } else {
-                    // Nova categoria
-                    categoriaData.criadoEm = serverTimestamp();
-                    const docRef = await addDoc(collection(db, "categorias"), categoriaData);
-                    categoriaData.id = docRef.id;
-                    categorias.push(categoriaData);
-                    
-                    showNotification('Categoria criada com sucesso!', 'success');
-                }
-                
-                modalCategoria.hide();
-                
-                // Atualizar interface
-                atualizarFiltros();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
-                
-            } catch (error) {
-                console.error('Erro ao salvar categoria:', error);
-                showNotification('Erro ao salvar categoria. Tente novamente.', 'error');
-            }
-        }
-
-        window.excluirCategoria = async function(id) {
-            // Verificar se há movimentações usando esta categoria
-            const movimentacoesComCategoria = movimentacoes.filter(m => m.categoriaId === id);
-            
-            if (movimentacoesComCategoria.length > 0) {
-                showNotification('Não é possível excluir esta categoria pois existem movimentações vinculadas a ela.', 'warning');
-                return;
-            }
-            
-            if (!confirm('Tem certeza que deseja excluir esta categoria?\n\nEsta ação não pode ser desfeita.')) {
-                return;
-            }
-            
-            try {
-                const catRef = doc(db, "categorias", id);
-                await deleteDoc(catRef);
-                
-                // Remover da lista local
-                const index = categorias.findIndex(c => c.id === id);
-                if (index !== -1) {
-                    categorias.splice(index, 1);
-                }
-                
-                // Atualizar interface
-                atualizarFiltros();
-                if (tipoAtualAba === 'categorias') {
-                    atualizarTabelaCategorias();
-                }
-                
-                showNotification('Categoria excluída com sucesso!', 'success');
-            } catch (error) {
-                console.error('Erro ao excluir categoria:', error);
-                showNotification('Erro ao excluir categoria. Tente novamente.', 'error');
-            }
-        };
-
-        // ============================================
-        // EXPORTAÇÃO E RELATÓRIOS
+        // EXPORTAÇÃO
         // ============================================
 
         window.exportarPDF = function() {
@@ -2807,329 +1913,29 @@
             // Movimentações
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('MOVIMENTAÇÕES RECENTES', margin, y);
+            doc.text('MOVIMENTAÇÕES', margin, y);
             y += 10;
             
-            const headers = [['Data', 'Tipo', 'Descrição', 'Categoria', 'Valor', 'Status']];
-            const data = movimentacoes.slice(0, 20).map(mov => {
-                const categoria = categorias.find(c => c.id === mov.categoriaId);
-                return [
-                    formatarData(mov.data),
-                    mov.tipo === 'receita' ? 'Receita' : 'Despesa',
-                    mov.descricao || '',
-                    categoria?.nome || '--',
-                    formatarMoeda(mov.valor),
-                    getStatusTexto(mov.status)
-                ];
-            });
-            
-            doc.autoTable({
-                startY: y,
-                head: headers,
-                body: data,
-                margin: { left: margin, right: margin },
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [68, 104, 154] },
-                alternateRowStyles: { fillColor: [248, 249, 250] }
-            });
-            
-            // Número de página
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, doc.internal.pageSize.height - 10, { align: 'right' });
-            }
-            
-            doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
-            showNotification('Relatório PDF gerado com sucesso!', 'success');
-        };
-
-        window.exportarMovimentacaoPDF = async function(id) {
-            const mov = movimentacoes.find(m => m.id === id);
-            if (!mov) {
-                showNotification('Movimentação não encontrada.', 'error');
-                return;
-            }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            const margin = 20;
-            const pageWidth = doc.internal.pageSize.width;
-            let y = margin;
-            
-            // Cabeçalho
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.text(mov.tipo === 'receita' ? 'COMPROVANTE DE RECEITA' : 'COMPROVANTE DE DESPESA', pageWidth/2, y, { align: 'center' });
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Data do Documento: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth - margin, y, { align: 'right' });
-            y += 15;
-            
-            // Logo
-            doc.setFontSize(14);
-            doc.setTextColor(68, 104, 154);
-            doc.text('SCANHUB', margin, y);
-            doc.setTextColor(0, 0, 0);
-            y += 10;
-            
-            // Informações da Movimentação
-            const categoria = categorias.find(c => c.id === mov.categoriaId);
-            const cliente = clientes.find(c => c.id === mov.clienteId);
-            
-            const info = [
-                ['Descrição:', mov.descricao || '--'],
-                ['Tipo:', mov.tipo === 'receita' ? 'Receita' : 'Despesa'],
-                ['Categoria:', categoria?.nome || '--'],
-                ['Valor:', formatarMoeda(mov.valor)],
-                ['Status:', getStatusTexto(mov.status)],
-                ['Data da Movimentação:', formatarData(mov.data)],
-                ['Data de Vencimento:', formatarData(mov.vencimento)],
-                ['Forma de Pagamento:', getFormaPagamentoTexto(mov.formaPagamento)],
-                ['Recorrência:', getRecorrenciaTexto(mov.recorrencia)]
-            ];
-            
-            if (mov.tipo === 'receita' && cliente) {
-                info.push(['Cliente:', cliente.nome || cliente.email || '--']);
-            }
-            
-            if (mov.tipo === 'despesa' && mov.fornecedor) {
-                info.push(['Fornecedor:', mov.fornecedor]);
-            }
-            
-            if (mov.numeroDocumento) {
-                info.push(['Nº Documento:', mov.numeroDocumento]);
-            }
-            
-            doc.setFont('helvetica', 'bold');
-            info.forEach(([label, value]) => {
+            // Adicionar movimentações
+            movimentacoes.forEach((mov, index) => {
                 if (y > 250) {
                     doc.addPage();
                     y = margin;
                 }
                 
-                doc.text(label, margin, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(value || '--', margin + 50, y);
-                doc.setFont('helvetica', 'bold');
-                y += 8;
+                const categoriaNome = getCategoriaNome(mov.categoria);
+                const valor = formatarMoeda(mov.valor);
+                
+                doc.setFontSize(9);
+                doc.text(`${formatarData(mov.data)} - ${mov.descricao}`, margin, y);
+                doc.text(`${categoriaNome}`, pageWidth/2 - 20, y);
+                doc.text(`${mov.tipo === 'receita' ? '+' : '-'} ${valor}`, pageWidth - margin, y, { align: 'right' });
+                y += 6;
             });
             
-            y += 5;
-            doc.setFont('helvetica', 'normal');
-            doc.text('Observações:', margin, y);
-            y += 8;
-            
-            if (mov.observacoes) {
-                const obsLines = doc.splitTextToSize(mov.observacoes, pageWidth - 2*margin);
-                obsLines.forEach(line => {
-                    doc.text(line, margin, y);
-                    y += 5;
-                });
-            } else {
-                doc.text('Nenhuma observação.', margin, y);
-                y += 5;
-            }
-            
-            y += 15;
-            doc.setLineWidth(0.5);
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
-            
-            doc.setFontSize(9);
-            doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
-            y += 5;
-            doc.text(`ID da Movimentação: ${mov.id.substring(0, 8)}`, pageWidth/2, y, { align: 'center' });
-            
-            doc.save(`${mov.tipo === 'receita' ? 'Receita' : 'Despesa'}-${mov.id.substring(0,8)}.pdf`);
-            showNotification('Comprovante gerado com sucesso!', 'success');
+            doc.save(`Relatorio-Financeiro-${new Date().toISOString().slice(0,10)}.pdf`);
+            showNotification('Relatório PDF gerado com sucesso!', 'success');
         };
-
-        window.exportarCSV = function() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Data,Tipo,Descrição,Categoria,Valor,Status,Vencimento,Forma Pagamento,Observações\n";
-            
-            movimentacoes.forEach(mov => {
-                const categoria = categorias.find(c => c.id === mov.categoriaId);
-                const linha = [
-                    formatarData(mov.data),
-                    mov.tipo === 'receita' ? 'Receita' : 'Despesa',
-                    `"${(mov.descricao || '').replace(/"/g, '""')}"`,
-                    `"${(categoria?.nome || 'Sem categoria').replace(/"/g, '""')}"`,
-                    mov.valor,
-                    getStatusTexto(mov.status),
-                    formatarData(mov.vencimento),
-                    getFormaPagamentoTexto(mov.formaPagamento),
-                    `"${(mov.observacoes || '').replace(/"/g, '""')}"`
-                ].join(',');
-                
-                csvContent += linha + "\n";
-            });
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `financeiro-${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification('Arquivo CSV gerado com sucesso!', 'success');
-        };
-
-        window.exportarRelatorio = function() {
-            exportarPDF();
-        };
-
-        // ============================================
-        // FUNÇÕES DE RELATÓRIOS
-        // ============================================
-
-        function atualizarPreviewRelatorio() {
-            const preview = document.getElementById('previewRelatorio');
-            if (!preview) return;
-            
-            const periodo = document.getElementById('periodoRelatorio')?.value || 'este_mes';
-            
-            let html = `
-                <h6>Resumo do Período</h6>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p class="mb-1"><strong>Saldo Atual:</strong> ${saldoAtual.textContent}</p>
-                        <p class="mb-1"><strong>Receitas:</strong> ${receitaMes.textContent}</p>
-                        <p class="mb-1"><strong>Despesas:</strong> ${despesaMes.textContent}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="mb-1"><strong>A Receber:</strong> ${aReceber.textContent}</p>
-                        <p class="mb-1"><strong>A Pagar:</strong> ${aPagar.textContent}</p>
-                        <p class="mb-1"><strong>Atrasados:</strong> ${atrasados.textContent}</p>
-                    </div>
-                </div>
-                <hr>
-                <h6>Análise Financeira</h6>
-                <p>Total de Movimentações: ${movimentacoes.length}</p>
-                <p>Receitas/Despesas: ${calcularProporcao()}</p>
-                <p>Status: ${calcularStatusFinanceiro()}</p>
-            `;
-            
-            preview.innerHTML = html;
-        }
-
-        function calcularProporcao() {
-            const receitas = movimentacoes.filter(m => m.tipo === 'receita').length;
-            const despesas = movimentacoes.filter(m => m.tipo === 'despesa').length;
-            const total = receitas + despesas;
-            
-            if (total === 0) return '0/0';
-            
-            const percentReceitas = Math.round((receitas / total) * 100);
-            const percentDespesas = Math.round((despesas / total) * 100);
-            
-            return `${percentReceitas}% / ${percentDespesas}%`;
-        }
-
-        function calcularStatusFinanceiro() {
-            const saldo = parseFloat(saldoAtual.textContent.replace(/[^\d.,]/g, '').replace(',', '.'));
-            
-            if (saldo > 0) {
-                return '<span class="text-success">Saudável</span>';
-            } else if (saldo < 0) {
-                return '<span class="text-danger">Preocupante</span>';
-            } else {
-                return '<span class="text-warning">Equilibrado</span>';
-            }
-        }
-
-        window.gerarRelatorioCompleto = function() {
-            exportarPDF();
-        };
-
-        window.gerarRelatorioSimples = function() {
-            const hoje = new Date();
-            const relatorio = `
-                RELATÓRIO FINANCEIRO RESUMIDO
-                Data: ${hoje.toLocaleDateString('pt-BR')}
-                
-                RESUMO:
-                - Saldo Atual: ${saldoAtual.textContent}
-                - Receitas do Mês: ${receitaMes.textContent}
-                - Despesas do Mês: ${despesaMes.textContent}
-                - Saldo Líquido: ${formatarMoeda(parseFloat(receitaMes.textContent.replace(/[^\d.,]/g, '').replace(',', '.')) - parseFloat(despesaMes.textContent.replace(/[^\d.,]/g, '').replace(',', '.')))}
-                
-                MOVIMENTAÇÕES RECENTES:
-                ${movimentacoes.slice(0, 5).map(m => `• ${formatarData(m.data)} - ${m.descricao} (${formatarMoeda(m.valor)})`).join('\n')}
-                
-                STATUS:
-                - A Receber (7 dias): ${aReceber.textContent}
-                - A Pagar (7 dias): ${aPagar.textContent}
-                - Atrasados: ${atrasados.textContent}
-            `;
-            
-            const blob = new Blob([relatorio], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `relatorio-resumido-${hoje.toISOString().slice(0,10)}.txt`;
-            a.click();
-            
-            showNotification('Relatório resumido gerado com sucesso!', 'success');
-        };
-
-        window.gerarProjecao = function() {
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const receitaMedia = calcularMediaReceitas();
-            const despesaMedia = calcularMediaDespesas();
-            const projecaoSaldo = receitaMedia - despesaMedia;
-            
-            const projecao = `
-                PROJEÇÃO FINANCEIRA - PRÓXIMOS 3 MESES
-                Data da Projeção: ${hoje.toLocaleDateString('pt-BR')}
-                
-                BASE DE CÁLCULO:
-                - Receita Média Mensal: ${formatarMoeda(receitaMedia)}
-                - Despesa Média Mensal: ${formatarMoeda(despesaMedia)}
-                - Saldo Médio Mensal: ${formatarMoeda(projecaoSaldo)}
-                
-                PROJEÇÃO:
-                Mês 1: ${formatarMoeda(projecaoSaldo)}
-                Mês 2: ${formatarMoeda(projecaoSaldo * 2)}
-                Mês 3: ${formatarMoeda(projecaoSaldo * 3)}
-                
-                RECOMENDAÇÕES:
-                ${projecaoSaldo > 0 ? '✓ Continue com o controle atual' : '✗ Considere reduzir despesas ou aumentar receitas'}
-                ${receitaMedia > despesaMedia ? '✓ Sua receita está maior que as despesas' : '✗ Suas despesas estão maiores que as receitas'}
-                
-                OBS: Esta projeção considera apenas a média histórica dos últimos meses.
-            `;
-            
-            const preview = document.getElementById('previewRelatorio');
-            if (preview) {
-                preview.innerHTML = `<pre class="mb-0">${projecao}</pre>`;
-            }
-            
-            showNotification('Projeção gerada com sucesso! Consulte a pré-visualização.', 'success');
-        };
-
-        function calcularMediaReceitas() {
-            const receitas = movimentacoes.filter(m => m.tipo === 'receita');
-            if (receitas.length === 0) return 0;
-            
-            const total = receitas.reduce((sum, m) => sum + (m.valor || 0), 0);
-            return total / 6; // Média dos últimos 6 meses
-        }
-
-        function calcularMediaDespesas() {
-            const despesas = movimentacoes.filter(m => m.tipo === 'despesa');
-            if (despesas.length === 0) return 0;
-            
-            const total = despesas.reduce((sum, m) => sum + (m.valor || 0), 0);
-            return total / 6; // Média dos últimos 6 meses
-        }
 
         // ============================================
         // FUNÇÕES AUXILIARES
@@ -3152,39 +1958,6 @@
                 style: 'currency',
                 currency: 'BRL'
             }).format(valor);
-        }
-
-        function getStatusTexto(status) {
-            const textos = {
-                'pago': 'Pago/Recebido',
-                'pendente': 'Pendente',
-                'atrasado': 'Atrasado'
-            };
-            return textos[status] || status;
-        }
-
-        function getFormaPagamentoTexto(forma) {
-            const formas = {
-                'dinheiro': 'Dinheiro',
-                'pix': 'PIX',
-                'cartao_credito': 'Cartão de Crédito',
-                'cartao_debito': 'Cartão de Débito',
-                'boleto': 'Boleto',
-                'transferencia': 'Transferência',
-                'outros': 'Outros'
-            };
-            return formas[forma] || forma || '--';
-        }
-
-        function getRecorrenciaTexto(recorrencia) {
-            const textos = {
-                'unica': 'Única',
-                'semanal': 'Semanal',
-                'mensal': 'Mensal',
-                'trimestral': 'Trimestral',
-                'anual': 'Anual'
-            };
-            return textos[recorrencia] || recorrencia || 'Única';
         }
 
         function getUltimos6Meses() {
@@ -3228,7 +2001,6 @@
             filterTipo.addEventListener('change', atualizarTabelaMovimentacoes);
             filterStatus.addEventListener('change', atualizarTabelaMovimentacoes);
             filterMes.addEventListener('change', atualizarTabelaMovimentacoes);
-            filterCategoria.addEventListener('change', atualizarTabelaMovimentacoes);
             
             // Menu mobile
             menuToggle.addEventListener('click', () => {
@@ -3261,45 +2033,12 @@
             });
             
             // Botões de tipo no modal
-            tipoMovBtns.forEach(btn => {
+            document.querySelectorAll('.tipo-mov-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    tipoMovBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tipo-mov-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    const tipo = this.getAttribute('data-tipo');
-                    tipoMovimentacao.value = tipo;
-                    
-                    // Mostrar/ocultar campos específicos
-                    if (tipo === 'despesa') {
-                        despesaFields.style.display = 'block';
-                        receitaFields.style.display = 'none';
-                    } else {
-                        despesaFields.style.display = 'none';
-                        receitaFields.style.display = 'block';
-                    }
-                    
-                    // Atualizar categorias no select
-                    atualizarSelectCategorias(tipo);
+                    document.getElementById('tipoMovimentacao').value = this.getAttribute('data-tipo');
                 });
-            });
-            
-            // Evento quando o modal é fechado
-            const modalElement = document.getElementById('modalMovimentacao');
-            modalElement.addEventListener('hidden.bs.modal', function () {
-                // Reabilitar campos se estavam desabilitados
-                const inputs = formMovimentacao.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    input.disabled = false;
-                });
-                
-                // Reabilitar botões de tipo
-                tipoMovBtns.forEach(btn => {
-                    btn.disabled = false;
-                });
-                
-                // Restaurar botão salvar
-                const btnSalvar = document.getElementById('btnSalvarMovimentacao');
-                btnSalvar.textContent = 'Salvar';
-                btnSalvar.onclick = salvarMovimentacao;
             });
         }
 
@@ -3315,29 +2054,8 @@
             
             if (vencimento) {
                 vencimento.value = hoje;
-                vencimento.min = hoje;
-            }
-            
-            // Configurar valor mínimo para campos numéricos
-            const valorInput = document.getElementById('valor');
-            if (valorInput) {
-                valorInput.min = '0.01';
-                valorInput.step = '0.01';
             }
         }
-
-        // ============================================
-        // FUNÇÕES GLOBAIS PARA O HTML
-        // ============================================
-
-        window.aplicarFiltros = function() {
-            atualizarTabelaMovimentacoes();
-        };
-
-        // Inicializar quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Sistema Financeiro ScanHub carregado');
-        });
 
     </script>
 </body>
