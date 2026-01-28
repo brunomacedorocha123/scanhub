@@ -1580,8 +1580,8 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Script Principal -->
-    <script type="module">
+   <!-- Script Principal -->
+<script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
@@ -1601,7 +1601,8 @@
         query,
         where,
         orderBy,
-        serverTimestamp
+        serverTimestamp,
+        getCountFromServer
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     // Firebase Config
@@ -1633,6 +1634,15 @@
     let tagsPublicas = [];
     let materiaisServico = [];
 
+    // ============== VARIÁVEIS DE LIMITES ==============
+    let planoUsuario = 'free';
+    let limiteServicos = 5;
+    let limiteProdutos = 5;
+    let limiteTotalCatalogo = 10;
+    let servicosAtuais = 0;
+    let produtosAtuais = 0;
+    let totalCatalogoAtual = 0;
+
     // ============================================
     // ELEMENTOS DOM - MODIFICADOS PARA NOVA ESTRUTURA
     // ============================================
@@ -1643,6 +1653,14 @@
     const btnLogout = document.getElementById('btnLogout');
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // ============== NOVO: ELEMENTOS DE LIMITES ==============
+    const alertLimiteCatalogo = document.getElementById('alertLimiteCatalogo');
+    const limiteTexto = document.getElementById('limiteTexto');
+    const btnUpgradeCatalogo = document.getElementById('btnUpgradeCatalogo');
+    const statsLimiteServicos = document.getElementById('statsLimiteServicos');
+    const statsLimiteProdutos = document.getElementById('statsLimiteProdutos');
+    const statsLimiteTotal = document.getElementById('statsLimiteTotal');
     
     // Elementos das abas
     const catalogoTabs = document.getElementById('catalogoTabs');
@@ -1752,6 +1770,171 @@
         alert(mensagem);
     }
 
+    // ============== NOVAS FUNÇÕES DE LIMITES ==============
+    function configurarLimitesPorPlano(plano) {
+        const planoNormalizado = plano.toLowerCase().trim();
+        
+        switch(planoNormalizado) {
+            case 'básico':
+            case 'basic':
+                limiteServicos = 20;
+                limiteProdutos = 20;
+                limiteTotalCatalogo = 40;
+                planoUsuario = 'basic';
+                break;
+                
+            case 'profissional':
+            case 'pro':
+                limiteServicos = 100;
+                limiteProdutos = 100;
+                limiteTotalCatalogo = 200;
+                planoUsuario = 'pro';
+                break;
+                
+            case 'enterprise':
+                limiteServicos = 500;
+                limiteProdutos = 500;
+                limiteTotalCatalogo = 1000;
+                planoUsuario = 'enterprise';
+                break;
+                
+            default: // free
+                limiteServicos = 5;
+                limiteProdutos = 5;
+                limiteTotalCatalogo = 10;
+                planoUsuario = 'free';
+        }
+        
+        console.log(`Plano detectado: ${planoNormalizado}`);
+        console.log(`Limites: Serviços=${limiteServicos}, Produtos=${limiteProdutos}, Total=${limiteTotalCatalogo}`);
+    }
+
+    async function verificarLimitesUsuario() {
+        try {
+            // Contar serviços
+            const servicosQuery = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", currentUser.uid)
+            );
+            const servicosCount = await getCountFromServer(servicosQuery);
+            servicosAtuais = servicosCount.data().count;
+            
+            // Contar produtos
+            const produtosQuery = query(
+                collection(db, "produtos"),
+                where("profissionalId", "==", currentUser.uid)
+            );
+            const produtosCount = await getCountFromServer(produtosQuery);
+            produtosAtuais = produtosCount.data().count;
+            
+            totalCatalogoAtual = servicosAtuais + produtosAtuais;
+            
+            // Atualizar interface de limites
+            atualizarDisplayLimites();
+            
+        } catch (error) {
+            console.error('Erro ao verificar limites:', error);
+            // Em caso de erro, usar valores locais
+            servicosAtuais = servicos.length;
+            produtosAtuais = produtos.length;
+            totalCatalogoAtual = servicosAtuais + produtosAtuais;
+        }
+    }
+
+    function atualizarDisplayLimites() {
+        if (!alertLimiteCatalogo || !limiteTexto) return;
+        
+        // Verificar se atingiu limite
+        let atingiuLimite = false;
+        let mensagem = '';
+        
+        if (planoUsuario !== 'enterprise') {
+            const percentualServicos = Math.round((servicosAtuais / limiteServicos) * 100);
+            const percentualProdutos = Math.round((produtosAtuais / limiteProdutos) * 100);
+            const percentualTotal = Math.round((totalCatalogoAtual / limiteTotalCatalogo) * 100);
+            
+            // Verificar qual limite está mais crítico
+            if (percentualTotal >= 80) {
+                atingiuLimite = true;
+                mensagem = `Catálogo: ${totalCatalogoAtual}/${limiteTotalCatalogo} itens (${percentualTotal}% usado)`;
+            } else if (percentualServicos >= 80) {
+                atingiuLimite = true;
+                mensagem = `Serviços: ${servicosAtuais}/${limiteServicos} (${percentualServicos}% usado)`;
+            } else if (percentualProdutos >= 80) {
+                atingiuLimite = true;
+                mensagem = `Produtos: ${produtosAtuais}/${limiteProdutos} (${percentualProdutos}% usado)`;
+            }
+            
+            // Atualizar alerta
+            if (atingiuLimite && alertLimiteCatalogo) {
+                alertLimiteCatalogo.style.display = 'block';
+                limiteTexto.textContent = mensagem;
+                
+                // Colorir alerta baseado na porcentagem
+                if (percentualTotal >= 90) {
+                    alertLimiteCatalogo.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                } else {
+                    alertLimiteCatalogo.style.background = 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)';
+                }
+            } else if (alertLimiteCatalogo) {
+                alertLimiteCatalogo.style.display = 'none';
+            }
+            
+            // Atualizar stats
+            if (statsLimiteServicos) {
+                statsLimiteServicos.textContent = `${servicosAtuais}/${limiteServicos}`;
+                statsLimiteServicos.style.color = percentualServicos >= 80 ? '#e74c3c' : '#27ae60';
+            }
+            
+            if (statsLimiteProdutos) {
+                statsLimiteProdutos.textContent = `${produtosAtuais}/${limiteProdutos}`;
+                statsLimiteProdutos.style.color = percentualProdutos >= 80 ? '#e74c3c' : '#27ae60';
+            }
+            
+            if (statsLimiteTotal) {
+                statsLimiteTotal.textContent = `${totalCatalogoAtual}/${limiteTotalCatalogo}`;
+                statsLimiteTotal.style.color = percentualTotal >= 80 ? '#e74c3c' : '#27ae60';
+            }
+        } else {
+            // Enterprise - sem limites visíveis
+            if (alertLimiteCatalogo) alertLimiteCatalogo.style.display = 'none';
+            if (statsLimiteServicos) statsLimiteServicos.textContent = `${servicosAtuais}/Ilimitado`;
+            if (statsLimiteProdutos) statsLimiteProdutos.textContent = `${produtosAtuais}/Ilimitado`;
+            if (statsLimiteTotal) statsLimiteTotal.textContent = `${totalCatalogoAtual}/Ilimitado`;
+        }
+    }
+
+    function verificarPodeAdicionarItem(tipo) {
+        if (planoUsuario === 'enterprise') {
+            return { podeCriar: true, motivo: '' };
+        }
+        
+        if (tipo === 'servico') {
+            if (servicosAtuais >= limiteServicos) {
+                return {
+                    podeCriar: false,
+                    motivo: `❌ LIMITE DE SERVIÇOS ATINGIDO!\n\nPlano: ${planoUsuario.toUpperCase()}\nLimite: ${limiteServicos} serviços\nAtuais: ${servicosAtuais}\n\nFaça upgrade para adicionar mais serviços.`
+                };
+            }
+        } else if (tipo === 'produto') {
+            if (produtosAtuais >= limiteProdutos) {
+                return {
+                    podeCriar: false,
+                    motivo: `❌ LIMITE DE PRODUTOS ATINGIDO!\n\nPlano: ${planoUsuario.toUpperCase()}\nLimite: ${limiteProdutos} produtos\nAtuais: ${produtosAtuais}\n\nFaça upgrade para adicionar mais produtos.`
+                };
+            }
+        }
+        
+        if (totalCatalogoAtual >= limiteTotalCatalogo) {
+            return {
+                podeCriar: false,
+                motivo: `❌ LIMITE TOTAL DO CATÁLOGO ATINGIDO!\n\nPlano: ${planoUsuario.toUpperCase()}\nLimite: ${limiteTotalCatalogo} itens\nAtuais: ${totalCatalogoAtual}\n\nFaça upgrade para adicionar mais itens.`
+            };
+        }
+        
+        return { podeCriar: true, motivo: '' };
+    }
+
     // Upload Imgur - MESMO CÓDIGO DO PERFIL
     async function uploadParaImgur(arquivo) {
         showLoading();
@@ -1829,7 +2012,7 @@
     }
 
     // ============================================
-    // INICIALIZAÇÃO DO SISTEMA - MANTIDO INTACTO
+    // INICIALIZAÇÃO DO SISTEMA - COM LIMITES
     // ============================================
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -1842,7 +2025,16 @@
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
+                    
+                    // ============== CONFIGURAR LIMITES ==============
+                    if (userData.plano_assinatura) {
+                        configurarLimitesPorPlano(userData.plano_assinatura);
+                    } else {
+                        configurarLimitesPorPlano('free');
+                    }
+                    
                     await carregarCatalogo();
+                    await verificarLimitesUsuario(); // Verificar limites reais
                     carregarCategorias(); 
                     inicializarSistema();
                 }
@@ -1883,6 +2075,13 @@
         
         // Inicializar tags system
         inicializarTagsSystem();
+        
+        // Botão upgrade
+        if (btnUpgradeCatalogo) {
+            btnUpgradeCatalogo.addEventListener('click', () => {
+                window.location.href = 'assinatura.html';
+            });
+        }
     }
 
     // ============================================
@@ -2320,9 +2519,19 @@
     }
 
     // ============================================
-    // CRUD - CREATE, READ, UPDATE, DELETE - MANTIDO INTACTO
+    // CRUD - CREATE, READ, UPDATE, DELETE
+    // COM VERIFICAÇÃO DE LIMITES
     // ============================================
     window.abrirModalItem = function(tipo = 'servico', itemId = null) {
+        // ============== VERIFICAÇÃO DE LIMITES ==============
+        if (!itemId) { // Só verifica limite se for criar novo
+            const verificacaoLimite = verificarPodeAdicionarItem(tipo);
+            if (!verificacaoLimite.podeCriar) {
+                showAlert(verificacaoLimite.motivo, 'error');
+                return;
+            }
+        }
+        
         resetarModal();
         
         if (itemId) {
@@ -2610,9 +2819,13 @@
                 // Adicionar localmente
                 if (tipo === 'servico') {
                     servicos.unshift(dadosCompletos);
+                    servicosAtuais++;
                 } else {
                     produtos.unshift(dadosCompletos);
+                    produtosAtuais++;
                 }
+                
+                totalCatalogoAtual = servicosAtuais + produtosAtuais;
                 
                 showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} criado com sucesso!`, 'success');
             }
@@ -2624,6 +2837,7 @@
             // Atualizar interface
             atualizarContadores();
             atualizarGridCatalogo();
+            atualizarDisplayLimites(); // Atualizar limites
             
         } catch (error) {
             console.error('Erro ao salvar item:', error);
@@ -2658,11 +2872,20 @@
             const index = lista.findIndex(item => item.id === id);
             if (index !== -1) {
                 lista.splice(index, 1);
+                
+                // Atualizar contadores
+                if (tipo === 'servico') {
+                    servicosAtuais = Math.max(0, servicosAtuais - 1);
+                } else {
+                    produtosAtuais = Math.max(0, produtosAtuais - 1);
+                }
+                totalCatalogoAtual = servicosAtuais + produtosAtuais;
             }
             
             // Atualizar interface
             atualizarContadores();
             atualizarGridCatalogo();
+            atualizarDisplayLimites(); // Atualizar limites
             
             showAlert(`${tipo === 'servico' ? 'Serviço' : 'Produto'} excluído com sucesso!`, 'success');
             
@@ -2851,7 +3074,7 @@
     }
 
     // ============================================
-    // EVENT LISTENERS - ATUALIZADO PARA NOVO MENU MOBILE
+    // EVENT LISTENERS - ATUALIZADO
     // ============================================
     function inicializarEventListeners() {
         // Botão salvar
@@ -2872,7 +3095,7 @@
             filterStatus.addEventListener('change', atualizarGridCatalogo);
         }
         
-        // Menu mobile - NOVO CÓDIGO
+        // Menu mobile
         if (menuToggle) {
             menuToggle.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -2890,7 +3113,7 @@
             });
         }
         
-        // Fechar menu ao clicar fora - NOVO CÓDIGO
+        // Fechar menu ao clicar fora
         document.addEventListener('click', (e) => {
             if (dashboardMenu && menuToggle) {
                 if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
