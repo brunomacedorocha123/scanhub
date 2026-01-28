@@ -21,6 +21,7 @@
         :root {
             --primary-color: #44689a;
             --secondary-color: #FF6B35;
+            --success-color: #27ae60;
             --light-color: #e8ecef;
             --dark-color: #2c3e50;
             --white: #ffffff;
@@ -41,13 +42,39 @@
             padding-top: 80px;
         }
 
+        /* Banner Sandbox */
+        .sandbox-banner {
+            background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: 600;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            box-shadow: 0 3px 10px rgba(255, 107, 53, 0.3);
+        }
+
+        .sandbox-banner i {
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
         /* Navbar */
         .navbar-checkout {
             background: white;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             padding: 15px 0;
             position: fixed;
-            top: 0;
+            top: 40px;
             left: 0;
             right: 0;
             z-index: 1000;
@@ -95,6 +122,7 @@
             height: fit-content;
             position: sticky;
             top: 100px;
+            border: 2px solid var(--primary-color);
         }
 
         .resumo-header {
@@ -141,22 +169,22 @@
         }
 
         .recursos-lista i {
-            color: #27ae60;
+            color: var(--success-color);
             margin-right: 10px;
             font-size: 1.2rem;
             min-width: 24px;
         }
 
-        .info-teste {
-            background: #e8f4ff;
-            border-left: 4px solid var(--primary-color);
+        .aviso-sandbox {
+            background: rgba(255, 107, 53, 0.1);
+            border-left: 4px solid var(--secondary-color);
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
         }
 
-        .info-teste i {
-            color: var(--primary-color);
+        .aviso-sandbox i {
+            color: var(--secondary-color);
             margin-right: 10px;
         }
 
@@ -196,8 +224,8 @@
         .passo-numero {
             width: 40px;
             height: 40px;
-            background: #e0e0e0;
-            color: #666;
+            background: var(--primary-color);
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -210,6 +238,7 @@
         .passo.ativo .passo-numero {
             background: var(--secondary-color);
             color: white;
+            transform: scale(1.1);
         }
 
         .passo-texto {
@@ -232,43 +261,73 @@
             margin-top: 20px;
         }
 
-        /* Métodos de Pagamento */
-        .metodos-pagamento {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
+        /* Cartão de Teste */
+        .cartao-teste-checkout {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
             margin: 20px 0;
+            position: relative;
+            overflow: hidden;
         }
 
-        .metodo-btn {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .cartao-teste-checkout::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
 
-        .metodo-btn:hover {
-            border-color: var(--primary-color);
-            background: white;
+        .cartao-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        .metodo-btn.ativo {
-            border-color: var(--secondary-color);
-            background: rgba(255, 107, 53, 0.1);
+        .cartao-header i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
         }
 
-        .metodo-btn i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            display: block;
+        .detalhes-cartao-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .metodo-nome {
+        .detalhe-item-checkout {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .detalhe-label-checkout {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .detalhe-valor-checkout {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1rem;
+        }
+
+        .badge-sandbox {
+            background: var(--secondary-color);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 10px;
         }
 
         /* Botões */
@@ -289,6 +348,7 @@
         .btn-voltar:hover {
             background: #e9ecef;
             color: var(--dark-color);
+            transform: translateY(-2px);
         }
 
         .btn-confirmar {
@@ -328,7 +388,7 @@
         }
 
         .seguranca-info i {
-            color: #27ae60;
+            color: var(--success-color);
             font-size: 1.5rem;
         }
 
@@ -410,6 +470,15 @@
                 margin: 0;
                 flex-shrink: 0;
             }
+            
+            .sandbox-banner {
+                font-size: 0.8rem;
+                padding: 8px;
+            }
+            
+            .navbar-checkout {
+                top: 40px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -434,28 +503,109 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .detalhes-cartao-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        /* Avisos */
-        .aviso {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        /* Modal de Usuário de Teste */
+        .modal-teste {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
         }
 
-        .aviso i {
-            color: #f39c12;
-            margin-top: 2px;
+        .modal-teste.hide {
+            display: none;
+        }
+
+        .modal-content-teste {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        .btn-fechar-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .credenciais-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+
+        .credenciais-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-copiar {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .btn-copiar:hover {
+            background: var(--secondary-color);
         }
     </style>
 </head>
 <body>
+    <!-- Banner Sandbox -->
+    <div class="sandbox-banner">
+        <i class="fas fa-flask"></i> AMBIENTE DE DESENVOLVIMENTO - SANDBOX MERCADO PAGO
+    </div>
+
+    <!-- Modal Usuário de Teste -->
+    <div class="modal-teste hide" id="modalTeste">
+        <div class="modal-content-teste">
+            <button class="btn-fechar-modal" onclick="fecharModal()">&times;</button>
+            <h4><i class="fas fa-user-plus"></i> Criar Usuário de Teste</h4>
+            <p>Gere um novo usuário de teste para simular diferentes situações:</p>
+            
+            <div class="credenciais-box" id="credenciaisBox">
+                <p><i class="fas fa-spinner fa-spin"></i> Criando usuário...</p>
+            </div>
+            
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary flex-grow-1" onclick="criarUsuarioTeste()">
+                    <i class="fas fa-plus"></i> Criar Novo Usuário
+                </button>
+                <button class="btn btn-outline-secondary" onclick="fecharModal()">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading -->
     <div class="loader" id="loader">
         <div class="spinner"></div>
@@ -470,7 +620,9 @@
             </a>
             
             <div class="d-flex align-items-center gap-3">
-                <span id="userEmail" class="text-muted d-none d-md-inline">carregando...</span>
+                <button class="btn btn-outline-warning btn-sm" onclick="mostrarModalTeste()">
+                    <i class="fas fa-user-plus"></i> Criar Usuário Teste
+                </button>
                 <a href="assinaturas.html" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-arrow-left"></i> Voltar
                 </a>
@@ -480,12 +632,31 @@
 
     <!-- Conteúdo Principal -->
     <div class="checkout-container">
-        <!-- Aviso de Teste -->
-        <div class="aviso">
-            <i class="fas fa-exclamation-triangle"></i>
-            <div>
-                <strong>MODO TESTE ATIVADO</strong>
-                <p class="mb-0">Você está no ambiente de testes. Use cartões de teste do Mercado Pago. Nenhum valor real será cobrado.</p>
+        <!-- Cartão de Teste -->
+        <div class="cartao-teste-checkout">
+            <div class="cartao-header">
+                <i class="fas fa-credit-card"></i>
+                <h5 class="mb-0">Cartões para Teste <span class="badge-sandbox">SANDBOX</span></h5>
+            </div>
+            <p class="mb-2">Use estes cartões fictícios para simular o pagamento:</p>
+            
+            <div class="detalhes-cartao-grid">
+                <div class="detalhe-item-checkout">
+                    <div class="detalhe-label-checkout">NÚMERO DO CARTÃO</div>
+                    <div class="detalhe-valor-checkout">5031 4332 1540 6351</div>
+                </div>
+                <div class="detalhe-item-checkout">
+                    <div class="detalhe-label-checkout">CVV</div>
+                    <div class="detalhe-valor-checkout">123</div>
+                </div>
+                <div class="detalhe-item-checkout">
+                    <div class="detalhe-label-checkout">VALIDADE</div>
+                    <div class="detalhe-valor-checkout">11/2025</div>
+                </div>
+                <div class="detalhe-item-checkout">
+                    <div class="detalhe-label-checkout">RESULTADO</div>
+                    <div class="detalhe-valor-checkout">APRO = Aprovado</div>
+                </div>
             </div>
         </div>
 
@@ -502,22 +673,22 @@
                     <!-- Preenchido por JavaScript -->
                 </ul>
 
-                <div class="info-teste">
+                <div class="aviso-sandbox">
                     <div class="d-flex align-items-start">
-                        <i class="fas fa-gift"></i>
+                        <i class="fas fa-info-circle"></i>
                         <div>
-                            <strong>7 DIAS DE TESTE POR R$ 1,00</strong>
-                            <p class="mb-0 small">Pague apenas R$ 1,00 para testar por 7 dias. Depois, R$ <span id="valorNormal">59,90</span>/mês. Cancele quando quiser.</p>
+                            <strong>AMBIENTE DE TESTES</strong>
+                            <p class="mb-0 small">Este é um pagamento simulado no sandbox. Use os cartões de teste acima. Nenhum valor real será cobrado.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <h6 class="mb-3">O que está incluído:</h6>
+                    <h6 class="mb-3">Benefícios incluídos:</h6>
                     <ul class="list-unstyled">
                         <li><i class="fas fa-check text-success me-2"></i> Cancelamento a qualquer momento</li>
                         <li><i class="fas fa-check text-success me-2"></i> Sem taxas escondidas</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Suporte 24/7</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Suporte dedicado</li>
                         <li><i class="fas fa-check text-success me-2"></i> Atualizações gratuitas</li>
                     </ul>
                 </div>
@@ -541,10 +712,11 @@
                     </div>
                 </div>
 
-                <h4 class="mb-4">Escolha como pagar</h4>
+                <h4 class="mb-4">Finalize sua assinatura</h4>
                 
                 <!-- Container do Mercado Pago -->
                 <div class="mp-container">
+                    <p class="text-muted mb-3">Escolha como deseja pagar:</p>
                     <div id="wallet_container"></div>
                 </div>
 
@@ -553,7 +725,7 @@
                     <i class="fas fa-shield-alt"></i>
                     <div>
                         <strong>Pagamento 100% seguro</strong>
-                        <p class="mb-0 small">Seus dados estão protegidos com criptografia SSL. Processado pelo Mercado Pago.</p>
+                        <p class="mb-0 small">Ambiente de testes sandbox. Processado pelo Mercado Pago.</p>
                     </div>
                 </div>
 
@@ -566,7 +738,6 @@
                     <div class="d-flex gap-3">
                         <button class="btn-confirmar" id="btnPagar" disabled>
                             <i class="fas fa-lock"></i> Finalizar Assinatura
-                            <span id="valorBtn">-</span>
                         </button>
                     </div>
                 </div>
@@ -578,7 +749,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
         // Firebase Config
         const firebaseConfig = {
@@ -600,10 +771,9 @@
         const planoPreco = document.getElementById('planoPreco');
         const planoPeriodo = document.getElementById('planoPeriodo');
         const recursosLista = document.getElementById('recursosLista');
-        const valorNormal = document.getElementById('valorNormal');
-        const valorBtn = document.getElementById('valorBtn');
-        const userEmail = document.getElementById('userEmail');
         const btnPagar = document.getElementById('btnPagar');
+        const modalTeste = document.getElementById('modalTeste');
+        const credenciaisBox = document.getElementById('credenciaisBox');
 
         // IDs dos planos no Mercado Pago Sandbox
         // ATENÇÃO: Você precisa criar esses planos no Sandbox e colocar os IDs reais aqui
@@ -613,12 +783,11 @@
             enterprise: '2c938084726fca240172757a51ff006d' // ID do plano Enterprise no Sandbox
         };
 
-        // Informações dos planos
+        // Informações dos planos (PREÇOS REAIS)
         const planosInfo = {
             basic: {
                 nome: 'BASIC',
-                precoTeste: '1.00',
-                precoNormal: '29.90',
+                preco: '29,90',
                 recursos: [
                     'Pedidos Ilimitados',
                     'Agenda Completa',
@@ -630,8 +799,7 @@
             },
             pro: {
                 nome: 'PROFESSIONAL',
-                precoTeste: '1.00',
-                precoNormal: '59.90',
+                preco: '59,90',
                 recursos: [
                     'Tudo do BASIC +',
                     'Até 1.000 Clientes',
@@ -643,8 +811,7 @@
             },
             enterprise: {
                 nome: 'ENTERPRISE',
-                precoTeste: '1.00',
-                precoNormal: '99.90',
+                preco: '99,90',
                 recursos: [
                     'Tudo do PROFESSIONAL +',
                     'Clientes Ilimitados',
@@ -670,7 +837,6 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     userData = user;
-                    userEmail.textContent = user.email;
                     await carregarPlano();
                     inicializarMercadoPago();
                 } else {
@@ -689,10 +855,8 @@
 
             // Atualizar interface
             planoNome.textContent = plano.nome;
-            planoPreco.textContent = `R$ ${plano.precoTeste}`;
-            planoPeriodo.textContent = 'nos primeiros 7 dias';
-            valorNormal.textContent = plano.precoNormal;
-            valorBtn.textContent = `R$ ${plano.precoTeste}`;
+            planoPreco.textContent = `R$ ${plano.preco}`;
+            planoPeriodo.textContent = 'por mês';
 
             // Adicionar recursos
             recursosLista.innerHTML = '';
@@ -710,19 +874,25 @@
 
         // Inicializar Mercado Pago
         function inicializarMercadoPago() {
-            // SUA PUBLIC KEY DO SANDBOX (a que você tem: TEST-7212078d...)
+            // SUA PUBLIC KEY DO SANDBOX (TEST-7212078d...)
             const publicKey = 'TEST-7212078d-c1a3-424f-b3de-192dd48bdcbd';
             
             mpInstance = new MercadoPago(publicKey, {
                 locale: 'pt-BR'
             });
 
+            // Verificar se o plano existe no objeto
+            if (!planosMP[planoSelecionado]) {
+                alert('Plano não configurado. Entre em contato com o suporte.');
+                return;
+            }
+
             // Criar o wallet (botão de pagamento)
             mpInstance.checkout({
                 preference: {
                     id: planosMP[planoSelecionado]
                 },
-                autoOpen: true, // Abre automaticamente
+                autoOpen: false,
                 render: {
                     container: '#wallet_container',
                     label: 'Pagar com Mercado Pago'
@@ -731,26 +901,108 @@
 
             // Habilitar botão de pagamento
             btnPagar.disabled = false;
-            btnPagar.innerHTML = `<i class="fas fa-lock"></i> Finalizar Assinatura - R$ ${planosInfo[planoSelecionado].precoTeste}`;
+            btnPagar.innerHTML = `<i class="fas fa-lock"></i> Finalizar Assinatura - R$ ${planosInfo[planoSelecionado].preco}`;
+            
+            // Adicionar evento ao botão
+            btnPagar.addEventListener('click', () => {
+                // Abrir checkout do MP
+                document.querySelector('#wallet_container button').click();
+            });
         }
 
-        // Botão de pagamento personalizado
-        btnPagar.addEventListener('click', async () => {
+        // Modal de usuário de teste
+        window.mostrarModalTeste = function() {
+            modalTeste.classList.remove('hide');
+            criarUsuarioTeste(); // Criar automaticamente ao abrir modal
+        };
+
+        window.fecharModal = function() {
+            modalTeste.classList.add('hide');
+        };
+
+        // Criar usuário de teste via API
+        async function criarUsuarioTeste() {
             try {
-                btnPagar.disabled = true;
-                btnPagar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+                credenciaisBox.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Criando usuário de teste...</p>';
+                
+                // SUA ACCESS TOKEN DO SANDBOX
+                const accessToken = 'TEST-8505030648459314-012809-308028c845daf1965da62f398b2b794d-1057080095';
+                
+                const response = await fetch('https://api.mercadopago.com/users/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        site_id: 'MLB',
+                        description: `Usuário teste ScanHub - ${new Date().toLocaleString()}`
+                    })
+                });
 
-                // Aqui você pode adicionar lógica adicional antes do pagamento
-                // Por exemplo, criar um documento temporário no Firestore
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
 
-                // Redirecionar para o fluxo normal do MP
-                window.location.href = `https://sandbox.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=${planosMP[planoSelecionado]}`;
-
+                const data = await response.json();
+                
+                // Formatar credenciais
+                const email = data.email || `test_user_${data.id}@testuser.com`;
+                const password = data.password || 'qatest1234';
+                
+                credenciaisBox.innerHTML = `
+                    <div class="credenciais-item">
+                        <span>Email:</span>
+                        <span>${email}</span>
+                        <button class="btn-copiar" onclick="copiarTexto('${email}')">Copiar</button>
+                    </div>
+                    <div class="credenciais-item">
+                        <span>Senha:</span>
+                        <span>${password}</span>
+                        <button class="btn-copiar" onclick="copiarTexto('${password}')">Copiar</button>
+                    </div>
+                    <div class="credenciais-item">
+                        <span>ID:</span>
+                        <span>${data.id}</span>
+                        <button class="btn-copiar" onclick="copiarTexto('${data.id}')">Copiar</button>
+                    </div>
+                    <div class="mt-3">
+                        <p class="mb-1 small"><strong>Como usar:</strong></p>
+                        <p class="mb-0 small">1. Faça logout do sistema atual</p>
+                        <p class="mb-0 small">2. Faça login com essas credenciais</p>
+                        <p class="mb-0 small">3. Teste o fluxo completo de assinatura</p>
+                    </div>
+                `;
+                
             } catch (error) {
-                console.error('Erro:', error);
-                btnPagar.disabled = false;
-                btnPagar.innerHTML = '<i class="fas fa-lock"></i> Tentar novamente';
-                alert('Erro ao processar pagamento. Tente novamente.');
+                console.error('Erro ao criar usuário:', error);
+                credenciaisBox.innerHTML = `
+                    <div class="alert alert-danger">
+                        <p><strong>Erro ao criar usuário:</strong></p>
+                        <p class="mb-0">${error.message}</p>
+                        <p class="mt-2 mb-0 small">
+                            Use estas credenciais padrão:<br>
+                            Email: test_user_123456@testuser.com<br>
+                            Senha: qatest1234
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para copiar texto
+        window.copiarTexto = function(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('Copiado para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+            });
+        };
+
+        // Fechar modal ao clicar fora
+        modalTeste.addEventListener('click', (e) => {
+            if (e.target === modalTeste) {
+                fecharModal();
             }
         });
 
