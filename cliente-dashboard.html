@@ -282,6 +282,136 @@
             cursor: pointer;
         }
 
+        /* ===== NOVO: CARD DE LIMITES ===== */
+        .limites-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+            display: none;
+        }
+
+        .limites-card.mostrar {
+            display: block;
+        }
+
+        .limite-titulo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .limite-titulo i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .plano-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .plano-badge-basic {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .plano-badge-pro {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+        }
+
+        .plano-badge-enterprise {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+        }
+
+        .plano-badge-free {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+        }
+
+        .limite-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .limite-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .limite-bar-container {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+
+        .limite-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .limite-bar.baixo {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        }
+
+        .limite-bar.medio {
+            background: linear-gradient(90deg, #FF9800, #FFC107);
+        }
+
+        .limite-bar.alto {
+            background: linear-gradient(90deg, #F44336, #EF5350);
+        }
+
+        .limite-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .limite-upgrade {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+            color: white;
+        }
+
         /* Responsivo - MOBILE FIRST */
         @media (max-width: 1200px) {
             .navbar-brand-dashboard {
@@ -406,6 +536,10 @@
             }
             
             .content-area {
+                padding: 15px;
+            }
+            
+            .limites-card {
                 padding: 15px;
             }
         }
@@ -587,6 +721,53 @@
             <p id="welcomeText">Gerencie seus serviços e encontre os melhores profissionais</p>
         </div>
 
+        <!-- ===== NOVO: CARD DE LIMITES ===== -->
+        <div class="limites-card" id="limitesCard">
+            <div class="limite-titulo">
+                <i class="fas fa-chart-line"></i>
+                <h4 class="mb-0">Seus Limites</h4>
+            </div>
+            
+            <div id="planoBadgeContainer">
+                <!-- Badge será inserido aqui -->
+            </div>
+            
+            <div class="limite-item">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Clientes</span>
+                    <span><strong id="clientesAtual">0</strong> / <span id="clientesLimite">0</span></span>
+                </div>
+                <div class="limite-bar-container">
+                    <div class="limite-bar baixo" id="clientesBar" style="width: 0%"></div>
+                </div>
+                <div class="limite-info">
+                    <span id="clientesStatus">Usando 0%</span>
+                    <span id="clientesRestantes">Restam 0</span>
+                </div>
+            </div>
+            
+            <div class="limite-item">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Catálogo (produtos + serviços)</span>
+                    <span><strong id="catalogoAtual">0</strong> / <span id="catalogoLimite">0</span></span>
+                </div>
+                <div class="limite-bar-container">
+                    <div class="limite-bar baixo" id="catalogoBar" style="width: 0%"></div>
+                </div>
+                <div class="limite-info">
+                    <span id="catalogoStatus">Usando 0%</span>
+                    <span id="catalogoRestantes">Restam 0</span>
+                </div>
+            </div>
+            
+            <div class="limite-upgrade">
+                <a href="assinatura.html" class="btn-upgrade" id="btnUpgrade">
+                    <i class="fas fa-crown"></i> UPGRADE DE PLANO
+                </a>
+                <p class="text-muted mt-2 mb-0 small">Aumente seus limites fazendo upgrade</p>
+            </div>
+        </div>
+
         <!-- Stats Overview -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -706,7 +887,12 @@
         import { 
             getFirestore, 
             doc, 
-            getDoc
+            getDoc,
+            collection,
+            query,
+            where,
+            getCountFromServer,
+            getDocs
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
         // Firebase Config
@@ -743,6 +929,21 @@
         const totalFavoritos = document.getElementById('totalFavoritos');
         const totalNotificacoes = document.getElementById('totalNotificacoes');
 
+        // Elementos do card de limites
+        const limitesCard = document.getElementById('limitesCard');
+        const planoBadgeContainer = document.getElementById('planoBadgeContainer');
+        const clientesAtual = document.getElementById('clientesAtual');
+        const clientesLimite = document.getElementById('clientesLimite');
+        const clientesBar = document.getElementById('clientesBar');
+        const clientesStatus = document.getElementById('clientesStatus');
+        const clientesRestantes = document.getElementById('clientesRestantes');
+        const catalogoAtual = document.getElementById('catalogoAtual');
+        const catalogoLimite = document.getElementById('catalogoLimite');
+        const catalogoBar = document.getElementById('catalogoBar');
+        const catalogoStatus = document.getElementById('catalogoStatus');
+        const catalogoRestantes = document.getElementById('catalogoRestantes');
+        const btnUpgrade = document.getElementById('btnUpgrade');
+
         // Botões de ação
         const btnBuscarProfissionais = document.getElementById('btnBuscarProfissionais');
         const btnNovoPedido = document.getElementById('btnNovoPedido');
@@ -750,6 +951,141 @@
 
         // Link do perfil
         const linkPerfil = document.getElementById('linkPerfil');
+
+        // Função para criar badge do plano
+        function criarBadgePlano(plano) {
+            // Normalizar o nome do plano (remover acentos)
+            const planoNormalizado = plano.toLowerCase()
+                .replace('básico', 'basic')
+                .replace('profissional', 'pro')
+                .replace('enterprise', 'enterprise')
+                .replace('free', 'free');
+
+            const planos = {
+                'basic': { nome: 'BASIC', classe: 'plano-badge-basic', icone: 'fas fa-gem' },
+                'pro': { nome: 'PROFESSIONAL', classe: 'plano-badge-pro', icone: 'fas fa-crown' },
+                'enterprise': { nome: 'ENTERPRISE', classe: 'plano-badge-enterprise', icone: 'fas fa-rocket' },
+                'free': { nome: 'FREE', classe: 'plano-badge-free', icone: 'fas fa-user' }
+            };
+
+            const infoPlano = planos[planoNormalizado] || planos.free;
+            
+            return `
+                <div class="plano-badge ${infoPlano.classe}">
+                    <i class="${infoPlano.icone}"></i> PLANO ${infoPlano.nome}
+                </div>
+            `;
+        }
+
+        // Função para definir limites por plano
+        function getLimitesPlano(plano) {
+            const planoNormalizado = plano.toLowerCase()
+                .replace('básico', 'basic')
+                .replace('profissional', 'pro')
+                .replace('enterprise', 'enterprise')
+                .replace('free', 'free');
+
+            const limites = {
+                'free': { clientes: 3, catalogo: 5 },
+                'basic': { clientes: 100, catalogo: 20 },
+                'pro': { clientes: 1000, catalogo: 100 },
+                'enterprise': { clientes: 999999, catalogo: 500 }
+            };
+
+            return limites[planoNormalizado] || limites.free;
+        }
+
+        // Função para atualizar barra de progresso
+        function atualizarBarra(elemento, porcentagem) {
+            elemento.style.width = `${porcentagem}%`;
+            
+            if (porcentagem >= 90) {
+                elemento.className = 'limite-bar alto';
+            } else if (porcentagem >= 70) {
+                elemento.className = 'limite-bar medio';
+            } else {
+                elemento.className = 'limite-bar baixo';
+            }
+        }
+
+        // Função para carregar limites do usuário
+        async function carregarLimitesUsuario(uid, userData) {
+            const tipoUsuario = userData.tipoUsuario || 'cliente';
+            const plano = userData.plano_assinatura || 'free';
+            
+            // Se for cliente, não mostra card de limites
+            if (tipoUsuario === 'cliente') {
+                limitesCard.classList.remove('mostrar');
+                return;
+            }
+            
+            // Mostra card para profissionais
+            limitesCard.classList.add('mostrar');
+            
+            // Atualiza badge do plano
+            planoBadgeContainer.innerHTML = criarBadgePlano(plano);
+            
+            // Busca limites do plano
+            const limites = getLimitesPlano(plano);
+            
+            try {
+                // Contar clientes atuais
+                const clientesRef = collection(db, "clientes");
+                const qClientes = query(clientesRef, where("profissionalId", "==", uid));
+                const clientesSnapshot = await getCountFromServer(qClientes);
+                const totalClientes = clientesSnapshot.data().count;
+                
+                // Contar itens do catálogo (produtos + serviços)
+                const produtosRef = collection(db, "produtos");
+                const qProdutos = query(produtosRef, where("profissionalId", "==", uid));
+                const produtosSnapshot = await getCountFromServer(qProdutos);
+                const totalProdutos = produtosSnapshot.data().count;
+                
+                const servicosRef = collection(db, "servicos");
+                const qServicos = query(servicosRef, where("profissionalId", "==", uid));
+                const servicosSnapshot = await getCountFromServer(qServicos);
+                const totalServicos = servicosSnapshot.data().count;
+                
+                const totalCatalogo = totalProdutos + totalServicos;
+                
+                // Calcular porcentagens
+                const porcentagemClientes = Math.min(100, (totalClientes / limites.clientes) * 100);
+                const porcentagemCatalogo = Math.min(100, (totalCatalogo / limites.catalogo) * 100);
+                
+                // Atualizar interface - CLIENTES
+                clientesAtual.textContent = totalClientes;
+                clientesLimite.textContent = limites.clientes;
+                clientesStatus.textContent = `Usando ${porcentagemClientes.toFixed(1)}%`;
+                clientesRestantes.textContent = `Restam ${Math.max(0, limites.clientes - totalClientes)}`;
+                atualizarBarra(clientesBar, porcentagemClientes);
+                
+                // Atualizar interface - CATÁLOGO
+                catalogoAtual.textContent = totalCatalogo;
+                catalogoLimite.textContent = limites.catalogo;
+                catalogoStatus.textContent = `Usando ${porcentagemCatalogo.toFixed(1)}%`;
+                catalogoRestantes.textContent = `Restam ${Math.max(0, limites.catalogo - totalCatalogo)}`;
+                atualizarBarra(catalogoBar, porcentagemCatalogo);
+                
+                // Esconder botão upgrade se for enterprise
+                if (plano === 'enterprise' || plano === 'enterprise') {
+                    btnUpgrade.style.display = 'none';
+                    document.querySelector('.limite-upgrade p').textContent = 'Plano máximo atingido';
+                }
+                
+            } catch (error) {
+                console.error("Erro ao carregar limites:", error);
+                // Em caso de erro, mostra limites zerados
+                clientesAtual.textContent = '0';
+                clientesLimite.textContent = limites.clientes;
+                clientesStatus.textContent = 'Usando 0%';
+                clientesRestantes.textContent = `Restam ${limites.clientes}`;
+                
+                catalogoAtual.textContent = '0';
+                catalogoLimite.textContent = limites.catalogo;
+                catalogoStatus.textContent = 'Usando 0%';
+                catalogoRestantes.textContent = `Restam ${limites.catalogo}`;
+            }
+        }
 
         // Carregar dados do usuário
         onAuthStateChanged(auth, async (user) => {
@@ -774,6 +1110,9 @@
                         // Inicializar estatísticas
                         inicializarEstatisticas();
                         
+                        // Carregar limites do usuário
+                        await carregarLimitesUsuario(user.uid, userData);
+                        
                         // Esconder loader
                         setTimeout(() => {
                             loader.classList.add('hide');
@@ -783,6 +1122,7 @@
                         loader.classList.add('hide');
                     }
                 } catch (error) {
+                    console.error("Erro ao carregar dados:", error);
                     loader.classList.add('hide');
                 }
             } else {
