@@ -1235,8 +1235,10 @@
     let userData = null;
     let clientes = [];
     let planoLimite = 50;
-    let tags = ['VIP', 'Recorrente', 'Novo', 'Potencial']; // Tags padrão
-    let segmentosSalvos = []; // Segmentos salvos localmente
+    let tags = ['VIP', 'Recorrente', 'Novo', 'Potencial'];
+    let segmentosSalvos = [];
+
+    // ================== FUNÇÕES PRINCIPAIS ==================
 
     // Carregar dados do usuário
     onAuthStateChanged(auth, async (user) => {
@@ -1249,9 +1251,9 @@
                 if (userDoc.exists()) {
                     userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
-                    verificarPlanoUsuario();
+                    verificarPlanoUsuario(); // Função ATUALIZADA
                     await carregarClientes();
-                    atualizarPreviewCards(); // Atualiza os cards
+                    atualizarPreviewCards();
                 }
             } catch (error) {
                 window.location.href = 'login.html';
@@ -1273,23 +1275,30 @@
         }
     }
 
-    // Verificar plano do usuário
+    // ================== FUNÇÃO ATUALIZADA: Verificar plano do usuário ==================
     function verificarPlanoUsuario() {
-        if (userData && userData.plano) {
-            switch(userData.plano) {
-                case 'premium':
-                    planoLimite = 1000;
-                    limiteClientes.textContent = 'Ilimitado';
-                    break;
-                case 'pro':
-                    planoLimite = 200;
-                    limiteClientes.textContent = '200';
-                    break;
-                case 'basico':
-                default:
-                    planoLimite = 50;
-                    limiteClientes.textContent = '50';
+        if (userData && userData.plano_assinatura) {
+            const plano = userData.plano_assinatura.toLowerCase().trim();
+            
+            if (plano.includes('basic') || plano.includes('básico')) {
+                planoLimite = 100;
+                limiteClientes.textContent = '100';
+            } else if (plano.includes('pro') || plano.includes('profissional')) {
+                planoLimite = 1000;
+                limiteClientes.textContent = '1000';
+            } else if (plano.includes('enterprise')) {
+                planoLimite = 999999;
+                limiteClientes.textContent = 'Ilimitado';
+            } else if (plano.includes('free')) {
+                planoLimite = 3;
+                limiteClientes.textContent = '3';
+            } else {
+                planoLimite = 50;
+                limiteClientes.textContent = '50';
             }
+        } else {
+            planoLimite = 50;
+            limiteClientes.textContent = '50';
         }
     }
 
@@ -1311,14 +1320,13 @@
                 });
             });
             
-            // Ordena por data de criação (mais recente primeiro)
             clientes.sort((a, b) => {
                 return new Date(b.dataCriacao || 0) - new Date(a.dataCriacao || 0);
             });
             
             atualizarTabelaClientes();
             atualizarEstatisticas();
-            verificarLimiteClientes();
+            verificarLimiteClientes(); // Função ATUALIZADA
         } catch (error) {
             // Silencioso
         }
@@ -1421,16 +1429,27 @@
         }
     }
 
-    // Verificar limite de clientes
+    // ================== FUNÇÃO ATUALIZADA: Verificar limite de clientes ==================
     function verificarLimiteClientes() {
+        if (planoLimite === 999999) {
+            // Enterprise - sem limite
+            alertLimite.classList.add('d-none');
+            return;
+        }
+        
         const percentual = Math.round((clientes.length / planoLimite) * 100);
         
-        if (planoLimite !== 1000 && percentual >= 80) {
+        if (percentual >= 80) {
             percentualUso.textContent = `${percentual}%`;
             alertLimite.classList.remove('d-none');
             
             if (percentual >= 95) {
                 alertLimite.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                alertLimite.querySelector('a').textContent = 'FAÇA UPGRADE URGENTE!';
+            } else if (percentual >= 90) {
+                alertLimite.style.background = 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)';
+            } else {
+                alertLimite.style.background = 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)';
             }
         } else {
             alertLimite.classList.add('d-none');
@@ -1444,21 +1463,18 @@
         return date.toLocaleDateString('pt-BR');
     }
 
-    // ================== NOVAS FUNCIONALIDADES ==================
+    // ================== FUNÇÕES DAS NOVAS FUNCIONALIDADES ==================
 
     // Atualizar preview dos cards
     function atualizarPreviewCards() {
-        // Preview das tags
         atualizarPreviewTags();
-        
-        // Preview dos aniversariantes
         atualizarPreviewAniversariantes();
     }
 
-    // 1. FUNCIONALIDADE DE SEGMENTAÇÃO
+    // Segmentação
     function atualizarPreviewTags() {
         tagsPreview.innerHTML = '';
-        const tagsExibicao = tags.slice(0, 3); // Mostra apenas 3 tags no preview
+        const tagsExibicao = tags.slice(0, 3);
         
         tagsExibicao.forEach(tag => {
             const tagElement = document.createElement('span');
@@ -1496,7 +1512,6 @@
         atualizarPreviewTags();
     };
 
-    // Adicionar nova tag
     btnAdicionarTag.addEventListener('click', () => {
         const tag = novaTag.value.trim();
         if (tag && !tags.includes(tag)) {
@@ -1513,7 +1528,6 @@
         }
     });
 
-    // Atualizar segmentos
     function atualizarSegmentos() {
         segmentosLista.innerHTML = '';
         
@@ -1538,7 +1552,7 @@
         });
     }
 
-    // 2. FUNCIONALIDADE DE ANIVERSARIANTES
+    // Aniversariantes
     function atualizarPreviewAniversariantes() {
         const aniversariantes = clientes.filter(cliente => {
             if (!cliente.dataNascimento) return false;
@@ -1554,7 +1568,7 @@
             return;
         }
         
-        const preview = aniversariantes.slice(0, 2); // Mostra 2 no preview
+        const preview = aniversariantes.slice(0, 2);
         preview.forEach(cliente => {
             const data = new Date(cliente.dataNascimento);
             const div = document.createElement('div');
@@ -1600,7 +1614,6 @@
             return;
         }
         
-        // Ordena por dia do mês
         aniversariantes.sort((a, b) => {
             const diaA = new Date(a.dataNascimento).getDate();
             const diaB = new Date(b.dataNascimento).getDate();
@@ -1629,12 +1642,11 @@
         });
     }
 
-    // Evento para abrir modal de aniversariantes
     cardAniversariantes.addEventListener('click', () => {
         atualizarModalAniversariantes();
     });
 
-    // 3. FUNCIONALIDADE DE EXPORTAÇÃO PDF
+    // Exportação PDF
     exportarTodos.addEventListener('click', () => {
         exportarParaPDF(clientes, 'todos-clientes');
         modalExportar.hide();
@@ -1656,7 +1668,6 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Cabeçalho
             doc.setFontSize(20);
             doc.text('Relatório de Clientes - ScanHub', 105, 15, { align: 'center' });
             
@@ -1664,7 +1675,6 @@
             doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 22, { align: 'center' });
             doc.text(`Total de clientes: ${clientesExportar.length}`, 105, 27, { align: 'center' });
             
-            // Preparar dados da tabela
             const tableData = clientesExportar.map(cliente => [
                 cliente.nome.substring(0, 30),
                 cliente.email.substring(0, 25),
@@ -1674,7 +1684,6 @@
                 formatarData(cliente.dataCadastro)
             ]);
             
-            // Criar tabela
             doc.autoTable({
                 head: [['Nome', 'E-mail', 'Telefone', 'Tipo', 'Status', 'Cadastro']],
                 body: tableData,
@@ -1684,23 +1693,22 @@
                 headStyles: { fillColor: [255, 107, 53] }
             });
             
-            // Salvar PDF
             doc.save(`${nomeArquivo}-${new Date().toISOString().split('T')[0]}.pdf`);
             
             alert('PDF gerado com sucesso! O download começará automaticamente.');
             
         } catch (error) {
-            console.error('Erro ao gerar PDF:', error);
             alert('Erro ao gerar PDF. Tente novamente.');
         }
     }
 
-    // ================== FUNÇÕES ORIGINAIS (mantidas) ==================
+    // ================== FUNÇÕES DE GESTÃO DE CLIENTES ==================
 
     // Novo cliente
     btnNovoCliente.addEventListener('click', () => {
-        if (planoLimite !== 1000 && clientes.length >= planoLimite) {
-            alert('Você atingiu o limite de clientes do seu plano. Atualize para cadastrar mais clientes.');
+        if (clientes.length >= planoLimite && planoLimite !== 999999) {
+            const planoNome = userData?.plano_assinatura || 'seu plano atual';
+            alert(`❌ LIMITE ATINGIDO!\n\nPlano: ${planoNome.toUpperCase()}\nLimite: ${planoLimite} clientes\nAtuais: ${clientes.length}\n\nFaça upgrade do plano para adicionar mais clientes.`);
             return;
         }
         
@@ -1798,7 +1806,7 @@
             
             modalCliente.hide();
             await carregarClientes();
-            atualizarPreviewCards(); // Atualiza os cards após salvar
+            atualizarPreviewCards();
             
         } catch (error) {
             alert('Erro ao salvar cliente. Tente novamente.');
@@ -1844,11 +1852,13 @@
         try {
             await deleteDoc(doc(db, "clientes", id));
             await carregarClientes();
-            atualizarPreviewCards(); // Atualiza os cards após excluir
+            atualizarPreviewCards();
         } catch (error) {
             alert('Erro ao excluir cliente. Tente novamente.');
         }
     }
+
+    // ================== EVENTOS ==================
 
     // Filtros e busca
     searchClientes.addEventListener('input', atualizarTabelaClientes);
