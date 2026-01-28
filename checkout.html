@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Assinatura - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Mercado Pago SDK -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #FF6B35;
+            --light-color: #e8ecef;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Navbar */
+        .navbar-checkout {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand-checkout {
+            display: flex;
+            align-items: center;
+            transform: scale(1.8);
+            transform-origin: left center;
+        }
+
+        .navbar-brand-checkout img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Container Principal */
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .checkout-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .checkout-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Resumo do Plano */
+        .resumo-plano {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .resumo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .plano-titulo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+
+        .plano-preco {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            line-height: 1;
+        }
+
+        .plano-periodo {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .recursos-lista {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        .recursos-lista li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+        }
+
+        .recursos-lista li:last-child {
+            border-bottom: none;
+        }
+
+        .recursos-lista i {
+            color: #27ae60;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            min-width: 24px;
+        }
+
+        .info-teste {
+            background: #e8f4ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .info-teste i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        /* Área de Pagamento */
+        .area-pagamento {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .passos {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .passos::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .passo {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .passo-numero {
+            width: 40px;
+            height: 40px;
+            background: #e0e0e0;
+            color: #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .passo.ativo .passo-numero {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .passo-texto {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .passo.ativo .passo-texto {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        /* Container do Mercado Pago */
+        .mp-container {
+            margin: 30px 0;
+            min-height: 300px;
+        }
+
+        #wallet_container {
+            margin-top: 20px;
+        }
+
+        /* Métodos de Pagamento */
+        .metodos-pagamento {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metodo-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .metodo-btn:hover {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .metodo-btn.ativo {
+            border-color: var(--secondary-color);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .metodo-btn i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .metodo-nome {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Botões */
+        .btn-voltar {
+            background: #f8f9fa;
+            color: var(--dark-color);
+            border: 2px solid #e0e0e0;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-voltar:hover {
+            background: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-confirmar {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirmar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-confirmar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Segurança */
+        .seguranca-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+
+        .seguranca-info i {
+            color: #27ae60;
+            font-size: 1.5rem;
+        }
+
+        /* Loading */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #FF6B35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+            
+            .navbar-brand-checkout {
+                transform: scale(1.4);
+            }
+            
+            .checkout-container {
+                padding: 0 15px;
+            }
+            
+            .resumo-plano, .area-pagamento {
+                padding: 20px;
+            }
+            
+            .plano-preco {
+                font-size: 2.8rem;
+            }
+            
+            .passos {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .passos::before {
+                display: none;
+            }
+            
+            .passo {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                text-align: left;
+            }
+            
+            .passo-numero {
+                margin: 0;
+                flex-shrink: 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-checkout {
+                transform: scale(1.2);
+            }
+            
+            .plano-titulo {
+                font-size: 1.5rem;
+            }
+            
+            .plano-preco {
+                font-size: 2.2rem;
+            }
+            
+            .botoes-acoes {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-voltar, .btn-confirmar {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Avisos */
+        .aviso {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .aviso i {
+            color: #f39c12;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>Carregando informações do plano...</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-checkout">
+        <div class="container">
+            <a class="navbar-brand-checkout" href="dashboard.html">
+                <img src="logoscanhub.png" alt="ScanHub">
+            </a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <span id="userEmail" class="text-muted d-none d-md-inline">carregando...</span>
+                <a href="assinaturas.html" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="checkout-container">
+        <!-- Aviso de Teste -->
+        <div class="aviso">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>MODO TESTE ATIVADO</strong>
+                <p class="mb-0">Você está no ambiente de testes. Use cartões de teste do Mercado Pago. Nenhum valor real será cobrado.</p>
+            </div>
+        </div>
+
+        <div class="checkout-wrapper">
+            <!-- Resumo do Plano -->
+            <div class="resumo-plano">
+                <div class="resumo-header">
+                    <h2 class="plano-titulo" id="planoNome">PROFESSIONAL</h2>
+                    <div class="plano-preco" id="planoPreco">R$ 59,90</div>
+                    <div class="plano-periodo" id="planoPeriodo">por mês</div>
+                </div>
+
+                <ul class="recursos-lista" id="recursosLista">
+                    <!-- Preenchido por JavaScript -->
+                </ul>
+
+                <div class="info-teste">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-gift"></i>
+                        <div>
+                            <strong>7 DIAS DE TESTE POR R$ 1,00</strong>
+                            <p class="mb-0 small">Pague apenas R$ 1,00 para testar por 7 dias. Depois, R$ <span id="valorNormal">59,90</span>/mês. Cancele quando quiser.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">O que está incluído:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i> Cancelamento a qualquer momento</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Sem taxas escondidas</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Suporte 24/7</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Atualizações gratuitas</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Área de Pagamento -->
+            <div class="area-pagamento">
+                <!-- Passos -->
+                <div class="passos">
+                    <div class="passo ativo">
+                        <div class="passo-numero">1</div>
+                        <div class="passo-texto">Escolha do Plano</div>
+                    </div>
+                    <div class="passo ativo">
+                        <div class="passo-numero">2</div>
+                        <div class="passo-texto">Pagamento</div>
+                    </div>
+                    <div class="passo">
+                        <div class="passo-numero">3</div>
+                        <div class="passo-texto">Confirmação</div>
+                    </div>
+                </div>
+
+                <h4 class="mb-4">Escolha como pagar</h4>
+                
+                <!-- Container do Mercado Pago -->
+                <div class="mp-container">
+                    <div id="wallet_container"></div>
+                </div>
+
+                <!-- Segurança -->
+                <div class="seguranca-info">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>Pagamento 100% seguro</strong>
+                        <p class="mb-0 small">Seus dados estão protegidos com criptografia SSL. Processado pelo Mercado Pago.</p>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-flex justify-content-between mt-4 botoes-acoes">
+                    <a href="assinaturas.html" class="btn-voltar">
+                        <i class="fas fa-arrow-left"></i> Escolher outro plano
+                    </a>
+                    
+                    <div class="d-flex gap-3">
+                        <button class="btn-confirmar" id="btnPagar" disabled>
+                            <i class="fas fa-lock"></i> Finalizar Assinatura
+                            <span id="valorBtn">-</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase e Mercado Pago -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Elementos DOM
+        const loader = document.getElementById('loader');
+        const planoNome = document.getElementById('planoNome');
+        const planoPreco = document.getElementById('planoPreco');
+        const planoPeriodo = document.getElementById('planoPeriodo');
+        const recursosLista = document.getElementById('recursosLista');
+        const valorNormal = document.getElementById('valorNormal');
+        const valorBtn = document.getElementById('valorBtn');
+        const userEmail = document.getElementById('userEmail');
+        const btnPagar = document.getElementById('btnPagar');
+
+        // IDs dos planos no Mercado Pago Sandbox
+        // ATENÇÃO: Você precisa criar esses planos no Sandbox e colocar os IDs reais aqui
+        const planosMP = {
+            basic: '2c938084726fca240172757a51ff006b', // ID do plano Basic no Sandbox
+            pro: '2c938084726fca240172757a51ff006c',    // ID do plano Pro no Sandbox
+            enterprise: '2c938084726fca240172757a51ff006d' // ID do plano Enterprise no Sandbox
+        };
+
+        // Informações dos planos
+        const planosInfo = {
+            basic: {
+                nome: 'BASIC',
+                precoTeste: '1.00',
+                precoNormal: '29.90',
+                recursos: [
+                    'Pedidos Ilimitados',
+                    'Agenda Completa',
+                    'Até 100 Clientes',
+                    'Catálogo com 20 Itens',
+                    'Suporte por Email',
+                    'Relatórios Básicos'
+                ]
+            },
+            pro: {
+                nome: 'PROFESSIONAL',
+                precoTeste: '1.00',
+                precoNormal: '59.90',
+                recursos: [
+                    'Tudo do BASIC +',
+                    'Até 1.000 Clientes',
+                    'Catálogo com 100 Itens',
+                    'Suporte Prioritário',
+                    'Relatórios Avançados',
+                    'Exportação de Dados'
+                ]
+            },
+            enterprise: {
+                nome: 'ENTERPRISE',
+                precoTeste: '1.00',
+                precoNormal: '99.90',
+                recursos: [
+                    'Tudo do PROFESSIONAL +',
+                    'Clientes Ilimitados',
+                    'Catálogo com 500 Itens',
+                    'Suporte 24/7',
+                    'Backup Automático',
+                    'API Acesso'
+                ]
+            }
+        };
+
+        let planoSelecionado = '';
+        let userData = null;
+        let mpInstance = null;
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pegar plano da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            planoSelecionado = urlParams.get('plano') || 'basic';
+            
+            // Verificar autenticação
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userData = user;
+                    userEmail.textContent = user.email;
+                    await carregarPlano();
+                    inicializarMercadoPago();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        // Carregar informações do plano
+        async function carregarPlano() {
+            const plano = planosInfo[planoSelecionado];
+            if (!plano) {
+                window.location.href = 'assinaturas.html';
+                return;
+            }
+
+            // Atualizar interface
+            planoNome.textContent = plano.nome;
+            planoPreco.textContent = `R$ ${plano.precoTeste}`;
+            planoPeriodo.textContent = 'nos primeiros 7 dias';
+            valorNormal.textContent = plano.precoNormal;
+            valorBtn.textContent = `R$ ${plano.precoTeste}`;
+
+            // Adicionar recursos
+            recursosLista.innerHTML = '';
+            plano.recursos.forEach(rec => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-check"></i> ${rec}`;
+                recursosLista.appendChild(li);
+            });
+
+            // Esconder loader
+            setTimeout(() => {
+                loader.classList.add('hide');
+            }, 500);
+        }
+
+        // Inicializar Mercado Pago
+        function inicializarMercadoPago() {
+            // SUA PUBLIC KEY DO SANDBOX (a que você tem: TEST-7212078d...)
+            const publicKey = 'TEST-7212078d-c1a3-424f-b3de-192dd48bdcbd';
+            
+            mpInstance = new MercadoPago(publicKey, {
+                locale: 'pt-BR'
+            });
+
+            // Criar o wallet (botão de pagamento)
+            mpInstance.checkout({
+                preference: {
+                    id: planosMP[planoSelecionado]
+                },
+                autoOpen: true, // Abre automaticamente
+                render: {
+                    container: '#wallet_container',
+                    label: 'Pagar com Mercado Pago'
+                }
+            });
+
+            // Habilitar botão de pagamento
+            btnPagar.disabled = false;
+            btnPagar.innerHTML = `<i class="fas fa-lock"></i> Finalizar Assinatura - R$ ${planosInfo[planoSelecionado].precoTeste}`;
+        }
+
+        // Botão de pagamento personalizado
+        btnPagar.addEventListener('click', async () => {
+            try {
+                btnPagar.disabled = true;
+                btnPagar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+                // Aqui você pode adicionar lógica adicional antes do pagamento
+                // Por exemplo, criar um documento temporário no Firestore
+
+                // Redirecionar para o fluxo normal do MP
+                window.location.href = `https://sandbox.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=${planosMP[planoSelecionado]}`;
+
+            } catch (error) {
+                console.error('Erro:', error);
+                btnPagar.disabled = false;
+                btnPagar.innerHTML = '<i class="fas fa-lock"></i> Tentar novamente';
+                alert('Erro ao processar pagamento. Tente novamente.');
+            }
+        });
+
+        // Fallback para esconder loader
+        setTimeout(() => {
+            loader.classList.add('hide');
+        }, 3000);
+    </script>
+</body>
+</html>

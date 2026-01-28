@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos de Assinatura - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #FF6B35;
+            --light-color: #e8ecef;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Navbar */
+        .navbar-assinatura {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand-assinatura {
+            display: flex;
+            align-items: center;
+            transform: scale(1.8);
+            transform-origin: left center;
+        }
+
+        .navbar-brand-assinatura img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Header */
+        .header-assinatura {
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-assinatura h1 {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-assinatura p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Planos */
+        .planos-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .plano-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plano-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .plano-card.popular {
+            border-color: var(--secondary-color);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .plano-card.popular:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .plano-badge {
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 8px 30px;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .plano-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .plano-titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+
+        .plano-preco {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .plano-periodo {
+            color: #666;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .plano-recursos {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        .plano-recursos li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+        }
+
+        .plano-recursos li:last-child {
+            border-bottom: none;
+        }
+
+        .plano-recursos i {
+            color: #27ae60;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .plano-limite {
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Botões */
+        .btn-assinar {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-assinar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+            color: white;
+        }
+
+        .btn-testar {
+            background: #f8f9fa;
+            color: var(--dark-color);
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-testar:hover {
+            background: #e9ecef;
+            color: var(--dark-color);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Comparativo */
+        .comparativo-table {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 50px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .comparativo-table th {
+            font-weight: 600;
+            color: var(--dark-color);
+            padding: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .comparativo-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f5f5f5;
+            vertical-align: middle;
+        }
+
+        .comparativo-table i.fa-check {
+            color: #27ae60;
+            font-size: 1.2rem;
+        }
+
+        .comparativo-table i.fa-times {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+
+        /* FAQ */
+        .faq-section {
+            margin-top: 60px;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .faq-pergunta {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-resposta {
+            color: #666;
+            display: none;
+        }
+
+        .faq-resposta.show {
+            display: block;
+        }
+
+        /* Responsivo */
+        @media (max-width: 992px) {
+            .plano-card.popular {
+                transform: scale(1);
+                margin-top: 30px;
+            }
+            
+            .plano-card.popular:hover {
+                transform: translateY(-10px);
+            }
+            
+            .planos-container {
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+            
+            .navbar-brand-assinatura {
+                transform: scale(1.4);
+            }
+            
+            .header-assinatura {
+                padding: 30px 15px;
+            }
+            
+            .header-assinatura h1 {
+                font-size: 1.8rem;
+            }
+            
+            .plano-card {
+                padding: 20px;
+            }
+            
+            .plano-preco {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-assinatura {
+                transform: scale(1.2);
+            }
+            
+            .header-assinatura h1 {
+                font-size: 1.5rem;
+            }
+            
+            .plano-titulo {
+                font-size: 1.3rem;
+            }
+            
+            .plano-preco {
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #FF6B35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer-assinatura {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .footer-assinatura a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .footer-assinatura a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-assinatura">
+        <div class="container">
+            <a class="navbar-brand-assinatura" href="dashboard.html">
+                <img src="logoscanhub.png" alt="ScanHub">
+            </a>
+            
+            <div class="ms-auto">
+                <a href="dashboard.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="container">
+        <div class="header-assinatura">
+            <h1>Escolha o Plano Perfeito para Você</h1>
+            <p>Teste qualquer plano por <strong>R$ 1,00</strong> nos primeiros 7 dias. Cancele quando quiser.</p>
+        </div>
+
+        <!-- Planos -->
+        <div class="planos-container">
+            <div class="row g-4">
+                <!-- Plano BASIC -->
+                <div class="col-lg-4">
+                    <div class="plano-card">
+                        <div class="plano-header">
+                            <div class="plano-titulo">BASIC</div>
+                            <div class="plano-preco">R$ 29,90</div>
+                            <div class="plano-periodo">por mês</div>
+                        </div>
+                        
+                        <ul class="plano-recursos">
+                            <li><i class="fas fa-check"></i> Pedidos <strong class="plano-limite">Ilimitados</strong></li>
+                            <li><i class="fas fa-check"></i> Agenda Completa</li>
+                            <li><i class="fas fa-check"></i> Clientes <strong class="plano-limite">Até 100</strong></li>
+                            <li><i class="fas fa-check"></i> Catálogo <strong class="plano-limite">20 Itens</strong></li>
+                            <li><i class="fas fa-check"></i> Suporte por Email</li>
+                            <li><i class="fas fa-check"></i> Relatórios Básicos</li>
+                        </ul>
+                        
+                        <a href="checkout.html?plano=basic" class="btn-assinar btn-testar">
+                            <i class="fas fa-bolt"></i> TESTAR POR R$ 1,00
+                        </a>
+                        <small class="d-block text-center text-muted mt-2">7 dias grátis, depois R$ 29,90/mês</small>
+                    </div>
+                </div>
+
+                <!-- Plano PROFESSIONAL (Destaque) -->
+                <div class="col-lg-4">
+                    <div class="plano-card popular">
+                        <div class="plano-badge">MAIS POPULAR</div>
+                        <div class="plano-header">
+                            <div class="plano-titulo">PROFESSIONAL</div>
+                            <div class="plano-preco">R$ 59,90</div>
+                            <div class="plano-periodo">por mês</div>
+                        </div>
+                        
+                        <ul class="plano-recursos">
+                            <li><i class="fas fa-check"></i> <strong>Tudo do BASIC +</strong></li>
+                            <li><i class="fas fa-check"></i> Clientes <strong class="plano-limite">Até 1.000</strong></li>
+                            <li><i class="fas fa-check"></i> Catálogo <strong class="plano-limite">100 Itens</strong></li>
+                            <li><i class="fas fa-check"></i> Suporte Prioritário</li>
+                            <li><i class="fas fa-check"></i> Relatórios Avançados</li>
+                            <li><i class="fas fa-check"></i> Exportação de Dados</li>
+                        </ul>
+                        
+                        <a href="checkout.html?plano=pro" class="btn-assinar">
+                            <i class="fas fa-crown"></i> TESTAR POR R$ 1,00
+                        </a>
+                        <small class="d-block text-center text-white-50 mt-2">7 dias grátis, depois R$ 59,90/mês</small>
+                    </div>
+                </div>
+
+                <!-- Plano ENTERPRISE -->
+                <div class="col-lg-4">
+                    <div class="plano-card">
+                        <div class="plano-header">
+                            <div class="plano-titulo">ENTERPRISE</div>
+                            <div class="plano-preco">R$ 99,90</div>
+                            <div class="plano-periodo">por mês</div>
+                        </div>
+                        
+                        <ul class="plano-recursos">
+                            <li><i class="fas fa-check"></i> <strong>Tudo do PROFESSIONAL +</strong></li>
+                            <li><i class="fas fa-check"></i> Clientes <strong class="plano-limite">Ilimitados</strong></li>
+                            <li><i class="fas fa-check"></i> Catálogo <strong class="plano-limite">500 Itens</strong></li>
+                            <li><i class="fas fa-check"></i> Suporte 24/7</li>
+                            <li><i class="fas fa-check"></i> Backup Automático</li>
+                            <li><i class="fas fa-check"></i> API Acesso</li>
+                        </ul>
+                        
+                        <a href="checkout.html?plano=enterprise" class="btn-assinar btn-testar">
+                            <i class="fas fa-rocket"></i> TESTAR POR R$ 1,00
+                        </a>
+                        <small class="d-block text-center text-muted mt-2">7 dias grátis, depois R$ 99,90/mês</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela Comparativa -->
+            <div class="comparativo-table">
+                <h3 class="mb-4 text-center">Comparação Completa de Planos</h3>
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th>Recurso</th>
+                                <th>BASIC</th>
+                                <th>PROFESSIONAL</th>
+                                <th>ENTERPRISE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pedidos</td>
+                                <td><i class="fas fa-check"></i> Ilimitados</td>
+                                <td><i class="fas fa-check"></i> Ilimitados</td>
+                                <td><i class="fas fa-check"></i> Ilimitados</td>
+                            </tr>
+                            <tr>
+                                <td>Agenda</td>
+                                <td><i class="fas fa-check"></i> Completa</td>
+                                <td><i class="fas fa-check"></i> Completa</td>
+                                <td><i class="fas fa-check"></i> Completa</td>
+                            </tr>
+                            <tr>
+                                <td>Clientes</td>
+                                <td>Até 100</td>
+                                <td>Até 1.000</td>
+                                <td>Ilimitados</td>
+                            </tr>
+                            <tr>
+                                <td>Itens no Catálogo</td>
+                                <td>20</td>
+                                <td>100</td>
+                                <td>500</td>
+                            </tr>
+                            <tr>
+                                <td>Suporte</td>
+                                <td>Email</td>
+                                <td>Prioritário</td>
+                                <td>24/7</td>
+                            </tr>
+                            <tr>
+                                <td>Relatórios</td>
+                                <td>Básicos</td>
+                                <td>Avançados</td>
+                                <td>Completos</td>
+                            </tr>
+                            <tr>
+                                <td>Backup</td>
+                                <td><i class="fas fa-times"></i></td>
+                                <td>Semanal</td>
+                                <td>Diário</td>
+                            </tr>
+                            <tr>
+                                <td>API Acesso</td>
+                                <td><i class="fas fa-times"></i></td>
+                                <td><i class="fas fa-times"></i></td>
+                                <td><i class="fas fa-check"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="faq-section">
+                <h3 class="mb-4 text-center">Perguntas Frequentes</h3>
+                
+                <div class="faq-item">
+                    <div class="faq-pergunta" onclick="toggleFaq(this)">
+                        Como funciona o teste de 7 dias?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-resposta">
+                        Você paga apenas R$ 1,00 para testar qualquer plano por 7 dias. Após esse período, a assinatura é renovada automaticamente pelo valor normal do plano. Você pode cancelar a qualquer momento dentro dos 7 dias sem pagar nada além dos R$ 1,00.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-pergunta" onclick="toggleFaq(this)">
+                        Posso mudar de plano depois?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-resposta">
+                        Sim! Você pode fazer upgrade ou downgrade a qualquer momento. A mudança será aplicada no próximo ciclo de cobrança com ajuste proporcional no valor.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-pergunta" onclick="toggleFaq(this)">
+                        Como funciona o cancelamento?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-resposta">
+                        Você pode cancelar a qualquer momento pelo seu dashboard. O acesso ao plano será mantido até o final do período pago. Não há multas ou taxas de cancelamento.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-pergunta" onclick="toggleFaq(this)">
+                        O que acontece se eu atingir o limite do meu plano?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-resposta">
+                        Você receberá uma notificação quando estiver próximo do limite. Para adicionar mais clientes ou itens, faça um upgrade de plano. Os recursos existentes continuam funcionando normalmente.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-assinatura">
+        <div class="container">
+            <p>© 2024 ScanHub. Todos os direitos reservados.</p>
+            <p>
+                <a href="#">Termos de Uso</a> | 
+                <a href="#">Política de Privacidade</a> | 
+                <a href="mailto:suporte@scanhub.com">suporte@scanhub.com</a>
+            </p>
+            <p class="mt-3">
+                <small>Pagamentos processados com segurança pelo Mercado Pago</small>
+            </p>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config (USE A SUA)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const loader = document.getElementById('loader');
+
+        // Verificar autenticação
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Usuário logado - esconder loader
+                setTimeout(() => {
+                    loader.classList.add('hide');
+                }, 500);
+            } else {
+                // Não logado - redirecionar para login
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Funções FAQ
+        window.toggleFaq = function(element) {
+            const resposta = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            
+            resposta.classList.toggle('show');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        };
+
+        // Esconder loader após 3 segundos (fallback)
+        setTimeout(() => {
+            loader.classList.add('hide');
+        }, 3000);
+    </script>
+</body>
+</html>

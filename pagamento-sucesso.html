@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Aprovado! - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #FF6B35;
+            --success-color: #27ae60;
+            --light-color: #e8ecef;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Card de Sucesso */
+        .success-card {
+            background: white;
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        /* Ícone de Sucesso */
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .success-icon i {
+            font-size: 3.5rem;
+            color: #27ae60;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Conteúdo */
+        .success-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+
+        .success-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .success-message {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        .plano-destaque {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* Contador */
+        .contador-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #e8f4ff;
+            border-radius: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .contador-texto {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .contador {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-family: monospace;
+        }
+
+        /* Botões */
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: var(--dark-color);
+            border: 2px solid #e0e0e0;
+            padding: 16px 35px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            color: var(--dark-color);
+            transform: translateY(-3px);
+        }
+
+        /* Mensagem de Boas-vindas */
+        .welcome-message {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .welcome-message i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Logo */
+        .logo-sucesso {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-sucesso img {
+            height: 50px;
+            width: auto;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .success-card {
+                padding: 30px 20px;
+            }
+            
+            .success-title {
+                font-size: 2rem;
+            }
+            
+            .success-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .success-icon {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .success-icon i {
+                font-size: 2.5rem;
+            }
+            
+            .contador {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .success-card {
+                padding: 25px 15px;
+            }
+            
+            .success-title {
+                font-size: 1.8rem;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .btn-success, .btn-secondary {
+                padding: 14px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Animação de Confetes */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FF6B35;
+            opacity: 0;
+            top: -20px;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Efeito de Digitação */
+        .digitando {
+            overflow: hidden;
+            border-right: 2px solid #27ae60;
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #27ae60; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Confetes -->
+    <div id="confettiContainer"></div>
+
+    <!-- Card de Sucesso -->
+    <div class="success-card">
+        <!-- Logo -->
+        <div class="logo-sucesso">
+            <img src="logoscanhub.png" alt="ScanHub">
+        </div>
+
+        <!-- Ícone -->
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+
+        <!-- Título -->
+        <h1 class="success-title digitando">Pagamento Aprovado! 🎉</h1>
+        <p class="success-subtitle">Sua assinatura foi ativada com sucesso!</p>
+
+        <!-- Informações da Assinatura -->
+        <div class="success-message">
+            <div class="info-item">
+                <span class="info-label">Plano Contratado:</span>
+                <span class="info-value">
+                    <span id="planoNome" class="plano-destaque">PROFESSIONAL</span>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Valor do Teste:</span>
+                <span class="info-value">R$ 1,00</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Valor Mensal:</span>
+                <span class="info-value" id="planoValor">R$ 59,90</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Próxima Cobrança:</span>
+                <span class="info-value" id="proximaCobranca">em 7 dias</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">ID da Transação:</span>
+                <span class="info-value" id="transacaoId">MP-123456789</span>
+            </div>
+        </div>
+
+        <!-- Contador para Redirecionamento -->
+        <div class="contador-container">
+            <p class="contador-texto">Você será redirecionado para o dashboard em:</p>
+            <div class="contador" id="contador">10</div>
+        </div>
+
+        <!-- Mensagem de Boas-vindas -->
+        <div class="welcome-message">
+            <i class="fas fa-rocket"></i>
+            <h5 class="mb-2">Bem-vindo ao plano Premium!</h5>
+            <p class="mb-0">Seu acesso a todos os recursos foi liberado. Aproveite ao máximo a plataforma!</p>
+        </div>
+
+        <!-- Botões -->
+        <a href="dashboard.html" class="btn-success" id="btnDashboard">
+            <i class="fas fa-tachometer-alt"></i> Ir para Dashboard Agora
+        </a>
+        
+        <a href="assinaturas.html" class="btn-secondary">
+            <i class="fas fa-crown"></i> Ver Detalhes da Assinatura
+        </a>
+
+        <!-- Mensagem Final -->
+        <div class="mt-4">
+            <p class="text-muted small">
+                <i class="fas fa-envelope"></i> Enviamos um email de confirmação para <span id="userEmail">seu@email.com</span>
+            </p>
+            <p class="text-muted small">
+                Precisa de ajuda? <a href="mailto:suporte@scanhub.com">suporte@scanhub.com</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Elementos DOM
+        const planoNome = document.getElementById('planoNome');
+        const planoValor = document.getElementById('planoValor');
+        const proximaCobranca = document.getElementById('proximaCobranca');
+        const transacaoId = document.getElementById('transacaoId');
+        const userEmail = document.getElementById('userEmail');
+        const btnDashboard = document.getElementById('btnDashboard');
+        const contador = document.getElementById('contador');
+        const confettiContainer = document.getElementById('confettiContainer');
+
+        // Gerar confetes
+        function criarConfetes() {
+            const cores = ['#FF6B35', '#27ae60', '#44689a', '#F7931E', '#9b59b6'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = cores[Math.floor(Math.random() * cores.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        // Contador para redirecionamento
+        function iniciarContador() {
+            let segundos = 10;
+            contador.textContent = segundos;
+            
+            const intervalo = setInterval(() => {
+                segundos--;
+                contador.textContent = segundos;
+                
+                if (segundos <= 0) {
+                    clearInterval(intervalo);
+                    window.location.href = 'dashboard.html';
+                }
+            }, 1000);
+            
+            // Parar contador se clicar no botão
+            btnDashboard.addEventListener('click', () => {
+                clearInterval(intervalo);
+            });
+        }
+
+        // Atualizar informações do usuário no Firebase
+        async function atualizarStatusUsuario(userId, plano) {
+            try {
+                const planoValores = {
+                    basic: { nome: 'BASIC', valor: '29.90' },
+                    pro: { nome: 'PROFESSIONAL', valor: '59.90' },
+                    enterprise: { nome: 'ENTERPRISE', valor: '99.90' }
+                };
+                
+                const infoPlano = planoValores[plano] || planoValores.pro;
+                
+                // Calcular data de expiração (7 dias de teste + 1 mês)
+                const hoje = new Date();
+                const dataExpiracao = new Date(hoje);
+                dataExpiracao.setDate(hoje.getDate() + 37); // 7 dias teste + 30 dias
+                
+                // Atualizar documento do usuário
+                await updateDoc(doc(db, "usuarios", userId), {
+                    plano_assinatura: plano,
+                    status_assinatura: "ativa",
+                    data_expiracao_assinatura: dataExpiracao.toISOString(),
+                    data_ativacao: new Date().toISOString()
+                });
+                
+                // Retornar informações para exibir
+                return {
+                    nome: infoPlano.nome,
+                    valor: infoPlano.valor,
+                    expiracao: dataExpiracao.toLocaleDateString('pt-BR')
+                };
+                
+            } catch (error) {
+                console.error('Erro ao atualizar usuário:', error);
+                return null;
+            }
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar autenticação
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userEmail.textContent = user.email;
+                    
+                    // Pegar informações da URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const plano = urlParams.get('plano') || 'pro';
+                    const transacao = urlParams.get('transacao') || 'MP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                    
+                    // Atualizar status do usuário no Firebase
+                    const info = await atualizarStatusUsuario(user.uid, plano);
+                    
+                    if (info) {
+                        planoNome.textContent = info.nome;
+                        planoValor.textContent = `R$ ${info.valor}`;
+                        proximaCobranca.textContent = `em 7 dias (${info.expiracao})`;
+                        transacaoId.textContent = transacao;
+                    }
+                    
+                    // Criar confetes
+                    criarConfetes();
+                    
+                    // Iniciar contador
+                    iniciarContador();
+                    
+                } else {
+                    // Não autenticado - redirecionar para login
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        // Fallback se não tiver parâmetros na URL
+        window.addEventListener('load', () => {
+            if (!window.location.search.includes('plano=')) {
+                // Preencher com valores padrão para demonstração
+                planoNome.textContent = 'PROFESSIONAL';
+                planoValor.textContent = 'R$ 59,90';
+                proximaCobranca.textContent = 'em 7 dias';
+                transacaoId.textContent = 'MP-DEMO-' + Date.now();
+                
+                criarConfetes();
+                iniciarContador();
+            }
+        });
+    </script>
+</body>
+</html>
