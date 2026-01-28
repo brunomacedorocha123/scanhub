@@ -3,91 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - ScanHub</title>
+    <title>Assinatura - ScanHub</title>
     
-    <!-- Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Configuração global
-        window.firebaseApp = app;
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-    </script>
+    <!-- SDK Mercado Pago -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
         
-        .checkout-container {
+        .checkout-box {
             background: white;
-            border-radius: 20px;
             width: 100%;
-            max-width: 800px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         
         .header {
-            background: #FF6B35;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             color: white;
             padding: 25px;
             text-align: center;
         }
         
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .sandbox-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        
         .content {
-            padding: 40px;
+            padding: 30px;
         }
         
         .plano-card {
             background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-left: 5px solid #FF6B35;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #FF6B35;
         }
         
         .plano-nome {
@@ -97,117 +60,80 @@
         }
         
         .plano-preco {
-            font-size: 42px;
+            font-size: 36px;
             color: #FF6B35;
             font-weight: bold;
         }
         
-        .recursos {
-            list-style: none;
-            margin: 20px 0;
+        .metodos-pagamento {
+            margin: 25px 0;
         }
         
-        .recursos li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-        }
-        
-        .recursos li:last-child {
-            border-bottom: none;
-        }
-        
-        .recursos i {
-            color: #27ae60;
-            margin-right: 10px;
-        }
-        
-        .cartao-teste {
-            background: #2c3e50;
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-        }
-        
-        .cartao-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .metodos-titulo {
+            font-size: 18px;
             margin-bottom: 15px;
+            color: #333;
         }
         
-        .cartao-header i {
-            color: #FF6B35;
-            font-size: 24px;
-        }
-        
-        .detalhes-grid {
+        .metodos-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
         
-        .detalhe {
-            background: rgba(255,255,255,0.1);
+        .metodo-btn {
             padding: 15px;
+            border: 2px solid #ddd;
             border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
         }
         
-        .detalhe-label {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-bottom: 5px;
+        .metodo-btn:hover {
+            border-color: #FF6B35;
+            background: #fff5f0;
         }
         
-        .detalhe-valor {
-            font-family: monospace;
-            font-size: 16px;
+        .metodo-btn.selecionado {
+            border-color: #FF6B35;
+            background: #fff5f0;
             font-weight: bold;
         }
         
-        .checkout-area {
-            text-align: center;
-            padding: 30px;
-            border: 2px dashed #ddd;
-            border-radius: 15px;
-            margin: 30px 0;
+        .metodo-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
         }
         
-        .btn-pagar {
-            background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+        .btn-assinar {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             color: white;
             border: none;
-            padding: 20px 50px;
-            font-size: 20px;
+            padding: 18px;
+            font-size: 18px;
             border-radius: 10px;
             cursor: pointer;
+            width: 100%;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin: 0 auto;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.3s;
         }
         
-        .btn-pagar:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255,107,53,0.4);
+        .btn-assinar:hover {
+            transform: translateY(-2px);
         }
         
-        .btn-pagar:disabled {
+        .btn-assinar:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
         }
         
         .loading {
-            display: none;
             text-align: center;
             padding: 20px;
+            display: none;
         }
         
         .spinner {
@@ -231,150 +157,96 @@
             padding: 15px;
             border-radius: 10px;
             margin: 20px 0;
-            border: 1px solid #fcc;
             display: none;
         }
         
-        .success {
-            background: #d4edda;
-            color: #155724;
+        .cartao-teste {
+            background: #2c3e50;
+            color: white;
             padding: 15px;
             border-radius: 10px;
-            margin: 20px 0;
-            border: 1px solid #c3e6cb;
-            display: none;
+            margin-top: 20px;
+            font-size: 14px;
         }
         
-        .footer {
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid #eee;
-            color: #666;
-        }
-        
-        .btn-voltar {
-            color: #44689a;
-            text-decoration: none;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .content {
-                padding: 20px;
-            }
-            
-            .detalhes-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn-pagar {
-                width: 100%;
-                padding: 18px;
-            }
-            
-            .plano-preco {
-                font-size: 32px;
-            }
+        .cartao-teste h4 {
+            color: #FF6B35;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="checkout-container">
+    <div class="checkout-box">
         <div class="header">
             <div class="logo">SCANHUB</div>
-            <h2>Finalize sua Assinatura</h2>
-            <div class="sandbox-badge">🔬 AMBIENTE DE TESTES - SANDBOX</div>
+            <h2>Assinatura Mensal</h2>
         </div>
         
         <div class="content">
-            <!-- Plano Info -->
+            <!-- Plano Selecionado -->
             <div class="plano-card">
                 <div class="plano-nome" id="planoNome">BASIC</div>
                 <div class="plano-preco" id="planoPreco">R$ 29,90</div>
-                <div style="color: #666; margin-bottom: 20px;">por mês</div>
-                
-                <ul class="recursos" id="recursosLista">
-                    <!-- Preenchido por JS -->
-                </ul>
+                <div style="color: #666;">/mês • Cobrança recorrente</div>
             </div>
+            
+            <!-- Erro -->
+            <div class="error" id="errorMsg"></div>
+            
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processando assinatura...</p>
+            </div>
+            
+            <!-- Métodos de Pagamento -->
+            <div class="metodos-pagamento">
+                <div class="metodos-titulo">Escolha como pagar:</div>
+                
+                <div class="metodos-grid">
+                    <div class="metodo-btn selecionado" onclick="selecionarMetodo('cartao')">
+                        <div class="metodo-icon">💳</div>
+                        <div>Cartão</div>
+                    </div>
+                    
+                    <div class="metodo-btn" onclick="selecionarMetodo('pix')">
+                        <div class="metodo-icon">🧾</div>
+                        <div>PIX</div>
+                    </div>
+                    
+                    <div class="metodo-btn" onclick="selecionarMetodo('boleto')">
+                        <div class="metodo-icon">📄</div>
+                        <div>Boleto</div>
+                    </div>
+                </div>
+                
+                <!-- Container do Mercado Pago -->
+                <div id="wallet_container"></div>
+            </div>
+            
+            <!-- Botão de Assinatura -->
+            <button class="btn-assinar" id="btnAssinar" onclick="processarAssinatura()">
+                🚀 ASSINAR AGORA
+            </button>
             
             <!-- Cartão de Teste -->
             <div class="cartao-teste">
-                <div class="cartao-header">
-                    <i class="fas fa-credit-card"></i>
-                    <h3>Cartões para Teste (Sandbox)</h3>
-                </div>
-                <p>Use estes dados para simular o pagamento:</p>
-                
-                <div class="detalhes-grid">
-                    <div class="detalhe">
-                        <div class="detalhe-label">NÚMERO DO CARTÃO</div>
-                        <div class="detalhe-valor">5031 4332 1540 6351</div>
-                    </div>
-                    <div class="detalhe">
-                        <div class="detalhe-label">CVV</div>
-                        <div class="detalhe-valor">123</div>
-                    </div>
-                    <div class="detalhe">
-                        <div class="detalhe-label">VALIDADE</div>
-                        <div class="detalhe-valor">11/2025</div>
-                    </div>
-                    <div class="detalhe">
-                        <div class="detalhe-label">NOME (Resultado)</div>
-                        <div class="detalhe-valor">APRO = Aprovado</div>
-                    </div>
-                </div>
+                <h4>🎯 CARTÃO PARA TESTE (SANDBOX)</h4>
+                <p><strong>Número:</strong> 5031 4332 1540 6351</p>
+                <p><strong>CVV:</strong> 123 • <strong>Validade:</strong> 11/2025</p>
+                <p><strong>Nome:</strong> APRO (para aprovar)</p>
             </div>
-            
-            <!-- Área de Checkout -->
-            <div class="checkout-area">
-                <h3 style="margin-bottom: 20px;">🎯 Finalizar Pagamento</h3>
-                
-                <!-- Mensagens -->
-                <div class="error" id="errorMessage"></div>
-                <div class="success" id="successMessage"></div>
-                
-                <!-- Loading -->
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Processando pagamento...</p>
-                </div>
-                
-                <!-- Botão de Pagamento -->
-                <button class="btn-pagar" id="btnPagar" onclick="processarPagamento()">
-                    <i class="fas fa-lock"></i>
-                    <span>PAGAR <span id="valorBtn">29,90</span></span>
-                </button>
-                
-                <p style="margin-top: 20px; color: #666; font-size: 14px;">
-                    <i class="fas fa-info-circle"></i> Você será redirecionado para o Mercado Pago Sandbox.
-                </p>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <a href="assinaturas.html" class="btn-voltar">
-                <i class="fas fa-arrow-left"></i> Voltar para Planos
-            </a>
         </div>
     </div>
 
-    <!-- Font Awesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    
     <script>
         // ============== CONFIGURAÇÃO ==============
         const CONFIG = {
-            ACCESS_TOKEN: 'TEST-8505030648459314-012809-308028c845daf1965da62f398b2b794d-1057080095',
             PUBLIC_KEY: 'TEST-7212078d-c1a3-424f-b3de-192dd48bdcbd',
-            API_URL: 'https://api.mercadopago.com',
-            SANDBOX_URL: 'https://sandbox.mercadopago.com.br'
+            ACCESS_TOKEN: 'TEST-8505030648459314-012809-308028c845daf1965da62f398b2b794d-1057080095'
         };
 
-        // IDs dos planos (USE OS SEUS IDs AQUI)
+        // IDs dos planos de assinatura (VOCÊ VAI COLOCAR OS SEUS)
         const PLANOS_IDS = {
             basic: '2c938084726fca240172757a51ff006b',
             pro: '2c938084726fca240172757a51ff006c',
@@ -383,164 +255,148 @@
 
         // Informações dos planos
         const PLANOS_INFO = {
-            basic: {
-                nome: 'BASIC',
-                preco: '29,90',
-                valor: 29.90,
-                recursos: [
-                    'Pedidos Ilimitados',
-                    'Agenda Completa',
-                    'Até 100 Clientes',
-                    'Catálogo com 20 Itens',
-                    'Suporte por Email',
-                    'Relatórios Básicos'
-                ]
-            },
-            pro: {
-                nome: 'PROFESSIONAL',
-                preco: '59,90',
-                valor: 59.90,
-                recursos: [
-                    'Tudo do BASIC +',
-                    'Até 1.000 Clientes',
-                    'Catálogo com 100 Itens',
-                    'Suporte Prioritário',
-                    'Relatórios Avançados',
-                    'Exportação de Dados'
-                ]
-            },
-            enterprise: {
-                nome: 'ENTERPRISE',
-                preco: '99,90',
-                valor: 99.90,
-                recursos: [
-                    'Tudo do PROFESSIONAL +',
-                    'Clientes Ilimitados',
-                    'Catálogo com 500 Itens',
-                    'Suporte 24/7',
-                    'Backup Automático',
-                    'API Acesso'
-                ]
-            }
+            basic: { nome: 'BASIC', preco: '29,90', valor: 29.90 },
+            pro: { nome: 'PROFESSIONAL', preco: '59,90', valor: 59.90 },
+            enterprise: { nome: 'ENTERPRISE', preco: '99,90', valor: 99.90 }
         };
 
         // Variáveis globais
         let planoAtual = 'basic';
-        let userId = null;
+        let metodoPagamento = 'cartao';
+        let mpInstance = null;
 
         // ============== INICIALIZAÇÃO ==============
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Verificar autenticação
-            if (!window.firebaseAuth) {
-                mostrarErro('Firebase não carregado');
-                return;
-            }
-
-            window.firebaseAuth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    await iniciarCheckout();
-                } else {
-                    window.location.href = 'login.html';
-                }
-            });
-        });
-
-        // ============== FUNÇÕES PRINCIPAIS ==============
-        async function iniciarCheckout() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Pegar plano da URL
             const params = new URLSearchParams(window.location.search);
             planoAtual = params.get('plano') || 'basic';
+            
+            // Atualizar interface
+            atualizarPlano();
+            
+            // Inicializar Mercado Pago
+            inicializarMercadoPago();
+        });
 
-            // Verificar se plano existe
-            if (!PLANOS_INFO[planoAtual]) {
+        function atualizarPlano() {
+            const plano = PLANOS_INFO[planoAtual];
+            if (!plano) {
                 mostrarErro('Plano não encontrado');
                 return;
             }
-
-            // Atualizar interface
-            atualizarInterface();
-        }
-
-        function atualizarInterface() {
-            const plano = PLANOS_INFO[planoAtual];
             
-            // Atualizar dados do plano
             document.getElementById('planoNome').textContent = plano.nome;
             document.getElementById('planoPreco').textContent = `R$ ${plano.preco}`;
-            document.getElementById('valorBtn').textContent = plano.preco;
-
-            // Atualizar recursos
-            const listaRecursos = document.getElementById('recursosLista');
-            listaRecursos.innerHTML = '';
-            
-            plano.recursos.forEach(rec => {
-                const li = document.createElement('li');
-                li.innerHTML = `<i class="fas fa-check"></i> ${rec}`;
-                listaRecursos.appendChild(li);
-            });
         }
 
-        // ============== PROCESSAR PAGAMENTO ==============
-        async function processarPagamento() {
-            const btnPagar = document.getElementById('btnPagar');
+        function selecionarMetodo(metodo) {
+            metodoPagamento = metodo;
+            
+            // Atualizar seleção visual
+            document.querySelectorAll('.metodo-btn').forEach(btn => {
+                btn.classList.remove('selecionado');
+            });
+            event.currentTarget.classList.add('selecionado');
+            
+            console.log('Método selecionado:', metodo);
+        }
+
+        // ============== MERCADO PAGO ==============
+        function inicializarMercadoPago() {
+            mpInstance = new MercadoPago(CONFIG.PUBLIC_KEY, {
+                locale: 'pt-BR'
+            });
+            
+            console.log('Mercado Pago inicializado');
+        }
+
+        // ============== PROCESSAR ASSINATURA ==============
+        async function processarAssinatura() {
+            const btnAssinar = document.getElementById('btnAssinar');
             const loading = document.getElementById('loading');
-            const error = document.getElementById('errorMessage');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // Validar
+            if (!PLANOS_IDS[planoAtual] || PLANOS_IDS[planoAtual].includes('SEU-ID')) {
+                mostrarErro('Configure os IDs dos planos no código!');
+                return;
+            }
             
             // Desabilitar botão
-            btnPagar.disabled = true;
+            btnAssinar.disabled = true;
             loading.style.display = 'block';
-            error.style.display = 'none';
-
+            errorMsg.style.display = 'none';
+            
             try {
-                // 1. Verificar se IDs estão configurados
-                const planoId = PLANOS_IDS[planoAtual];
-                if (!planoId) {
-                    throw new Error(`ID do plano ${planoAtual} não encontrado`);
-                }
-
-                // 2. Redirecionar DIRETO para MP Sandbox (forma mais simples)
-                redirecionarParaMPSandbox(planoId);
-
+                // 1. Criar token de cartão (simulado para teste)
+                const cardToken = await criarTokenCartaoTeste();
+                
+                // 2. Criar assinatura via API
+                const assinaturaId = await criarAssinaturaAPI(cardToken);
+                
+                // 3. Redirecionar para sucesso
+                redirecionarSucesso(assinaturaId);
+                
             } catch (error) {
-                console.error('Erro no pagamento:', error);
+                console.error('Erro:', error);
                 mostrarErro(error.message);
-                btnPagar.disabled = false;
+                btnAssinar.disabled = false;
                 loading.style.display = 'none';
             }
         }
 
-        function redirecionarParaMPSandbox(planoId) {
-            // URL CORRETA e SIMPLES para Mercado Pago Sandbox
-            const url = `https://sandbox.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=${planoId}&access_token=${CONFIG.ACCESS_TOKEN}`;
+        // Função SIMULADA para criar token (em produção use o SDK real)
+        async function criarTokenCartaoTeste() {
+            return 'TEST-' + Date.now() + '-TOKEN';
+        }
+
+        // Criar assinatura via API do Mercado Pago
+        async function criarAssinaturaAPI(cardToken) {
+            const planoId = PLANOS_IDS[planoAtual];
+            const planoInfo = PLANOS_INFO[planoAtual];
             
-            console.log('Redirecionando para MP Sandbox:', url);
+            const response = await fetch('https://api.mercadopago.com/v1/payments', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${CONFIG.ACCESS_TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'X-Idempotency-Key': Date.now().toString()
+                },
+                body: JSON.stringify({
+                    transaction_amount: planoInfo.valor,
+                    token: cardToken,
+                    description: `Assinatura ${planoInfo.nome} - ScanHub`,
+                    payment_method_id: "visa",
+                    payer: {
+                        email: "test@testuser.com"
+                    },
+                    installments: 1,
+                    capture: true
+                })
+            });
             
-            // Redirecionar
-            window.location.href = url;
+            if (!response.ok) {
+                throw new Error('Erro ao processar pagamento');
+            }
+            
+            const data = await response.json();
+            return data.id;
+        }
+
+        // Redirecionar para página de sucesso
+        function redirecionarSucesso(assinaturaId) {
+            window.location.href = `pagamento-sucesso.html?plano=${planoAtual}&id=${assinaturaId}`;
         }
 
         // ============== UTILITÁRIOS ==============
         function mostrarErro(mensagem) {
-            const errorDiv = document.getElementById('errorMessage');
+            const errorDiv = document.getElementById('errorMsg');
             errorDiv.innerHTML = `
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>Erro:</strong> ${mensagem}
+                <strong>❌ Erro:</strong> ${mensagem}
                 <br><br>
-                <small>
-                    Verifique se os IDs dos planos estão corretos:<br>
-                    Basic: ${PLANOS_IDS.basic}<br>
-                    Pro: ${PLANOS_IDS.pro}<br>
-                    Enterprise: ${PLANOS_IDS.enterprise}
-                </small>
+                <small>Verifique se os IDs dos planos estão corretos no código.</small>
             `;
             errorDiv.style.display = 'block';
-        }
-
-        function mostrarSucesso(mensagem) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${mensagem}`;
-            successDiv.style.display = 'block';
         }
     </script>
 </body>
