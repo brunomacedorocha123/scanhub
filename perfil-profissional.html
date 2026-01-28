@@ -46,6 +46,7 @@
             padding: 0 20px;
         }
 
+        /* Header com Badge do Plano */
         .profile-header {
             background: white;
             border-radius: 15px;
@@ -53,6 +54,42 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             margin-bottom: 30px;
             text-align: center;
+            position: relative;
+        }
+
+        /* Badge do Plano */
+        .plano-badge-perfil {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .plano-badge-basic {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .plano-badge-pro {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+        }
+
+        .plano-badge-enterprise {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+        }
+
+        .plano-badge-free {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
         }
 
         .profile-avatar {
@@ -359,6 +396,14 @@
                 height: 120px;
             }
             
+            .plano-badge-perfil {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 0 auto 20px;
+                width: fit-content;
+            }
+            
             .gallery-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
@@ -399,6 +444,12 @@
     <div class="container-main">
         <!-- Profile Header -->
         <div class="profile-header">
+            <!-- Badge do Plano (será preenchido pelo JavaScript) -->
+            <div class="plano-badge-perfil" id="planoBadge">
+                <i class="fas fa-crown"></i>
+                <span id="planoTexto">PLANO BASIC</span>
+            </div>
+            
             <div class="profile-avatar" id="avatarDisplay">
                 <i class="fas fa-user"></i>
                 <label class="avatar-upload-btn">
@@ -839,6 +890,8 @@
     const db = getFirestore(app);
 
     const loadingOverlay = document.getElementById('loadingOverlay');
+    const planoBadge = document.getElementById('planoBadge');
+    const planoTexto = document.getElementById('planoTexto');
     const avatarDisplay = document.getElementById('avatarDisplay');
     const avatarInput = document.getElementById('avatarInput');
     const userName = document.getElementById('userName');
@@ -890,6 +943,39 @@
         alert(mensagem);
     }
 
+    function atualizarBadgePlano(plano) {
+        const planos = {
+            'basic': { 
+                nome: 'BASIC', 
+                classe: 'plano-badge-basic',
+                icone: 'fas fa-gem'
+            },
+            'pro': { 
+                nome: 'PROFESSIONAL', 
+                classe: 'plano-badge-pro',
+                icone: 'fas fa-crown'
+            },
+            'enterprise': { 
+                nome: 'ENTERPRISE', 
+                classe: 'plano-badge-enterprise',
+                icone: 'fas fa-rocket'
+            },
+            'free': { 
+                nome: 'FREE', 
+                classe: 'plano-badge-free',
+                icone: 'fas fa-user'
+            }
+        };
+        
+        const infoPlano = planos[plano] || planos.free;
+        
+        // Atualizar classes
+        planoBadge.className = 'plano-badge-perfil ' + infoPlano.classe;
+        
+        // Atualizar conteúdo
+        planoTexto.innerHTML = `<i class="${infoPlano.icone}"></i> PLANO ${infoPlano.nome}`;
+    }
+
     async function uploadParaImgur(arquivo) {
         showLoading();
         
@@ -909,7 +995,7 @@
             });
             
             if (!resposta.ok) {
-                throw new Error(`Erro do Imgur`);
+                throw new Error('Erro no upload');
             }
             
             const dados = await resposta.json();
@@ -1070,6 +1156,12 @@
                 
                 if (userDoc.exists()) {
                     userData = userDoc.data();
+                    
+                    // Atualizar badge do plano
+                    if (userData.plano_assinatura) {
+                        atualizarBadgePlano(userData.plano_assinatura);
+                    }
+                    
                     carregarDadosUsuario(userData);
                 }
             } catch (erro) {
@@ -1132,7 +1224,6 @@
             whatsapp.value = prof.whatsapp || '';
             emailProfissional.value = prof.emailProfissional || '';
             
-            // PRIMEIRA ALTERAÇÃO: Carregar foto do profissional (campo separado)
             const fotoParaCarregar = dados.fotoPerfilProfissional || dados.fotoPerfil;
             
             if (fotoParaCarregar && fotoParaCarregar.startsWith('http')) {
@@ -1173,7 +1264,6 @@
             
             const userRef = doc(db, "usuarios", usuario.uid);
             
-            // SEGUNDA ALTERAÇÃO: Salvar em campo separado
             await updateDoc(userRef, {
                 fotoPerfilProfissional: imageUrl,
                 ultimaAtualizacao: new Date().toISOString()
