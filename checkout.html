@@ -41,7 +41,6 @@
             overflow: hidden;
         }
         
-        /* LEFT PANEL - RESUMO DO PLANO */
         .left-panel {
             padding: 40px;
             background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
@@ -117,7 +116,6 @@
             font-size: 18px;
         }
         
-        /* RIGHT PANEL - PAGAMENTO */
         .right-panel {
             padding: 40px;
         }
@@ -174,7 +172,6 @@
             gap: 15px;
         }
         
-        /* BOTÕES */
         .btn-pagar {
             background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             color: white;
@@ -222,7 +219,6 @@
             color: white;
         }
         
-        /* CARTOES TESTE */
         .cartoes-teste {
             background: #f8f9fa;
             border-radius: 15px;
@@ -270,7 +266,6 @@
             font-size: 14px;
         }
         
-        /* LOADING & ERROR */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -318,7 +313,6 @@
             display: block;
         }
         
-        /* RESPONSIVO */
         @media (max-width: 768px) {
             .checkout-container {
                 grid-template-columns: 1fr;
@@ -349,18 +343,15 @@
         }
     </style>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
         <p>Processando pagamento...</p>
     </div>
 
     <div class="checkout-container">
-        <!-- LEFT PANEL - RESUMO DO PLANO -->
         <div class="left-panel checkout-box">
             <div class="logo-checkout">
                 <h1><i class="fas fa-qrcode"></i> SCANHUB</h1>
@@ -392,17 +383,14 @@
             </div>
         </div>
         
-        <!-- RIGHT PANEL - PAGAMENTO -->
         <div class="right-panel checkout-box">
             <div class="header-pagamento">
                 <h2><i class="fas fa-credit-card"></i> Pagamento</h2>
                 <p>Complete os dados para finalizar sua assinatura</p>
             </div>
             
-            <!-- Mensagem de Erro -->
             <div class="error-message" id="errorMessage"></div>
             
-            <!-- Formulário de Pagamento -->
             <div class="form-container">
                 <div class="form-group">
                     <label class="form-label">Nome completo</label>
@@ -452,7 +440,7 @@
                 </div>
             </div>
             
-            <button class="btn-pagar" id="btnPagar" onclick="processarPagamento()">
+            <button class="btn-pagar" id="btnPagar">
                 <i class="fas fa-lock"></i> FINALIZAR ASSINATURA
             </button>
             
@@ -460,7 +448,6 @@
                 <i class="fas fa-arrow-left"></i> Voltar para planos
             </a>
             
-            <!-- Cartões para Teste -->
             <div class="cartoes-teste">
                 <h3><i class="fas fa-vial"></i> CARTÕES PARA TESTE (SANDBOX)</h3>
                 
@@ -495,20 +482,16 @@
     </div>
 
     <script>
-        // ============== CONFIGURAÇÃO ==============
         const CONFIG = {
-            // SUAS CREDENCIAIS MERCADO PAGO
             PUBLIC_KEY: 'TEST-7212078d-c1a3-424f-b3de-192dd48bdcbd',
             ACCESS_TOKEN: 'TEST-8505030648459314-012809-308028c845daf1965da62f398b2b794d-1057080095',
             
-            // IDs DOS SEUS PLANOS NO MERCADO PAGO
             PLANOS_IDS: {
                 basic: '2c9380848c58d203018c5c86352600a2',
                 pro: '2c9380848c58d203018c5c86353100a3',
                 enterprise: '2c9380848c58d203018c5c86353700a4'
             },
             
-            // INFORMAÇÕES DOS PLANOS
             PLANOS_INFO: {
                 basic: { nome: 'BASIC', preco: '29,90', valor: 29.90 },
                 pro: { nome: 'PROFESSIONAL', preco: '59,90', valor: 59.90 },
@@ -516,29 +499,21 @@
             }
         };
 
-        // ============== VARIÁVEIS GLOBAIS ==============
         let planoAtual = 'pro';
         let mpInstance = null;
         let firebaseApp = null;
         let currentUser = null;
 
-        // ============== INICIALIZAÇÃO ==============
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar plano da URL
             const urlParams = new URLSearchParams(window.location.search);
             planoAtual = urlParams.get('plano') || 'pro';
             
-            // Atualizar interface
             atualizarPlano();
-            
-            // Formatar inputs
             formatarInputs();
-            
-            // Inicializar Firebase
             inicializarFirebase();
-            
-            // Inicializar Mercado Pago
             inicializarMercadoPago();
+            
+            document.getElementById('btnPagar').addEventListener('click', processarPagamento);
         });
 
         function atualizarPlano() {
@@ -547,8 +522,6 @@
             
             document.getElementById('planoNome').textContent = plano.nome;
             document.getElementById('planoPreco').textContent = `R$ ${plano.preco}`;
-            
-            // Atualizar opções de parcelamento
             atualizarParcelas(plano.valor);
         }
 
@@ -567,14 +540,12 @@
         }
 
         function formatarInputs() {
-            // Formatar número do cartão
             document.getElementById('cardNumber').addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 value = value.replace(/(\d{4})/g, '$1 ').trim();
                 e.target.value = value.substring(0, 19);
             });
             
-            // Formatar validade
             document.getElementById('cardExpiry').addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 if (value.length >= 2) {
@@ -583,7 +554,6 @@
                 e.target.value = value.substring(0, 5);
             });
             
-            // Formatar CPF
             document.getElementById('identificationNumber').addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 if (value.length > 3) value = value.substring(0, 3) + '.' + value.substring(3);
@@ -593,7 +563,6 @@
             });
         }
 
-        // ============== FIREBASE ==============
         function inicializarFirebase() {
             const firebaseConfig = {
                 apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
@@ -606,9 +575,6 @@
             
             try {
                 firebaseApp = firebase.initializeApp(firebaseConfig);
-                console.log('Firebase inicializado');
-                
-                // Verificar autenticação
                 firebase.auth().onAuthStateChanged((user) => {
                     if (user) {
                         currentUser = user;
@@ -618,7 +584,7 @@
                     }
                 });
             } catch (error) {
-                console.log('Firebase já inicializado');
+                firebaseApp = firebase.app();
             }
         }
 
@@ -627,38 +593,24 @@
             document.getElementById('cardholderName').value = user.displayName || '';
         }
 
-        // ============== MERCADO PAGO ==============
         function inicializarMercadoPago() {
-            mpInstance = new MercadoPago(CONFIG.PUBLIC_KEY, {
-                locale: 'pt-BR'
-            });
-            console.log('Mercado Pago inicializado');
+            mpInstance = new MercadoPago(CONFIG.PUBLIC_KEY, { locale: 'pt-BR' });
         }
 
-        // ============== PROCESSAR PAGAMENTO ==============
         async function processarPagamento() {
             try {
-                // Validar dados
                 if (!validarFormulario()) return;
                 
-                // Mostrar loading
                 mostrarLoading(true);
                 ocultarErro();
                 
-                // 1. Criar token do cartão
                 const cardToken = await criarTokenCartao();
-                
-                // 2. Criar assinatura no Mercado Pago
                 const assinaturaId = await criarAssinaturaMP(cardToken);
-                
-                // 3. Salvar no Firebase
                 await salvarNoFirebase(assinaturaId);
                 
-                // 4. Redirecionar para sucesso
                 redirecionarSucesso(assinaturaId);
                 
             } catch (error) {
-                console.error('Erro:', error);
                 mostrarErro(error.message || 'Erro ao processar pagamento');
                 mostrarLoading(false);
             }
@@ -676,7 +628,6 @@
                 }
             }
             
-            // Validar email
             const email = document.getElementById('cardholderEmail').value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
@@ -684,7 +635,6 @@
                 return false;
             }
             
-            // Validar CVV
             const cvv = document.getElementById('cardCvv').value;
             if (cvv.length < 3) {
                 mostrarErro('CVV deve ter 3 ou 4 dígitos');
@@ -695,8 +645,6 @@
         }
 
         async function criarTokenCartao() {
-            // Em produção, use o SDK do Mercado Pago para criar token
-            // Para sandbox, podemos simular
             return new Promise((resolve) => {
                 setTimeout(() => {
                     resolve('TEST-' + Date.now() + '-TOKEN');
@@ -708,14 +656,10 @@
             const planoId = CONFIG.PLANOS_IDS[planoAtual];
             const planoInfo = CONFIG.PLANOS_INFO[planoAtual];
             
-            if (!planoId || planoId.includes('SEU-ID')) {
-                throw new Error('Configure os IDs dos planos no código!');
+            if (!planoId) {
+                throw new Error('Plano não configurado');
             }
             
-            // Simulação - em produção faça a chamada real à API
-            console.log('Criando assinatura com:', { planoId, cardToken });
-            
-            // Simular resposta do Mercado Pago
             return new Promise((resolve) => {
                 setTimeout(() => {
                     resolve('MP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase());
@@ -724,39 +668,44 @@
         }
 
         async function salvarNoFirebase(assinaturaId) {
-            if (!currentUser || !firebaseApp) return;
+            if (!currentUser) {
+                throw new Error('Usuário não autenticado');
+            }
             
             const db = firebase.firestore();
             const userId = currentUser.uid;
             const userEmail = currentUser.email;
+            const planoInfo = CONFIG.PLANOS_INFO[planoAtual];
             
-            // Calcular datas
             const hoje = new Date();
             const expiracao = new Date(hoje);
-            expiracao.setMonth(expiracao.getMonth() + 1); // +1 mês
+            expiracao.setMonth(expiracao.getMonth() + 1);
             
-            // Salvar assinatura
             await db.collection('assinaturas').doc(assinaturaId).set({
                 userId: userId,
                 userEmail: userEmail,
                 plano: planoAtual,
+                nomePlano: planoInfo.nome,
                 assinaturaId: assinaturaId,
                 status: 'ativa',
-                valor: CONFIG.PLANOS_INFO[planoAtual].valor,
-                dataInicio: firebase.firestore.Timestamp.now(),
+                valor: planoInfo.valor,
+                valorFormatado: `R$ ${planoInfo.preco}`,
+                dataInicio: firebase.firestore.FieldValue.serverTimestamp(),
                 dataExpiracao: firebase.firestore.Timestamp.fromDate(expiracao),
-                dataCriacao: firebase.firestore.Timestamp.now()
+                dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
+                proximaCobranca: firebase.firestore.Timestamp.fromDate(expiracao),
+                metodoPagamento: 'cartao',
+                recorrente: true
             });
             
-            // Atualizar usuário
             await db.collection('usuarios').doc(userId).update({
                 plano_assinatura: planoAtual,
                 status_assinatura: 'ativa',
                 data_expiracao_assinatura: firebase.firestore.Timestamp.fromDate(expiracao),
-                ultimo_pagamento: firebase.firestore.Timestamp.now()
+                ultimo_pagamento: firebase.firestore.FieldValue.serverTimestamp(),
+                assinatura_ativa: true,
+                data_atualizacao: firebase.firestore.FieldValue.serverTimestamp()
             });
-            
-            console.log('Dados salvos no Firebase');
         }
 
         function redirecionarSucesso(assinaturaId) {
@@ -765,7 +714,6 @@
             }, 500);
         }
 
-        // ============== UTILITÁRIOS ==============
         function mostrarLoading(mostrar) {
             const overlay = document.getElementById('loadingOverlay');
             const btn = document.getElementById('btnPagar');
@@ -784,7 +732,6 @@
             errorDiv.textContent = '❌ ' + mensagem;
             errorDiv.classList.add('active');
             
-            // Auto-remover após 10 segundos
             setTimeout(() => {
                 ocultarErro();
             }, 10000);
@@ -793,41 +740,6 @@
         function ocultarErro() {
             document.getElementById('errorMessage').classList.remove('active');
         }
-
-        // ============== BACKUP SIMPLES ==============
-        // Se algo der errado, esta função faz um fluxo simplificado
-        async function processarPagamentoSimplificado() {
-            try {
-                mostrarLoading(true);
-                
-                // Simular processamento
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // Criar ID fake para demonstração
-                const assinaturaId = 'MP-DEMO-' + Date.now();
-                
-                // Redirecionar
-                window.location.href = `pagamento-sucesso.html?plano=${planoAtual}&id=${assinaturaId}`;
-                
-            } catch (error) {
-                mostrarErro('Erro: ' + error.message);
-                mostrarLoading(false);
-            }
-        }
-
-        // Adicionar fallback
-        document.getElementById('btnPagar').addEventListener('click', function(e) {
-            // Se o processamento principal falhar, tenta o simplificado
-            const originalProcess = processarPagamento;
-            processarPagamento = async function() {
-                try {
-                    await originalProcess();
-                } catch (error) {
-                    console.log('Tentando fluxo simplificado...');
-                    await processarPagamentoSimplificado();
-                }
-            };
-        });
     </script>
 </body>
 </html>
