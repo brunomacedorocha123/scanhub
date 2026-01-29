@@ -182,6 +182,7 @@
 
         .filter-group {
             margin-bottom: 0;
+            position: relative;
         }
 
         .filter-group label {
@@ -202,12 +203,56 @@
             font-family: 'Poppins', sans-serif;
             background: white;
             cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 15px;
+            padding-right: 40px;
         }
 
         .filter-group select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(68, 104, 154, 0.1);
             outline: none;
+        }
+
+        /* Campo de cidade com autocomplete */
+        .city-input-container {
+            position: relative;
+        }
+
+        .city-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .city-suggestion {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .city-suggestion:hover {
+            background: #f0f7ff;
+        }
+
+        .city-suggestion:last-child {
+            border-bottom: none;
         }
 
         /* Results Info */
@@ -522,31 +567,6 @@
             margin-left: 5px;
         }
 
-        /* Modal de Detalhes */
-        .modal-professional {
-            border-radius: 20px;
-            border: none;
-            overflow: hidden;
-        }
-
-        .modal-professional .modal-header {
-            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
-            color: white;
-            border: none;
-            padding: 25px 30px;
-        }
-
-        .modal-professional .modal-body {
-            padding: 30px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-
-        .modal-professional .modal-footer {
-            border-top: 1px solid #eee;
-            padding: 20px 30px;
-        }
-
         /* Responsive */
         @media (max-width: 1200px) {
             .main-container {
@@ -729,12 +749,10 @@
                     </select>
                 </div>
 
-                <div class="filter-group">
+                <div class="filter-group city-input-container">
                     <label for="filterCity"><i class="fas fa-map-marker-alt me-2"></i>Cidade</label>
-                    <select id="filterCity" class="form-select">
-                        <option value="">Todas cidades</option>
-                        <!-- Carregado pelo JavaScript -->
-                    </select>
+                    <input type="text" id="filterCity" class="form-control" placeholder="Digite sua cidade..." autocomplete="off">
+                    <div class="city-suggestions" id="citySuggestions"></div>
                 </div>
 
                 <div class="filter-group">
@@ -781,32 +799,6 @@
                 <i class="fas fa-search"></i>
                 <h3>Busque por profissionais</h3>
                 <p>Digite na barra de busca acima para encontrar profissionais qualificados na sua região.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para detalhes do profissional -->
-    <div class="modal fade modal-professional" id="professionalModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalProfessionalName">Carregando...</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="modalProfessionalContent">
-                        <div class="text-center">
-                            <div class="spinner"></div>
-                            <p>Carregando detalhes...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary" id="modalContactBtn">
-                        <i class="fab fa-whatsapp me-2"></i>Contatar
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -864,12 +856,7 @@
         const sortBy = document.getElementById('sortBy');
         const resultsCount = document.getElementById('resultsCount');
         const professionalsGrid = document.getElementById('professionalsGrid');
-        
-        // Modal
-        const professionalModal = new bootstrap.Modal(document.getElementById('professionalModal'));
-        const modalProfessionalName = document.getElementById('modalProfessionalName');
-        const modalProfessionalContent = document.getElementById('modalProfessionalContent');
-        const modalContactBtn = document.getElementById('modalContactBtn');
+        const citySuggestions = document.getElementById('citySuggestions');
 
         // ============================================
         // VARIÁVEIS GLOBAIS
@@ -878,26 +865,18 @@
         let filteredProfessionals = [];
         let currentUser = null;
         
-        // Dados para filtros
-        const specialtiesSet = new Set();
-        const citiesSet = new Set();
+        // Dados para filtros - Vamos carregar DINAMICAMENTE
+        let specialtiesSet = new Set();
+        let citiesSet = new Set();
+        let cityList = [];
         
-        // Lista completa de especialidades (mesma do seu código)
-        const ALL_SPECIALTIES = [
-            "Advocacia", "Alarme", "Alvenaria", "Antena", "Ar Condicionado", "Arquitetura", "Artes Marciais",
-            "Babysitter", "Barbeiro", "Cabeleireiro", "Calhas", "Cerca Elétrica", "Cerâmica", "Chaveiro",
-            "Coach", "Consultoria", "Construção Civil", "Contabilidade", "Costura", "Cuidador de Idosos",
-            "Dança", "Dedetização", "Design", "Design de Interiores", "Elétrica", "Eletrodomésticos",
-            "Eletrônica", "Encanador", "Engenharia", "Entregador", "Eventos", "Festas", "Fotógrafo",
-            "Forro", "Funilaria", "Gesso", "Guias de Turismo", "Hidráulica", "Impermeabilização",
-            "Jardineiro", "Jardinagem", "Jato de Areia", "Lavanderia", "Limpeza", "Logística",
-            "Manicure", "Marcenaria", "Marketing Digital", "Massoterapia", "Mecânica", "Montador",
-            "Motorista", "Músico", "Nutricionista", "Organização", "Personal Trainer", "Pet Sitter",
-            "Pintura", "Pisos", "Piscina", "Portão", "Programador", "Professor", "Psicologia",
-            "Redes", "Redator", "Reformas", "Segurança", "Serralheria", "Sistema Fotovoltaico",
-            "Social Media", "Solda", "Som", "Técnico de Celular", "Telhado", "TI & Informática",
-            "Tradução", "Turismo", "Veterinária", "Video Maker", "Vidraçaria", "Web Designer",
-            "Yoga", "Outro"
+        // Lista de estados brasileiros para sugestão
+        const BRAZILIAN_STATES = [
+            'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal',
+            'Espírito Santo', 'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul',
+            'Minas Gerais', 'Pará', 'Paraíba', 'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro',
+            'Rio Grande do Norte', 'Rio Grande do Sul', 'Rondônia', 'Roraima', 'Santa Catarina',
+            'São Paulo', 'Sergipe', 'Tocantins'
         ];
 
         // ============================================
@@ -913,7 +892,6 @@
         }
 
         function showAlert(message, type = 'info') {
-            // Criar alerta customizado
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
             alertDiv.style.cssText = `
@@ -931,7 +909,6 @@
             
             document.body.appendChild(alertDiv);
             
-            // Auto-remover após 5 segundos
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
@@ -957,61 +934,87 @@
         }
 
         // ============================================
-        // FUNÇÕES PRINCIPAIS
+        // FUNÇÕES PRINCIPAIS - CARREGAMENTO DE DADOS
         // ============================================
 
         async function loadAllProfessionals() {
             showLoading();
             
             try {
+                console.log('🔍 Iniciando carregamento de profissionais...');
+                
                 // Resetar dados
                 allProfessionals = [];
-                specialtiesSet.clear();
-                citiesSet.clear();
+                specialtiesSet = new Set();
+                citiesSet = new Set();
+                cityList = [];
                 
-                // Buscar TODOS os profissionais ativos
+                // Buscar TODOS os profissionais
                 const q = query(
                     collection(db, "usuarios"),
-                    where("tipoUsuario", "==", "profissional"),
-                    where("status", "==", "ativo")
+                    where("tipoUsuario", "==", "profissional")
                 );
                 
                 const querySnapshot = await getDocs(q);
-                console.log(`Encontrados ${querySnapshot.size} profissionais no total`);
+                console.log(`📊 Total de documentos encontrados: ${querySnapshot.size}`);
                 
                 // Processar cada documento
-                const promises = querySnapshot.docs.map(async (docSnapshot) => {
+                querySnapshot.forEach((docSnapshot) => {
                     const userData = docSnapshot.data();
                     
-                    // Verificar se tem perfil profissional completo
-                    if (userData.profissional && 
-                        userData.profissional.perfilCompleto === true &&
-                        userData.profissional.visivelBusca !== false) {
+                    // Verificar se tem perfil profissional
+                    if (userData.profissional && userData.status === "ativo") {
                         
-                        // Adicionar especialidade ao conjunto
-                        if (userData.profissional.especialidadePrincipal) {
-                            specialtiesSet.add(userData.profissional.especialidadePrincipal);
+                        const profData = userData.profissional;
+                        
+                        // Verificar condições para aparecer
+                        const hasCompleteProfile = profData.perfilCompleto === true;
+                        const isVisible = profData.visivelBusca !== false;
+                        const hasSpecialty = profData.especialidadePrincipal && profData.especialidadePrincipal.trim() !== '';
+                        const hasName = profData.nomeProfissional && profData.nomeProfissional.trim() !== '';
+                        
+                        if (hasCompleteProfile && isVisible && hasSpecialty && hasName) {
+                            const professional = {
+                                id: docSnapshot.id,
+                                ...userData
+                            };
+                            
+                            allProfessionals.push(professional);
+                            
+                            // Coletar especialidades
+                            if (profData.especialidadePrincipal) {
+                                specialtiesSet.add(profData.especialidadePrincipal);
+                            }
+                            
+                            // Coletar cidades
+                            if (profData.cidadeBase) {
+                                const city = profData.cidadeBase.trim();
+                                if (city && !citiesSet.has(city)) {
+                                    citiesSet.add(city);
+                                    cityList.push(city);
+                                }
+                            }
+                            
+                            // Coletar cidades atendidas
+                            if (profData.cidadesAtendidas && Array.isArray(profData.cidadesAtendidas)) {
+                                profData.cidadesAtendidas.forEach(city => {
+                                    const cityTrimmed = city.trim();
+                                    if (cityTrimmed && !citiesSet.has(cityTrimmed)) {
+                                        citiesSet.add(cityTrimmed);
+                                        cityList.push(cityTrimmed);
+                                    }
+                                });
+                            }
                         }
-                        
-                        // Adicionar cidade ao conjunto
-                        if (userData.profissional.cidadeBase) {
-                            citiesSet.add(userData.profissional.cidadeBase);
-                        }
-                        
-                        return {
-                            id: docSnapshot.id,
-                            ...userData
-                        };
                     }
-                    return null;
                 });
                 
-                // Esperar todas as promessas
-                const results = await Promise.all(promises);
+                console.log(`✅ Profissionais carregados: ${allProfessionals.length}`);
+                console.log(`🏙️ Cidades encontradas: ${cityList.length}`);
+                console.log(`⭐ Especialidades encontradas: ${Array.from(specialtiesSet).length}`);
                 
-                // Filtrar resultados nulos
-                allProfessionals = results.filter(prof => prof !== null);
-                console.log(`Carregados ${allProfessionals.length} profissionais com perfil completo`);
+                // Ordenar arrays
+                cityList.sort();
                 
                 // Popular filtros
                 populateFilterSelects();
@@ -1019,9 +1022,18 @@
                 // Aplicar filtros iniciais
                 applyFilters();
                 
+                // Mostrar mensagem de sucesso
+                setTimeout(() => {
+                    if (allProfessionals.length > 0) {
+                        showAlert(`✅ ${allProfessionals.length} profissionais carregados com sucesso!`, 'success');
+                    } else {
+                        showAlert('ℹ️ Nenhum profissional encontrado no momento.', 'info');
+                    }
+                }, 1000);
+                
             } catch (error) {
-                console.error('Erro detalhado ao carregar profissionais:', error);
-                showAlert('Erro ao carregar profissionais. Verifique sua conexão e tente novamente.', 'error');
+                console.error('❌ Erro ao carregar profissionais:', error);
+                showAlert('❌ Erro ao carregar profissionais. Verifique sua conexão e tente novamente.', 'error');
                 showEmptyState('Erro ao carregar', 'Não foi possível carregar a lista de profissionais.');
             } finally {
                 hideLoading();
@@ -1029,11 +1041,14 @@
         }
 
         function populateFilterSelects() {
-            // Popular especialidades
+            console.log('🔧 Populando filtros...');
+            
+            // ========== ESPECIALIDADES ==========
             filterSpecialty.innerHTML = '<option value="">Todas especialidades</option>';
             
             // Converter Set para Array e ordenar
-            const specialtiesArray = Array.from(specialtiesSet).sort();
+            const specialtiesArray = Array.from(specialtiesSet);
+            specialtiesArray.sort();
             
             // Adicionar especialidades encontradas
             specialtiesArray.forEach(specialty => {
@@ -1043,37 +1058,68 @@
                 filterSpecialty.appendChild(option);
             });
             
-            // Adicionar outras especialidades da lista completa (desabilitadas)
-            ALL_SPECIALTIES.forEach(specialty => {
-                if (!specialtiesSet.has(specialty)) {
-                    const option = document.createElement('option');
-                    option.value = specialty;
-                    option.textContent = `${specialty} (nenhum profissional)`;
-                    option.disabled = true;
-                    option.style.color = '#999';
-                    option.style.fontStyle = 'italic';
-                    filterSpecialty.appendChild(option);
-                }
+            console.log(`🔧 ${specialtiesArray.length} especialidades adicionadas ao filtro`);
+            
+            // ========== SUGESTÕES DE CIDADES ==========
+            // A lista de sugestões será carregada dinamicamente quando o usuário digitar
+            
+            // Mostrar quantas cidades foram encontradas
+            if (cityList.length > 0) {
+                console.log(`🏙️ ${cityList.length} cidades disponíveis para busca`);
+            }
+        }
+
+        function showCitySuggestions(searchTerm = '') {
+            citySuggestions.innerHTML = '';
+            
+            if (!searchTerm.trim()) {
+                citySuggestions.style.display = 'none';
+                return;
+            }
+            
+            const searchLower = searchTerm.toLowerCase();
+            const matches = cityList.filter(city => 
+                city.toLowerCase().includes(searchLower)
+            ).slice(0, 10); // Limitar a 10 sugestões
+            
+            if (matches.length === 0) {
+                citySuggestions.style.display = 'none';
+                return;
+            }
+            
+            matches.forEach(city => {
+                const div = document.createElement('div');
+                div.className = 'city-suggestion';
+                div.textContent = city;
+                div.onclick = () => {
+                    filterCity.value = city;
+                    citySuggestions.style.display = 'none';
+                    applyFilters();
+                };
+                citySuggestions.appendChild(div);
             });
             
-            // Popular cidades
-            filterCity.innerHTML = '<option value="">Todas cidades</option>';
-            const citiesArray = Array.from(citiesSet).sort();
-            citiesArray.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city;
-                option.textContent = city;
-                filterCity.appendChild(option);
-            });
+            citySuggestions.style.display = 'block';
         }
+
+        // ============================================
+        // SISTEMA DE FILTRAGEM
+        // ============================================
 
         function applyFilters() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedSpecialty = filterSpecialty.value;
-            const selectedCity = filterCity.value;
+            const selectedCity = filterCity.value.toLowerCase().trim();
             const minRating = parseFloat(filterRating.value) || 0;
             const serviceType = filterServiceType.value;
             const sortOrder = sortBy.value;
+            
+            console.log('🎯 Aplicando filtros...');
+            console.log('🔍 Busca:', searchTerm);
+            console.log('⭐ Especialidade:', selectedSpecialty);
+            console.log('🏙️ Cidade:', selectedCity);
+            console.log('★ Avaliação mínima:', minRating);
+            console.log('🛠️ Tipo serviço:', serviceType);
             
             // Filtrar profissionais
             filteredProfessionals = allProfessionals.filter(prof => {
@@ -1107,8 +1153,8 @@
                 
                 // 3. Filtro por cidade
                 if (selectedCity) {
-                    const cidadeBase = profData.cidadeBase || '';
-                    const cidadesAtendidas = profData.cidadesAtendidas || [];
+                    const cidadeBase = (profData.cidadeBase || '').toLowerCase();
+                    const cidadesAtendidas = (profData.cidadesAtendidas || []).map(c => c.toLowerCase());
                     
                     if (cidadeBase !== selectedCity && 
                         !cidadesAtendidas.includes(selectedCity)) {
@@ -1126,19 +1172,21 @@
                 if (serviceType) {
                     switch(serviceType) {
                         case 'presencial':
-                            if (!profData.atendeDomicilio) return false;
+                            if (profData.atendeDomicilio !== true) return false;
                             break;
                         case 'remoto':
-                            if (!profData.atendeOnline) return false;
+                            if (profData.atendeOnline !== true) return false;
                             break;
                         case 'ambos':
-                            if (!profData.atendeDomicilio || !profData.atendeOnline) return false;
+                            if (profData.atendeDomicilio !== true || profData.atendeOnline !== true) return false;
                             break;
                     }
                 }
                 
                 return true;
             });
+            
+            console.log(`✅ ${filteredProfessionals.length} profissionais após filtragem`);
             
             // Ordenar resultados
             sortProfessionals(filteredProfessionals, sortOrder);
@@ -1178,7 +1226,7 @@
                     
                 case 'relevance':
                 default:
-                    // Manter ordem original (mais recentes primeiro)
+                    // Manter ordem original
                     break;
             }
         }
@@ -1195,6 +1243,10 @@
             }
         }
 
+        // ============================================
+        // RENDERIZAÇÃO DOS RESULTADOS
+        // ============================================
+
         function renderProfessionals() {
             professionalsGrid.innerHTML = '';
             
@@ -1207,11 +1259,10 @@
             }
             
             filteredProfessionals.forEach((prof, index) => {
-                setTimeout(() => {
-                    const card = createProfessionalCard(prof);
-                    card.classList.add('fade-in');
-                    professionalsGrid.appendChild(card);
-                }, index * 50); // Animação em cascata
+                const card = createProfessionalCard(prof);
+                card.style.animationDelay = `${index * 50}ms`;
+                card.classList.add('fade-in');
+                professionalsGrid.appendChild(card);
             });
         }
 
@@ -1235,31 +1286,33 @@
             const card = document.createElement('div');
             card.className = 'professional-card';
             
-            // Gerar tags HTML
-            let tagsHTML = '';
-            if (profData.especialidades && Array.isArray(profData.especialidades)) {
-                tagsHTML = `
-                    <div class="card-tags">
-                        ${profData.especialidades.slice(0, 3).map(tag => 
-                            `<span class="card-tag">${tag}</span>`
-                        ).join('')}
-                        ${profData.especialidades.length > 3 ? 
-                            `<span class="card-tag">+${profData.especialidades.length - 3}</span>` : ''
-                        }
-                    </div>
-                `;
-            }
-            
             // Gerar rating HTML
             let ratingHTML = '';
             const rating = profData.avaliacaoMedia || 0;
             if (rating > 0) {
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 >= 0.5;
+                
                 ratingHTML = `
-                    <div class="rating-stars">
-                        ${Array.from({length: 5}, (_, i) => 
-                            `<i class="fas fa-star${i < Math.floor(rating) ? '' : '-half-alt'}"></i>`
-                        ).join('')}
+                    <div class="rating-starts">
+                        ${Array(fullStars).fill('<i class="fas fa-star"></i>').join('')}
+                        ${hasHalfStar ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                        ${Array(5 - fullStars - (hasHalfStar ? 1 : 0)).fill('<i class="far fa-star"></i>').join('')}
                         <span class="rating-value">${rating.toFixed(1)}</span>
+                    </div>
+                `;
+            }
+            
+            // Gerar tags HTML
+            let tagsHTML = '';
+            if (profData.especialidades && Array.isArray(profData.especialidades) && profData.especialidades.length > 0) {
+                const tagsToShow = profData.especialidades.slice(0, 3);
+                tagsHTML = `
+                    <div class="card-tags">
+                        ${tagsToShow.map(tag => `<span class="card-tag">${tag}</span>`).join('')}
+                        ${profData.especialidades.length > 3 ? 
+                            `<span class="card-tag">+${profData.especialidades.length - 3}</span>` : ''
+                        }
                     </div>
                 `;
             }
@@ -1283,7 +1336,7 @@
                         <span>${profData.especialidadePrincipal || 'Serviços Profissionais'}</span>
                     </div>
                     
-                    <p class="card-slogan">${profData.slogan || profData.descricao?.substring(0, 120) || 'Profissional qualificado e experiente.'}</p>
+                    <p class="card-slogan">${profData.slogan || (profData.descricao ? profData.descricao.substring(0, 120) + '...' : 'Profissional qualificado e experiente.')}</p>
                     
                     ${tagsHTML}
                     
@@ -1302,15 +1355,17 @@
                         
                         <div class="meta-item">
                             <i class="fas fa-check-circle"></i>
-                            <span class="meta-label">Status</span>
-                            <span class="meta-value">${profData.atendeOnline && profData.atendeDomicilio ? 'Presencial/Online' : 
-                                                     profData.atendeOnline ? 'Online' : 
-                                                     profData.atendeDomicilio ? 'Presencial' : 'Não informado'}</span>
+                            <span class="meta-label">Atendimento</span>
+                            <span class="meta-value">
+                                ${profData.atendeOnline && profData.atendeDomicilio ? 'Presencial/Online' : 
+                                  profData.atendeOnline ? 'Online' : 
+                                  profData.atendeDomicilio ? 'Presencial' : 'Não informado'}
+                            </span>
                         </div>
                     </div>
                     
                     <div class="card-footer">
-                        <button class="btn-ver-perfil" onclick="showProfessionalDetails('${prof.id}')" data-professional-id="${prof.id}">
+                        <button class="btn-ver-perfil" onclick="viewProfessionalProfile('${prof.id}')">
                             <i class="fas fa-eye me-2"></i>Ver Perfil Completo
                         </button>
                     </div>
@@ -1332,120 +1387,23 @@
             }
         }
 
-        async function showProfessionalDetails(professionalId) {
+        // ============================================
+        // FUNÇÕES DE NAVEGAÇÃO
+        // ============================================
+
+        async function viewProfessionalProfile(professionalId) {
             showLoading();
             
             try {
-                // Buscar dados completos do profissional
-                const userRef = doc(db, "usuarios", professionalId);
-                const userDoc = await getDoc(userRef);
+                // Salvar no sessionStorage para a próxima página
+                sessionStorage.setItem('profissionalSelecionado', professionalId);
                 
-                if (!userDoc.exists()) {
-                    throw new Error('Profissional não encontrado');
-                }
-                
-                const userData = userDoc.data();
-                const profData = userData.profissional;
-                
-                if (!profData) {
-                    throw new Error('Dados profissionais não encontrados');
-                }
-                
-                // Atualizar modal
-                modalProfessionalName.textContent = profData.nomeProfissional || 'Profissional';
-                
-                // Gerar conteúdo do modal
-                const photoUrl = getPhotoUrl(userData, profData);
-                const whatsappLink = profData.whatsapp ? 
-                    `https://wa.me/55${profData.whatsapp.replace(/\D/g, '')}?text=Olá ${profData.nomeProfissional}! Vi seu perfil no ScanHub e gostaria de mais informações.` : 
-                    '#';
-                
-                modalProfessionalContent.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-4 text-center mb-4 mb-md-0">
-                            <div class="profile-avatar-modal mb-3" style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden; margin: 0 auto;">
-                                <img src="${photoUrl}" alt="${profData.nomeProfissional}" 
-                                     style="width: 100%; height: 100%; object-fit: cover;"
-                                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(profData.nomeProfissional)}&background=44689a&color=fff&size=200'">
-                            </div>
-                            <h4>${profData.nomeProfissional}</h4>
-                            <p class="text-muted">${profData.especialidadePrincipal || 'Profissional'}</p>
-                            
-                            ${profData.avaliacaoMedia ? `
-                                <div class="rating-stars justify-content-center mb-2">
-                                    ${Array.from({length: 5}, (_, i) => 
-                                        `<i class="fas fa-star${i < Math.floor(profData.avaliacaoMedia) ? '' : '-half-alt'}"></i>`
-                                    ).join('')}
-                                    <span class="rating-value ms-2">${profData.avaliacaoMedia.toFixed(1)}</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="col-md-8">
-                            <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Informações</h5>
-                            
-                            <div class="row mb-4">
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Especialidade Principal</small>
-                                    <strong>${profData.especialidadePrincipal || 'Não informada'}</strong>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Experiência</small>
-                                    <strong>${formatExperience(profData.anosExperiencia)}</strong>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Cidade Base</small>
-                                    <strong>${profData.cidadeBase || 'Não informada'}</strong>
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <small class="text-muted d-block">Tipo de Atendimento</small>
-                                    <strong>${profData.atendeOnline && profData.atendeDomicilio ? 'Presencial e Online' : 
-                                             profData.atendeOnline ? 'Apenas Online' : 
-                                             profData.atendeDomicilio ? 'Apenas Presencial' : 'Não informado'}</strong>
-                                </div>
-                            </div>
-                            
-                            ${profData.descricao ? `
-                                <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>Descrição</h5>
-                                <p class="mb-4">${profData.descricao}</p>
-                            ` : ''}
-                            
-                            ${profData.especialidades && profData.especialidades.length > 0 ? `
-                                <h5 class="mb-3"><i class="fas fa-tags me-2"></i>Especialidades</h5>
-                                <div class="d-flex flex-wrap gap-2 mb-4">
-                                    ${profData.especialidades.map(tag => 
-                                        `<span class="badge bg-primary">${tag}</span>`
-                                    ).join('')}
-                                </div>
-                            ` : ''}
-                            
-                            ${profData.formasPagamento && profData.formasPagamento.length > 0 ? `
-                                <h5 class="mb-3"><i class="fas fa-money-bill-wave me-2"></i>Formas de Pagamento</h5>
-                                <div class="d-flex flex-wrap gap-2 mb-4">
-                                    ${profData.formasPagamento.map(pagamento => 
-                                        `<span class="badge bg-success">${pagamento}</span>`
-                                    ).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-                
-                // Configurar botão de contato
-                modalContactBtn.onclick = () => {
-                    if (profData.whatsapp) {
-                        window.open(whatsappLink, '_blank');
-                    } else {
-                        showAlert('WhatsApp não disponível para este profissional.', 'warning');
-                    }
-                };
-                
-                // Mostrar modal
-                professionalModal.show();
+                // Redirecionar para a página de perfil
+                window.location.href = `perfil-profissional-publico.html?id=${professionalId}`;
                 
             } catch (error) {
-                console.error('Erro ao carregar detalhes:', error);
-                showAlert('Erro ao carregar detalhes do profissional.', 'error');
+                console.error('Erro ao redirecionar:', error);
+                showAlert('Erro ao carregar perfil do profissional.', 'error');
             } finally {
                 hideLoading();
             }
@@ -1462,19 +1420,17 @@
             filterRating.value = '0';
             filterServiceType.value = '';
             sortBy.value = 'relevance';
+            
+            // Esconder sugestões
+            citySuggestions.style.display = 'none';
+            
+            // Aplicar filtros
             applyFilters();
+            
+            showAlert('Filtros limpos com sucesso!', 'info');
         };
 
-        window.showProfessionalDetails = showProfessionalDetails;
-
-        window.contactProfessional = function(whatsapp) {
-            if (whatsapp) {
-                const cleanNumber = whatsapp.replace(/\D/g, '');
-                window.open(`https://wa.me/55${cleanNumber}`, '_blank');
-            } else {
-                showAlert('WhatsApp não disponível para este profissional.', 'warning');
-            }
-        };
+        window.viewProfessionalProfile = viewProfessionalProfile;
 
         // ============================================
         // INICIALIZAÇÃO DO SISTEMA
@@ -1494,26 +1450,46 @@
                 searchTimeout = setTimeout(applyFilters, 500);
             });
             
-            // Filtros
+            // Campo de cidade com autocomplete
+            let cityTimeout;
+            filterCity.addEventListener('input', () => {
+                clearTimeout(cityTimeout);
+                cityTimeout = setTimeout(() => {
+                    showCitySuggestions(filterCity.value);
+                    applyFilters();
+                }, 300);
+            });
+            
+            // Fechar sugestões ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!filterCity.contains(e.target) && !citySuggestions.contains(e.target)) {
+                    citySuggestions.style.display = 'none';
+                }
+            });
+            
+            // Filtros select
             filterSpecialty.addEventListener('change', applyFilters);
-            filterCity.addEventListener('change', applyFilters);
             filterRating.addEventListener('change', applyFilters);
             filterServiceType.addEventListener('change', applyFilters);
             sortBy.addEventListener('change', applyFilters);
             
-            // Prevenir envio de formulário acidental
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                    e.preventDefault();
-                }
-            });
+            // Recarregar dados
+            document.addEventListener('reloadProfessionals', loadAllProfessionals);
+            
+            // Botão de recarregar na interface (opcional)
+            const reloadBtn = document.createElement('button');
+            reloadBtn.className = 'btn btn-sm btn-outline-primary ms-2';
+            reloadBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            reloadBtn.title = 'Recarregar profissionais';
+            reloadBtn.onclick = loadAllProfessionals;
+            document.querySelector('.sort-filter').appendChild(reloadBtn);
         }
 
         // Verificar autenticação e carregar dados
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                console.log('Usuário autenticado:', user.uid);
+                console.log('👤 Usuário autenticado:', user.uid);
                 
                 // Carregar profissionais
                 await loadAllProfessionals();
@@ -1521,13 +1497,8 @@
                 // Inicializar eventos
                 initEventListeners();
                 
-                // Mostrar mensagem de boas-vindas
-                setTimeout(() => {
-                    showAlert(`Bem-vindo(a) de volta! Encontramos ${allProfessionals.length} profissionais disponíveis.`, 'success');
-                }, 1000);
-                
             } else {
-                console.log('Usuário não autenticado, redirecionando...');
+                console.log('🔒 Usuário não autenticado, redirecionando...');
                 window.location.href = 'login.html';
             }
         });
@@ -1535,8 +1506,15 @@
         // Recarregar página quando voltar do cache
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
-                console.log('Página carregada do cache, recarregando dados...');
+                console.log('🔄 Página carregada do cache, recarregando dados...');
                 loadAllProfessionals();
+            }
+        });
+
+        // Prevenir envio de formulário
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
             }
         });
 
@@ -1544,11 +1522,12 @@
         window.debug = {
             getAllProfessionals: () => allProfessionals,
             getFilteredProfessionals: () => filteredProfessionals,
-            reloadData: loadAllProfessionals,
-            clearFilters: window.clearAllFilters
+            getSpecialties: () => Array.from(specialtiesSet),
+            getCities: () => cityList,
+            reloadData: loadAllProfessionals
         };
 
-        console.log('Sistema de busca de profissionais inicializado!');
+        console.log('🚀 Sistema de busca de profissionais inicializado!');
 
     </script>
 </body>
