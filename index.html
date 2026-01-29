@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-       :root {
+      :root {
     --primary-color: #44689a;
     --secondary-color: #33c47;
     --light-color: #e8ecef;
@@ -37,6 +37,19 @@ body {
     overflow-x: hidden;
 }
 
+/* NAVBAR FIXED */
+.navbar {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    padding: 15px 0;
+    transition: all 0.3s ease;
+    position: fixed !important;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
 .navbar-brand {
     display: flex;
     align-items: center;
@@ -53,16 +66,52 @@ body {
     object-fit: contain;
 }
 
+.navbar-toggler {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2844, 62, 80, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    width: 24px;
+    height: 24px;
+}
+
 .navbar-nav .nav-link {
     color: var(--dark-color) !important;
     font-weight: 500;
     margin: 0 15px;
     transition: all 0.3s ease;
     padding: 8px 0 !important;
+    position: relative;
 }
 
 .navbar-nav .nav-link:hover {
     color: var(--primary-color) !important;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 100%;
 }
 
 .btn-custom {
@@ -78,6 +127,12 @@ body {
     box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    color: white;
+}
+
 .btn-outline-custom {
     background: var(--white);
     border: 2px solid var(--primary-color);
@@ -91,6 +146,13 @@ body {
     box-shadow: 0 2px 10px rgba(68, 104, 154, 0.2);
 }
 
+.btn-outline-custom:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(68, 104, 154, 0.3);
+}
+
 .hero {
     background: linear-gradient(135deg, #e8ecef 0%, #ffffff 100%);
     min-height: 90vh;
@@ -98,7 +160,8 @@ body {
     align-items: center;
     position: relative;
     overflow: hidden;
-    padding: 120px 0 80px;
+    padding: 140px 0 80px; /* Aumentado para compensar navbar fixed */
+    margin-top: 0;
 }
 
 .hero-content {
@@ -307,10 +370,15 @@ body {
     margin-top: 10px;
 }
 
-/* RESPONSIVE */
+/* =========================================== */
+/* RESPONSIVE - CORREÇÕES PARA MOBILE */
+/* =========================================== */
+
 @media (max-width: 991px) {
+    /* HERO SECTION */
     .hero {
-        padding: 100px 0 60px;
+        padding: 120px 0 60px; /* Ajustado para navbar mobile */
+        text-align: center;
     }
     
     .hero h1 {
@@ -330,28 +398,85 @@ body {
     
     .hero-buttons {
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    /* NAVBAR MOBILE - CORREÇÕES */
+    .navbar {
+        padding: 10px 0 !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    .navbar-brand {
+        transform: scale(5.5);
     }
     
     .navbar-brand img {
-        height: 65px;
+        height: 50px;
+    }
+    
+    .navbar-collapse {
+        position: fixed;
+        top: 70px; /* Altura do navbar mobile */
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        padding: 25px;
+        margin: 0;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 15px 15px;
+        max-height: calc(100vh - 70px);
+        overflow-y: auto;
+        z-index: 999;
     }
     
     .navbar-nav {
         text-align: center;
-        padding-top: 20px;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100%;
     }
     
     .navbar-nav .nav-item {
-        margin-bottom: 10px;
+        margin-bottom: 15px !important;
+        width: 100%;
     }
     
+    .navbar-nav .nav-link {
+        margin: 0 !important;
+        padding: 12px 20px !important;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        display: block;
+        text-align: center;
+    }
+    
+    .navbar-nav .nav-link:hover {
+        background: rgba(68, 104, 154, 0.1);
+    }
+    
+    .navbar-nav .nav-link::after {
+        display: none;
+    }
+    
+    /* BOTÕES NO MOBILE MENU */
     .navbar-nav .btn-custom,
     .navbar-nav .btn-outline-custom {
-        width: auto;
-        display: inline-block;
-        margin: 5px 10px;
+        width: 100%;
+        max-width: 250px;
+        margin: 10px auto !important;
+        display: block;
+        text-align: center;
+        padding: 12px 20px;
     }
     
+    /* CONTEÚDO PRINCIPAL */
     .services, .features {
         padding: 80px 0;
     }
@@ -409,11 +534,21 @@ body {
     }
     
     .navbar-brand img {
-        height: 60px;
+        height: 45px;
     }
     
     .services, .features {
         padding: 70px 0 90px;
+    }
+    
+    /* NAVBAR PARA TABLETS PEQUENOS */
+    .navbar-collapse {
+        top: 65px;
+        padding: 20px;
+    }
+    
+    .navbar-brand {
+        transform: scale(5);
     }
 }
 
@@ -431,8 +566,12 @@ body {
         height: 250px;
     }
     
+    .navbar-brand {
+        transform: scale(4.5);
+    }
+    
     .navbar-brand img {
-        height: 55px;
+        height: 40px;
     }
     
     .hero-buttons {
@@ -451,6 +590,17 @@ body {
         padding: 60px 0 80px;
     }
     
+    /* NAVBAR PARA CELULARES */
+    .navbar-collapse {
+        top: 60px;
+        padding: 15px;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 10px 15px !important;
+        font-size: 0.95rem;
+    }
+    
     /* EM CELULARES PEQUENOS: TEXTO À ESQUERDA PARA MELHOR LEGIBILIDADE */
     .hero p,
     .service-card p,
@@ -461,6 +611,7 @@ body {
     }
 }
 
+/* LOADER ANIMATION */
 .loader {
     position: fixed;
     top: 0;
@@ -492,6 +643,30 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* SCROLLBAR PERSONALIZADA */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a5a7a;
+}
+
+/* CORREÇÃO PARA SCROLL SMOOTH */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Compensa navbar fixed */
 }
     </style>
 </head>
