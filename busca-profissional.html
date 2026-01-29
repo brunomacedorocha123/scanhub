@@ -20,6 +20,15 @@
             --secondary-color: #FF6B35;
             --light-color: #f8f9fa;
             --dark-color: #2c3e50;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-600: #6c757d;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
         * {
@@ -35,357 +44,522 @@
             padding-top: 80px;
         }
 
+        /* Navbar */
         .navbar {
             background: white;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            padding: 15px 0;
         }
 
         .navbar-brand img {
-            height: 50px;
+            height: 60px;
+            transform: scale(2);
+            transform-origin: left center;
         }
 
-        .btn-voltar {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            color: var(--dark-color);
-            font-weight: 500;
-            padding: 8px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .btn-voltar:hover {
-            background: #e9ecef;
-            border-color: #44689a;
-            color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-
-        .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .hero-section {
-            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .hero-section p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto 25px;
-        }
-
-        .search-container {
+        /* Header Busca */
+        .header-busca {
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
         }
 
-        .search-main {
+        .search-box {
             position: relative;
-            margin-bottom: 25px;
         }
 
-        .search-main input {
-            width: 100%;
-            padding: 16px 60px 16px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-        }
-
-        .search-main input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(68, 104, 154, 0.1);
-            outline: none;
-        }
-
-        .search-main button {
+        .search-box i {
             position: absolute;
-            right: 10px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
+            color: var(--gray-600);
+            z-index: 10;
         }
 
-        .search-main button:hover {
-            background: #e55a2b;
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .filters-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
-            color: var(--dark-color);
-        }
-
-        .filter-group select,
-        .filter-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+        .search-box input {
+            padding-left: 50px;
+            height: 56px;
+            border-radius: 12px;
+            border: 2px solid var(--gray-200);
             font-size: 1rem;
             transition: all 0.3s;
         }
 
-        .filter-group select:focus,
-        .filter-group input:focus {
+        .search-box input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(68, 104, 154, 0.1);
-            outline: none;
         }
 
-        .results-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Filtros */
+        .filtros-container {
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 20px;
             margin-bottom: 25px;
-            padding: 20px 0;
-            border-bottom: 2px solid #eee;
+            border: 1px solid var(--gray-200);
         }
 
-        .results-count {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .results-count span {
-            color: var(--primary-color);
-            background: rgba(68, 104, 154, 0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-left: 8px;
-        }
-
-        .sort-filter {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sort-filter label {
-            font-weight: 500;
-            color: #666;
-        }
-
-        .professionals-grid {
+        /* Grid de Profissionais */
+        .profissionais-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
-            margin-top: 20px;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
-        .professional-card {
+        @media (min-width: 768px) {
+            .profissionais-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 992px) {
+            .profissionais-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .profissionais-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Card do Profissional */
+        .profissional-card {
             background: white;
-            border-radius: 20px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
+            border: 1px solid var(--gray-200);
             height: 100%;
             display: flex;
             flex-direction: column;
-            border: 1px solid #f0f0f0;
-        }
-
-        .professional-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            border-color: #e0e0e0;
-        }
-
-        .card-image {
-            height: 220px;
-            background: #f0f0f0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .professional-card:hover .card-image img {
-            transform: scale(1.05);
-        }
-
-        .card-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 107, 53, 0.95);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .card-content {
-            padding: 25px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--dark-color);
-        }
-
-        .card-specialty {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-slogan {
-            color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 15px;
-            flex: 1;
-            line-height: 1.5;
-        }
-
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 12px 0;
-            border-top: 1px solid #f0f0f0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .meta-item {
-            text-align: center;
-            flex: 1;
-        }
-
-        .meta-item i {
-            color: var(--primary-color);
-            margin-bottom: 5px;
-            font-size: 1.1rem;
-        }
-
-        .meta-label {
-            font-size: 0.8rem;
-            color: #666;
-            display: block;
-        }
-
-        .meta-value {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--dark-color);
-        }
-
-        .card-footer {
-            padding-top: 15px;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        .btn-ver-perfil {
-            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            width: 100%;
             cursor: pointer;
-            transition: all 0.3s;
+        }
+
+        .profissional-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-avatar {
+            width: 100%;
+            height: 180px;
+            background: var(--gray-100);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            overflow: hidden;
         }
 
-        .btn-ver-perfil:hover {
+        .card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            margin-bottom: 12px;
+        }
+
+        .card-categoria {
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .card-nome {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-cidade {
+            color: var(--gray-600);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .card-descricao {
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .card-estrelas {
+            color: #FFD700;
+            font-size: 0.9rem;
+        }
+
+        .card-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .card-btn:hover {
+            background: #e55a2b;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(68, 104, 154, 0.3);
         }
 
+        /* Modal do Profissional */
+        .modal-profissional .modal-dialog {
+            max-width: 900px;
+        }
+
+        .modal-profissional .modal-content {
+            border-radius: 20px;
+            overflow: hidden;
+            border: none;
+        }
+
+        .modal-header-profissional {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #5a82c2 100%);
+            color: white;
+            padding: 30px;
+            position: relative;
+            border: none;
+        }
+
+        .modal-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 5px solid white;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: var(--gray-100);
+        }
+
+        .modal-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-profissional .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .modal-profissional .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Abas do Modal */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--gray-200);
+            background: white;
+            padding: 0 30px;
+        }
+
+        .modal-tab {
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            font-weight: 500;
+            color: var(--gray-600);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .modal-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .modal-tab-badge {
+            background: var(--gray-200);
+            color: var(--gray-600);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .modal-tab.active .modal-tab-badge {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .modal-body-profissional {
+            padding: 0;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* Conteúdo das Abas */
+        .tab-content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Seção Sobre */
+        .secao-titulo {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .info-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .info-item i {
+            color: var(--primary-color);
+            margin-right: 10px;
+            margin-top: 3px;
+            width: 20px;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Tags */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: var(--gray-100);
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Galeria */
+        .galeria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .galeria-item {
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: var(--gray-100);
+        }
+
+        .galeria-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .galeria-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Catálogo */
+        .catalogo-item {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .catalogo-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .catalogo-tipo {
+            background: var(--gray-100);
+            color: var(--gray-600);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .catalogo-preco {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        /* Botões Ação */
+        .botoes-acao {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+            transition: all 0.3s;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-interesse {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex: 1;
+            transition: all 0.3s;
+        }
+
+        .btn-interesse:hover {
+            background: #365a8a;
+            transform: translateY(-2px);
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-600);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h4 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--gray-700);
+        }
+
+        /* Loading */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 9999;
             display: none;
         }
 
+        .loading-overlay.active {
+            display: flex;
+        }
+
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
         }
 
         @keyframes spin {
@@ -393,80 +567,42 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            font-size: 1.1rem;
-            color: var(--dark-color);
-            font-weight: 500;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            grid-column: 1 / -1;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #555;
-            font-weight: 600;
-        }
-
-        .empty-state p {
-            color: #777;
-            max-width: 500px;
-            margin: 0 auto 25px;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
+        /* Responsivo */
         @media (max-width: 768px) {
             body {
                 padding-top: 70px;
             }
             
-            .hero-section {
-                padding: 25px;
-            }
-            
-            .hero-section h1 {
-                font-size: 1.8rem;
-            }
-            
-            .search-container {
+            .header-busca {
                 padding: 20px;
             }
             
-            .filters-row {
-                grid-template-columns: 1fr;
+            .modal-profissional .modal-dialog {
+                margin: 10px;
             }
             
-            .professionals-grid {
-                grid-template-columns: 1fr;
+            .modal-header-profissional {
+                padding: 20px;
             }
             
-            .results-info {
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .botoes-acao {
                 flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
+            }
+            
+            .btn-whatsapp, .btn-interesse {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
+    <!-- Loading -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
-        <div class="loading-text">Carregando profissionais...</div>
     </div>
 
     <!-- Navbar -->
@@ -475,90 +611,321 @@
             <a class="navbar-brand" href="dashboard-cliente.html">
                 <img src="logoscanhub.png" alt="ScanHub">
             </a>
-            <div class="d-flex">
-                <a href="dashboard-cliente.html" class="btn btn-voltar">
+            <div class="d-flex align-items-center">
+                <a href="dashboard-cliente.html" class="btn btn-outline-primary me-2">
                     <i class="fas fa-arrow-left me-2"></i>Voltar
                 </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="main-container">
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <h1>Encontre o profissional ideal</h1>
-            <p>Busque por especialistas qualificados perto de você. Avaliações reais, portfólios verificados e orçamentos sem compromisso.</p>
-        </div>
-
-        <!-- Search Container -->
-        <div class="search-container">
-            <!-- Barra de Busca Principal -->
-            <div class="search-main">
-                <input type="text" id="searchInput" placeholder="O que você precisa? Ex: eletricista, encanador, massagista...">
-                <button id="btnSearch">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            <!-- Filtros -->
-            <div class="filters-row">
-                <div class="filter-group">
-                    <label for="filterSpecialty"><i class="fas fa-star me-2"></i>Especialidade</label>
-                    <select id="filterSpecialty" class="form-select">
+    <div class="container py-4">
+        <!-- Header com Busca -->
+        <div class="header-busca">
+            <h1 class="mb-4">Encontre o profissional ideal</h1>
+            
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="inputBusca" 
+                               placeholder="O que você precisa? Ex: encanador, eletricista, designer...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="selectEspecialidade">
                         <option value="">Todas especialidades</option>
+                        <!-- Será preenchido via JavaScript -->
                     </select>
                 </div>
-
-                <div class="filter-group">
-                    <label for="filterCity"><i class="fas fa-map-marker-alt me-2"></i>Cidade</label>
-                    <input type="text" id="filterCity" class="form-control" placeholder="Digite a cidade...">
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="inputCidade" placeholder="Cidade">
                 </div>
+            </div>
+        </div>
 
-                <div class="filter-group">
-                    <label for="filterRating"><i class="fas fa-star me-2"></i>Avaliação mínima</label>
-                    <select id="filterRating" class="form-select">
-                        <option value="0">Todas avaliações</option>
-                        <option value="4">⭐ 4+ estrelas</option>
-                        <option value="4.5">⭐⭐⭐⭐½ 4.5+ estrelas</option>
-                        <option value="5">⭐⭐⭐⭐⭐ 5 estrelas</option>
-                    </select>
+        <!-- Filtros Rápidos -->
+        <div class="filtros-container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h6 class="mb-0" id="contadorResultados">Carregando profissionais...</h6>
                 </div>
-
-                <div class="filter-group">
-                    <label for="filterServiceType"><i class="fas fa-briefcase me-2"></i>Tipo de serviço</label>
-                    <select id="filterServiceType" class="form-select">
-                        <option value="">Todos os tipos</option>
-                        <option value="presencial">Presencial</option>
-                        <option value="remoto">Remoto</option>
-                        <option value="ambos">Ambos</option>
+                <div class="col-md-6 text-end">
+                    <select class="form-select form-select-sm w-auto d-inline-block" id="selectOrdenar">
+                        <option value="relevancia">Mais relevantes</option>
+                        <option value="nome">Nome A-Z</option>
+                        <option value="cidade">Cidade</option>
+                        <option value="avaliacao">Melhor avaliados</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <!-- Results Info -->
-        <div class="results-info">
-            <div class="results-count">
-                Encontrados: <span id="resultsCount">0</span> profissionais
-            </div>
-            <div class="sort-filter">
-                <label for="sortBy">Ordenar por:</label>
-                <select id="sortBy" class="form-select" style="width: auto;">
-                    <option value="relevance">Relevância</option>
-                    <option value="rating">Melhor avaliação</option>
-                    <option value="experience">Mais experiência</option>
-                    <option value="name">Nome A-Z</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Professionals Grid -->
-        <div class="professionals-grid" id="professionalsGrid">
+        <!-- Grid de Profissionais -->
+        <div class="profissionais-grid" id="profissionaisGrid">
+            <!-- Cards serão inseridos aqui via JavaScript -->
             <div class="empty-state">
                 <i class="fas fa-search"></i>
-                <h3>Busque por profissionais</h3>
-                <p>Digite na barra de busca acima para encontrar profissionais qualificados na sua região.</p>
+                <h4>Buscando profissionais...</h4>
+                <p>Carregando lista de profissionais disponíveis</p>
+            </div>
+        </div>
+
+        <!-- Paginação -->
+        <nav id="paginacao" style="display: none;">
+            <ul class="pagination justify-content-center">
+                <!-- Paginação será gerada via JavaScript -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Modal Profissional -->
+    <div class="modal fade modal-profissional" id="modalProfissional" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Header com foto e informações básicas -->
+                <div class="modal-header-profissional">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    
+                    <div class="text-center">
+                        <div class="modal-avatar mx-auto" id="modalAvatar">
+                            <i class="fas fa-user fa-3x text-muted" style="line-height: 110px;"></i>
+                        </div>
+                        <h3 id="modalNome">Nome do Profissional</h3>
+                        <p id="modalSlogan" class="mb-2">Slogan do profissional</p>
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <span id="modalEspecialidade" class="badge bg-light text-dark">Especialidade</span>
+                            <span id="modalCidade" class="text-light"><i class="fas fa-map-marker-alt"></i> Cidade</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Abas -->
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="sobre">
+                        <i class="fas fa-user me-2"></i>Sobre
+                    </button>
+                    <button class="modal-tab" data-tab="catalogo">
+                        <i class="fas fa-boxes me-2"></i>Catálogo
+                        <span class="modal-tab-badge" id="badgeCatalogo">0</span>
+                    </button>
+                    <button class="modal-tab" data-tab="portfolio">
+                        <i class="fas fa-images me-2"></i>Portfólio
+                        <span class="modal-tab-badge" id="badgePortfolio">0</span>
+                    </button>
+                    <button class="modal-tab" data-tab="contato">
+                        <i class="fas fa-address-book me-2"></i>Contato
+                    </button>
+                </div>
+
+                <!-- Conteúdo das Abas -->
+                <div class="modal-body-profissional">
+                    <!-- ABA: SOBRE -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabSobre">
+                            <!-- Descrição -->
+                            <div class="mb-4">
+                                <h6 class="secao-titulo">Descrição</h6>
+                                <p id="modalDescricao" class="info-value">Carregando...</p>
+                            </div>
+
+                            <!-- Informações Profissionais -->
+                            <div class="mb-4">
+                                <h6 class="secao-titulo">Informações Profissionais</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-briefcase"></i>
+                                            <div>
+                                                <div class="info-label">Especialidade Principal</div>
+                                                <div class="info-value" id="infoEspecialidade">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <div>
+                                                <div class="info-label">Experiência</div>
+                                                <div class="info-value" id="infoExperiencia">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-tags"></i>
+                                            <div>
+                                                <div class="info-label">Sub-especialidades</div>
+                                                <div class="tags-container" id="infoTags">
+                                                    <!-- Tags serão inseridas aqui -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Área de Atendimento -->
+                            <div class="mb-4">
+                                <h6 class="secao-titulo">Área de Atendimento</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <div>
+                                                <div class="info-label">Cidade Base</div>
+                                                <div class="info-value" id="infoCidadeBase">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-ruler"></i>
+                                            <div>
+                                                <div class="info-label">Raio de Atendimento</div>
+                                                <div class="info-value" id="infoRaioKm">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="info-item">
+                                            <i class="fas fa-map-pin"></i>
+                                            <div>
+                                                <div class="info-label">Cidades Atendidas</div>
+                                                <div class="tags-container" id="infoCidadesAtendidas">
+                                                    <!-- Cidades serão inseridas aqui -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-home"></i>
+                                            <div>
+                                                <div class="info-label" id="infoAtendeDomicilio">Atende em domicílio: -</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-laptop"></i>
+                                            <div>
+                                                <div class="info-label" id="infoAtendeOnline">Atende online: -</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Formas de Trabalho -->
+                            <div class="mb-4">
+                                <h6 class="secao-titulo">Formas de Trabalho</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <div>
+                                                <div class="info-label">Formas de Pagamento</div>
+                                                <div class="tags-container" id="infoFormasPagamento">
+                                                    <!-- Formas de pagamento serão inseridas aqui -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-clock"></i>
+                                            <div>
+                                                <div class="info-label">Tempo de Resposta</div>
+                                                <div class="info-value" id="infoTempoResposta">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-file-invoice-dollar"></i>
+                                            <div>
+                                                <div class="info-label" id="infoOrcamentoGratuito">Orçamento gratuito: -</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <div>
+                                                <div class="info-label">Garantia Oferecida</div>
+                                                <div class="info-value" id="infoGarantia">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ABA: CATÁLOGO -->
+                        <div class="tab-pane" id="tabCatalogo">
+                            <h6 class="secao-titulo">Serviços & Produtos</h6>
+                            <div id="catalogoContainer">
+                                <p class="text-muted">Carregando catálogo...</p>
+                            </div>
+                        </div>
+
+                        <!-- ABA: PORTFÓLIO -->
+                        <div class="tab-pane" id="tabPortfolio">
+                            <h6 class="secao-titulo">Portfólio - Trabalhos Realizados</h6>
+                            <div id="portfolioContainer">
+                                <p class="text-muted">Carregando portfólio...</p>
+                            </div>
+                        </div>
+
+                        <!-- ABA: CONTATO -->
+                        <div class="tab-pane" id="tabContato">
+                            <h6 class="secao-titulo">Informações de Contato</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                                        <div>
+                                            <div class="info-label">WhatsApp</div>
+                                            <div class="info-value" id="infoWhatsapp">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <div>
+                                            <div class="info-label">E-mail Profissional</div>
+                                            <div class="info-value" id="infoEmail">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h6 class="secao-titulo">Links</h6>
+                                <div id="infoLinks">
+                                    <p class="text-muted">Nenhum link disponível</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="botoes-acao">
+                        <button class="btn-whatsapp" id="btnWhatsappModal">
+                            <i class="fab fa-whatsapp"></i>
+                            Conversar no WhatsApp
+                        </button>
+                        <button class="btn-interesse" id="btnInteresseModal">
+                            <i class="fas fa-handshake"></i>
+                            Tenho Interesse
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -566,27 +933,18 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Firebase e Script Principal -->
+    <!-- Firebase -->
     <script type="module">
-        // ============================================
-        // SISTEMA COMPLETO DE BUSCA DE PROFISSIONAIS
-        // ============================================
-
-        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
             getFirestore, 
             collection, 
-            getDocs, 
-            query, 
-            where
+            getDocs,
+            query,
+            where,
+            orderBy
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
             authDomain: "scanhub-ed512.firebaseapp.com",
@@ -596,501 +954,749 @@
             appId: "1:1083305018831:web:f7594d560439c8965c3eba"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
         // Elementos DOM
         const loadingOverlay = document.getElementById('loadingOverlay');
-        const searchInput = document.getElementById('searchInput');
-        const btnSearch = document.getElementById('btnSearch');
-        const filterSpecialty = document.getElementById('filterSpecialty');
-        const filterCity = document.getElementById('filterCity');
-        const filterRating = document.getElementById('filterRating');
-        const filterServiceType = document.getElementById('filterServiceType');
-        const sortBy = document.getElementById('sortBy');
-        const resultsCount = document.getElementById('resultsCount');
-        const professionalsGrid = document.getElementById('professionalsGrid');
+        const inputBusca = document.getElementById('inputBusca');
+        const selectEspecialidade = document.getElementById('selectEspecialidade');
+        const inputCidade = document.getElementById('inputCidade');
+        const selectOrdenar = document.getElementById('selectOrdenar');
+        const contadorResultados = document.getElementById('contadorResultados');
+        const profissionaisGrid = document.getElementById('profissionaisGrid');
+        
+        // Modal elements
+        const modalProfissional = new bootstrap.Modal(document.getElementById('modalProfissional'));
+        const modalAvatar = document.getElementById('modalAvatar');
+        const modalNome = document.getElementById('modalNome');
+        const modalSlogan = document.getElementById('modalSlogan');
+        const modalEspecialidade = document.getElementById('modalEspecialidade');
+        const modalCidade = document.getElementById('modalCidade');
+        const modalDescricao = document.getElementById('modalDescricao');
+        const btnWhatsappModal = document.getElementById('btnWhatsappModal');
+        const btnInteresseModal = document.getElementById('btnInteresseModal');
+        
+        // Info elements
+        const infoEspecialidade = document.getElementById('infoEspecialidade');
+        const infoExperiencia = document.getElementById('infoExperiencia');
+        const infoTags = document.getElementById('infoTags');
+        const infoCidadeBase = document.getElementById('infoCidadeBase');
+        const infoRaioKm = document.getElementById('infoRaioKm');
+        const infoCidadesAtendidas = document.getElementById('infoCidadesAtendidas');
+        const infoAtendeDomicilio = document.getElementById('infoAtendeDomicilio');
+        const infoAtendeOnline = document.getElementById('infoAtendeOnline');
+        const infoFormasPagamento = document.getElementById('infoFormasPagamento');
+        const infoTempoResposta = document.getElementById('infoTempoResposta');
+        const infoOrcamentoGratuito = document.getElementById('infoOrcamentoGratuito');
+        const infoGarantia = document.getElementById('infoGarantia');
+        const infoWhatsapp = document.getElementById('infoWhatsapp');
+        const infoEmail = document.getElementById('infoEmail');
+        const infoLinks = document.getElementById('infoLinks');
+        
+        // Tab elements
+        const modalTabs = document.querySelectorAll('.modal-tab');
+        const badgeCatalogo = document.getElementById('badgeCatalogo');
+        const badgePortfolio = document.getElementById('badgePortfolio');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        const catalogoContainer = document.getElementById('catalogoContainer');
+        const portfolioContainer = document.getElementById('portfolioContainer');
 
-        // Dados
-        let allProfessionals = [];
-        let filteredProfessionals = [];
-        let specialtiesSet = new Set();
-        let citiesSet = new Set();
+        // Variáveis globais
+        let todosProfissionais = [];
+        let profissionaisFiltrados = [];
+        let especialidadesUnicas = new Set();
+        let profissionalAtual = null;
 
-        // ============================================
-        // FUNÇÕES DE UTILIDADE
-        // ============================================
+        // Especialidades padrão (mesmas do perfil-profissional)
+        const especialidadesPadrao = [
+            'Advocacia', 'Alarme', 'Alvenaria', 'Antena', 'Ar Condicionado',
+            'Arquitetura', 'Artes Marciais', 'Babysitter', 'Barbeiro',
+            'Cabeleireiro', 'Calhas', 'Cerca Elétrica', 'Cerâmica', 'Chaveiro',
+            'Coach', 'Consultoria', 'Construção Civil', 'Contabilidade',
+            'Costura', 'Cuidador de Idosos', 'Dança', 'Dedetização', 'Design',
+            'Design de Interiores', 'Elétrica', 'Eletrodomésticos', 'Eletrônica',
+            'Encanador', 'Engenharia', 'Entregador', 'Eventos', 'Festas',
+            'Fotógrafo', 'Forro', 'Funilaria', 'Gesso', 'Guias de Turismo',
+            'Hidráulica', 'Impermeabilização', 'Jardineiro', 'Jardinagem',
+            'Jato de Areia', 'Lavanderia', 'Limpeza', 'Logística', 'Manicure',
+            'Marcenaria', 'Marketing Digital', 'Massoterapia', 'Mecânica',
+            'Montador de Móveis', 'Motorista Particular', 'Músico',
+            'Nutricionista', 'Organização Residencial', 'Personal Trainer',
+            'Pet Sitter', 'Pintura', 'Piso', 'Piscina', 'Portão Automático',
+            'Programador', 'Professor Particular', 'Psicologia', 'Redes',
+            'Redator', 'Reformas', 'Segurança', 'Serralheria',
+            'Sistema Fotovoltaico', 'Social Media', 'Solda', 'Som',
+            'Técnico de Celular', 'Telhado', 'TI & Informática', 'Tradução',
+            'Guias de Turismo', 'Veterinária', 'Video Maker', 'Vidraçaria',
+            'Web Designer', 'Yoga', 'Outro'
+        ];
 
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-
-        function showAlert(message, type = 'info') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = `
-                top: 100px;
-                right: 20px;
-                z-index: 9999;
-                min-width: 300px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            `;
-            
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-
-        function formatPhone(phone) {
-            if (!phone) return 'Não informado';
-            const numbers = phone.replace(/\D/g, '');
-            if (numbers.length === 11) {
-                return `(${numbers.substring(0, 2)}) ${numbers.substring(2, 7)}-${numbers.substring(7)}`;
-            } else if (numbers.length === 10) {
-                return `(${numbers.substring(0, 2)}) ${numbers.substring(2, 6)}-${numbers.substring(6)}`;
-            }
-            return phone;
-        }
-
-        // ============================================
-        // FUNÇÕES PRINCIPAIS
-        // ============================================
-
-        async function loadAllProfessionals() {
+        // Inicializar
+        async function init() {
             showLoading();
-            
+            await carregarProfissionais();
+            preencherFiltroEspecialidades();
+            aplicarFiltros();
+            hideLoading();
+            inicializarEventListeners();
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+
+        // Esconder loading
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        // Carregar profissionais do Firestore
+        async function carregarProfissionais() {
             try {
-                console.log('🔍 Iniciando carregamento de profissionais...');
-                
-                // Resetar dados
-                allProfessionals = [];
-                specialtiesSet = new Set();
-                citiesSet = new Set();
-                
-                // Buscar TODOS os profissionais
+                const usuariosRef = collection(db, "usuarios");
                 const q = query(
-                    collection(db, "usuarios"),
+                    usuariosRef,
                     where("tipoUsuario", "==", "profissional"),
                     where("status", "==", "ativo")
                 );
                 
                 const querySnapshot = await getDocs(q);
-                console.log(`📊 Total de documentos encontrados: ${querySnapshot.size}`);
+                todosProfissionais = [];
                 
-                // Processar cada documento
-                querySnapshot.forEach((docSnapshot) => {
-                    const userData = docSnapshot.data();
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
                     
-                    if (userData.profissional) {
-                        const profData = userData.profissional;
+                    // Verificar se o profissional tem perfil completo e visível
+                    if (data.profissional && data.profissional.perfilCompleto === true) {
+                        const profissional = {
+                            id: doc.id,
+                            ...data,
+                            profissional: data.profissional || {}
+                        };
                         
-                        // VERIFICAÇÃO SIMPLIFICADA - Apenas perfilCompleto
-                        const hasCompleteProfile = profData.perfilCompleto === true;
-                        const hasSpecialty = profData.especialidadePrincipal && profData.especialidadePrincipal.trim() !== '';
-                        const hasName = profData.nomeProfissional && profData.nomeProfissional.trim() !== '';
+                        todosProfissionais.push(profissional);
                         
-                        // Não verifica visivelBusca - se o campo não existir, assume que está visível
-                        if (hasCompleteProfile && hasSpecialty && hasName) {
-                            const professional = {
-                                id: docSnapshot.id,
-                                ...userData
-                            };
-                            
-                            allProfessionals.push(professional);
-                            
-                            // Coletar especialidades
-                            if (profData.especialidadePrincipal) {
-                                specialtiesSet.add(profData.especialidadePrincipal);
-                            }
-                            
-                            // Coletar cidades
-                            if (profData.cidadeBase) {
-                                citiesSet.add(profData.cidadeBase);
-                            }
-                            
-                            console.log(`✅ Adicionado: ${profData.nomeProfissional} - ${profData.especialidadePrincipal}`);
+                        // Coletar especialidades únicas para o filtro
+                        if (profissional.profissional.especialidadePrincipal) {
+                            especialidadesUnicas.add(profissional.profissional.especialidadePrincipal);
                         }
                     }
                 });
                 
-                console.log(`✅ Profissionais carregados: ${allProfessionals.length}`);
-                console.log(`⭐ Especialidades:`, Array.from(specialtiesSet));
-                console.log(`🏙️ Cidades:`, Array.from(citiesSet));
-                
-                // Popular filtros
-                populateFilterSelects();
-                
-                // Aplicar filtros iniciais
-                applyFilters();
-                
-                // Mostrar mensagem
-                if (allProfessionals.length > 0) {
-                    showAlert(`✅ ${allProfessionals.length} profissionais carregados!`, 'success');
-                }
+                console.log(`Carregados ${todosProfissionais.length} profissionais`);
                 
             } catch (error) {
-                console.error('❌ Erro ao carregar profissionais:', error);
-                showAlert('❌ Erro ao carregar profissionais. Verifique o console.', 'error');
-                showEmptyState('Erro ao carregar', 'Não foi possível carregar os profissionais.');
-            } finally {
-                hideLoading();
+                console.error('Erro ao carregar profissionais:', error);
+                mostrarErro('Erro ao carregar profissionais. Tente novamente.');
             }
         }
 
-        function populateFilterSelects() {
-            console.log('🔧 Populando filtros...');
+        // Preencher filtro de especialidades
+        function preencherFiltroEspecialidades() {
+            // Limpar opções
+            selectEspecialidade.innerHTML = '<option value="">Todas especialidades</option>';
             
-            // Popular especialidades
-            filterSpecialty.innerHTML = '<option value="">Todas especialidades</option>';
-            
-            const specialtiesArray = Array.from(specialtiesSet).sort();
-            specialtiesArray.forEach(specialty => {
+            // Adicionar especialidades encontradas
+            Array.from(especialidadesUnicas).sort().forEach(especialidade => {
                 const option = document.createElement('option');
-                option.value = specialty;
-                option.textContent = specialty;
-                filterSpecialty.appendChild(option);
+                option.value = especialidade;
+                option.textContent = especialidade;
+                selectEspecialidade.appendChild(option);
             });
             
-            console.log(`🔧 ${specialtiesArray.length} especialidades adicionadas`);
+            // Adicionar especialidades padrão que não foram encontradas
+            especialidadesPadrao.forEach(especialidade => {
+                if (!especialidadesUnicas.has(especialidade)) {
+                    const option = document.createElement('option');
+                    option.value = especialidade;
+                    option.textContent = especialidade;
+                    option.disabled = true;
+                    selectEspecialidade.appendChild(option);
+                }
+            });
         }
 
-        function applyFilters() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const selectedSpecialty = filterSpecialty.value;
-            const selectedCity = filterCity.value.toLowerCase().trim();
-            const minRating = parseFloat(filterRating.value) || 0;
-            const serviceType = filterServiceType.value;
-            const sortOrder = sortBy.value;
-            
-            console.log('🎯 Aplicando filtros...');
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const buscaTexto = inputBusca.value.toLowerCase().trim();
+            const especialidadeFiltro = selectEspecialidade.value;
+            const cidadeFiltro = inputCidade.value.toLowerCase().trim();
+            const ordenarPor = selectOrdenar.value;
             
             // Filtrar profissionais
-            filteredProfessionals = allProfessionals.filter(prof => {
+            profissionaisFiltrados = todosProfissionais.filter(prof => {
                 const profData = prof.profissional;
-                if (!profData) return false;
                 
-                // 1. Filtro por termo de busca
-                if (searchTerm) {
-                    const searchFields = [
-                        profData.nomeProfissional || '',
-                        profData.descricao || '',
-                        profData.slogan || '',
-                        profData.especialidadePrincipal || ''
-                    ];
-                    
-                    if (profData.especialidades && Array.isArray(profData.especialidades)) {
-                        searchFields.push(...profData.especialidades);
-                    }
-                    
-                    const hasMatch = searchFields.some(field => 
-                        field.toLowerCase().includes(searchTerm)
-                    );
-                    
-                    if (!hasMatch) return false;
+                // Filtro por texto
+                let matchTexto = true;
+                if (buscaTexto) {
+                    matchTexto = 
+                        (profData.nomeProfissional && profData.nomeProfissional.toLowerCase().includes(buscaTexto)) ||
+                        (profData.descricao && profData.descricao.toLowerCase().includes(buscaTexto)) ||
+                        (profData.slogan && profData.slogan.toLowerCase().includes(buscaTexto)) ||
+                        (profData.especialidadePrincipal && profData.especialidadePrincipal.toLowerCase().includes(buscaTexto)) ||
+                        (prof.apelido && prof.apelido.toLowerCase().includes(buscaTexto));
                 }
                 
-                // 2. Filtro por especialidade
-                if (selectedSpecialty && profData.especialidadePrincipal !== selectedSpecialty) {
-                    return false;
+                // Filtro por especialidade
+                let matchEspecialidade = true;
+                if (especialidadeFiltro) {
+                    matchEspecialidade = profData.especialidadePrincipal === especialidadeFiltro;
                 }
                 
-                // 3. Filtro por cidade
-                if (selectedCity) {
-                    const cidadeBase = (profData.cidadeBase || '').toLowerCase();
-                    if (cidadeBase !== selectedCity) {
-                        return false;
-                    }
+                // Filtro por cidade
+                let matchCidade = true;
+                if (cidadeFiltro) {
+                    matchCidade = 
+                        (profData.cidadeBase && profData.cidadeBase.toLowerCase().includes(cidadeFiltro)) ||
+                        (profData.cidadesAtendidas && 
+                         profData.cidadesAtendidas.some(cidade => cidade.toLowerCase().includes(cidadeFiltro)));
                 }
                 
-                // 4. Filtro por avaliação
-                if (minRating > 0) {
-                    const rating = profData.avaliacaoMedia || 0;
-                    if (rating < minRating) return false;
-                }
-                
-                // 5. Filtro por tipo de serviço
-                if (serviceType) {
-                    switch(serviceType) {
-                        case 'presencial':
-                            if (profData.atendeDomicilio !== true) return false;
-                            break;
-                        case 'remoto':
-                            if (profData.atendeOnline !== true) return false;
-                            break;
-                        case 'ambos':
-                            if (profData.atendeDomicilio !== true || profData.atendeOnline !== true) return false;
-                            break;
-                    }
-                }
-                
-                return true;
+                return matchTexto && matchEspecialidade && matchCidade;
             });
             
-            console.log(`✅ ${filteredProfessionals.length} profissionais após filtragem`);
-            
             // Ordenar resultados
-            sortProfessionals(filteredProfessionals, sortOrder);
+            ordenarResultados(ordenarPor);
             
-            // Atualizar contador
-            resultsCount.textContent = filteredProfessionals.length;
-            
-            // Renderizar resultados
-            renderProfessionals();
+            // Atualizar interface
+            atualizarContadorResultados();
+            renderizarProfissionais();
         }
 
-        function sortProfessionals(professionals, sortOrder) {
-            switch(sortOrder) {
-                case 'rating':
-                    professionals.sort((a, b) => {
-                        const ratingA = a.profissional.avaliacaoMedia || 0;
-                        const ratingB = b.profissional.avaliacaoMedia || 0;
-                        return ratingB - ratingA;
+        // Ordenar resultados
+        function ordenarResultados(criterio) {
+            switch(criterio) {
+                case 'nome':
+                    profissionaisFiltrados.sort((a, b) => {
+                        const nomeA = a.profissional.nomeProfissional || '';
+                        const nomeB = b.profissional.nomeProfissional || '';
+                        return nomeA.localeCompare(nomeB);
                     });
                     break;
                     
-                case 'experience':
-                    professionals.sort((a, b) => {
-                        const expA = getExperienceValue(a.profissional.anosExperiencia);
-                        const expB = getExperienceValue(b.profissional.anosExperiencia);
-                        return expB - expA;
+                case 'cidade':
+                    profissionaisFiltrados.sort((a, b) => {
+                        const cidadeA = a.profissional.cidadeBase || '';
+                        const cidadeB = b.profissional.cidadeBase || '';
+                        return cidadeA.localeCompare(cidadeB);
                     });
                     break;
                     
-                case 'name':
-                    professionals.sort((a, b) => {
-                        const nameA = a.profissional.nomeProfissional || '';
-                        const nameB = b.profissional.nomeProfissional || '';
-                        return nameA.localeCompare(nameB);
-                    });
+                case 'avaliacao':
+                    // TODO: Implementar quando tiver sistema de avaliações
                     break;
                     
-                case 'relevance':
-                default:
+                default: // relevancia
+                    // Mantém a ordem original (por relevância)
                     break;
             }
         }
 
-        function getExperienceValue(experience) {
-            if (!experience) return 0;
-            switch(experience) {
-                case '1': return 1;
-                case '1-3': return 2;
-                case '3-5': return 4;
-                case '5-10': return 7.5;
-                case '10+': return 10;
-                default: return 0;
+        // Atualizar contador de resultados
+        function atualizarContadorResultados() {
+            const total = profissionaisFiltrados.length;
+            let texto = '';
+            
+            if (total === 0) {
+                texto = 'Nenhum profissional encontrado';
+            } else if (total === 1) {
+                texto = '1 profissional encontrado';
+            } else {
+                texto = `${total} profissionais encontrados`;
             }
+            
+            contadorResultados.textContent = texto;
         }
 
-        function renderProfessionals() {
-            professionalsGrid.innerHTML = '';
+        // Renderizar profissionais na grid
+        function renderizarProfissionais() {
+            profissionaisGrid.innerHTML = '';
             
-            if (filteredProfessionals.length === 0) {
-                showEmptyState(
-                    'Nenhum profissional encontrado',
-                    'Tente ajustar os filtros ou usar outros termos de busca.'
-                );
+            if (profissionaisFiltrados.length === 0) {
+                profissionaisGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h4>Nenhum profissional encontrado</h4>
+                        <p>Tente ajustar os filtros de busca</p>
+                    </div>
+                `;
                 return;
             }
             
-            filteredProfessionals.forEach((prof, index) => {
-                const card = createProfessionalCard(prof);
-                card.style.animationDelay = `${index * 50}ms`;
-                card.classList.add('fade-in');
-                professionalsGrid.appendChild(card);
+            profissionaisFiltrados.forEach(prof => {
+                const card = criarCardProfissional(prof);
+                profissionaisGrid.appendChild(card);
             });
         }
 
-        function showEmptyState(title, message) {
-            professionalsGrid.innerHTML = `
-                <div class="empty-state fade-in">
-                    <i class="fas fa-user-slash"></i>
-                    <h3>${title}</h3>
-                    <p>${message}</p>
-                    <button class="btn btn-primary mt-3" onclick="clearAllFilters()">
-                        <i class="fas fa-times me-2"></i>Limpar filtros
-                    </button>
-                </div>
-            `;
-        }
-
-        function createProfessionalCard(prof) {
+        // Criar card do profissional
+        function criarCardProfissional(prof) {
             const profData = prof.profissional;
-            const photoUrl = prof.fotoPerfilProfissional || 
-                           prof.fotoPerfil || 
-                           `https://ui-avatars.com/api/?name=${encodeURIComponent(profData.nomeProfissional)}&background=44689a&color=fff&size=200`;
-            
             const card = document.createElement('div');
-            card.className = 'professional-card';
+            card.className = 'profissional-card';
+            card.dataset.id = prof.id;
             
-            // Gerar tags HTML
-            let tagsHTML = '';
-            if (profData.especialidades && Array.isArray(profData.especialidades) && profData.especialidades.length > 0) {
-                const tagsToShow = profData.especialidades.slice(0, 3);
-                tagsHTML = `
-                    <div class="d-flex flex-wrap gap-2 mb-2">
-                        ${tagsToShow.map(tag => `<span class="badge bg-primary">${tag}</span>`).join('')}
-                        ${profData.especialidades.length > 3 ? 
-                            `<span class="badge bg-secondary">+${profData.especialidades.length - 3}</span>` : ''
-                        }
-                    </div>
-                `;
-            }
+            // Foto do profissional
+            const foto = prof.fotoPerfilProfissional || prof.fotoPerfil || '';
+            const fotoHtml = foto 
+                ? `<img src="${foto}" alt="${profData.nomeProfissional || 'Profissional'}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user fa-3x text-muted\\' style=\\'line-height: 180px;\\'></i>';">`
+                : '<i class="fas fa-user fa-3x text-muted" style="line-height: 180px;"></i>';
+            
+            // Descrição curta (limitar)
+            const descricaoCurta = profData.descricao 
+                ? profData.descricao.substring(0, 100) + (profData.descricao.length > 100 ? '...' : '')
+                : 'Sem descrição';
+            
+            // Cidade
+            const cidade = profData.cidadeBase || 'Localização não informada';
             
             card.innerHTML = `
-                <div class="card-image">
-                    <img src="${photoUrl}" alt="${profData.nomeProfissional}" 
-                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(profData.nomeProfissional)}&background=44689a&color=fff&size=200'">
-                    <div class="card-badge">
-                        <i class="fas fa-briefcase me-1"></i>${profData.especialidadePrincipal || 'Profissional'}
-                    </div>
+                <div class="card-avatar">
+                    ${fotoHtml}
                 </div>
-                
                 <div class="card-content">
-                    <h3 class="card-title">${profData.nomeProfissional || 'Profissional'}</h3>
-                    
-                    ${tagsHTML}
-                    
-                    <div class="card-specialty">
-                        <i class="fas fa-star"></i>
-                        <span>${profData.especialidadePrincipal || 'Serviços Profissionais'}</span>
+                    <div class="card-header">
+                        <span class="card-categoria">${profData.especialidadePrincipal || 'Profissional'}</span>
+                        <h4 class="card-nome">${profData.nomeProfissional || prof.apelido || 'Profissional'}</h4>
+                        <p class="card-cidade"><i class="fas fa-map-marker-alt"></i> ${cidade}</p>
                     </div>
-                    
-                    <p class="card-slogan">${profData.slogan || (profData.descricao ? profData.descricao.substring(0, 120) + '...' : 'Profissional qualificado')}</p>
-                    
-                    <div class="card-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span class="meta-label">Cidade</span>
-                            <span class="meta-value">${profData.cidadeBase || 'Não informado'}</span>
-                        </div>
-                        
-                        <div class="meta-item">
-                            <i class="fas fa-clock"></i>
-                            <span class="meta-label">Experiência</span>
-                            <span class="meta-value">${formatExperience(profData.anosExperiencia)}</span>
-                        </div>
-                        
-                        <div class="meta-item">
-                            <i class="fas fa-check-circle"></i>
-                            <span class="meta-label">Atendimento</span>
-                            <span class="meta-value">${profData.atendeOnline ? 'Online' : 'Presencial'}</span>
-                        </div>
-                    </div>
-                    
+                    <p class="card-descricao">${descricaoCurta}</p>
                     <div class="card-footer">
-                        <button class="btn-ver-perfil" onclick="viewProfessionalProfile('${prof.id}')">
-                            <i class="fas fa-eye me-2"></i>Ver Perfil Completo
+                        <div class="card-estrelas">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <small class="text-muted">(4.5)</small>
+                        </div>
+                        <button class="card-btn btn-ver-perfil">
+                            Ver Perfil
                         </button>
                     </div>
                 </div>
             `;
             
+            // Adicionar evento de clique
+            const btnVerPerfil = card.querySelector('.btn-ver-perfil');
+            btnVerPerfil.addEventListener('click', (e) => {
+                e.stopPropagation();
+                abrirModalProfissional(prof);
+            });
+            
+            card.addEventListener('click', () => {
+                abrirModalProfissional(prof);
+            });
+            
             return card;
         }
 
-        function formatExperience(experience) {
-            if (!experience) return 'N/I';
-            switch(experience) {
-                case '1': return '<1 ano';
-                case '1-3': return '1-3 anos';
-                case '3-5': return '3-5 anos';
-                case '5-10': return '5-10 anos';
-                case '10+': return '10+ anos';
-                default: return experience;
+        // Abrir modal com detalhes do profissional
+        async function abrirModalProfissional(prof) {
+            profissionalAtual = prof;
+            const profData = prof.profissional;
+            
+            showLoading();
+            
+            try {
+                // Preencher informações básicas
+                const foto = prof.fotoPerfilProfissional || prof.fotoPerfil || '';
+                if (foto) {
+                    modalAvatar.innerHTML = `<img src="${foto}" alt="${profData.nomeProfissional || 'Profissional'}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user fa-3x text-muted\\' style=\\'line-height: 110px;\\'></i>';">`;
+                } else {
+                    modalAvatar.innerHTML = '<i class="fas fa-user fa-3x text-muted" style="line-height: 110px;"></i>';
+                }
+                
+                modalNome.textContent = profData.nomeProfissional || prof.apelido || 'Profissional';
+                modalSlogan.textContent = profData.slogan || 'Profissional qualificado';
+                modalEspecialidade.textContent = profData.especialidadePrincipal || 'Profissional';
+                modalCidade.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${profData.cidadeBase || 'Localização não informada'}`;
+                modalDescricao.textContent = profData.descricao || 'Sem descrição disponível.';
+                
+                // Preencher informações detalhadas
+                infoEspecialidade.textContent = profData.especialidadePrincipal || '-';
+                infoExperiencia.textContent = formatarExperiencia(profData.anosExperiencia);
+                infoCidadeBase.textContent = profData.cidadeBase || '-';
+                infoRaioKm.textContent = profData.raioKm ? `${profData.raioKm} km` : '-';
+                infoTempoResposta.textContent = formatarTempoResposta(profData.tempoResposta);
+                infoOrcamentoGratuito.textContent = `Orçamento gratuito: ${profData.orcamentoGratuito ? 'Sim' : 'Não'}`;
+                infoGarantia.textContent = profData.garantiaDias ? `${profData.garantiaDias} dias` : '-';
+                infoAtendeDomicilio.textContent = `Atende em domicílio: ${profData.atendeDomicilio ? 'Sim' : 'Não'}`;
+                infoAtendeOnline.textContent = `Atende online: ${profData.atendeOnline ? 'Sim' : 'Não'}`;
+                
+                // WhatsApp
+                const whatsapp = profData.whatsapp || prof.celular || '';
+                infoWhatsapp.textContent = whatsapp || 'Não informado';
+                if (whatsapp) {
+                    btnWhatsappModal.style.display = 'flex';
+                    btnWhatsappModal.onclick = () => abrirWhatsApp(whatsapp, prof);
+                } else {
+                    btnWhatsappModal.style.display = 'none';
+                }
+                
+                // Email
+                infoEmail.textContent = profData.emailProfissional || prof.email || 'Não informado';
+                
+                // Preencher arrays (tags, cidades, etc.)
+                preencherTags(infoTags, profData.especialidades);
+                preencherTags(infoCidadesAtendidas, profData.cidadesAtendidas);
+                preencherTags(infoFormasPagamento, profData.formasPagamento);
+                
+                // Links
+                if (profData.links && profData.links.length > 0 && profData.links[0]) {
+                    infoLinks.innerHTML = profData.links.map(link => 
+                        `<a href="${link}" target="_blank" class="d-block mb-2"><i class="fas fa-external-link-alt me-2"></i>${link}</a>`
+                    ).join('');
+                } else {
+                    infoLinks.innerHTML = '<p class="text-muted">Nenhum link disponível</p>';
+                }
+                
+                // Carregar catálogo
+                await carregarCatalogoProfissional(prof.id);
+                
+                // Carregar portfólio
+                await carregarPortfolioProfissional(profData);
+                
+                // Atualizar badges
+                atualizarBadges();
+                
+                // Mostrar modal
+                modalProfissional.show();
+                
+            } catch (error) {
+                console.error('Erro ao abrir modal:', error);
+                mostrarErro('Erro ao carregar detalhes do profissional');
+            } finally {
+                hideLoading();
             }
         }
 
-        // ============================================
-        // FUNÇÕES GLOBAIS
-        // ============================================
-
-        window.clearAllFilters = function() {
-            searchInput.value = '';
-            filterSpecialty.value = '';
-            filterCity.value = '';
-            filterRating.value = '0';
-            filterServiceType.value = '';
-            sortBy.value = 'relevance';
-            applyFilters();
-            showAlert('Filtros limpos!', 'info');
-        };
-
-        window.viewProfessionalProfile = function(professionalId) {
-            sessionStorage.setItem('profissionalSelecionado', professionalId);
-            window.location.href = `perfil-profissional-publico.html?id=${professionalId}`;
-        };
-
-        window.loadProfessionals = loadAllProfessionals;
-
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-
-        function initEventListeners() {
-            btnSearch.addEventListener('click', applyFilters);
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') applyFilters();
-            });
-            
-            let searchTimeout;
-            searchInput.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(applyFilters, 500);
-            });
-            
-            filterSpecialty.addEventListener('change', applyFilters);
-            filterCity.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(applyFilters, 500);
-            });
-            filterRating.addEventListener('change', applyFilters);
-            filterServiceType.addEventListener('change', applyFilters);
-            sortBy.addEventListener('change', applyFilters);
+        // Carregar catálogo do profissional
+        async function carregarCatalogoProfissional(profissionalId) {
+            try {
+                // Buscar serviços
+                const servicosRef = collection(db, "servicos");
+                const qServicos = query(
+                    servicosRef,
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "ativo")
+                );
+                
+                const servicosSnapshot = await getDocs(qServicos);
+                const servicos = [];
+                servicosSnapshot.forEach(doc => {
+                    servicos.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Buscar produtos
+                const produtosRef = collection(db, "produtos");
+                const qProdutos = query(
+                    produtosRef,
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "ativo")
+                );
+                
+                const produtosSnapshot = await getDocs(qProdutos);
+                const produtos = [];
+                produtosSnapshot.forEach(doc => {
+                    produtos.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Renderizar catálogo
+                renderizarCatalogo(servicos, produtos);
+                
+            } catch (error) {
+                console.error('Erro ao carregar catálogo:', error);
+                catalogoContainer.innerHTML = '<p class="text-muted">Erro ao carregar catálogo</p>';
+            }
         }
 
-        // Verificar autenticação
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                console.log('👤 Usuário autenticado:', user.uid);
-                await loadAllProfessionals();
-                initEventListeners();
-            } else {
-                console.log('🔒 Redirecionando para login...');
-                window.location.href = 'login.html';
+        // Renderizar catálogo
+        function renderizarCatalogo(servicos, produtos) {
+            const totalItens = servicos.length + produtos.length;
+            
+            if (totalItens === 0) {
+                catalogoContainer.innerHTML = '<p class="text-muted">Nenhum item no catálogo</p>';
+                return;
             }
-        });
+            
+            let html = '';
+            
+            // Serviços
+            servicos.forEach(servico => {
+                html += `
+                    <div class="catalogo-item">
+                        <div class="catalogo-item-header">
+                            <div>
+                                <h6 class="mb-1">${servico.nome || 'Serviço'}</h6>
+                                <span class="catalogo-tipo">Serviço</span>
+                            </div>
+                            <div class="catalogo-preco">${formatarPreco(servico.precoVenda)}</div>
+                        </div>
+                        <p class="mb-2">${servico.descricao || 'Sem descrição'}</p>
+                        ${servico.duracao ? `<small class="text-muted"><i class="far fa-clock"></i> ${servico.duracao}</small>` : ''}
+                    </div>
+                `;
+            });
+            
+            // Produtos
+            produtos.forEach(produto => {
+                const estoque = produto.estoqueAtual > 0 ? 
+                    `<span class="badge bg-success">${produto.estoqueAtual} em estoque</span>` : 
+                    `<span class="badge bg-danger">Esgotado</span>`;
+                
+                html += `
+                    <div class="catalogo-item">
+                        <div class="catalogo-item-header">
+                            <div>
+                                <h6 class="mb-1">${produto.nome || 'Produto'}</h6>
+                                <span class="catalogo-tipo">Produto</span>
+                                ${estoque}
+                            </div>
+                            <div class="catalogo-preco">${formatarPreco(produto.precoVenda)}</div>
+                        </div>
+                        <p class="mb-2">${produto.descricao || 'Sem descrição'}</p>
+                        ${produto.marca ? `<small class="text-muted"><i class="fas fa-tag"></i> ${produto.marca}</small>` : ''}
+                    </div>
+                `;
+            });
+            
+            catalogoContainer.innerHTML = html;
+        }
 
-        // CSS para animação
-        const style = document.createElement('style');
-        style.textContent = `
-            .fade-in {
-                animation: fadeIn 0.5s ease-in;
+        // Carregar portfólio
+        async function carregarPortfolioProfissional(profData) {
+            const fotos = profData.portfolioFotos || [];
+            const videos = profData.videos || [];
+            
+            if (fotos.length === 0 && videos.length === 0) {
+                portfolioContainer.innerHTML = '<p class="text-muted">Nenhum trabalho no portfólio</p>';
+                return;
             }
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
+            
+            let html = '';
+            
+            // Fotos
+            if (fotos.length > 0) {
+                html += '<h6 class="mt-4 mb-3">Fotos</h6>';
+                html += '<div class="galeria-grid">';
+                fotos.forEach(foto => {
+                    html += `
+                        <div class="galeria-item">
+                            <img src="${foto}" alt="Portfólio" onclick="abrirImagemModal('${foto}')" style="cursor: pointer;">
+                        </div>
+                    `;
+                });
+                html += '</div>';
             }
-        `;
-        document.head.appendChild(style);
+            
+            // Vídeos
+            if (videos.length > 0) {
+                html += '<h6 class="mt-4 mb-3">Vídeos</h6>';
+                videos.forEach(video => {
+                    html += `
+                        <div class="mb-3">
+                            <div class="ratio ratio-16x9">
+                                <iframe src="${embedVideoUrl(video)}" 
+                                        title="Vídeo do portfólio" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen>
+                                </iframe>
+                            </div>
+                            <small class="text-muted d-block mt-1">${extrairNomeVideo(video)}</small>
+                        </div>
+                    `;
+                });
+            }
+            
+            portfolioContainer.innerHTML = html;
+        }
 
-        console.log('🚀 Sistema de busca inicializado!');
+        // Atualizar badges das abas
+        function atualizarBadges() {
+            // Contar itens do catálogo (serviços + produtos)
+            const catalogoItens = catalogoContainer.querySelectorAll('.catalogo-item').length;
+            badgeCatalogo.textContent = catalogoItens;
+            
+            // Contar itens do portfólio (fotos + vídeos)
+            const profData = profissionalAtual?.profissional || {};
+            const fotos = profData.portfolioFotos || [];
+            const videos = profData.videos || [];
+            const portfolioItens = fotos.length + videos.length;
+            badgePortfolio.textContent = portfolioItens;
+        }
 
+        // Funções auxiliares
+        function formatarExperiencia(anos) {
+            if (!anos) return '-';
+            const map = {
+                '1': 'Menos de 1 ano',
+                '1-3': '1-3 anos',
+                '3-5': '3-5 anos',
+                '5-10': '5-10 anos',
+                '10+': 'Mais de 10 anos'
+            };
+            return map[anos] || anos;
+        }
+
+        function formatarTempoResposta(tempo) {
+            if (!tempo) return '-';
+            const map = {
+                '1': 'Até 1 hora',
+                '2': 'Até 2 horas',
+                '4': 'Até 4 horas',
+                '24': 'Até 24 horas',
+                '48': 'Até 48 horas'
+            };
+            return map[tempo] || tempo;
+        }
+
+        function formatarPreco(valor) {
+            if (!valor) return 'R$ --';
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        function preencherTags(container, items) {
+            container.innerHTML = '';
+            
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                container.innerHTML = '<span class="text-muted">-</span>';
+                return;
+            }
+            
+            items.forEach(item => {
+                if (item && item.trim()) {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.textContent = item;
+                    container.appendChild(tag);
+                }
+            });
+        }
+
+        function abrirWhatsApp(numero, prof) {
+            // Limpar número (remover tudo que não for dígito)
+            const numeroLimpo = numero.replace(/\D/g, '');
+            
+            // Adicionar código do Brasil se não tiver
+            const numeroFinal = numeroLimpo.startsWith('55') ? numeroLimpo : `55${numeroLimpo}`;
+            
+            // Mensagem pré-definida
+            const nomeCliente = localStorage.getItem('userName') || 'Cliente ScanHub';
+            const nomeProfissional = prof.profissional.nomeProfissional || prof.apelido || 'Profissional';
+            const especialidade = prof.profissional.especialidadePrincipal || 'serviço';
+            
+            const mensagem = encodeURIComponent(
+                `Olá ${nomeProfissional}! Sou ${nomeCliente}, vi seu perfil no ScanHub e tenho interesse no seu serviço de ${especialidade}. Podemos conversar?`
+            );
+            
+            // Abrir WhatsApp
+            window.open(`https://wa.me/${numeroFinal}?text=${mensagem}`, '_blank');
+        }
+
+        function embedVideoUrl(url) {
+            // YouTube
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                if (videoId) {
+                    return `https://www.youtube.com/embed/${videoId[1]}`;
+                }
+            }
+            // Vimeo
+            else if (url.includes('vimeo.com')) {
+                const videoId = url.match(/vimeo\.com\/(\d+)/);
+                if (videoId) {
+                    return `https://player.vimeo.com/video/${videoId[1]}`;
+                }
+            }
+            return url;
+        }
+
+        function extrairNomeVideo(url) {
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                return 'Vídeo do YouTube';
+            } else if (url.includes('vimeo.com')) {
+                return 'Vídeo do Vimeo';
+            }
+            return 'Vídeo';
+        }
+
+        // Mostrar erro
+        function mostrarErro(mensagem) {
+            profissionaisGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Oops!</h4>
+                    <p>${mensagem}</p>
+                    <button class="btn btn-primary mt-3" onclick="window.location.reload()">
+                        <i class="fas fa-redo me-2"></i>Tentar novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        // Inicializar event listeners
+        function inicializarEventListeners() {
+            // Filtros
+            inputBusca.addEventListener('input', aplicarFiltros);
+            selectEspecialidade.addEventListener('change', aplicarFiltros);
+            inputCidade.addEventListener('input', aplicarFiltros);
+            selectOrdenar.addEventListener('change', aplicarFiltros);
+            
+            // Abas do modal
+            modalTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remover active de todas
+                    modalTabs.forEach(t => t.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    
+                    // Adicionar active na clicada
+                    tab.classList.add('active');
+                    const tabId = tab.dataset.tab;
+                    document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
+                });
+            });
+            
+            // Botão Tenho Interesse
+            btnInteresseModal.addEventListener('click', () => {
+                alert('Funcionalidade "Tenho Interesse" será implementada em breve!');
+                // TODO: Implementar sistema de solicitações
+            });
+        }
+
+        // Funções globais (para usar em onclick)
+        window.abrirImagemModal = function(url) {
+            // Abrir imagem em modal maior
+            const modalHtml = `
+                <div class="modal fade" id="imagemModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-body p-0">
+                                <img src="${url}" class="img-fluid w-100" alt="Portfólio">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal anterior se existir
+            const modalAntigo = document.getElementById('imagemModal');
+            if (modalAntigo) modalAntigo.remove();
+            
+            // Adicionar novo modal
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const imagemModal = new bootstrap.Modal(document.getElementById('imagemModal'));
+            imagemModal.show();
+        };
+
+        // Inicializar a aplicação
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
