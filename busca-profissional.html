@@ -35,7 +35,6 @@
             padding-top: 80px;
         }
 
-        /* Navbar */
         .navbar {
             background: white;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -72,14 +71,12 @@
             transform: translateY(-2px);
         }
 
-        /* Main Container */
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
             color: white;
@@ -91,23 +88,10 @@
             overflow: hidden;
         }
 
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
-            background-size: cover;
-        }
-
         .hero-section h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             font-weight: 700;
-            position: relative;
-            z-index: 1;
         }
 
         .hero-section p {
@@ -115,11 +99,8 @@
             opacity: 0.9;
             max-width: 600px;
             margin: 0 auto 25px;
-            position: relative;
-            z-index: 1;
         }
 
-        /* Search Container */
         .search-container {
             background: white;
             border-radius: 15px;
@@ -140,7 +121,6 @@
             border-radius: 12px;
             font-size: 1.1rem;
             transition: all 0.3s;
-            font-family: 'Poppins', sans-serif;
         }
 
         .search-main input:focus {
@@ -172,7 +152,6 @@
             transform: translateY(-50%) scale(1.05);
         }
 
-        /* Filtros */
         .filters-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -180,82 +159,30 @@
             margin-top: 20px;
         }
 
-        .filter-group {
-            margin-bottom: 0;
-            position: relative;
-        }
-
         .filter-group label {
             font-weight: 600;
             margin-bottom: 8px;
             display: block;
             color: var(--dark-color);
-            font-size: 0.9rem;
         }
 
-        .filter-group select {
+        .filter-group select,
+        .filter-group input {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: all 0.3s;
-            font-family: 'Poppins', sans-serif;
-            background: white;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 15px;
-            padding-right: 40px;
         }
 
-        .filter-group select:focus {
+        .filter-group select:focus,
+        .filter-group input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(68, 104, 154, 0.1);
             outline: none;
         }
 
-        /* Campo de cidade com autocomplete */
-        .city-input-container {
-            position: relative;
-        }
-
-        .city-suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 2px solid var(--primary-color);
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .city-suggestion {
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid #eee;
-        }
-
-        .city-suggestion:hover {
-            background: #f0f7ff;
-        }
-
-        .city-suggestion:last-child {
-            border-bottom: none;
-        }
-
-        /* Results Info */
         .results-info {
             display: flex;
             justify-content: space-between;
@@ -263,8 +190,6 @@
             margin-bottom: 25px;
             padding: 20px 0;
             border-bottom: 2px solid #eee;
-            flex-wrap: wrap;
-            gap: 15px;
         }
 
         .results-count {
@@ -285,16 +210,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
         .sort-filter label {
             font-weight: 500;
             color: #666;
-            font-size: 0.9rem;
         }
 
-        /* Professionals Grid */
         .professionals-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -302,7 +224,6 @@
             margin-top: 20px;
         }
 
-        /* Professional Card */
         .professional-card {
             background: white;
             border-radius: 20px;
@@ -313,7 +234,6 @@
             display: flex;
             flex-direction: column;
             border: 1px solid #f0f0f0;
-            position: relative;
         }
 
         .professional-card:hover {
@@ -324,7 +244,7 @@
 
         .card-image {
             height: 220px;
-            background: linear-gradient(45deg, #f0f0f0, #e8e8e8);
+            background: #f0f0f0;
             position: relative;
             overflow: hidden;
         }
@@ -351,9 +271,6 @@
             font-size: 0.8rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            z-index: 2;
-            backdrop-filter: blur(5px);
         }
 
         .card-content {
@@ -368,7 +285,6 @@
             font-weight: 700;
             margin-bottom: 8px;
             color: var(--dark-color);
-            line-height: 1.3;
         }
 
         .card-specialty {
@@ -378,11 +294,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
-        }
-
-        .card-specialty i {
-            font-size: 0.9rem;
         }
 
         .card-slogan {
@@ -391,10 +302,6 @@
             margin-bottom: 15px;
             flex: 1;
             line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
         .card-meta {
@@ -410,7 +317,6 @@
         .meta-item {
             text-align: center;
             flex: 1;
-            padding: 0 5px;
         }
 
         .meta-item i {
@@ -423,16 +329,12 @@
             font-size: 0.8rem;
             color: #666;
             display: block;
-            margin-bottom: 3px;
         }
 
         .meta-value {
             font-weight: 600;
             font-size: 0.95rem;
             color: var(--dark-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .card-footer {
@@ -454,8 +356,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            font-size: 1rem;
-            font-family: 'Poppins', sans-serif;
         }
 
         .btn-ver-perfil:hover {
@@ -463,7 +363,6 @@
             box-shadow: 0 5px 15px rgba(68, 104, 154, 0.3);
         }
 
-        /* Loading */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -500,7 +399,6 @@
             font-weight: 500;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -531,76 +429,13 @@
             line-height: 1.6;
         }
 
-        /* Tags */
-        .card-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 10px 0;
-        }
-
-        .card-tag {
-            background: rgba(68, 104, 154, 0.1);
-            color: var(--primary-color);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        /* Rating Stars */
-        .rating-stars {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-bottom: 5px;
-        }
-
-        .rating-stars i {
-            color: #ffc107;
-            font-size: 0.9rem;
-        }
-
-        .rating-value {
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-left: 5px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .main-container {
-                padding: 15px;
-            }
-            
-            .hero-section {
-                padding: 30px;
-            }
-            
-            .hero-section h1 {
-                font-size: 2rem;
-            }
-        }
-
-        @media (max-width: 992px) {
+        @media (max-width: 768px) {
             body {
                 padding-top: 70px;
             }
             
-            .professionals-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 20px;
-            }
-            
-            .filters-row {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
             .hero-section {
                 padding: 25px;
-                border-radius: 15px;
             }
             
             .hero-section h1 {
@@ -611,92 +446,19 @@
                 padding: 20px;
             }
             
-            .results-info {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
-            .sort-filter {
-                width: 100%;
+            .filters-row {
+                grid-template-columns: 1fr;
             }
             
             .professionals-grid {
                 grid-template-columns: 1fr;
             }
             
-            .filters-row {
-                grid-template-columns: 1fr;
+            .results-info {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
             }
-        }
-
-        @media (max-width: 576px) {
-            .navbar-brand img {
-                height: 40px;
-            }
-            
-            .btn-voltar {
-                padding: 6px 15px;
-                font-size: 0.9rem;
-            }
-            
-            .hero-section {
-                padding: 20px;
-            }
-            
-            .hero-section h1 {
-                font-size: 1.6rem;
-            }
-            
-            .hero-section p {
-                font-size: 1rem;
-            }
-            
-            .card-content {
-                padding: 20px;
-            }
-            
-            .card-title {
-                font-size: 1.2rem;
-            }
-            
-            .card-meta {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            
-            .meta-item {
-                flex: 1 0 calc(50% - 10px);
-            }
-        }
-
-        /* Animações */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #365a8a;
         }
     </style>
 </head>
@@ -745,14 +507,12 @@
                     <label for="filterSpecialty"><i class="fas fa-star me-2"></i>Especialidade</label>
                     <select id="filterSpecialty" class="form-select">
                         <option value="">Todas especialidades</option>
-                        <!-- Carregado pelo JavaScript -->
                     </select>
                 </div>
 
-                <div class="filter-group city-input-container">
+                <div class="filter-group">
                     <label for="filterCity"><i class="fas fa-map-marker-alt me-2"></i>Cidade</label>
-                    <input type="text" id="filterCity" class="form-control" placeholder="Digite sua cidade..." autocomplete="off">
-                    <div class="city-suggestions" id="citySuggestions"></div>
+                    <input type="text" id="filterCity" class="form-control" placeholder="Digite a cidade...">
                 </div>
 
                 <div class="filter-group">
@@ -812,7 +572,7 @@
         // SISTEMA COMPLETO DE BUSCA DE PROFISSIONAIS
         // ============================================
 
-        // Import Firebase (versão 10.8.0)
+        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
             getAuth, 
@@ -823,9 +583,7 @@
             collection, 
             getDocs, 
             query, 
-            where,
-            doc,
-            getDoc
+            where
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Firebase Config
@@ -843,9 +601,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ============================================
-        // ELEMENTOS DOM
-        // ============================================
+        // Elementos DOM
         const loadingOverlay = document.getElementById('loadingOverlay');
         const searchInput = document.getElementById('searchInput');
         const btnSearch = document.getElementById('btnSearch');
@@ -856,28 +612,12 @@
         const sortBy = document.getElementById('sortBy');
         const resultsCount = document.getElementById('resultsCount');
         const professionalsGrid = document.getElementById('professionalsGrid');
-        const citySuggestions = document.getElementById('citySuggestions');
 
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
+        // Dados
         let allProfessionals = [];
         let filteredProfessionals = [];
-        let currentUser = null;
-        
-        // Dados para filtros - Vamos carregar DINAMICAMENTE
         let specialtiesSet = new Set();
         let citiesSet = new Set();
-        let cityList = [];
-        
-        // Lista de estados brasileiros para sugestão
-        const BRAZILIAN_STATES = [
-            'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal',
-            'Espírito Santo', 'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul',
-            'Minas Gerais', 'Pará', 'Paraíba', 'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro',
-            'Rio Grande do Norte', 'Rio Grande do Sul', 'Rondônia', 'Roraima', 'Santa Catarina',
-            'São Paulo', 'Sergipe', 'Tocantins'
-        ];
 
         // ============================================
         // FUNÇÕES DE UTILIDADE
@@ -927,14 +667,8 @@
             return phone;
         }
 
-        function getPhotoUrl(prof, profData) {
-            return prof.fotoPerfilProfissional || 
-                   prof.fotoPerfil || 
-                   `https://ui-avatars.com/api/?name=${encodeURIComponent(profData.nomeProfissional || 'Profissional')}&background=44689a&color=fff&size=200`;
-        }
-
         // ============================================
-        // FUNÇÕES PRINCIPAIS - CARREGAMENTO DE DADOS
+        // FUNÇÕES PRINCIPAIS
         // ============================================
 
         async function loadAllProfessionals() {
@@ -947,12 +681,12 @@
                 allProfessionals = [];
                 specialtiesSet = new Set();
                 citiesSet = new Set();
-                cityList = [];
                 
                 // Buscar TODOS os profissionais
                 const q = query(
                     collection(db, "usuarios"),
-                    where("tipoUsuario", "==", "profissional")
+                    where("tipoUsuario", "==", "profissional"),
+                    where("status", "==", "ativo")
                 );
                 
                 const querySnapshot = await getDocs(q);
@@ -962,18 +696,16 @@
                 querySnapshot.forEach((docSnapshot) => {
                     const userData = docSnapshot.data();
                     
-                    // Verificar se tem perfil profissional
-                    if (userData.profissional && userData.status === "ativo") {
-                        
+                    if (userData.profissional) {
                         const profData = userData.profissional;
                         
-                        // Verificar condições para aparecer
+                        // VERIFICAÇÃO SIMPLIFICADA - Apenas perfilCompleto
                         const hasCompleteProfile = profData.perfilCompleto === true;
-                        const isVisible = profData.visivelBusca !== false;
                         const hasSpecialty = profData.especialidadePrincipal && profData.especialidadePrincipal.trim() !== '';
                         const hasName = profData.nomeProfissional && profData.nomeProfissional.trim() !== '';
                         
-                        if (hasCompleteProfile && isVisible && hasSpecialty && hasName) {
+                        // Não verifica visivelBusca - se o campo não existir, assume que está visível
+                        if (hasCompleteProfile && hasSpecialty && hasName) {
                             const professional = {
                                 id: docSnapshot.id,
                                 ...userData
@@ -988,33 +720,17 @@
                             
                             // Coletar cidades
                             if (profData.cidadeBase) {
-                                const city = profData.cidadeBase.trim();
-                                if (city && !citiesSet.has(city)) {
-                                    citiesSet.add(city);
-                                    cityList.push(city);
-                                }
+                                citiesSet.add(profData.cidadeBase);
                             }
                             
-                            // Coletar cidades atendidas
-                            if (profData.cidadesAtendidas && Array.isArray(profData.cidadesAtendidas)) {
-                                profData.cidadesAtendidas.forEach(city => {
-                                    const cityTrimmed = city.trim();
-                                    if (cityTrimmed && !citiesSet.has(cityTrimmed)) {
-                                        citiesSet.add(cityTrimmed);
-                                        cityList.push(cityTrimmed);
-                                    }
-                                });
-                            }
+                            console.log(`✅ Adicionado: ${profData.nomeProfissional} - ${profData.especialidadePrincipal}`);
                         }
                     }
                 });
                 
                 console.log(`✅ Profissionais carregados: ${allProfessionals.length}`);
-                console.log(`🏙️ Cidades encontradas: ${cityList.length}`);
-                console.log(`⭐ Especialidades encontradas: ${Array.from(specialtiesSet).length}`);
-                
-                // Ordenar arrays
-                cityList.sort();
+                console.log(`⭐ Especialidades:`, Array.from(specialtiesSet));
+                console.log(`🏙️ Cidades:`, Array.from(citiesSet));
                 
                 // Popular filtros
                 populateFilterSelects();
@@ -1022,19 +738,15 @@
                 // Aplicar filtros iniciais
                 applyFilters();
                 
-                // Mostrar mensagem de sucesso
-                setTimeout(() => {
-                    if (allProfessionals.length > 0) {
-                        showAlert(`✅ ${allProfessionals.length} profissionais carregados com sucesso!`, 'success');
-                    } else {
-                        showAlert('ℹ️ Nenhum profissional encontrado no momento.', 'info');
-                    }
-                }, 1000);
+                // Mostrar mensagem
+                if (allProfessionals.length > 0) {
+                    showAlert(`✅ ${allProfessionals.length} profissionais carregados!`, 'success');
+                }
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar profissionais:', error);
-                showAlert('❌ Erro ao carregar profissionais. Verifique sua conexão e tente novamente.', 'error');
-                showEmptyState('Erro ao carregar', 'Não foi possível carregar a lista de profissionais.');
+                showAlert('❌ Erro ao carregar profissionais. Verifique o console.', 'error');
+                showEmptyState('Erro ao carregar', 'Não foi possível carregar os profissionais.');
             } finally {
                 hideLoading();
             }
@@ -1043,14 +755,10 @@
         function populateFilterSelects() {
             console.log('🔧 Populando filtros...');
             
-            // ========== ESPECIALIDADES ==========
+            // Popular especialidades
             filterSpecialty.innerHTML = '<option value="">Todas especialidades</option>';
             
-            // Converter Set para Array e ordenar
-            const specialtiesArray = Array.from(specialtiesSet);
-            specialtiesArray.sort();
-            
-            // Adicionar especialidades encontradas
+            const specialtiesArray = Array.from(specialtiesSet).sort();
             specialtiesArray.forEach(specialty => {
                 const option = document.createElement('option');
                 option.value = specialty;
@@ -1058,53 +766,8 @@
                 filterSpecialty.appendChild(option);
             });
             
-            console.log(`🔧 ${specialtiesArray.length} especialidades adicionadas ao filtro`);
-            
-            // ========== SUGESTÕES DE CIDADES ==========
-            // A lista de sugestões será carregada dinamicamente quando o usuário digitar
-            
-            // Mostrar quantas cidades foram encontradas
-            if (cityList.length > 0) {
-                console.log(`🏙️ ${cityList.length} cidades disponíveis para busca`);
-            }
+            console.log(`🔧 ${specialtiesArray.length} especialidades adicionadas`);
         }
-
-        function showCitySuggestions(searchTerm = '') {
-            citySuggestions.innerHTML = '';
-            
-            if (!searchTerm.trim()) {
-                citySuggestions.style.display = 'none';
-                return;
-            }
-            
-            const searchLower = searchTerm.toLowerCase();
-            const matches = cityList.filter(city => 
-                city.toLowerCase().includes(searchLower)
-            ).slice(0, 10); // Limitar a 10 sugestões
-            
-            if (matches.length === 0) {
-                citySuggestions.style.display = 'none';
-                return;
-            }
-            
-            matches.forEach(city => {
-                const div = document.createElement('div');
-                div.className = 'city-suggestion';
-                div.textContent = city;
-                div.onclick = () => {
-                    filterCity.value = city;
-                    citySuggestions.style.display = 'none';
-                    applyFilters();
-                };
-                citySuggestions.appendChild(div);
-            });
-            
-            citySuggestions.style.display = 'block';
-        }
-
-        // ============================================
-        // SISTEMA DE FILTRAGEM
-        // ============================================
 
         function applyFilters() {
             const searchTerm = searchInput.value.toLowerCase().trim();
@@ -1115,11 +778,6 @@
             const sortOrder = sortBy.value;
             
             console.log('🎯 Aplicando filtros...');
-            console.log('🔍 Busca:', searchTerm);
-            console.log('⭐ Especialidade:', selectedSpecialty);
-            console.log('🏙️ Cidade:', selectedCity);
-            console.log('★ Avaliação mínima:', minRating);
-            console.log('🛠️ Tipo serviço:', serviceType);
             
             // Filtrar profissionais
             filteredProfessionals = allProfessionals.filter(prof => {
@@ -1154,10 +812,7 @@
                 // 3. Filtro por cidade
                 if (selectedCity) {
                     const cidadeBase = (profData.cidadeBase || '').toLowerCase();
-                    const cidadesAtendidas = (profData.cidadesAtendidas || []).map(c => c.toLowerCase());
-                    
-                    if (cidadeBase !== selectedCity && 
-                        !cidadesAtendidas.includes(selectedCity)) {
+                    if (cidadeBase !== selectedCity) {
                         return false;
                     }
                 }
@@ -1226,7 +881,6 @@
                     
                 case 'relevance':
                 default:
-                    // Manter ordem original
                     break;
             }
         }
@@ -1242,10 +896,6 @@
                 default: return 0;
             }
         }
-
-        // ============================================
-        // RENDERIZAÇÃO DOS RESULTADOS
-        // ============================================
 
         function renderProfessionals() {
             professionalsGrid.innerHTML = '';
@@ -1273,7 +923,7 @@
                     <h3>${title}</h3>
                     <p>${message}</p>
                     <button class="btn btn-primary mt-3" onclick="clearAllFilters()">
-                        <i class="fas fa-times me-2"></i>Limpar todos os filtros
+                        <i class="fas fa-times me-2"></i>Limpar filtros
                     </button>
                 </div>
             `;
@@ -1281,37 +931,22 @@
 
         function createProfessionalCard(prof) {
             const profData = prof.profissional;
-            const photoUrl = getPhotoUrl(prof, profData);
+            const photoUrl = prof.fotoPerfilProfissional || 
+                           prof.fotoPerfil || 
+                           `https://ui-avatars.com/api/?name=${encodeURIComponent(profData.nomeProfissional)}&background=44689a&color=fff&size=200`;
             
             const card = document.createElement('div');
             card.className = 'professional-card';
-            
-            // Gerar rating HTML
-            let ratingHTML = '';
-            const rating = profData.avaliacaoMedia || 0;
-            if (rating > 0) {
-                const fullStars = Math.floor(rating);
-                const hasHalfStar = rating % 1 >= 0.5;
-                
-                ratingHTML = `
-                    <div class="rating-starts">
-                        ${Array(fullStars).fill('<i class="fas fa-star"></i>').join('')}
-                        ${hasHalfStar ? '<i class="fas fa-star-half-alt"></i>' : ''}
-                        ${Array(5 - fullStars - (hasHalfStar ? 1 : 0)).fill('<i class="far fa-star"></i>').join('')}
-                        <span class="rating-value">${rating.toFixed(1)}</span>
-                    </div>
-                `;
-            }
             
             // Gerar tags HTML
             let tagsHTML = '';
             if (profData.especialidades && Array.isArray(profData.especialidades) && profData.especialidades.length > 0) {
                 const tagsToShow = profData.especialidades.slice(0, 3);
                 tagsHTML = `
-                    <div class="card-tags">
-                        ${tagsToShow.map(tag => `<span class="card-tag">${tag}</span>`).join('')}
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        ${tagsToShow.map(tag => `<span class="badge bg-primary">${tag}</span>`).join('')}
                         ${profData.especialidades.length > 3 ? 
-                            `<span class="card-tag">+${profData.especialidades.length - 3}</span>` : ''
+                            `<span class="badge bg-secondary">+${profData.especialidades.length - 3}</span>` : ''
                         }
                     </div>
                 `;
@@ -1329,21 +964,19 @@
                 <div class="card-content">
                     <h3 class="card-title">${profData.nomeProfissional || 'Profissional'}</h3>
                     
-                    ${ratingHTML}
+                    ${tagsHTML}
                     
                     <div class="card-specialty">
                         <i class="fas fa-star"></i>
                         <span>${profData.especialidadePrincipal || 'Serviços Profissionais'}</span>
                     </div>
                     
-                    <p class="card-slogan">${profData.slogan || (profData.descricao ? profData.descricao.substring(0, 120) + '...' : 'Profissional qualificado e experiente.')}</p>
-                    
-                    ${tagsHTML}
+                    <p class="card-slogan">${profData.slogan || (profData.descricao ? profData.descricao.substring(0, 120) + '...' : 'Profissional qualificado')}</p>
                     
                     <div class="card-meta">
                         <div class="meta-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span class="meta-label">Local</span>
+                            <span class="meta-label">Cidade</span>
                             <span class="meta-value">${profData.cidadeBase || 'Não informado'}</span>
                         </div>
                         
@@ -1356,11 +989,7 @@
                         <div class="meta-item">
                             <i class="fas fa-check-circle"></i>
                             <span class="meta-label">Atendimento</span>
-                            <span class="meta-value">
-                                ${profData.atendeOnline && profData.atendeDomicilio ? 'Presencial/Online' : 
-                                  profData.atendeOnline ? 'Online' : 
-                                  profData.atendeDomicilio ? 'Presencial' : 'Não informado'}
-                            </span>
+                            <span class="meta-value">${profData.atendeOnline ? 'Online' : 'Presencial'}</span>
                         </div>
                     </div>
                     
@@ -1388,29 +1017,7 @@
         }
 
         // ============================================
-        // FUNÇÕES DE NAVEGAÇÃO
-        // ============================================
-
-        async function viewProfessionalProfile(professionalId) {
-            showLoading();
-            
-            try {
-                // Salvar no sessionStorage para a próxima página
-                sessionStorage.setItem('profissionalSelecionado', professionalId);
-                
-                // Redirecionar para a página de perfil
-                window.location.href = `perfil-profissional-publico.html?id=${professionalId}`;
-                
-            } catch (error) {
-                console.error('Erro ao redirecionar:', error);
-                showAlert('Erro ao carregar perfil do profissional.', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // ============================================
-        // FUNÇÕES GLOBAIS PARA BOTÕES
+        // FUNÇÕES GLOBAIS
         // ============================================
 
         window.clearAllFilters = function() {
@@ -1420,114 +1027,69 @@
             filterRating.value = '0';
             filterServiceType.value = '';
             sortBy.value = 'relevance';
-            
-            // Esconder sugestões
-            citySuggestions.style.display = 'none';
-            
-            // Aplicar filtros
             applyFilters();
-            
-            showAlert('Filtros limpos com sucesso!', 'info');
+            showAlert('Filtros limpos!', 'info');
         };
 
-        window.viewProfessionalProfile = viewProfessionalProfile;
+        window.viewProfessionalProfile = function(professionalId) {
+            sessionStorage.setItem('profissionalSelecionado', professionalId);
+            window.location.href = `perfil-profissional-publico.html?id=${professionalId}`;
+        };
+
+        window.loadProfessionals = loadAllProfessionals;
 
         // ============================================
-        // INICIALIZAÇÃO DO SISTEMA
+        // INICIALIZAÇÃO
         // ============================================
 
         function initEventListeners() {
-            // Busca principal
             btnSearch.addEventListener('click', applyFilters);
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') applyFilters();
             });
             
-            // Busca em tempo real com debounce
             let searchTimeout;
             searchInput.addEventListener('input', () => {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(applyFilters, 500);
             });
             
-            // Campo de cidade com autocomplete
-            let cityTimeout;
-            filterCity.addEventListener('input', () => {
-                clearTimeout(cityTimeout);
-                cityTimeout = setTimeout(() => {
-                    showCitySuggestions(filterCity.value);
-                    applyFilters();
-                }, 300);
-            });
-            
-            // Fechar sugestões ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!filterCity.contains(e.target) && !citySuggestions.contains(e.target)) {
-                    citySuggestions.style.display = 'none';
-                }
-            });
-            
-            // Filtros select
             filterSpecialty.addEventListener('change', applyFilters);
+            filterCity.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 500);
+            });
             filterRating.addEventListener('change', applyFilters);
             filterServiceType.addEventListener('change', applyFilters);
             sortBy.addEventListener('change', applyFilters);
-            
-            // Recarregar dados
-            document.addEventListener('reloadProfessionals', loadAllProfessionals);
-            
-            // Botão de recarregar na interface (opcional)
-            const reloadBtn = document.createElement('button');
-            reloadBtn.className = 'btn btn-sm btn-outline-primary ms-2';
-            reloadBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
-            reloadBtn.title = 'Recarregar profissionais';
-            reloadBtn.onclick = loadAllProfessionals;
-            document.querySelector('.sort-filter').appendChild(reloadBtn);
         }
 
-        // Verificar autenticação e carregar dados
+        // Verificar autenticação
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user;
                 console.log('👤 Usuário autenticado:', user.uid);
-                
-                // Carregar profissionais
                 await loadAllProfessionals();
-                
-                // Inicializar eventos
                 initEventListeners();
-                
             } else {
-                console.log('🔒 Usuário não autenticado, redirecionando...');
+                console.log('🔒 Redirecionando para login...');
                 window.location.href = 'login.html';
             }
         });
 
-        // Recarregar página quando voltar do cache
-        window.addEventListener('pageshow', (event) => {
-            if (event.persisted) {
-                console.log('🔄 Página carregada do cache, recarregando dados...');
-                loadAllProfessionals();
+        // CSS para animação
+        const style = document.createElement('style');
+        style.textContent = `
+            .fade-in {
+                animation: fadeIn 0.5s ease-in;
             }
-        });
-
-        // Prevenir envio de formulário
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
             }
-        });
+        `;
+        document.head.appendChild(style);
 
-        // Exportar funções para debug
-        window.debug = {
-            getAllProfessionals: () => allProfessionals,
-            getFilteredProfessionals: () => filteredProfessionals,
-            getSpecialties: () => Array.from(specialtiesSet),
-            getCities: () => cityList,
-            reloadData: loadAllProfessionals
-        };
-
-        console.log('🚀 Sistema de busca de profissionais inicializado!');
+        console.log('🚀 Sistema de busca inicializado!');
 
     </script>
 </body>
