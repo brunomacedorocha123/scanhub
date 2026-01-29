@@ -933,770 +933,915 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Firebase -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            collection, 
-            getDocs,
-            query,
-            where,
-            orderBy
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getFirestore, 
+        collection, 
+        getDocs,
+        query,
+        where,
+        orderBy
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // Elementos DOM
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const inputBusca = document.getElementById('inputBusca');
-        const selectEspecialidade = document.getElementById('selectEspecialidade');
-        const inputCidade = document.getElementById('inputCidade');
-        const selectOrdenar = document.getElementById('selectOrdenar');
-        const contadorResultados = document.getElementById('contadorResultados');
-        const profissionaisGrid = document.getElementById('profissionaisGrid');
-        
-        // Modal elements
-        const modalProfissional = new bootstrap.Modal(document.getElementById('modalProfissional'));
-        const modalAvatar = document.getElementById('modalAvatar');
-        const modalNome = document.getElementById('modalNome');
-        const modalSlogan = document.getElementById('modalSlogan');
-        const modalEspecialidade = document.getElementById('modalEspecialidade');
-        const modalCidade = document.getElementById('modalCidade');
-        const modalDescricao = document.getElementById('modalDescricao');
-        const btnWhatsappModal = document.getElementById('btnWhatsappModal');
-        const btnInteresseModal = document.getElementById('btnInteresseModal');
-        
-        // Info elements
-        const infoEspecialidade = document.getElementById('infoEspecialidade');
-        const infoExperiencia = document.getElementById('infoExperiencia');
-        const infoTags = document.getElementById('infoTags');
-        const infoCidadeBase = document.getElementById('infoCidadeBase');
-        const infoRaioKm = document.getElementById('infoRaioKm');
-        const infoCidadesAtendidas = document.getElementById('infoCidadesAtendidas');
-        const infoAtendeDomicilio = document.getElementById('infoAtendeDomicilio');
-        const infoAtendeOnline = document.getElementById('infoAtendeOnline');
-        const infoFormasPagamento = document.getElementById('infoFormasPagamento');
-        const infoTempoResposta = document.getElementById('infoTempoResposta');
-        const infoOrcamentoGratuito = document.getElementById('infoOrcamentoGratuito');
-        const infoGarantia = document.getElementById('infoGarantia');
-        const infoWhatsapp = document.getElementById('infoWhatsapp');
-        const infoEmail = document.getElementById('infoEmail');
-        const infoLinks = document.getElementById('infoLinks');
-        
-        // Tab elements
-        const modalTabs = document.querySelectorAll('.modal-tab');
-        const badgeCatalogo = document.getElementById('badgeCatalogo');
-        const badgePortfolio = document.getElementById('badgePortfolio');
-        const tabPanes = document.querySelectorAll('.tab-pane');
-        const catalogoContainer = document.getElementById('catalogoContainer');
-        const portfolioContainer = document.getElementById('portfolioContainer');
+    // Elementos DOM
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const inputBusca = document.getElementById('inputBusca');
+    const selectEspecialidade = document.getElementById('selectEspecialidade');
+    const inputCidade = document.getElementById('inputCidade');
+    const selectOrdenar = document.getElementById('selectOrdenar');
+    const contadorResultados = document.getElementById('contadorResultados');
+    const profissionaisGrid = document.getElementById('profissionaisGrid');
+    
+    // Modal elements
+    const modalProfissionalElement = document.getElementById('modalProfissional');
+    const modalProfissional = modalProfissionalElement ? new bootstrap.Modal(modalProfissionalElement) : null;
+    const modalAvatar = document.getElementById('modalAvatar');
+    const modalNome = document.getElementById('modalNome');
+    const modalSlogan = document.getElementById('modalSlogan');
+    const modalEspecialidade = document.getElementById('modalEspecialidade');
+    const modalCidade = document.getElementById('modalCidade');
+    const modalDescricao = document.getElementById('modalDescricao');
+    const btnWhatsappModal = document.getElementById('btnWhatsappModal');
+    const btnInteresseModal = document.getElementById('btnInteresseModal');
+    
+    // Info elements
+    const infoEspecialidade = document.getElementById('infoEspecialidade');
+    const infoExperiencia = document.getElementById('infoExperiencia');
+    const infoTags = document.getElementById('infoTags');
+    const infoCidadeBase = document.getElementById('infoCidadeBase');
+    const infoRaioKm = document.getElementById('infoRaioKm');
+    const infoCidadesAtendidas = document.getElementById('infoCidadesAtendidas');
+    const infoAtendeDomicilio = document.getElementById('infoAtendeDomicilio');
+    const infoAtendeOnline = document.getElementById('infoAtendeOnline');
+    const infoFormasPagamento = document.getElementById('infoFormasPagamento');
+    const infoTempoResposta = document.getElementById('infoTempoResposta');
+    const infoOrcamentoGratuito = document.getElementById('infoOrcamentoGratuito');
+    const infoGarantia = document.getElementById('infoGarantia');
+    const infoWhatsapp = document.getElementById('infoWhatsapp');
+    const infoEmail = document.getElementById('infoEmail');
+    const infoLinks = document.getElementById('infoLinks');
+    
+    // Tab elements
+    const modalTabs = document.querySelectorAll('.modal-tab');
+    const badgeCatalogo = document.getElementById('badgeCatalogo');
+    const badgePortfolio = document.getElementById('badgePortfolio');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const catalogoContainer = document.getElementById('catalogoContainer');
+    const portfolioContainer = document.getElementById('portfolioContainer');
 
-        // Variáveis globais
-        let todosProfissionais = [];
-        let profissionaisFiltrados = [];
-        let especialidadesUnicas = new Set();
-        let profissionalAtual = null;
+    // Variáveis globais
+    let todosProfissionais = [];
+    let profissionaisFiltrados = [];
+    let especialidadesUnicas = new Set();
+    let profissionalAtual = null;
 
-        // Especialidades padrão (mesmas do perfil-profissional)
-        const especialidadesPadrao = [
-            'Advocacia', 'Alarme', 'Alvenaria', 'Antena', 'Ar Condicionado',
-            'Arquitetura', 'Artes Marciais', 'Babysitter', 'Barbeiro',
-            'Cabeleireiro', 'Calhas', 'Cerca Elétrica', 'Cerâmica', 'Chaveiro',
-            'Coach', 'Consultoria', 'Construção Civil', 'Contabilidade',
-            'Costura', 'Cuidador de Idosos', 'Dança', 'Dedetização', 'Design',
-            'Design de Interiores', 'Elétrica', 'Eletrodomésticos', 'Eletrônica',
-            'Encanador', 'Engenharia', 'Entregador', 'Eventos', 'Festas',
-            'Fotógrafo', 'Forro', 'Funilaria', 'Gesso', 'Guias de Turismo',
-            'Hidráulica', 'Impermeabilização', 'Jardineiro', 'Jardinagem',
-            'Jato de Areia', 'Lavanderia', 'Limpeza', 'Logística', 'Manicure',
-            'Marcenaria', 'Marketing Digital', 'Massoterapia', 'Mecânica',
-            'Montador de Móveis', 'Motorista Particular', 'Músico',
-            'Nutricionista', 'Organização Residencial', 'Personal Trainer',
-            'Pet Sitter', 'Pintura', 'Piso', 'Piscina', 'Portão Automático',
-            'Programador', 'Professor Particular', 'Psicologia', 'Redes',
-            'Redator', 'Reformas', 'Segurança', 'Serralheria',
-            'Sistema Fotovoltaico', 'Social Media', 'Solda', 'Som',
-            'Técnico de Celular', 'Telhado', 'TI & Informática', 'Tradução',
-            'Guias de Turismo', 'Veterinária', 'Video Maker', 'Vidraçaria',
-            'Web Designer', 'Yoga', 'Outro'
-        ];
+    // Especialidades padrão
+    const especialidadesPadrao = [
+        'advocacia', 'alarme', 'alvenaria', 'antena', 'ar_condicionado',
+        'arquitetura', 'artes_marciais', 'babysitter', 'barbeiro',
+        'cabeleireiro', 'calhas', 'cerca_eletrica', 'ceramica', 'chaveiro',
+        'coach', 'consultoria', 'construcao', 'contabilidade',
+        'costura', 'cuidador', 'danca', 'dedetizacao', 'design',
+        'design_interiores', 'eletrica', 'eletrodomesticos', 'eletronica',
+        'encanador', 'engenharia', 'entregador', 'eventos', 'festas',
+        'fotografo', 'forro', 'funilaria', 'gesso', 'guias_turismo',
+        'hidraulica', 'impermeabilizacao', 'jardineiro', 'jardinagem',
+        'jato_areia', 'lavanderia', 'limpeza', 'logistica', 'manicure',
+        'marcenaria', 'marketing_digital', 'massoterapia', 'mecanica',
+        'montador', 'motorista', 'musico', 'nutricionista', 'organizacao',
+        'personal_trainer', 'pet_sitter', 'pintura', 'piso', 'piscina',
+        'portao', 'programador', 'professor', 'psicologia', 'rede',
+        'redator', 'reforma', 'seguranca', 'serralheria',
+        'sistema_fotovoltaico', 'social_media', 'solda', 'som',
+        'tecnico_celular', 'telhado', 'ti', 'traducao',
+        'turismo', 'veterinaria', 'video_maker', 'vidracaria',
+        'web_designer', 'yoga', 'outro'
+    ];
 
-        // Inicializar
-        async function init() {
-            showLoading();
+    // Inicializar
+    async function init() {
+        console.log('Inicializando busca-profissional...');
+        showLoading();
+        try {
             await carregarProfissionais();
             preencherFiltroEspecialidades();
             aplicarFiltros();
-            hideLoading();
             inicializarEventListeners();
+            console.log('Inicialização concluída com', todosProfissionais.length, 'profissionais');
+        } catch (error) {
+            console.error('Erro na inicialização:', error);
+            mostrarErro('Erro ao carregar profissionais');
+        } finally {
+            hideLoading();
         }
+    }
 
-        // Mostrar loading
-        function showLoading() {
-            loadingOverlay.classList.add('active');
-        }
+    // Mostrar loading
+    function showLoading() {
+        if (loadingOverlay) loadingOverlay.classList.add('active');
+    }
 
-        // Esconder loading
-        function hideLoading() {
-            loadingOverlay.classList.remove('active');
-        }
+    // Esconder loading
+    function hideLoading() {
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+    }
 
-        // Carregar profissionais do Firestore
-        async function carregarProfissionais() {
-            try {
-                const usuariosRef = collection(db, "usuarios");
-                const q = query(
-                    usuariosRef,
-                    where("tipoUsuario", "==", "profissional"),
-                    where("status", "==", "ativo")
-                );
+    // Carregar profissionais do Firestore
+    async function carregarProfissionais() {
+        try {
+            const usuariosRef = collection(db, "usuarios");
+            const q = query(
+                usuariosRef,
+                where("tipoUsuario", "==", "profissional"),
+                where("status", "==", "ativo")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            todosProfissionais = [];
+            especialidadesUnicas.clear();
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
                 
-                const querySnapshot = await getDocs(q);
-                todosProfissionais = [];
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
+                // Verificar se o profissional tem perfil completo
+                if (data.profissional && data.profissional.perfilCompleto === true) {
+                    const profissional = {
+                        id: doc.id,
+                        ...data,
+                        profissional: data.profissional || {}
+                    };
                     
-                    // Verificar se o profissional tem perfil completo e visível
-                    if (data.profissional && data.profissional.perfilCompleto === true) {
-                        const profissional = {
-                            id: doc.id,
-                            ...data,
-                            profissional: data.profissional || {}
-                        };
-                        
-                        todosProfissionais.push(profissional);
-                        
-                        // Coletar especialidades únicas para o filtro
-                        if (profissional.profissional.especialidadePrincipal) {
-                            especialidadesUnicas.add(profissional.profissional.especialidadePrincipal);
-                        }
+                    todosProfissionais.push(profissional);
+                    
+                    // Coletar especialidades únicas para o filtro
+                    if (profissional.profissional.especialidadePrincipal) {
+                        especialidadesUnicas.add(profissional.profissional.especialidadePrincipal);
                     }
-                });
-                
-                console.log(`Carregados ${todosProfissionais.length} profissionais`);
-                
-            } catch (error) {
-                console.error('Erro ao carregar profissionais:', error);
-                mostrarErro('Erro ao carregar profissionais. Tente novamente.');
-            }
-        }
-
-        // Preencher filtro de especialidades
-        function preencherFiltroEspecialidades() {
-            // Limpar opções
-            selectEspecialidade.innerHTML = '<option value="">Todas especialidades</option>';
-            
-            // Adicionar especialidades encontradas
-            Array.from(especialidadesUnicas).sort().forEach(especialidade => {
-                const option = document.createElement('option');
-                option.value = especialidade;
-                option.textContent = especialidade;
-                selectEspecialidade.appendChild(option);
-            });
-            
-            // Adicionar especialidades padrão que não foram encontradas
-            especialidadesPadrao.forEach(especialidade => {
-                if (!especialidadesUnicas.has(especialidade)) {
-                    const option = document.createElement('option');
-                    option.value = especialidade;
-                    option.textContent = especialidade;
-                    option.disabled = true;
-                    selectEspecialidade.appendChild(option);
                 }
             });
+            
+            console.log(`Carregados ${todosProfissionais.length} profissionais`);
+            
+        } catch (error) {
+            console.error('Erro ao carregar profissionais:', error);
+            throw error;
         }
+    }
 
-        // Aplicar filtros
-        function aplicarFiltros() {
-            const buscaTexto = inputBusca.value.toLowerCase().trim();
-            const especialidadeFiltro = selectEspecialidade.value;
-            const cidadeFiltro = inputCidade.value.toLowerCase().trim();
-            const ordenarPor = selectOrdenar.value;
+    // Preencher filtro de especialidades
+    function preencherFiltroEspecialidades() {
+        if (!selectEspecialidade) return;
+        
+        // Limpar opções
+        selectEspecialidade.innerHTML = '<option value="">Todas especialidades</option>';
+        
+        // Adicionar especialidades encontradas
+        Array.from(especialidadesUnicas).sort().forEach(especialidade => {
+            const option = document.createElement('option');
+            option.value = especialidade;
             
-            // Filtrar profissionais
-            profissionaisFiltrados = todosProfissionais.filter(prof => {
-                const profData = prof.profissional;
-                
-                // Filtro por texto
-                let matchTexto = true;
-                if (buscaTexto) {
-                    matchTexto = 
-                        (profData.nomeProfissional && profData.nomeProfissional.toLowerCase().includes(buscaTexto)) ||
-                        (profData.descricao && profData.descricao.toLowerCase().includes(buscaTexto)) ||
-                        (profData.slogan && profData.slogan.toLowerCase().includes(buscaTexto)) ||
-                        (profData.especialidadePrincipal && profData.especialidadePrincipal.toLowerCase().includes(buscaTexto)) ||
-                        (prof.apelido && prof.apelido.toLowerCase().includes(buscaTexto));
-                }
-                
-                // Filtro por especialidade
-                let matchEspecialidade = true;
-                if (especialidadeFiltro) {
-                    matchEspecialidade = profData.especialidadePrincipal === especialidadeFiltro;
-                }
-                
-                // Filtro por cidade
-                let matchCidade = true;
-                if (cidadeFiltro) {
-                    matchCidade = 
-                        (profData.cidadeBase && profData.cidadeBase.toLowerCase().includes(cidadeFiltro)) ||
-                        (profData.cidadesAtendidas && 
-                         profData.cidadesAtendidas.some(cidade => cidade.toLowerCase().includes(cidadeFiltro)));
-                }
-                
-                return matchTexto && matchEspecialidade && matchCidade;
-            });
+            // Converter para formato mais amigável (remover underscores, capitalizar)
+            let textoAmigavel = especialidade.replace(/_/g, ' ');
+            textoAmigavel = textoAmigavel.charAt(0).toUpperCase() + textoAmigavel.slice(1);
             
-            // Ordenar resultados
-            ordenarResultados(ordenarPor);
-            
-            // Atualizar interface
-            atualizarContadorResultados();
-            renderizarProfissionais();
-        }
+            option.textContent = textoAmigavel;
+            selectEspecialidade.appendChild(option);
+        });
+        
+        console.log(`${especialidadesUnicas.size} especialidades encontradas`);
+    }
 
-        // Ordenar resultados
-        function ordenarResultados(criterio) {
-            switch(criterio) {
-                case 'nome':
-                    profissionaisFiltrados.sort((a, b) => {
-                        const nomeA = a.profissional.nomeProfissional || '';
-                        const nomeB = b.profissional.nomeProfissional || '';
-                        return nomeA.localeCompare(nomeB);
-                    });
-                    break;
-                    
-                case 'cidade':
-                    profissionaisFiltrados.sort((a, b) => {
-                        const cidadeA = a.profissional.cidadeBase || '';
-                        const cidadeB = b.profissional.cidadeBase || '';
-                        return cidadeA.localeCompare(cidadeB);
-                    });
-                    break;
-                    
-                case 'avaliacao':
-                    // TODO: Implementar quando tiver sistema de avaliações
-                    break;
-                    
-                default: // relevancia
-                    // Mantém a ordem original (por relevância)
-                    break;
-            }
-        }
-
-        // Atualizar contador de resultados
-        function atualizarContadorResultados() {
-            const total = profissionaisFiltrados.length;
-            let texto = '';
-            
-            if (total === 0) {
-                texto = 'Nenhum profissional encontrado';
-            } else if (total === 1) {
-                texto = '1 profissional encontrado';
-            } else {
-                texto = `${total} profissionais encontrados`;
-            }
-            
-            contadorResultados.textContent = texto;
-        }
-
-        // Renderizar profissionais na grid
-        function renderizarProfissionais() {
-            profissionaisGrid.innerHTML = '';
-            
-            if (profissionaisFiltrados.length === 0) {
-                profissionaisGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h4>Nenhum profissional encontrado</h4>
-                        <p>Tente ajustar os filtros de busca</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            profissionaisFiltrados.forEach(prof => {
-                const card = criarCardProfissional(prof);
-                profissionaisGrid.appendChild(card);
-            });
-        }
-
-        // Criar card do profissional
-        function criarCardProfissional(prof) {
+    // Aplicar filtros
+    function aplicarFiltros() {
+        console.log('Aplicando filtros...');
+        
+        const buscaTexto = inputBusca ? inputBusca.value.toLowerCase().trim() : '';
+        const especialidadeFiltro = selectEspecialidade ? selectEspecialidade.value : '';
+        const cidadeFiltro = inputCidade ? inputCidade.value.toLowerCase().trim() : '';
+        const ordenarPor = selectOrdenar ? selectOrdenar.value : 'relevancia';
+        
+        console.log('Filtros:', { buscaTexto, especialidadeFiltro, cidadeFiltro, ordenarPor });
+        
+        // Filtrar profissionais
+        profissionaisFiltrados = todosProfissionais.filter(prof => {
             const profData = prof.profissional;
-            const card = document.createElement('div');
-            card.className = 'profissional-card';
-            card.dataset.id = prof.id;
             
-            // Foto do profissional
-            const foto = prof.fotoPerfilProfissional || prof.fotoPerfil || '';
-            const fotoHtml = foto 
-                ? `<img src="${foto}" alt="${profData.nomeProfissional || 'Profissional'}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user fa-3x text-muted\\' style=\\'line-height: 180px;\\'></i>';">`
-                : '<i class="fas fa-user fa-3x text-muted" style="line-height: 180px;"></i>';
+            // Filtro por texto
+            let matchTexto = true;
+            if (buscaTexto) {
+                const textoBusca = buscaTexto.toLowerCase();
+                matchTexto = 
+                    (profData.nomeProfissional && profData.nomeProfissional.toLowerCase().includes(textoBusca)) ||
+                    (profData.descricao && profData.descricao.toLowerCase().includes(textoBusca)) ||
+                    (profData.slogan && profData.slogan.toLowerCase().includes(textoBusca)) ||
+                    (profData.especialidadePrincipal && profData.especialidadePrincipal.toLowerCase().includes(textoBusca)) ||
+                    (prof.apelido && prof.apelido.toLowerCase().includes(textoBusca)) ||
+                    (profData.cidadeBase && profData.cidadeBase.toLowerCase().includes(textoBusca));
+            }
             
-            // Descrição curta (limitar)
-            const descricaoCurta = profData.descricao 
-                ? profData.descricao.substring(0, 100) + (profData.descricao.length > 100 ? '...' : '')
-                : 'Sem descrição';
+            // Filtro por especialidade
+            let matchEspecialidade = true;
+            if (especialidadeFiltro) {
+                matchEspecialidade = profData.especialidadePrincipal === especialidadeFiltro;
+            }
             
-            // Cidade
-            const cidade = profData.cidadeBase || 'Localização não informada';
+            // Filtro por cidade
+            let matchCidade = true;
+            if (cidadeFiltro) {
+                matchCidade = 
+                    (profData.cidadeBase && profData.cidadeBase.toLowerCase().includes(cidadeFiltro)) ||
+                    (profData.cidadesAtendidas && 
+                     Array.isArray(profData.cidadesAtendidas) &&
+                     profData.cidadesAtendidas.some(cidade => 
+                         cidade && cidade.toLowerCase().includes(cidadeFiltro)
+                     ));
+            }
             
-            card.innerHTML = `
-                <div class="card-avatar">
-                    ${fotoHtml}
-                </div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <span class="card-categoria">${profData.especialidadePrincipal || 'Profissional'}</span>
-                        <h4 class="card-nome">${profData.nomeProfissional || prof.apelido || 'Profissional'}</h4>
-                        <p class="card-cidade"><i class="fas fa-map-marker-alt"></i> ${cidade}</p>
-                    </div>
-                    <p class="card-descricao">${descricaoCurta}</p>
-                    <div class="card-footer">
-                        <div class="card-estrelas">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <small class="text-muted">(4.5)</small>
-                        </div>
-                        <button class="card-btn btn-ver-perfil">
-                            Ver Perfil
-                        </button>
-                    </div>
+            return matchTexto && matchEspecialidade && matchCidade;
+        });
+        
+        console.log(`Filtrados: ${profissionaisFiltrados.length} de ${todosProfissionais.length}`);
+        
+        // Ordenar resultados
+        ordenarResultados(ordenarPor);
+        
+        // Atualizar interface
+        atualizarContadorResultados();
+        renderizarProfissionais();
+    }
+
+    // Ordenar resultados
+    function ordenarResultados(criterio) {
+        switch(criterio) {
+            case 'nome':
+                profissionaisFiltrados.sort((a, b) => {
+                    const nomeA = a.profissional.nomeProfissional || '';
+                    const nomeB = b.profissional.nomeProfissional || '';
+                    return nomeA.localeCompare(nomeB);
+                });
+                break;
+                
+            case 'cidade':
+                profissionaisFiltrados.sort((a, b) => {
+                    const cidadeA = a.profissional.cidadeBase || '';
+                    const cidadeB = b.profissional.cidadeBase || '';
+                    return cidadeA.localeCompare(cidadeB);
+                });
+                break;
+                
+            case 'avaliacao':
+                // TODO: Implementar quando tiver sistema de avaliações
+                break;
+                
+            default: // relevancia
+                // Mantém a ordem original
+                break;
+        }
+    }
+
+    // Atualizar contador de resultados
+    function atualizarContadorResultados() {
+        if (!contadorResultados) return;
+        
+        const total = profissionaisFiltrados.length;
+        let texto = '';
+        
+        if (total === 0) {
+            texto = 'Nenhum profissional encontrado';
+        } else if (total === 1) {
+            texto = '1 profissional encontrado';
+        } else {
+            texto = `${total} profissionais encontrados`;
+        }
+        
+        contadorResultados.textContent = texto;
+    }
+
+    // Renderizar profissionais na grid
+    function renderizarProfissionais() {
+        if (!profissionaisGrid) return;
+        
+        profissionaisGrid.innerHTML = '';
+        
+        if (profissionaisFiltrados.length === 0) {
+            profissionaisGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h4>Nenhum profissional encontrado</h4>
+                    <p>Tente ajustar os filtros de busca</p>
                 </div>
             `;
-            
-            // Adicionar evento de clique
-            const btnVerPerfil = card.querySelector('.btn-ver-perfil');
+            return;
+        }
+        
+        profissionaisFiltrados.forEach(prof => {
+            const card = criarCardProfissional(prof);
+            if (card) {
+                profissionaisGrid.appendChild(card);
+            }
+        });
+    }
+
+    // Criar card do profissional
+    function criarCardProfissional(prof) {
+        const profData = prof.profissional;
+        const card = document.createElement('div');
+        card.className = 'profissional-card';
+        card.dataset.id = prof.id;
+        
+        // Foto do profissional
+        const foto = prof.fotoPerfilProfissional || prof.fotoPerfil || '';
+        const fotoHtml = foto 
+            ? `<img src="${foto}" alt="${profData.nomeProfissional || 'Profissional'}" 
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user fa-3x text-muted\\' style=\\'line-height: 180px;\\'></i>';">`
+            : '<i class="fas fa-user fa-3x text-muted" style="line-height: 180px;"></i>';
+        
+        // Descrição curta (limitar)
+        const descricao = profData.descricao || '';
+        const descricaoCurta = descricao.length > 100 
+            ? descricao.substring(0, 100) + '...' 
+            : descricao || 'Sem descrição';
+        
+        // Cidade
+        const cidade = profData.cidadeBase || 'Localização não informada';
+        
+        // Especialidade formatada
+        let especialidadeTexto = profData.especialidadePrincipal || 'Profissional';
+        especialidadeTexto = especialidadeTexto.replace(/_/g, ' ');
+        especialidadeTexto = especialidadeTexto.charAt(0).toUpperCase() + especialidadeTexto.slice(1);
+        
+        card.innerHTML = `
+            <div class="card-avatar">
+                ${fotoHtml}
+            </div>
+            <div class="card-content">
+                <div class="card-header">
+                    <span class="card-categoria">${especialidadeTexto}</span>
+                    <h4 class="card-nome">${profData.nomeProfissional || prof.apelido || 'Profissional'}</h4>
+                    <p class="card-cidade"><i class="fas fa-map-marker-alt"></i> ${cidade}</p>
+                </div>
+                <p class="card-descricao">${descricaoCurta}</p>
+                <div class="card-footer">
+                    <div class="card-estrelas">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <small class="text-muted">(4.5)</small>
+                    </div>
+                    <button class="card-btn btn-ver-perfil">
+                        Ver Perfil
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Adicionar evento de clique no botão
+        const btnVerPerfil = card.querySelector('.btn-ver-perfil');
+        if (btnVerPerfil) {
             btnVerPerfil.addEventListener('click', (e) => {
                 e.stopPropagation();
                 abrirModalProfissional(prof);
             });
-            
-            card.addEventListener('click', () => {
-                abrirModalProfissional(prof);
-            });
-            
-            return card;
         }
+        
+        // Adicionar evento de clique no card inteiro
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.btn-ver-perfil')) {
+                abrirModalProfissional(prof);
+            }
+        });
+        
+        return card;
+    }
 
-        // Abrir modal com detalhes do profissional
-        async function abrirModalProfissional(prof) {
-            profissionalAtual = prof;
-            const profData = prof.profissional;
+    // Abrir modal com detalhes do profissional
+    async function abrirModalProfissional(prof) {
+        if (!modalProfissional) {
+            console.error('Modal não encontrado');
+            return;
+        }
+        
+        profissionalAtual = prof;
+        const profData = prof.profissional;
+        
+        showLoading();
+        
+        try {
+            // Preencher informações básicas
+            const foto = prof.fotoPerfilProfissional || prof.fotoPerfil || '';
+            if (foto && modalAvatar) {
+                modalAvatar.innerHTML = `<img src="${foto}" alt="${profData.nomeProfissional || 'Profissional'}" 
+                    onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user fa-3x text-muted\\' style=\\'line-height: 110px;\\'></i>';">`;
+            } else if (modalAvatar) {
+                modalAvatar.innerHTML = '<i class="fas fa-user fa-3x text-muted" style="line-height: 110px;"></i>';
+            }
             
-            showLoading();
+            if (modalNome) modalNome.textContent = profData.nomeProfissional || prof.apelido || 'Profissional';
+            if (modalSlogan) modalSlogan.textContent = profData.slogan || 'Profissional qualificado';
             
-            try {
-                // Preencher informações básicas
-                const foto = prof.fotoPerfilProfissional || prof.fotoPerfil || '';
-                if (foto) {
-                    modalAvatar.innerHTML = `<img src="${foto}" alt="${profData.nomeProfissional || 'Profissional'}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user fa-3x text-muted\\' style=\\'line-height: 110px;\\'></i>';">`;
-                } else {
-                    modalAvatar.innerHTML = '<i class="fas fa-user fa-3x text-muted" style="line-height: 110px;"></i>';
-                }
-                
-                modalNome.textContent = profData.nomeProfissional || prof.apelido || 'Profissional';
-                modalSlogan.textContent = profData.slogan || 'Profissional qualificado';
-                modalEspecialidade.textContent = profData.especialidadePrincipal || 'Profissional';
-                modalCidade.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${profData.cidadeBase || 'Localização não informada'}`;
-                modalDescricao.textContent = profData.descricao || 'Sem descrição disponível.';
-                
-                // Preencher informações detalhadas
-                infoEspecialidade.textContent = profData.especialidadePrincipal || '-';
-                infoExperiencia.textContent = formatarExperiencia(profData.anosExperiencia);
-                infoCidadeBase.textContent = profData.cidadeBase || '-';
-                infoRaioKm.textContent = profData.raioKm ? `${profData.raioKm} km` : '-';
-                infoTempoResposta.textContent = formatarTempoResposta(profData.tempoResposta);
-                infoOrcamentoGratuito.textContent = `Orçamento gratuito: ${profData.orcamentoGratuito ? 'Sim' : 'Não'}`;
-                infoGarantia.textContent = profData.garantiaDias ? `${profData.garantiaDias} dias` : '-';
-                infoAtendeDomicilio.textContent = `Atende em domicílio: ${profData.atendeDomicilio ? 'Sim' : 'Não'}`;
-                infoAtendeOnline.textContent = `Atende online: ${profData.atendeOnline ? 'Sim' : 'Não'}`;
-                
-                // WhatsApp
-                const whatsapp = profData.whatsapp || prof.celular || '';
-                infoWhatsapp.textContent = whatsapp || 'Não informado';
+            // Especialidade formatada
+            let especialidadeTexto = profData.especialidadePrincipal || 'Profissional';
+            especialidadeTexto = especialidadeTexto.replace(/_/g, ' ');
+            especialidadeTexto = especialidadeTexto.charAt(0).toUpperCase() + especialidadeTexto.slice(1);
+            
+            if (modalEspecialidade) modalEspecialidade.textContent = especialidadeTexto;
+            if (modalCidade) modalCidade.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${profData.cidadeBase || 'Localização não informada'}`;
+            if (modalDescricao) modalDescricao.textContent = profData.descricao || 'Sem descrição disponível.';
+            
+            // Preencher informações detalhadas
+            if (infoEspecialidade) infoEspecialidade.textContent = especialidadeTexto;
+            if (infoExperiencia) infoExperiencia.textContent = formatarExperiencia(profData.anosExperiencia);
+            if (infoCidadeBase) infoCidadeBase.textContent = profData.cidadeBase || '-';
+            if (infoRaioKm) infoRaioKm.textContent = profData.raioKm ? `${profData.raioKm} km` : '-';
+            if (infoTempoResposta) infoTempoResposta.textContent = formatarTempoResposta(profData.tempoResposta);
+            if (infoOrcamentoGratuito) infoOrcamentoGratuito.textContent = `Orçamento gratuito: ${profData.orcamentoGratuito ? 'Sim' : 'Não'}`;
+            if (infoGarantia) infoGarantia.textContent = profData.garantiaDias ? `${profData.garantiaDias} dias` : '-';
+            if (infoAtendeDomicilio) infoAtendeDomicilio.textContent = `Atende em domicílio: ${profData.atendeDomicilio ? 'Sim' : 'Não'}`;
+            if (infoAtendeOnline) infoAtendeOnline.textContent = `Atende online: ${profData.atendeOnline ? 'Sim' : 'Não'}`;
+            
+            // WhatsApp
+            const whatsapp = profData.whatsapp || prof.celular || '';
+            if (infoWhatsapp) infoWhatsapp.textContent = whatsapp || 'Não informado';
+            if (btnWhatsappModal) {
                 if (whatsapp) {
                     btnWhatsappModal.style.display = 'flex';
                     btnWhatsappModal.onclick = () => abrirWhatsApp(whatsapp, prof);
                 } else {
                     btnWhatsappModal.style.display = 'none';
                 }
-                
-                // Email
-                infoEmail.textContent = profData.emailProfissional || prof.email || 'Não informado';
-                
-                // Preencher arrays (tags, cidades, etc.)
-                preencherTags(infoTags, profData.especialidades);
-                preencherTags(infoCidadesAtendidas, profData.cidadesAtendidas);
-                preencherTags(infoFormasPagamento, profData.formasPagamento);
-                
-                // Links
-                if (profData.links && profData.links.length > 0 && profData.links[0]) {
+            }
+            
+            // Email
+            if (infoEmail) infoEmail.textContent = profData.emailProfissional || prof.email || 'Não informado';
+            
+            // Preencher arrays (tags, cidades, etc.)
+            if (infoTags) preencherTags(infoTags, profData.especialidades);
+            if (infoCidadesAtendidas) preencherTags(infoCidadesAtendidas, profData.cidadesAtendidas);
+            if (infoFormasPagamento) preencherTags(infoFormasPagamento, profData.formasPagamento);
+            
+            // Links
+            if (infoLinks) {
+                if (profData.links && Array.isArray(profData.links) && profData.links.length > 0 && profData.links[0]) {
                     infoLinks.innerHTML = profData.links.map(link => 
                         `<a href="${link}" target="_blank" class="d-block mb-2"><i class="fas fa-external-link-alt me-2"></i>${link}</a>`
                     ).join('');
                 } else {
                     infoLinks.innerHTML = '<p class="text-muted">Nenhum link disponível</p>';
                 }
-                
-                // Carregar catálogo
-                await carregarCatalogoProfissional(prof.id);
-                
-                // Carregar portfólio
-                await carregarPortfolioProfissional(profData);
-                
-                // Atualizar badges
-                atualizarBadges();
-                
-                // Mostrar modal
-                modalProfissional.show();
-                
-            } catch (error) {
-                console.error('Erro ao abrir modal:', error);
-                mostrarErro('Erro ao carregar detalhes do profissional');
-            } finally {
-                hideLoading();
             }
+            
+            // Carregar catálogo e portfólio
+            await Promise.all([
+                carregarCatalogoProfissional(prof.id),
+                carregarPortfolioProfissional(profData)
+            ]);
+            
+            // Atualizar badges
+            atualizarBadges();
+            
+            // Inicializar abas do modal
+            inicializarAbasModal();
+            
+            // Mostrar modal
+            modalProfissional.show();
+            
+            console.log('Modal aberto para:', profData.nomeProfissional);
+            
+        } catch (error) {
+            console.error('Erro ao abrir modal:', error);
+            alert('Erro ao carregar detalhes do profissional');
+        } finally {
+            hideLoading();
         }
+    }
 
-        // Carregar catálogo do profissional
-        async function carregarCatalogoProfissional(profissionalId) {
-            try {
-                // Buscar serviços
-                const servicosRef = collection(db, "servicos");
-                const qServicos = query(
-                    servicosRef,
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "ativo")
-                );
-                
-                const servicosSnapshot = await getDocs(qServicos);
-                const servicos = [];
-                servicosSnapshot.forEach(doc => {
-                    servicos.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Buscar produtos
-                const produtosRef = collection(db, "produtos");
-                const qProdutos = query(
-                    produtosRef,
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "ativo")
-                );
-                
-                const produtosSnapshot = await getDocs(qProdutos);
-                const produtos = [];
-                produtosSnapshot.forEach(doc => {
-                    produtos.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Renderizar catálogo
-                renderizarCatalogo(servicos, produtos);
-                
-            } catch (error) {
-                console.error('Erro ao carregar catálogo:', error);
-                catalogoContainer.innerHTML = '<p class="text-muted">Erro ao carregar catálogo</p>';
-            }
+    // Carregar catálogo do profissional
+    async function carregarCatalogoProfissional(profissionalId) {
+        if (!catalogoContainer) return;
+        
+        try {
+            // Buscar serviços
+            const servicosRef = collection(db, "servicos");
+            const qServicos = query(
+                servicosRef,
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "ativo")
+            );
+            
+            const servicosSnapshot = await getDocs(qServicos);
+            const servicos = [];
+            servicosSnapshot.forEach(doc => {
+                servicos.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Buscar produtos
+            const produtosRef = collection(db, "produtos");
+            const qProdutos = query(
+                produtosRef,
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "ativo")
+            );
+            
+            const produtosSnapshot = await getDocs(qProdutos);
+            const produtos = [];
+            produtosSnapshot.forEach(doc => {
+                produtos.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Renderizar catálogo
+            renderizarCatalogo(servicos, produtos);
+            
+        } catch (error) {
+            console.error('Erro ao carregar catálogo:', error);
+            catalogoContainer.innerHTML = '<p class="text-muted">Erro ao carregar catálogo</p>';
         }
+    }
 
-        // Renderizar catálogo
-        function renderizarCatalogo(servicos, produtos) {
-            const totalItens = servicos.length + produtos.length;
-            
-            if (totalItens === 0) {
-                catalogoContainer.innerHTML = '<p class="text-muted">Nenhum item no catálogo</p>';
-                return;
-            }
-            
-            let html = '';
-            
-            // Serviços
-            servicos.forEach(servico => {
-                html += `
-                    <div class="catalogo-item">
-                        <div class="catalogo-item-header">
-                            <div>
-                                <h6 class="mb-1">${servico.nome || 'Serviço'}</h6>
-                                <span class="catalogo-tipo">Serviço</span>
-                            </div>
-                            <div class="catalogo-preco">${formatarPreco(servico.precoVenda)}</div>
+    // Renderizar catálogo
+    function renderizarCatalogo(servicos, produtos) {
+        if (!catalogoContainer) return;
+        
+        const totalItens = servicos.length + produtos.length;
+        
+        if (totalItens === 0) {
+            catalogoContainer.innerHTML = '<p class="text-muted">Nenhum item no catálogo</p>';
+            return;
+        }
+        
+        let html = '';
+        
+        // Serviços
+        servicos.forEach(servico => {
+            html += `
+                <div class="catalogo-item">
+                    <div class="catalogo-item-header">
+                        <div>
+                            <h6 class="mb-1">${servico.nome || 'Serviço'}</h6>
+                            <span class="catalogo-tipo">Serviço</span>
                         </div>
-                        <p class="mb-2">${servico.descricao || 'Sem descrição'}</p>
-                        ${servico.duracao ? `<small class="text-muted"><i class="far fa-clock"></i> ${servico.duracao}</small>` : ''}
+                        <div class="catalogo-preco">${formatarPreco(servico.precoVenda)}</div>
+                    </div>
+                    <p class="mb-2">${servico.descricao || 'Sem descrição'}</p>
+                    ${servico.duracao ? `<small class="text-muted"><i class="far fa-clock"></i> ${servico.duracao}</small>` : ''}
+                </div>
+            `;
+        });
+        
+        // Produtos
+        produtos.forEach(produto => {
+            const estoque = produto.estoqueAtual > 0 ? 
+                `<span class="badge bg-success ms-2">${produto.estoqueAtual} em estoque</span>` : 
+                `<span class="badge bg-danger ms-2">Esgotado</span>`;
+            
+            html += `
+                <div class="catalogo-item">
+                    <div class="catalogo-item-header">
+                        <div>
+                            <h6 class="mb-1">${produto.nome || 'Produto'}</h6>
+                            <span class="catalogo-tipo">Produto</span>
+                            ${estoque}
+                        </div>
+                        <div class="catalogo-preco">${formatarPreco(produto.precoVenda)}</div>
+                    </div>
+                    <p class="mb-2">${produto.descricao || 'Sem descrição'}</p>
+                    ${produto.marca ? `<small class="text-muted"><i class="fas fa-tag"></i> ${produto.marca}</small>` : ''}
+                </div>
+            `;
+        });
+        
+        catalogoContainer.innerHTML = html;
+    }
+
+    // Carregar portfólio
+    async function carregarPortfolioProfissional(profData) {
+        if (!portfolioContainer) return;
+        
+        const fotos = profData.portfolioFotos || [];
+        const videos = profData.videos || [];
+        
+        if (fotos.length === 0 && videos.length === 0) {
+            portfolioContainer.innerHTML = '<p class="text-muted">Nenhum trabalho no portfólio</p>';
+            return;
+        }
+        
+        let html = '';
+        
+        // Fotos
+        if (fotos.length > 0) {
+            html += '<h6 class="mt-4 mb-3">Fotos</h6>';
+            html += '<div class="galeria-grid">';
+            fotos.forEach(foto => {
+                html += `
+                    <div class="galeria-item">
+                        <img src="${foto}" alt="Portfólio" onclick="abrirImagemModal('${foto}')" style="cursor: pointer;">
                     </div>
                 `;
             });
-            
-            // Produtos
-            produtos.forEach(produto => {
-                const estoque = produto.estoqueAtual > 0 ? 
-                    `<span class="badge bg-success">${produto.estoqueAtual} em estoque</span>` : 
-                    `<span class="badge bg-danger">Esgotado</span>`;
-                
+            html += '</div>';
+        }
+        
+        // Vídeos
+        if (videos.length > 0) {
+            html += '<h6 class="mt-4 mb-3">Vídeos</h6>';
+            videos.forEach(video => {
                 html += `
-                    <div class="catalogo-item">
-                        <div class="catalogo-item-header">
-                            <div>
-                                <h6 class="mb-1">${produto.nome || 'Produto'}</h6>
-                                <span class="catalogo-tipo">Produto</span>
-                                ${estoque}
-                            </div>
-                            <div class="catalogo-preco">${formatarPreco(produto.precoVenda)}</div>
+                    <div class="mb-3">
+                        <div class="ratio ratio-16x9">
+                            <iframe src="${embedVideoUrl(video)}" 
+                                    title="Vídeo do portfólio" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen>
+                            </iframe>
                         </div>
-                        <p class="mb-2">${produto.descricao || 'Sem descrição'}</p>
-                        ${produto.marca ? `<small class="text-muted"><i class="fas fa-tag"></i> ${produto.marca}</small>` : ''}
+                        <small class="text-muted d-block mt-1">${extrairNomeVideo(video)}</small>
                     </div>
                 `;
             });
-            
-            catalogoContainer.innerHTML = html;
         }
+        
+        portfolioContainer.innerHTML = html;
+    }
 
-        // Carregar portfólio
-        async function carregarPortfolioProfissional(profData) {
-            const fotos = profData.portfolioFotos || [];
-            const videos = profData.videos || [];
-            
-            if (fotos.length === 0 && videos.length === 0) {
-                portfolioContainer.innerHTML = '<p class="text-muted">Nenhum trabalho no portfólio</p>';
-                return;
-            }
-            
-            let html = '';
-            
-            // Fotos
-            if (fotos.length > 0) {
-                html += '<h6 class="mt-4 mb-3">Fotos</h6>';
-                html += '<div class="galeria-grid">';
-                fotos.forEach(foto => {
-                    html += `
-                        <div class="galeria-item">
-                            <img src="${foto}" alt="Portfólio" onclick="abrirImagemModal('${foto}')" style="cursor: pointer;">
-                        </div>
-                    `;
-                });
-                html += '</div>';
-            }
-            
-            // Vídeos
-            if (videos.length > 0) {
-                html += '<h6 class="mt-4 mb-3">Vídeos</h6>';
-                videos.forEach(video => {
-                    html += `
-                        <div class="mb-3">
-                            <div class="ratio ratio-16x9">
-                                <iframe src="${embedVideoUrl(video)}" 
-                                        title="Vídeo do portfólio" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                        allowfullscreen>
-                                </iframe>
-                            </div>
-                            <small class="text-muted d-block mt-1">${extrairNomeVideo(video)}</small>
-                        </div>
-                    `;
-                });
-            }
-            
-            portfolioContainer.innerHTML = html;
-        }
-
-        // Atualizar badges das abas
-        function atualizarBadges() {
-            // Contar itens do catálogo (serviços + produtos)
+    // Atualizar badges das abas
+    function atualizarBadges() {
+        // Contar itens do catálogo
+        if (catalogoContainer && badgeCatalogo) {
             const catalogoItens = catalogoContainer.querySelectorAll('.catalogo-item').length;
             badgeCatalogo.textContent = catalogoItens;
-            
-            // Contar itens do portfólio (fotos + vídeos)
+        }
+        
+        // Contar itens do portfólio
+        if (badgePortfolio) {
             const profData = profissionalAtual?.profissional || {};
             const fotos = profData.portfolioFotos || [];
             const videos = profData.videos || [];
             const portfolioItens = fotos.length + videos.length;
             badgePortfolio.textContent = portfolioItens;
         }
+    }
 
-        // Funções auxiliares
-        function formatarExperiencia(anos) {
-            if (!anos) return '-';
-            const map = {
-                '1': 'Menos de 1 ano',
-                '1-3': '1-3 anos',
-                '3-5': '3-5 anos',
-                '5-10': '5-10 anos',
-                '10+': 'Mais de 10 anos'
-            };
-            return map[anos] || anos;
-        }
-
-        function formatarTempoResposta(tempo) {
-            if (!tempo) return '-';
-            const map = {
-                '1': 'Até 1 hora',
-                '2': 'Até 2 horas',
-                '4': 'Até 4 horas',
-                '24': 'Até 24 horas',
-                '48': 'Até 48 horas'
-            };
-            return map[tempo] || tempo;
-        }
-
-        function formatarPreco(valor) {
-            if (!valor) return 'R$ --';
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor);
-        }
-
-        function preencherTags(container, items) {
-            container.innerHTML = '';
-            
-            if (!items || !Array.isArray(items) || items.length === 0) {
-                container.innerHTML = '<span class="text-muted">-</span>';
-                return;
-            }
-            
-            items.forEach(item => {
-                if (item && item.trim()) {
-                    const tag = document.createElement('span');
-                    tag.className = 'tag';
-                    tag.textContent = item;
-                    container.appendChild(tag);
+    // Inicializar abas do modal
+    function inicializarAbasModal() {
+        modalTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remover active de todas
+                modalTabs.forEach(t => t.classList.remove('active'));
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+                
+                // Adicionar active na clicada
+                this.classList.add('active');
+                const tabId = this.dataset.tab;
+                const tabPane = document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
+                if (tabPane) {
+                    tabPane.classList.add('active');
                 }
             });
-        }
+        });
+    }
 
-        function abrirWhatsApp(numero, prof) {
-            // Limpar número (remover tudo que não for dígito)
-            const numeroLimpo = numero.replace(/\D/g, '');
-            
-            // Adicionar código do Brasil se não tiver
-            const numeroFinal = numeroLimpo.startsWith('55') ? numeroLimpo : `55${numeroLimpo}`;
-            
-            // Mensagem pré-definida
-            const nomeCliente = localStorage.getItem('userName') || 'Cliente ScanHub';
-            const nomeProfissional = prof.profissional.nomeProfissional || prof.apelido || 'Profissional';
-            const especialidade = prof.profissional.especialidadePrincipal || 'serviço';
-            
-            const mensagem = encodeURIComponent(
-                `Olá ${nomeProfissional}! Sou ${nomeCliente}, vi seu perfil no ScanHub e tenho interesse no seu serviço de ${especialidade}. Podemos conversar?`
-            );
-            
-            // Abrir WhatsApp
-            window.open(`https://wa.me/${numeroFinal}?text=${mensagem}`, '_blank');
-        }
+    // Funções auxiliares
+    function formatarExperiencia(anos) {
+        if (!anos) return '-';
+        const map = {
+            '1': 'Menos de 1 ano',
+            '1-3': '1-3 anos',
+            '3-5': '3-5 anos',
+            '5-10': '5-10 anos',
+            '10+': 'Mais de 10 anos'
+        };
+        return map[anos] || anos;
+    }
 
-        function embedVideoUrl(url) {
-            // YouTube
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-                if (videoId) {
-                    return `https://www.youtube.com/embed/${videoId[1]}`;
-                }
+    function formatarTempoResposta(tempo) {
+        if (!tempo) return '-';
+        const map = {
+            '1': 'Até 1 hora',
+            '2': 'Até 2 horas',
+            '4': 'Até 4 horas',
+            '24': 'Até 24 horas',
+            '48': 'Até 48 horas'
+        };
+        return map[tempo] || tempo;
+    }
+
+    function formatarPreco(valor) {
+        if (!valor && valor !== 0) return 'R$ --';
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor);
+    }
+
+    function preencherTags(container, items) {
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            container.innerHTML = '<span class="text-muted">-</span>';
+            return;
+        }
+        
+        items.forEach(item => {
+            if (item && item.trim()) {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.textContent = item;
+                container.appendChild(tag);
             }
-            // Vimeo
-            else if (url.includes('vimeo.com')) {
-                const videoId = url.match(/vimeo\.com\/(\d+)/);
-                if (videoId) {
-                    return `https://player.vimeo.com/video/${videoId[1]}`;
-                }
+        });
+    }
+
+    function abrirWhatsApp(numero, prof) {
+        // Limpar número (remover tudo que não for dígito)
+        const numeroLimpo = numero.replace(/\D/g, '');
+        
+        // Adicionar código do Brasil se não tiver
+        const numeroFinal = numeroLimpo.startsWith('55') ? numeroLimpo : `55${numeroLimpo}`;
+        
+        // Mensagem pré-definida
+        const nomeCliente = localStorage.getItem('userName') || 'Cliente ScanHub';
+        const nomeProfissional = prof.profissional.nomeProfissional || prof.apelido || 'Profissional';
+        const especialidade = prof.profissional.especialidadePrincipal || 'serviço';
+        
+        // Formatar especialidade
+        let especialidadeFormatada = especialidade.replace(/_/g, ' ');
+        especialidadeFormatada = especialidadeFormatada.charAt(0).toUpperCase() + especialidadeFormatada.slice(1);
+        
+        const mensagem = encodeURIComponent(
+            `Olá ${nomeProfissional}! Sou ${nomeCliente}, vi seu perfil no ScanHub e tenho interesse no seu serviço de ${especialidadeFormatada}. Podemos conversar?`
+        );
+        
+        // Abrir WhatsApp
+        window.open(`https://wa.me/${numeroFinal}?text=${mensagem}`, '_blank');
+    }
+
+    function embedVideoUrl(url) {
+        if (!url) return '';
+        
+        // YouTube
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if (videoId && videoId[1]) {
+                return `https://www.youtube.com/embed/${videoId[1]}`;
             }
-            return url;
         }
-
-        function extrairNomeVideo(url) {
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                return 'Vídeo do YouTube';
-            } else if (url.includes('vimeo.com')) {
-                return 'Vídeo do Vimeo';
+        // Vimeo
+        else if (url.includes('vimeo.com')) {
+            const videoId = url.match(/vimeo\.com\/(\d+)/);
+            if (videoId && videoId[1]) {
+                return `https://player.vimeo.com/video/${videoId[1]}`;
             }
-            return 'Vídeo';
         }
+        return url;
+    }
 
-        // Mostrar erro
-        function mostrarErro(mensagem) {
-            profissionaisGrid.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h4>Oops!</h4>
-                    <p>${mensagem}</p>
-                    <button class="btn btn-primary mt-3" onclick="window.location.reload()">
-                        <i class="fas fa-redo me-2"></i>Tentar novamente
-                    </button>
-                </div>
-            `;
+    function extrairNomeVideo(url) {
+        if (!url) return 'Vídeo';
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            return 'Vídeo do YouTube';
+        } else if (url.includes('vimeo.com')) {
+            return 'Vídeo do Vimeo';
         }
+        return 'Vídeo';
+    }
 
-        // Inicializar event listeners
-        function inicializarEventListeners() {
-            // Filtros
-            inputBusca.addEventListener('input', aplicarFiltros);
-            selectEspecialidade.addEventListener('change', aplicarFiltros);
-            inputCidade.addEventListener('input', aplicarFiltros);
-            selectOrdenar.addEventListener('change', aplicarFiltros);
-            
-            // Abas do modal
-            modalTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remover active de todas
-                    modalTabs.forEach(t => t.classList.remove('active'));
-                    tabPanes.forEach(pane => pane.classList.remove('active'));
-                    
-                    // Adicionar active na clicada
-                    tab.classList.add('active');
-                    const tabId = tab.dataset.tab;
-                    document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
-                });
+    // Mostrar erro
+    function mostrarErro(mensagem) {
+        if (!profissionaisGrid) return;
+        
+        profissionaisGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>Oops!</h4>
+                <p>${mensagem}</p>
+                <button class="btn btn-primary mt-3" onclick="window.location.reload()">
+                    <i class="fas fa-redo me-2"></i>Tentar novamente
+                </button>
+            </div>
+        `;
+    }
+
+    // Inicializar event listeners
+    function inicializarEventListeners() {
+        console.log('Configurando event listeners...');
+        
+        // Filtro de busca com debounce
+        if (inputBusca) {
+            let buscaTimeout;
+            inputBusca.addEventListener('input', function() {
+                console.log('Busca alterada:', this.value);
+                clearTimeout(buscaTimeout);
+                buscaTimeout = setTimeout(() => {
+                    aplicarFiltros();
+                }, 500);
             });
-            
-            // Botão Tenho Interesse
-            btnInteresseModal.addEventListener('click', () => {
+        }
+        
+        // Filtro de especialidade
+        if (selectEspecialidade) {
+            selectEspecialidade.addEventListener('change', function() {
+                console.log('Especialidade selecionada:', this.value);
+                aplicarFiltros();
+            });
+        }
+        
+        // Filtro de cidade
+        if (inputCidade) {
+            let cidadeTimeout;
+            inputCidade.addEventListener('input', function() {
+                console.log('Cidade alterada:', this.value);
+                clearTimeout(cidadeTimeout);
+                cidadeTimeout = setTimeout(() => {
+                    aplicarFiltros();
+                }, 500);
+            });
+        }
+        
+        // Ordenação
+        if (selectOrdenar) {
+            selectOrdenar.addEventListener('change', function() {
+                console.log('Ordenação alterada:', this.value);
+                aplicarFiltros();
+            });
+        }
+        
+        // Botão Tenho Interesse
+        if (btnInteresseModal) {
+            btnInteresseModal.addEventListener('click', function() {
                 alert('Funcionalidade "Tenho Interesse" será implementada em breve!');
                 // TODO: Implementar sistema de solicitações
             });
         }
+        
+        console.log('Event listeners configurados');
+    }
 
-        // Funções globais (para usar em onclick)
-        window.abrirImagemModal = function(url) {
-            // Abrir imagem em modal maior
-            const modalHtml = `
-                <div class="modal fade" id="imagemModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-body p-0">
-                                <img src="${url}" class="img-fluid w-100" alt="Portfólio">
-                            </div>
+    // Funções globais (para usar em onclick)
+    window.abrirImagemModal = function(url) {
+        // Remover modal anterior se existir
+        const modalAntigo = document.getElementById('imagemModal');
+        if (modalAntigo) modalAntigo.remove();
+        
+        // Criar modal para imagem
+        const modalHtml = `
+            <div class="modal fade" id="imagemModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <img src="${url}" class="img-fluid w-100" alt="Portfólio">
                         </div>
                     </div>
                 </div>
-            `;
-            
-            // Remover modal anterior se existir
-            const modalAntigo = document.getElementById('imagemModal');
-            if (modalAntigo) modalAntigo.remove();
-            
-            // Adicionar novo modal
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const imagemModal = new bootstrap.Modal(document.getElementById('imagemModal'));
+            </div>
+        `;
+        
+        // Adicionar ao DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const imagemModalElement = document.getElementById('imagemModal');
+        if (imagemModalElement) {
+            const imagemModal = new bootstrap.Modal(imagemModalElement);
             imagemModal.show();
-        };
+            
+            // Remover do DOM quando fechar
+            imagemModalElement.addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+    };
 
-        // Inicializar a aplicação
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    // Inicializar a aplicação quando o DOM carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM carregado, inicializando...');
+        init();
+    });
+
+    // Expor função de teste
+    window.testarFiltros = function() {
+        console.log('=== TESTANDO FILTROS ===');
+        console.log('Total profissionais:', todosProfissionais.length);
+        console.log('Especialidades únicas:', Array.from(especialidadesUnicas));
+        console.log('Select especialidade valor:', selectEspecialidade ? selectEspecialidade.value : 'não encontrado');
+        aplicarFiltros();
+    };
+</script>
 </body>
 </html>
