@@ -636,17 +636,8 @@
     <script type="module">
        // Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { 
-    getAuth, 
-    onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { 
-    getFirestore, 
-    collection, 
-    getDocs,
-    query,
-    where
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -682,12 +673,16 @@ let cidadesUnicas = new Set();
 
 // Mostrar loading
 function showLoading() {
-    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
 }
 
 // Esconder loading
 function hideLoading() {
-    if (loadingOverlay) loadingOverlay.style.display = 'none';
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
 }
 
 // Mostrar alerta
@@ -697,7 +692,9 @@ function showAlert(mensagem, tipo = 'info') {
 
 // Formatar número de telefone
 function formatarTelefone(telefone) {
-    if (!telefone) return 'Não informado';
+    if (!telefone) {
+        return 'Não informado';
+    }
     const numeros = telefone.replace(/\D/g, '');
     if (numeros.length === 11) {
         return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7)}`;
@@ -707,15 +704,15 @@ function formatarTelefone(telefone) {
     return telefone;
 }
 
-// Carregar todos os profissionais
+// Carregar todos os profissionais - FUNÇÃO PRINCIPAL
 async function carregarProfissionais() {
     showLoading();
     
     try {
-        // Primeiro carregar especialidades fixas
+        // Primeiro: Carregar todas as especialidades possíveis da lista fixa
         carregarEspecialidadesFixa();
         
-        // Buscar todos os profissionais
+        // Query para buscar profissionais visíveis
         const q = query(
             collection(db, "usuarios"),
             where("tipoUsuario", "==", "profissional"),
@@ -730,25 +727,31 @@ async function carregarProfissionais() {
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             
+            // Verificar se tem perfil profissional
             if (data.profissional) {
                 const prof = data.profissional;
                 
+                // Verificar condições para aparecer na busca
                 const temPerfilCompleto = prof.perfilCompleto === true;
                 const estaVisivel = prof.visivelBusca !== false;
                 const temEspecialidade = prof.especialidadePrincipal && prof.especialidadePrincipal.trim() !== '';
-                const temNome = prof.nomeProfissional && prof.nomeProfissional.trim() !== '';
+                const temNomeProfissional = prof.nomeProfissional && prof.nomeProfissional.trim() !== '';
                 
-                if (temPerfilCompleto && estaVisivel && temEspecialidade && temNome) {
-                    profissionais.push({
+                if (temPerfilCompleto && estaVisivel && temEspecialidade && temNomeProfissional) {
+                    const profissionalData = {
                         id: doc.id,
                         ...data,
                         profissional: prof
-                    });
+                    };
                     
+                    profissionais.push(profissionalData);
+                    
+                    // Coletar especialidades únicas
                     if (prof.especialidadePrincipal) {
                         especialidadesUnicas.add(prof.especialidadePrincipal);
                     }
                     
+                    // Coletar cidades únicas
                     if (prof.cidadeBase) {
                         cidadesUnicas.add(prof.cidadeBase);
                     }
@@ -756,21 +759,28 @@ async function carregarProfissionais() {
             }
         });
         
+        // Popular filtros
         popularFiltros();
+        
+        // Mostrar todos inicialmente
         filtrarEExibirProfissionais();
         
     } catch (error) {
+        console.error('Erro ao carregar profissionais:', error);
         showAlert('Erro ao carregar profissionais. Tente novamente.', 'error');
-        professionalsGrid.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro ao carregar</h3>
-                <p>Não foi possível carregar a lista de profissionais.</p>
-                <button class="btn btn-primary mt-3" onclick="carregarProfissionais()">
-                    <i class="fas fa-sync-alt me-2"></i>Tentar novamente
-                </button>
-            </div>
-        `;
+        if (professionalsGrid) {
+            professionalsGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Erro ao carregar</h3>
+                    <p>Não foi possível carregar a lista de profissionais.</p>
+                    <p class="text-muted small">${error.message}</p>
+                    <button class="btn btn-primary mt-3" onclick="carregarProfissionais()">
+                        <i class="fas fa-sync-alt me-2"></i>Tentar novamente
+                    </button>
+                </div>
+            `;
+        }
     } finally {
         hideLoading();
     }
@@ -779,26 +789,93 @@ async function carregarProfissionais() {
 // Carregar lista fixa de especialidades
 function carregarEspecialidadesFixa() {
     const especialidadesFixa = [
-        "Advocacia", "Alarme", "Alvenaria", "Antena", "Ar Condicionado",
-        "Arquitetura", "Artes Marciais", "Babysitter", "Barbeiro",
-        "Cabeleireiro", "Calhas", "Cerca Elétrica", "Cerâmica", "Chaveiro",
-        "Coach", "Consultoria", "Construção Civil", "Contabilidade",
-        "Costura", "Cuidador de Idosos", "Dança", "Dedetização", "Design",
-        "Design de Interiores", "Elétrica", "Eletrodomésticos", "Eletrônica",
-        "Encanador", "Engenharia", "Entregador", "Eventos", "Festas",
-        "Fotógrafo", "Forro", "Funilaria", "Gesso", "Guias de Turismo",
-        "Hidráulica", "Impermeabilização", "Jardineiro", "Jardinagem",
-        "Jato de Areia", "Lavanderia", "Limpeza", "Logística", "Manicure",
-        "Marcenaria", "Marketing Digital", "Massoterapia", "Mecânica",
-        "Montador", "Motorista", "Músico", "Nutricionista", "Organização",
-        "Personal Trainer", "Pet Sitter", "Pintura", "Pisos", "Piscina",
-        "Portão", "Programador", "Professor", "Psicologia", "Redes",
-        "Redator", "Reformas", "Segurança", "Serralheria", "Sistema Fotovoltaico",
-        "Social Media", "Solda", "Som", "Técnico de Celular", "Telhado",
-        "TI & Informática", "Tradução", "Turismo", "Veterinária", "Video Maker",
-        "Vidraçaria", "Web Designer", "Yoga", "Outro"
+        "Advocacia",
+        "Alarme",
+        "Alvenaria",
+        "Antena",
+        "Ar Condicionado",
+        "Arquitetura",
+        "Artes Marciais",
+        "Babysitter",
+        "Barbeiro",
+        "Cabeleireiro",
+        "Calhas",
+        "Cerca Elétrica",
+        "Cerâmica",
+        "Chaveiro",
+        "Coach",
+        "Consultoria",
+        "Construção Civil",
+        "Contabilidade",
+        "Costura",
+        "Cuidador de Idosos",
+        "Dança",
+        "Dedetização",
+        "Design",
+        "Design de Interiores",
+        "Elétrica",
+        "Eletrodomésticos",
+        "Eletrônica",
+        "Encanador",
+        "Engenharia",
+        "Entregador",
+        "Eventos",
+        "Festas",
+        "Fotógrafo",
+        "Forro",
+        "Funilaria",
+        "Gesso",
+        "Guias de Turismo",
+        "Hidráulica",
+        "Impermeabilização",
+        "Jardineiro",
+        "Jardinagem",
+        "Jato de Areia",
+        "Lavanderia",
+        "Limpeza",
+        "Logística",
+        "Manicure",
+        "Marcenaria",
+        "Marketing Digital",
+        "Massoterapia",
+        "Mecânica",
+        "Montador",
+        "Motorista",
+        "Músico",
+        "Nutricionista",
+        "Organização",
+        "Personal Trainer",
+        "Pet Sitter",
+        "Pintura",
+        "Pisos",
+        "Piscina",
+        "Portão",
+        "Programador",
+        "Professor",
+        "Psicologia",
+        "Redes",
+        "Redator",
+        "Reformas",
+        "Segurança",
+        "Serralheria",
+        "Sistema Fotovoltaico",
+        "Social Media",
+        "Solda",
+        "Som",
+        "Técnico de Celular",
+        "Telhado",
+        "TI & Informática",
+        "Tradução",
+        "Turismo",
+        "Veterinária",
+        "Video Maker",
+        "Vidraçaria",
+        "Web Designer",
+        "Yoga",
+        "Outro"
     ];
     
+    // Adicionar especialidades fixas ao conjunto
     especialidadesFixa.forEach(esp => {
         especialidadesUnicas.add(esp);
     });
@@ -809,12 +886,18 @@ function popularFiltros() {
     // Popular especialidades
     if (filterSpecialty) {
         filterSpecialty.innerHTML = '<option value="">Todas especialidades</option>';
-        const especialidadesOrdenadas = Array.from(especialidadesUnicas).sort();
+        
+        // Converter Set para Array e ordenar
+        const todasEspecialidades = Array.from(especialidadesUnicas);
+        const especialidadesOrdenadas = todasEspecialidades.sort((a, b) => a.localeCompare(b));
+        
         especialidadesOrdenadas.forEach(especialidade => {
             const option = document.createElement('option');
             option.value = especialidade;
             option.textContent = especialidade;
-            filterSpecialty.appendChild(option);
+            if (filterSpecialty) {
+                filterSpecialty.appendChild(option);
+            }
         });
     }
 
@@ -822,11 +905,14 @@ function popularFiltros() {
     if (filterCity) {
         filterCity.innerHTML = '<option value="">Todas cidades</option>';
         const cidadesOrdenadas = Array.from(cidadesUnicas).sort();
+        
         cidadesOrdenadas.forEach(cidade => {
             const option = document.createElement('option');
             option.value = cidade;
             option.textContent = cidade;
-            filterCity.appendChild(option);
+            if (filterCity) {
+                filterCity.appendChild(option);
+            }
         });
     }
 }
@@ -919,9 +1005,10 @@ function filtrarProfissionais() {
     return profissionaisFiltrados;
 }
 
-// Extrair anos de experiência
+// Extrair anos de experiência do valor
 function extrairAnosExperiencia(anosExp) {
     if (!anosExp) return 0;
+    
     if (anosExp === '1') return 1;
     if (anosExp === '1-3') return 2;
     if (anosExp === '3-5') return 4;
