@@ -47,20 +47,19 @@
             background-color: #f5f7fa;
             color: var(--dark);
             line-height: 1.6;
-            padding-top: 70px;
+            padding-top: 80px;
         }
 
-        /* Navbar */
+        /* Navbar - Igual ao Dashboard */
         .navbar-notificacoes {
             background: white;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             padding: 15px 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            height: 70px;
         }
 
         .navbar-container {
@@ -72,14 +71,19 @@
             margin: 0 auto;
         }
 
-        .logo-container {
+        /* Logo Grande - Igual ao Dashboard */
+        .navbar-brand-notificacoes {
             display: flex;
             align-items: center;
-            gap: 15px;
+            transform: scale(2.5);
+            transform-origin: left center;
+            margin-right: 40px;
         }
 
-        .navbar-brand img {
-            height: 40px;
+        .navbar-brand-notificacoes img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
         }
 
         .page-title {
@@ -128,6 +132,7 @@
             font-size: 1.2rem;
             color: var(--dark);
             padding: 8px;
+            cursor: pointer;
         }
 
         .badge-count {
@@ -147,11 +152,18 @@
             border: 2px solid white;
         }
 
+        /* User Info Compacto - Igual ao Dashboard */
+        .user-info-notificacoes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--gradient-secondary);
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             color: white;
             display: flex;
             align-items: center;
@@ -159,8 +171,71 @@
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-details h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-details small {
+            color: #666;
+            font-size: 0.75rem;
+        }
+
+        /* Botão Logout */
+        .btn-logout-notificacoes {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-logout-notificacoes:hover {
+            background: #f8f9fa;
+            color: #e74c3c;
+        }
+
+        /* Responsivo Logo */
+        @media (max-width: 1200px) {
+            .navbar-brand-notificacoes {
+                transform: scale(2);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-brand-notificacoes {
+                transform: scale(1.8);
+                margin-right: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand-notificacoes {
+                transform: scale(1.6);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-notificacoes {
+                transform: scale(1.4);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand-notificacoes {
+                transform: scale(1.2);
+            }
         }
 
         /* Header */
@@ -282,7 +357,7 @@
             box-shadow: var(--shadow-md);
             height: fit-content;
             position: sticky;
-            top: 90px;
+            top: 100px;
         }
 
         @media (max-width: 992px) {
@@ -571,7 +646,7 @@
             flex-shrink: 0;
         }
 
-        .type-budget { background: rgba(255, 107, 53, 0.1); color: var(--secondary); }
+        .type-orcamento { background: rgba(255, 107, 53, 0.1); color: var(--secondary); }
         .type-review { background: rgba(241, 196, 15, 0.1); color: var(--warning); }
         .type-system { background: rgba(52, 152, 219, 0.1); color: var(--info); }
         .type-message { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
@@ -796,21 +871,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive Utilities */
-        .mobile-only {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .mobile-only {
-                display: block;
-            }
-            
-            .desktop-only {
-                display: none;
-            }
-        }
-
         /* Toast Notifications */
         .toast-container {
             position: fixed;
@@ -870,6 +930,13 @@
             color: var(--gray);
             margin: 0;
         }
+
+        /* Responsivo User Info */
+        @media (max-width: 768px) {
+            .user-details {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -878,13 +945,23 @@
     <nav class="navbar-notificacoes">
         <div class="navbar-container">
             <div class="logo-container">
-                <a class="navbar-brand" href="dashboard-profissional.html">
+                <a class="navbar-brand-notificacoes" href="dashboard-profissional.html">
                     <img src="logoscanhub.png" alt="ScanHub">
                 </a>
                 <div class="page-title">Central de Notificações</div>
             </div>
             
             <div class="user-actions">
+                <div class="user-info-notificacoes">
+                    <div class="user-avatar" id="userAvatar" onclick="window.location.href='perfil-profissional.html'">
+                        ?
+                    </div>
+                    <div class="user-details d-none d-md-block">
+                        <h5 id="userName">Carregando...</h5>
+                        <small>ID: <span id="userId">---</span></small>
+                    </div>
+                </div>
+                
                 <a href="dashboard-profissional.html" class="btn-back" title="Voltar">
                     <i class="fas fa-arrow-left"></i>
                 </a>
@@ -894,9 +971,10 @@
                     <span class="badge-count" id="unreadBadge">0</span>
                 </button>
                 
-                <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">
-                    ?
-                </div>
+                <button class="btn-logout-notificacoes" id="btnLogout" title="Sair">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-md-inline">Sair</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -970,12 +1048,12 @@
                     </div>
                     <span class="filter-count" id="countAll">0</span>
                 </div>
-                <div class="filter-item" onclick="filterByType('budget', this)">
+                <div class="filter-item" onclick="filterByType('orcamento', this)">
                     <div class="filter-item-left">
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Orçamentos</span>
                     </div>
-                    <span class="filter-count" id="countBudget">0</span>
+                    <span class="filter-count" id="countOrcamento">0</span>
                 </div>
                 <div class="filter-item" onclick="filterByType('review', this)">
                     <div class="filter-item-left">
@@ -1128,12 +1206,15 @@
 
         // DOM Elements
         const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userId = document.getElementById('userId');
         const unreadBadge = document.getElementById('unreadBadge');
         const loadingState = document.getElementById('loadingState');
         const emptyState = document.getElementById('emptyState');
         const notificationList = document.getElementById('notificationList');
         const searchInput = document.getElementById('searchInput');
         const toastContainer = document.getElementById('toastContainer');
+        const btnLogout = document.getElementById('btnLogout');
 
         // Stats Elements
         const totalNotificationsEl = document.getElementById('totalNotifications');
@@ -1141,9 +1222,9 @@
         const newReviewsEl = document.getElementById('newReviews');
         const urgentAlertsEl = document.getElementById('urgentAlerts');
 
-        // Counter Elements
+        // Counter Elements - CORRIGIDOS
         const countAllEl = document.getElementById('countAll');
-        const countBudgetEl = document.getElementById('countBudget');
+        const countOrcamentoEl = document.getElementById('countOrcamento'); // CORRIGIDO: era countBudget
         const countReviewEl = document.getElementById('countReview');
         const countMessageEl = document.getElementById('countMessage');
         const countSystemEl = document.getElementById('countSystem');
@@ -1159,6 +1240,18 @@
                     currentUser = user;
                     await loadUserData();
                     await loadNotifications();
+                    
+                    // Configurar logout
+                    btnLogout.addEventListener('click', async () => {
+                        try {
+                            await signOut(auth);
+                            window.location.href = 'login.html';
+                        } catch (error) {
+                            console.error('Erro ao sair:', error);
+                            showToast('Erro', 'Não foi possível sair da conta', 'info');
+                        }
+                    });
+                    
                 } else {
                     window.location.href = 'login.html';
                 }
@@ -1174,9 +1267,17 @@
                 if (userSnap.exists()) {
                     userData = userSnap.data();
                     
-                    // Update avatar
+                    // Update user interface
                     if (userData.apelido) {
+                        userName.textContent = userData.apelido;
                         userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
+                    }
+                    
+                    // Update user ID if available
+                    if (userData.idScanHub) {
+                        userId.textContent = userData.idScanHub;
+                    } else {
+                        userId.textContent = currentUser.uid.substring(0, 8);
                     }
                     
                     // Set user name in avatar title
@@ -1207,14 +1308,21 @@
                 
                 querySnapshot.forEach((docSnapshot) => {
                     const data = docSnapshot.data();
+                    
+                    // Corrigir campo arquivada - garantir que existe
+                    const arquivada = data.arquivada !== undefined ? data.arquivada : false;
+                    
                     notifications.push({
                         id: docSnapshot.id,
                         ...data,
+                        arquivada: arquivada,
                         // Convert Firestore timestamp to Date
                         data: data.data?.toDate() || new Date()
                     });
                 });
 
+                console.log('Notificações carregadas:', notifications.length);
+                
                 // Update counters
                 updateCounters();
                 
@@ -1249,7 +1357,7 @@
                     return false;
                 }
                 
-                // Filter by status
+                // Filter by status (read/unread)
                 if (currentStatusFilter === 'unread' && notification.lida) {
                     return false;
                 }
@@ -1264,9 +1372,6 @@
                 if (currentTab === 'archived' && !notification.arquivada) {
                     return false;
                 }
-                if (currentTab === 'archived' && notification.arquivada) {
-                    return true;
-                }
                 if (currentTab !== 'archived' && notification.arquivada) {
                     return false;
                 }
@@ -1275,8 +1380,8 @@
                 const searchTerm = searchInput.value.toLowerCase();
                 if (searchTerm) {
                     const searchableText = (
-                        notification.titulo + ' ' + 
-                        notification.descricao + ' ' + 
+                        (notification.titulo || '') + ' ' + 
+                        (notification.descricao || '') + ' ' + 
                         (notification.metadata?.clienteNome || '')
                     ).toLowerCase();
                     
@@ -1290,6 +1395,18 @@
 
             // Clear list
             notificationList.innerHTML = '';
+
+            if (filteredNotifications.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-state';
+                emptyMessage.innerHTML = `
+                    <i class="far fa-bell"></i>
+                    <h4>Nenhuma notificação encontrada</h4>
+                    <p>Tente alterar os filtros ou faça uma nova busca.</p>
+                `;
+                notificationList.appendChild(emptyMessage);
+                return;
+            }
 
             // Render each notification
             filteredNotifications.forEach(notification => {
@@ -1307,14 +1424,14 @@
             if (!notification.lida) classes.push('unread');
             if (notification.urgente) classes.push('urgent');
             
-            // Determine type icon and color
+            // Determine type icon and color - CORRIGIDO: agora usa "orcamento" em vez de "budget"
             let typeIcon = 'fas fa-info-circle';
             let typeClass = 'type-system';
             
             switch (notification.tipo) {
-                case 'budget':
+                case 'orcamento':
                     typeIcon = 'fas fa-file-invoice-dollar';
-                    typeClass = 'type-budget';
+                    typeClass = 'type-orcamento'; // CORRIGIDO: era type-budget
                     break;
                 case 'review':
                     typeIcon = 'fas fa-star';
@@ -1333,6 +1450,10 @@
             // Format time
             const timeAgo = formatTimeAgo(notification.data);
             
+            // Build notification title with proper display
+            const notificationTitle = notification.titulo || 'Nova notificação';
+            const isUnread = !notification.lida;
+            
             // Build HTML
             div.className = classes.join(' ');
             div.innerHTML = `
@@ -1343,8 +1464,8 @@
                 <div class="notification-content">
                     <div class="notification-header">
                         <div class="notification-title">
-                            ${notification.titulo || 'Nova notificação'}
-                            ${!notification.lida ? '<span class="badge-new">Nova</span>' : ''}
+                            ${notificationTitle}
+                            ${isUnread ? '<span class="badge-new">Nova</span>' : ''}
                         </div>
                         <div class="notification-time">
                             <i class="fas fa-clock"></i> ${timeAgo}
@@ -1393,8 +1514,8 @@
                 </div>
                 
                 <div class="notification-actions">
-                    ${notification.tipo === 'budget' ? `
-                        <button class="btn-action btn-primary" onclick="respondToBudget('${notification.id}')">
+                    ${notification.tipo === 'orcamento' ? `
+                        <button class="btn-action btn-primary" onclick="respondToOrcamento('${notification.id}')">
                             <i class="fas fa-reply"></i> Responder
                         </button>
                     ` : ''}
@@ -1423,7 +1544,7 @@
             const total = notifications.length;
             const unread = notifications.filter(n => !n.lida).length;
             const read = notifications.filter(n => n.lida).length;
-            const budget = notifications.filter(n => n.tipo === 'budget').length;
+            const orcamento = notifications.filter(n => n.tipo === 'orcamento').length; // CORRIGIDO: era budget
             const review = notifications.filter(n => n.tipo === 'review').length;
             const message = notifications.filter(n => n.tipo === 'message').length;
             const system = notifications.filter(n => n.tipo === 'system').length;
@@ -1431,13 +1552,13 @@
 
             // Update stats
             totalNotificationsEl.textContent = total;
-            pendingBudgetEl.textContent = budget;
+            pendingBudgetEl.textContent = orcamento; // CORRIGIDO: agora mostra contagem correta
             newReviewsEl.textContent = review;
             urgentAlertsEl.textContent = urgent;
 
             // Update filter counts
             countAllEl.textContent = total;
-            countBudgetEl.textContent = budget;
+            countOrcamentoEl.textContent = orcamento; // CORRIGIDO: era countBudget
             countReviewEl.textContent = review;
             countMessageEl.textContent = message;
             countSystemEl.textContent = system;
@@ -1518,10 +1639,10 @@
             }
         };
 
-        // Filter by type
+        // Filter by type - CORRIGIDO: agora usa "orcamento" em vez de "budget"
         window.filterByType = function(type, element) {
             // Update active filter button
-            document.querySelectorAll('.filter-item').forEach(item => {
+            document.querySelectorAll('.filter-group:first-child .filter-item').forEach(item => {
                 item.classList.remove('active');
             });
             element.classList.add('active');
@@ -1576,8 +1697,8 @@
             window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
         };
 
-        // Respond to budget
-        window.respondToBudget = async function(notificationId) {
+        // Respond to orcamento - CORRIGIDO: agora usa "orcamento" em vez de "budget"
+        window.respondToOrcamento = async function(notificationId) {
             const notification = notifications.find(n => n.id === notificationId);
             if (!notification) return;
             
@@ -1589,12 +1710,6 @@
                 'Para responder ao orçamento, acesse a página de pedidos', 
                 'info'
             );
-        };
-
-        // Toggle user menu (simplified for now)
-        window.toggleUserMenu = function() {
-            // In a real app, this would show a dropdown menu
-            window.location.href = 'perfil-profissional.html';
         };
 
         // Show toast notification
