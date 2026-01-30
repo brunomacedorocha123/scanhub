@@ -792,376 +792,446 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Firebase e Lógica -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            query,
-            where,
-            getDocs 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- Firebase e Lógica COMPLETO E FUNCIONAL -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        query,
+        where,
+        getDocs,
+        addDoc,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Config Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.appspot.com",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Config Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.appspot.com",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // State
-        let profissionalData = null;
-        let profissionalId = null;
-        let servicos = [];
-        let produtos = [];
+    // State
+    let profissionalData = null;
+    let profissionalId = null;
+    let servicos = [];
+    let produtos = [];
 
-        // Elementos
-        const loadingState = document.getElementById('loadingState');
-        const errorState = document.getElementById('errorState');
-        const profileContent = document.getElementById('profileContent');
+    // Elementos
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const profileContent = document.getElementById('profileContent');
 
-        // Init
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Pegar ID da URL
-            const urlParams = new URLSearchParams(window.location.search);
-            profissionalId = urlParams.get('id');
+    // Modal
+    const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
+    
+    // FUNÇÕES GLOBAIS
+    window.abrirModalOrcamento = function() {
+        modalOrcamento.show();
+    };
 
-            if (!profissionalId) {
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Pegar ID da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        profissionalId = urlParams.get('id');
+
+        if (!profissionalId) {
+            mostrarErro();
+            return;
+        }
+
+        await carregarPerfil();
+    });
+
+    async function carregarPerfil() {
+        try {
+            // Buscar dados do profissional
+            const userRef = doc(db, "usuarios", profissionalId);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
                 mostrarErro();
                 return;
             }
 
-            await carregarPerfil();
-        });
-
-        async function carregarPerfil() {
-            try {
-                // Buscar dados do profissional
-                const userRef = doc(db, "usuarios", profissionalId);
-                const userSnap = await getDoc(userRef);
-
-                if (!userSnap.exists()) {
-                    mostrarErro();
-                    return;
-                }
-
-                const userData = userSnap.data();
-                
-                // Verificar se é profissional e está visível
-                if (userData.tipoUsuario !== 'profissional' || 
-                    userData.status !== 'ativo' || 
-                    !userData.profissional?.perfilCompleto ||
-                    userData.profissional?.visivelBusca === false) {
-                    mostrarErro();
-                    return;
-                }
-
-                profissionalData = { ...userData, profissional: userData.profissional };
-                
-                // Buscar catálogo (serviços e produtos)
-                await carregarCatalogo();
-                
-                // Renderizar
-                renderizarPerfil();
-                
-                // Esconder loading
-                loadingState.style.display = 'none';
-                profileContent.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Erro:', error);
+            const userData = userSnap.data();
+            
+            // Verificar se é profissional e está visível
+            if (userData.tipoUsuario !== 'profissional' || 
+                userData.status !== 'ativo' || 
+                !userData.profissional?.perfilCompleto ||
+                userData.profissional?.visivelBusca === false) {
                 mostrarErro();
-            }
-        }
-
-        async function carregarCatalogo() {
-            try {
-                // Buscar serviços
-                const qServicos = query(
-                    collection(db, "servicos"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "ativo")
-                );
-                const snapServicos = await getDocs(qServicos);
-                servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
-
-                // Buscar produtos
-                const qProdutos = query(
-                    collection(db, "produtos"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "ativo")
-                );
-                const snapProdutos = await getDocs(qProdutos);
-                produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
-
-            } catch (error) {
-                console.error('Erro ao carregar catálogo:', error);
-            }
-        }
-
-        function renderizarPerfil() {
-            const prof = profissionalData.profissional;
-            
-            // Cover (primeira foto do portfólio ou placeholder)
-            const coverContainer = document.getElementById('coverContainer');
-            if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
-                coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
-            } else {
-                coverContainer.innerHTML = `
-                    <div class="cover-placeholder">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                `;
-            }
-
-            // Avatar
-            const avatarUrl = profissionalData.fotoPerfilProfissional || 
-                             profissionalData.fotoPerfil || 
-                             'https://via.placeholder.com/300';
-            document.getElementById('profileAvatar').src = avatarUrl;
-
-            // Badge do plano (só mostra se for Pro ou Enterprise)
-            const plano = profissionalData.plano_assinatura;
-            if (plano === 'pro' || plano === 'enterprise') {
-                const badge = document.getElementById('planBadge');
-                badge.style.display = 'flex';
-                badge.querySelector('span').textContent = plano.toUpperCase();
-            }
-
-            // Nome e especialidade
-            document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
-            document.getElementById('profileSpecialty').innerHTML = `
-                <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
-            `;
-
-            // Localização
-            document.getElementById('profileLocation').innerHTML = `
-                <i class="fas fa-map-marker-alt"></i> 
-                ${prof.cidadeBase || 'Cidade não informada'}
-                ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
-            `;
-
-            // WhatsApp
-            if (prof.whatsapp) {
-                const whatsappNum = prof.whatsapp.replace(/\D/g, '');
-                document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
-            }
-
-            // Sobre/Descrição
-            document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
-
-            // Anos experiência
-            document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
-
-            // Garantia
-            if (prof.garantiaDias && prof.garantiaDias > 0) {
-                document.getElementById('badgeGarantia').style.display = 'flex';
-                document.getElementById('diasGarantia').textContent = prof.garantiaDias;
-            }
-
-            // Formas de atendimento
-            const atendimentoContainer = document.getElementById('atendimentoBadges');
-            atendimentoContainer.innerHTML = '';
-            if (prof.atendeDomicilio) {
-                atendimentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
-                `;
-            }
-            if (prof.atendeOnline) {
-                atendimentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
-                `;
-            }
-
-            // Formas de pagamento
-            const pagamentoContainer = document.getElementById('pagamentoBadges');
-            pagamentoContainer.innerHTML = '';
-            if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
-                prof.formasPagamento.forEach(forma => {
-                    pagamentoContainer.innerHTML += `
-                        <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
-                    `;
-                });
-            }
-
-            // Tempo resposta
-            if (prof.tempoResposta) {
-                document.getElementById('tempoResposta').innerHTML = `
-                    <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
-                `;
-            }
-
-            // Tags/Especialidades
-            const tagsContainer = document.getElementById('tagsContainer');
-            tagsContainer.innerHTML = '';
-            if (prof.especialidades && Array.isArray(prof.especialidades)) {
-                prof.especialidades.forEach(tag => {
-                    tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
-                });
-            }
-
-            // Galeria de fotos (se tiver mais de 1 foto no portfólio)
-            if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
-                const galeriaSection = document.getElementById('galeriaSection');
-                const galeriaGrid = document.getElementById('galeriaGrid');
-                galeriaSection.style.display = 'block';
-                
-                // Pular a primeira (já usada na capa) ou mostrar todas?
-                // Vamos mostrar todas exceto a primeira se for igual à capa
-                const fotos = prof.portfolioFotos.slice(1);
-                galeriaGrid.innerHTML = fotos.map(foto => `
-                    <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
-                        <img src="${foto}" alt="Portfólio">
-                    </div>
-                `).join('');
-            }
-
-            // Catálogo
-            renderizarCatalogo();
-        }
-
-        function renderizarCatalogo() {
-            const todosItens = [...servicos, ...produtos];
-            document.getElementById('countCatalogo').textContent = todosItens.length;
-            
-            const grid = document.getElementById('catalogoGrid');
-            const vazio = document.getElementById('catalogoVazio');
-
-            if (todosItens.length === 0) {
-                vazio.style.display = 'block';
-                grid.style.display = 'none';
                 return;
             }
 
-            vazio.style.display = 'none';
-            grid.style.display = 'grid';
-
-            grid.innerHTML = todosItens.map(item => {
-                const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
-                              `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
-                
-                const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
-                const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
-                
-                const metaInfo = item.tipo === 'servico' 
-                    ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
-                    : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
-
-                return `
-                    <div class="item-card">
-                        <div class="item-image">
-                            <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
-                            <span class="item-type ${tipoClass}">${tipoText}</span>
-                        </div>
-                        <div class="item-content">
-                            <h4 class="item-title">${item.nome}</h4>
-                            <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
-                            <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
-                            <div class="item-meta">
-                                ${metaInfo}
-                                <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Funções auxiliares
-        function formatarEspecialidade(esp) {
-            if (!esp) return 'Profissional';
-            const map = {
-                'eletrica': 'Eletricista',
-                'hidraulica': 'Encanador',
-                'massoterapia': 'Massoterapeuta',
-                'tecnico_celular': 'Técnico de Celular',
-                'veterinaria': 'Veterinário(a)',
-                'manicure': 'Manicure',
-                'pintura': 'Pintor',
-                'ar_condicionado': 'Ar Condicionado',
-                'marcenaria': 'Marceneiro'
-            };
-            return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
-        }
-
-        function formatarExperiencia(exp) {
-            const map = {
-                '1': 'Menos de 1 ano',
-                '1-3': '1-3 anos',
-                '3-5': '3-5 anos',
-                '5-10': '5-10 anos',
-                '10+': 'Mais de 10 anos'
-            };
-            return map[exp] || exp || 'Não informado';
-        }
-
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor || 0);
-        }
-
-        function mostrarErro() {
+            profissionalData = { ...userData, profissional: userData.profissional };
+            
+            // Buscar catálogo (serviços e produtos)
+            await carregarCatalogo();
+            
+            // Renderizar
+            renderizarPerfil();
+            
+            // Esconder loading
             loadingState.style.display = 'none';
-            errorState.style.display = 'block';
-            profileContent.style.display = 'none';
+            profileContent.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Erro:', error);
+            mostrarErro();
+        }
+    }
+
+    async function carregarCatalogo() {
+        try {
+            // Buscar serviços
+            const qServicos = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "ativo")
+            );
+            const snapServicos = await getDocs(qServicos);
+            servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
+
+            // Buscar produtos
+            const qProdutos = query(
+                collection(db, "produtos"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "ativo")
+            );
+            const snapProdutos = await getDocs(qProdutos);
+            produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
+
+        } catch (error) {
+            console.error('Erro ao carregar catálogo:', error);
+        }
+    }
+
+    function renderizarPerfil() {
+        const prof = profissionalData.profissional;
+        
+        // Cover (primeira foto do portfólio ou placeholder)
+        const coverContainer = document.getElementById('coverContainer');
+        if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
+            coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
+        } else {
+            coverContainer.innerHTML = `
+                <div class="cover-placeholder">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            `;
         }
 
-        // Controle de abas
-        window.switchTab = function(tabName) {
-            // Atualizar botões
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
+        // Avatar
+        const avatarUrl = profissionalData.fotoPerfilProfissional || 
+                         profissionalData.fotoPerfil || 
+                         'https://via.placeholder.com/300';
+        document.getElementById('profileAvatar').src = avatarUrl;
+
+        // Badge do plano (só mostra se for Pro ou Enterprise)
+        const plano = profissionalData.plano_assinatura;
+        if (plano === 'pro' || plano === 'enterprise') {
+            const badge = document.getElementById('planBadge');
+            badge.style.display = 'flex';
+            badge.querySelector('span').textContent = plano.toUpperCase();
+        }
+
+        // Nome e especialidade
+        document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
+        document.getElementById('profileSpecialty').innerHTML = `
+            <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
+        `;
+
+        // Localização
+        document.getElementById('profileLocation').innerHTML = `
+            <i class="fas fa-map-marker-alt"></i> 
+            ${prof.cidadeBase || 'Cidade não informada'}
+            ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
+        `;
+
+        // WhatsApp
+        if (prof.whatsapp) {
+            const whatsappNum = prof.whatsapp.replace(/\D/g, '');
+            document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
+        }
+
+        // Sobre/Descrição
+        document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
+
+        // Anos experiência
+        document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
+
+        // Garantia
+        if (prof.garantiaDias && prof.garantiaDias > 0) {
+            document.getElementById('badgeGarantia').style.display = 'flex';
+            document.getElementById('diasGarantia').textContent = prof.garantiaDias;
+        }
+
+        // Formas de atendimento
+        const atendimentoContainer = document.getElementById('atendimentoBadges');
+        atendimentoContainer.innerHTML = '';
+        if (prof.atendeDomicilio) {
+            atendimentoContainer.innerHTML += `
+                <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
+            `;
+        }
+        if (prof.atendeOnline) {
+            atendimentoContainer.innerHTML += `
+                <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
+            `;
+        }
+
+        // Formas de pagamento
+        const pagamentoContainer = document.getElementById('pagamentoBadges');
+        pagamentoContainer.innerHTML = '';
+        if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
+            prof.formasPagamento.forEach(forma => {
+                pagamentoContainer.innerHTML += `
+                    <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
+                `;
             });
-            event.target.closest('.tab-btn').classList.add('active');
+        }
 
-            // Atualizar conteúdo
-            document.querySelectorAll('.tab-content-section').forEach(content => {
-                content.classList.remove('active');
+        // Tempo resposta
+        if (prof.tempoResposta) {
+            document.getElementById('tempoResposta').innerHTML = `
+                <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
+            `;
+        }
+
+        // Tags/Especialidades
+        const tagsContainer = document.getElementById('tagsContainer');
+        tagsContainer.innerHTML = '';
+        if (prof.especialidades && Array.isArray(prof.especialidades)) {
+            prof.especialidades.forEach(tag => {
+                tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
             });
+        }
 
-            if (tabName === 'sobre') {
-                document.getElementById('tabSobre').classList.add('active');
-            } else {
-                document.getElementById('tabCatalogo').classList.add('active');
-            }
-        };
-
-        // Modal de orçamento
-        const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
-        
-        window.abrirModalOrcamento = function() {
-            modalOrcamento.show();
-        };
-
-        // Enviar orçamento (simulação - aqui você integraria com Firebase)
-        document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Galeria de fotos (se tiver mais de 1 foto no portfólio)
+        if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
+            const galeriaSection = document.getElementById('galeriaSection');
+            const galeriaGrid = document.getElementById('galeriaGrid');
+            galeriaSection.style.display = 'block';
             
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-            btn.disabled = true;
+            // Pular a primeira (já usada na capa) ou mostrar todas?
+            // Vamos mostrar todas exceto a primeira se for igual à capa
+            const fotos = prof.portfolioFotos.slice(1);
+            galeriaGrid.innerHTML = fotos.map(foto => `
+                <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
+                    <img src="${foto}" alt="Portfólio">
+                </div>
+            `).join('');
+        }
 
-            // Aqui você enviaria para o Firebase na coleção "solicitacoes" ou "orcamentos"
-            setTimeout(() => {
-                alert('Solicitação enviada com sucesso! O profissional entrará em contato em breve.');
-                modalOrcamento.hide();
-                e.target.reset();
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }, 1500);
+        // Catálogo
+        renderizarCatalogo();
+    }
+
+    function renderizarCatalogo() {
+        const todosItens = [...servicos, ...produtos];
+        document.getElementById('countCatalogo').textContent = todosItens.length;
+        
+        const grid = document.getElementById('catalogoGrid');
+        const vazio = document.getElementById('catalogoVazio');
+
+        if (todosItens.length === 0) {
+            vazio.style.display = 'block';
+            grid.style.display = 'none';
+            return;
+        }
+
+        vazio.style.display = 'none';
+        grid.style.display = 'grid';
+
+        grid.innerHTML = todosItens.map(item => {
+            const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
+                          `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
+            
+            const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
+            const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
+            
+            const metaInfo = item.tipo === 'servico' 
+                ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
+                : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
+
+            return `
+                <div class="item-card">
+                    <div class="item-image">
+                        <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
+                        <span class="item-type ${tipoClass}">${tipoText}</span>
+                    </div>
+                    <div class="item-content">
+                        <h4 class="item-title">${item.nome}</h4>
+                        <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
+                        <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
+                        <div class="item-meta">
+                            ${metaInfo}
+                            <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Funções auxiliares
+    function formatarEspecialidade(esp) {
+        if (!esp) return 'Profissional';
+        const map = {
+            'eletrica': 'Eletricista',
+            'hidraulica': 'Encanador',
+            'massoterapia': 'Massoterapeuta',
+            'tecnico_celular': 'Técnico de Celular',
+            'veterinaria': 'Veterinário(a)',
+            'manicure': 'Manicure',
+            'pintura': 'Pintor',
+            'ar_condicionado': 'Ar Condicionado',
+            'marcenaria': 'Marceneiro'
+        };
+        return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
+    }
+
+    function formatarExperiencia(exp) {
+        const map = {
+            '1': 'Menos de 1 ano',
+            '1-3': '1-3 anos',
+            '3-5': '3-5 anos',
+            '5-10': '5-10 anos',
+            '10+': 'Mais de 10 anos'
+        };
+        return map[exp] || exp || 'Não informado';
+    }
+
+    function formatarMoeda(valor) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor || 0);
+    }
+
+    function mostrarErro() {
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+        profileContent.style.display = 'none';
+    }
+
+    // Controle de abas
+    window.switchTab = function(tabName) {
+        // Atualizar botões
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
         });
-    </script>
+        event.target.closest('.tab-btn').classList.add('active');
+
+        // Atualizar conteúdo
+        document.querySelectorAll('.tab-content-section').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        if (tabName === 'sobre') {
+            document.getElementById('tabSobre').classList.add('active');
+        } else {
+            document.getElementById('tabCatalogo').classList.add('active');
+        }
+    };
+
+    // ENVIAR ORÇAMENTO E CRIAR NOTIFICAÇÃO - FUNCIONAL
+    document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        btn.disabled = true;
+
+        try {
+            // Pegar dados do formulário
+            const nomeCliente = document.getElementById('nomeCliente').value;
+            const telefoneCliente = document.getElementById('telefoneCliente').value;
+            const cidadeCliente = document.getElementById('cidadeCliente').value;
+            const descricaoServico = document.getElementById('descricaoServico').value;
+
+            // Verificar se cliente está logado
+            const user = auth.currentUser;
+            
+            if (!user) {
+                alert('Você precisa estar logado para enviar orçamento!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 1. CRIAR NOTIFICAÇÃO PARA O PROFISSIONAL
+            await addDoc(collection(db, "notificacoes"), {
+                profissionalId: profissionalId, // ID do profissional da URL
+                clienteId: user.uid,
+                clienteNome: nomeCliente,
+                clienteTelefone: telefoneCliente,
+                clienteCidade: cidadeCliente,
+                tipo: "orcamento",
+                titulo: "Novo pedido de orçamento",
+                descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
+                lida: false,
+                urgente: false,
+                arquivada: false,
+                data: serverTimestamp(),
+                metadata: {
+                    clienteNome: nomeCliente,
+                    servico: descricaoServico,
+                    telefone: telefoneCliente,
+                    cidade: cidadeCliente
+                },
+                tags: ["orcamento", "novo"]
+            });
+
+            // 2. CRIAR NA COLEÇÃO SOLICITAÇÕES
+            await addDoc(collection(db, "solicitacoes"), {
+                profissionalId: profissionalId,
+                clienteId: user.uid,
+                clienteNome: nomeCliente,
+                clienteTelefone: telefoneCliente,
+                clienteCidade: cidadeCliente,
+                descricao: descricaoServico,
+                status: "pendente",
+                tipo: "orcamento",
+                data: serverTimestamp()
+            });
+
+            // Fechar modal e limpar formulário
+            modalOrcamento.hide();
+            e.target.reset();
+            
+            // Mostrar mensagem de sucesso
+            alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
+            
+        } catch (error) {
+            console.error('Erro ao enviar orçamento:', error);
+            alert('❌ Erro ao enviar solicitação. Tente novamente.');
+            
+            // Debug
+            console.log('Detalhes do erro:', error.code, error.message);
+            
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
