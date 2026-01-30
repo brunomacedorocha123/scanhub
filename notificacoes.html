@@ -3,30 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central de Notificações - ScanHub</title>
+    <title>Central de Notificações - ScanHub Pro</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css " rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300 ;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #44689a;
-            --secondary-color: #FF6B35;
-            --secondary-light: rgba(255, 107, 53, 0.1);
-            --light-color: #f8f9fa;
-            --dark-color: #2c3e50;
-            --success-color: #27ae60;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-            --info-color: #3498db;
+            --primary: #44689a;
+            --primary-dark: #365a8a;
+            --secondary: #FF6B35;
+            --secondary-dark: #e55a2b;
+            --success: #27ae60;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --light-gray: #ecf0f1;
             --white: #ffffff;
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
-            --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
-            --gradient: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            --gradient-primary: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
+            --gradient-secondary: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
         }
 
         * {
@@ -35,227 +41,1153 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f5f7fa;
-            color: var(--dark-color);
-            padding-top: 80px;
-            line-height: 1.6;
+        html {
+            scroll-behavior: smooth;
         }
 
-        /* Navbar Padrão */
-        .navbar-scanhub {
-            background: white;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 15px 0;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-top: 90px;
+        }
+
+        /* ============================================
+           NAVBAR PREMIUM
+           ============================================ */
+        .navbar-pro {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            padding: 0;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-        }
-
-        .navbar-brand-scanhub {
+            height: 75px;
             display: flex;
             align-items: center;
-            transform: scale(2.5);
-            transform-origin: left center;
-            margin-right: 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        .navbar-brand-scanhub img {
-            height: 60px;
+        .navbar-container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand-pro {
+            display: flex;
+            align-items: center;
+            transform: scale(2.4);
+            transform-origin: left center;
+        }
+
+        .navbar-brand-pro img {
+            height: 55px;
             width: auto;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
-        .user-info-nav {
+        .navbar-center {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-left: auto;
+            gap: 30px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-link-pro {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .nav-link-pro:hover {
+            color: var(--primary);
+            background: rgba(68, 104, 154, 0.05);
+        }
+
+        .nav-link-pro.active {
+            color: var(--primary);
+            background: rgba(68, 104, 154, 0.1);
+            font-weight: 600;
+        }
+
+        .nav-link-pro.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-icon-nav {
+            position: relative;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 107, 53, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .notification-icon-nav:hover {
+            background: var(--secondary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .user-profile-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 20px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-profile-nav:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
 
         .user-avatar-nav {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--gradient);
+            background: var(--gradient-secondary);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1rem;
             border: 3px solid white;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
         }
 
-        .mobile-menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--dark-color);
-            padding: 5px 10px;
+        .user-info-nav {
+            line-height: 1.3;
         }
 
-        @media (max-width: 992px) {
-            .navbar-brand-scanhub {
-                transform: scale(1.8);
-            }
-            .mobile-menu-toggle {
-                display: block;
-            }
+        .user-name-nav {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--dark);
         }
 
-        @media (max-width: 576px) {
-            .navbar-brand-scanhub {
-                transform: scale(1.4);
-            }
+        .user-role-nav {
+            font-size: 0.75rem;
+            color: #999;
         }
 
-        /* Header da Página */
-        .page-header {
-            background: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
+        .btn-back-nav {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-back-nav:hover {
+            background: var(--primary);
             color: white;
-            padding: 40px 0;
-            margin-bottom: 30px;
+            transform: translateX(-3px);
+        }
+
+        /* ============================================
+           HEADER SECTION
+           ============================================ */
+        .header-pro {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 50px 40px;
+            margin-bottom: 40px;
             position: relative;
             overflow: hidden;
         }
 
-        .page-header::before {
+        .header-pro::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
+            top: -100px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
             background: rgba(255,255,255,0.05);
             border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
         }
 
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            position: relative;
+        .header-pro::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -150px;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
         }
 
-        .page-subtitle {
-            opacity: 0.9;
-            font-size: 1.1rem;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
 
-        /* Container Principal */
-        .main-container {
-            max-width: 1200px;
+        .header-container {
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 0 20px 40px;
-        }
-
-        /* Filtros */
-        .filters-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
             gap: 15px;
         }
 
-        .filter-groups {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .header-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
         }
 
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 25px;
-            font-weight: 500;
-            color: var(--dark-color);
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-header-action {
+            padding: 14px 28px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            backdrop-filter: blur(10px);
         }
 
-        .filter-btn:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            transform: translateY(-2px);
+        .btn-header-primary {
+            background: rgba(255,255,255,0.95);
+            color: var(--primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
-        .filter-btn.active {
-            background: var(--primary-color);
+        .btn-header-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-header-secondary {
+            background: rgba(255,255,255,0.1);
             color: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 15px rgba(68, 104, 154, 0.3);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-header-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+
+        /* ============================================
+           STATS CARDS
+           ============================================ */
+        .stats-container {
+            max-width: 1600px;
+            margin: -30px auto 40px;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat-card-pro {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 25px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-pro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-secondary);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .stat-card-pro:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card-pro:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-icon-pro {
+            width: 65px;
+            height: 65px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon-primary {
+            background: linear-gradient(135deg, rgba(68, 104, 154, 0.15) 0%, rgba(68, 104, 154, 0.05) 100%);
+            color: var(--primary);
+        }
+
+        .stat-icon-success {
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, rgba(39, 174, 96, 0.05) 100%);
+            color: var(--success);
+        }
+
+        .stat-icon-warning {
+            background: linear-gradient(135deg, rgba(241, 196, 15, 0.15) 0%, rgba(241, 196, 15, 0.05) 100%);
+            color: var(--warning);
+        }
+
+        .stat-icon-danger {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.15) 0%, rgba(231, 76, 60, 0.05) 100%);
+            color: var(--danger);
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .stat-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .stat-trend {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .trend-up {
+            color: var(--success);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* ============================================
+           MAIN LAYOUT
+           ============================================ */
+        .main-layout {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 40px 60px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+        }
+
+        /* ============================================
+           SIDEBAR FILTERS
+           ============================================ */
+        .sidebar-pro {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+        }
+
+        .filter-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #555;
+            border: 2px solid transparent;
+        }
+
+        .filter-item:hover {
+            background: #f8f9fa;
+            color: var(--dark);
+        }
+
+        .filter-item.active {
+            background: rgba(68, 104, 154, 0.08);
+            color: var(--primary);
+            border-color: rgba(68, 104, 154, 0.2);
+            font-weight: 600;
+        }
+
+        .filter-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-item i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
         }
 
         .filter-badge {
-            background: rgba(255,255,255,0.3);
-            color: white;
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 700;
-        }
-
-        .filter-btn:not(.active) .filter-badge {
             background: #e0e0e0;
             color: #666;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            min-width: 28px;
+            text-align: center;
+            transition: all 0.3s;
         }
 
-        /* Lista de Notificações */
-        .notifications-list {
+        .filter-item.active .filter-badge {
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-badge.new {
+            background: var(--secondary);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        /* ============================================
+           CONTENT AREA
+           ============================================ */
+        .content-pro {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            padding: 35px;
+            min-height: 700px;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tabs-pro {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab-item {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .tab-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 60%;
+            height: 3px;
+            background: var(--gradient-secondary);
+            border-radius: 3px;
+            transition: transform 0.3s;
+        }
+
+        .tab-item.active {
+            color: var(--secondary);
+        }
+
+        .tab-item.active::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .tab-item:hover {
+            color: var(--dark);
+            background: #f8f9fa;
+        }
+
+        .content-tools {
+            display: flex;
+            gap: 15px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            padding: 12px 20px 12px 45px;
+            border: 2px solid #f0f0f0;
+            border-radius: 30px;
+            width: 280px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(68, 104, 154, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .btn-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid #f0f0f0;
+            background: white;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: rotate(15deg);
+        }
+
+        /* ============================================
+           NOTIFICATION ITEMS
+           ============================================ */
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .notification-card {
+            background: white;
+            border: 2px solid #f8f9fa;
+            border-radius: var(--radius-xl);
+            padding: 30px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 25px;
+            align-items: start;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: transparent;
+            transition: all 0.3s;
+        }
+
+        .notification-card:hover {
+            border-color: transparent;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-3px);
+        }
+
+        .notification-card.unread {
+            background: linear-gradient(135deg, rgba(68, 104, 154, 0.02) 0%, rgba(255, 107, 53, 0.02) 100%);
+            border-color: rgba(255, 107, 53, 0.15);
+        }
+
+        .notification-card.unread::before {
+            background: var(--gradient-secondary);
+        }
+
+        .notification-card.urgent {
+            border-color: rgba(231, 76, 60, 0.2);
+            background: rgba(231, 76, 60, 0.02);
+        }
+
+        .notification-card.urgent::before {
+            background: var(--danger);
+        }
+
+        .notification-type-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .type-orcamento {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.05) 100%);
+            color: var(--secondary);
+        }
+
+        .type-avaliacao {
+            background: linear-gradient(135deg, rgba(241, 196, 15, 0.15) 0%, rgba(241, 196, 15, 0.05) 100%);
+            color: #f1c40f;
+        }
+
+        .type-sistema {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(52, 152, 219, 0.05) 100%);
+            color: var(--info);
+        }
+
+        .type-promocao {
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.15) 0%, rgba(155, 89, 182, 0.05) 100%);
+            color: #9b59b6;
+        }
+
+        .notification-content {
+            min-width: 0;
+        }
+
+        .notification-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+            gap: 15px;
+        }
+
+        .notification-title-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-new-notification {
+            background: var(--secondary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse-new 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-new {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4); }
+            50% { opacity: 0.9; box-shadow: 0 0 0 8px rgba(255, 107, 53, 0); }
+        }
+
+        .notification-time {
+            color: #999;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .notification-description {
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .notification-tags {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 6px 14px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .customer-info {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-item i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .notification-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 150px;
+        }
+
+        .btn-action-main {
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-responder {
+            background: var(--gradient-secondary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-responder:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+
+              .btn-whatsapp:hover {
+            background: #128C4B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-secondary-action {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary-action:hover {
+            background: #e0e0e0;
+            color: var(--dark);
+        }
+
+        .btn-delete {
+            background: transparent;
+            color: #999;
+            border: 2px solid transparent;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-delete:hover {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+            border-color: rgba(231, 76, 60, 0.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 4rem;
+            color: #ccc;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Pagination */
+        .pagination-pro {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .page-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            border: 2px solid #f0f0f0;
+            background: white;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .page-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(68, 104, 154, 0.3);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-pro {
+            background: white;
+            border-radius: var(--radius-xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-pro {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 30px;
+            position: relative;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #f0f0f0;
+            border-radius: var(--radius-md);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(68, 104, 154, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .modal-footer {
+            padding: 20px 30px 30px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 30px;
+            z-index: 3000;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .notification-card {
+        .toast-pro {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius-lg);
+            padding: 20px 25px;
+            box-shadow: var(--shadow-xl);
             display: flex;
-            gap: 20px;
-            position: relative;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
+            align-items: center;
+            gap: 15px;
+            min-width: 350px;
+            border-left: 4px solid var(--success);
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        .notification-card:hover {
-            transform: translateX(5px);
-            box-shadow: var(--shadow-hover);
+        .toast-pro.show {
+            transform: translateX(0);
         }
 
-        .notification-card.nao-lida {
-            background: rgba(68, 104, 154, 0.03);
-            border-left-color: var(--secondary-color);
-        }
-
-        .notification-card.avaliacao {
-            border-left-color: #f1c40f;
-        }
-
-        .notification-card.sistema {
-            border-left-color: #9b59b6;
-        }
-
-        .notification-icon {
-            width: 50px;
-            height: 50px;
+        .toast-icon {
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -264,594 +1196,690 @@
             flex-shrink: 0;
         }
 
-        .icon-orcamento {
-            background: var(--secondary-light);
-            color: var(--secondary-color);
+        .toast-success .toast-icon {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success);
         }
 
-        .icon-avaliacao {
-            background: rgba(241, 196, 15, 0.1);
-            color: #f1c40f;
+        .toast-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            color: var(--dark);
         }
 
-        .icon-sistema {
-            background: rgba(155, 89, 182, 0.1);
-            color: #9b59b6;
-        }
-
-        .notification-content {
-            flex: 1;
-            min-width: 0; /* Para ellipsis funcionar */
-        }
-
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--dark-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .badge-novo {
-            background: var(--secondary-color);
-            color: white;
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .notification-date {
-            font-size: 0.85rem;
-            color: #999;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .notification-text {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .notification-meta {
-            display: flex;
-            gap: 20px;
-            font-size: 0.9rem;
-            color: #666;
-            flex-wrap: wrap;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .meta-item i {
-            color: var(--primary-color);
-        }
-
-        .notification-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn-action-sm {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-ver {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-ver:hover {
-            background: #365a8a;
-            transform: translateY(-2px);
-        }
-
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-        }
-
-        .btn-whatsapp:hover {
-            background: #128C7E;
-        }
-
-        .btn-arquivar {
-            background: #f0f0f0;
-            color: #666;
-        }
-
-        .btn-arquivar:hover {
-            background: #e0e0e0;
-        }
-
-        .btn-lida {
-            background: transparent;
-            border: 1px solid #ddd;
-            color: #666;
-        }
-
-        .btn-lida:hover {
-            background: #f8f9fa;
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        /* Estado Vazio */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-        }
-
-        .empty-icon {
-            font-size: 5rem;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-
-        .empty-title {
-            font-size: 1.5rem;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .empty-text {
-            color: #999;
-        }
-
-        /* Loading */
-        .loading-container {
-            text-align: center;
-            padding: 60px;
-        }
-
-        .spinner-scanhub {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 107, 53, 0.1);
-            border-top-color: var(--secondary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Modal de Detalhes */
-        .modal-content {
-            border-radius: 20px;
-            border: none;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-        }
-
-        .modal-header-custom {
-            background: var(--gradient);
-            color: white;
-            border-radius: 20px 20px 0 0;
-            padding: 25px;
-            position: relative;
-        }
-
-        .modal-header-custom .btn-close {
-            filter: brightness(0) invert(1);
-            opacity: 0.8;
-        }
-
-        .modal-body-custom {
-            padding: 30px;
-        }
-
-        .detail-section {
-            margin-bottom: 25px;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #666;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
-            font-size: 1.1rem;
-            color: var(--dark-color);
-        }
-
-        .cliente-info {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .cliente-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .cliente-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .cliente-nome {
-            font-weight: 600;
-            font-size: 1.2rem;
+        .toast-content p {
             margin: 0;
-        }
-
-        .cliente-meta {
-            color: #666;
             font-size: 0.9rem;
+            color: #666;
         }
 
-        .resposta-form {
-            background: var(--secondary-light);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 2px solid rgba(255, 107, 53, 0.1);
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 280px 1fr;
+                gap: 25px;
+                padding: 0 30px 60px;
+            }
         }
 
-        .form-title {
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        @media (max-width: 992px) {
+            .navbar-center {
+                display: none;
+            }
 
-        .form-control-custom {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 12px;
-            font-family: 'Poppins', sans-serif;
-            width: 100%;
-            margin-bottom: 15px;
-        }
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
 
-        .form-control-custom:focus {
-            border-color: var(--secondary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
+            .sidebar-pro {
+                position: static;
+                margin-bottom: 30px;
+            }
 
-        .btn-responder {
-            background: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 30px;
+            }
 
-        .btn-responder:hover {
-            background: #e55a2b;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
-        }
-
-        .avaliacao-estrelas {
-            color: #f1c40f;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-
-        .toast-scanhub {
-            background: white;
-            border-left: 4px solid var(--secondary-color);
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            margin-top: 10px;
-            animation: slideIn 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+
+            .navbar-container {
+                padding: 0 20px;
+            }
+
+            .navbar-brand-pro {
+                transform: scale(1.8);
+            }
+
+            .user-info-nav {
+                display: none;
+            }
+
+            .main-layout {
+                padding: 0 20px 40px;
+            }
+
+            .header-pro {
+                padding: 30px 20px;
+            }
+
+            .header-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                padding: 0 20px;
+            }
+
+            .content-pro {
+                padding: 25px;
+            }
+
             .notification-card {
-                flex-direction: column;
-                padding: 20px;
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .notification-actions {
+                flex-direction: row;
                 flex-wrap: wrap;
             }
 
-            .btn-action-sm {
+            .btn-action-main {
                 flex: 1;
-                justify-content: center;
+                min-width: 140px;
             }
 
-            .filters-container {
+            .content-header {
                 flex-direction: column;
+                gap: 20px;
                 align-items: stretch;
             }
 
-            .filter-groups {
-                overflow-x: auto;
-                padding-bottom: 5px;
+            .search-input {
+                width: 100%;
             }
+
+            .tabs-pro {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+        }
+
+        /* Loading Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-scanhub">
-        <div class="container-fluid">
-            <div class="d-flex align-items-center w-100">
-                <a class="navbar-brand-scanhub" href="profissional-dashboard.html">
-                    <img src="logoscanhub.png" alt="ScanHub">
+    <!-- Navbar Premium -->
+    <nav class="navbar-pro">
+        <div class="navbar-container">
+            <a href="#" class="navbar-brand-pro">
+                <img src="logoscanhub.png" alt="ScanHub Pro">
+            </a>
+
+            <div class="navbar-center">
+                <a href="#" class="nav-link-pro">
+                    <i class="fas fa-home"></i> Início
+                </a>
+                <a href="#" class="nav-link-pro">
+                    <i class="fas fa-briefcase"></i> Serviços
+                </a>
+                <a href="#" class="nav-link-pro active">
+                    <i class="fas fa-bell"></i> Notificações
+                </a>
+                <a href="#" class="nav-link-pro">
+                    <i class="fas fa-chart-line"></i> Relatórios
+                </a>
+                <a href="#" class="nav-link-pro">
+                    <i class="fas fa-cog"></i> Configurações
+                </a>
+            </div>
+
+            <div class="navbar-right">
+                <a href="#" class="btn-back-nav" title="Voltar">
+                    <i class="fas fa-arrow-left"></i>
                 </a>
 
-                <button class="mobile-menu-toggle" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-
-                <div class="user-info-nav">
-                    <div class="user-avatar-nav" id="userAvatar">?</div>
-                    <div class="d-none d-md-block">
-                        <div style="font-weight: 600; font-size: 0.9rem;" id="userName">Carregando...</div>
-                        <div style="font-size: 0.75rem; color: #666;">ID: <span id="userId">---</span></div>
-                    </div>
+                <div class="notification-icon-nav">
+                    <i class="fas fa-bell"></i>
+                    <span class="nav-badge">3</span>
                 </div>
 
-                <a href="profissional-dashboard.html" class="btn btn-outline-danger btn-sm ms-3">
-                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-md-inline">Voltar</span>
-                </a>
+                <div class="user-profile-nav">
+                    <div class="user-avatar-nav">JS</div>
+                    <div class="user-info-nav">
+                        <div class="user-name-nav">João Silva</div>
+                        <div class="user-role-nav">Eletricista Premium</div>
+                    </div>
+                    <i class="fas fa-chevron-down" style="color: #999; font-size: 0.8rem;"></i>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Header -->
-    <div class="page-header">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="page-title"><i class="fas fa-bell me-3"></i>Central de Notificações</h1>
-                    <p class="page-subtitle">Gerencie seus orçamentos, avaliações e mensagens importantes</p>
-                </div>
-                <button class="btn btn-light" onclick="marcarTodasLidas()">
-                    <i class="fas fa-check-double me-2"></i>Marcar todas como lidas
+    <!-- Header Section -->
+    <header class="header-pro">
+        <div class="header-container">
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-bell"></i>
+                    Central de Notificações
+                </h1>
+                <p>Gerencie seus orçamentos, avaliações e mensagens em um só lugar</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-header-action btn-header-primary" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i>
+                    Marcar todas como lidas
                 </button>
+                <button class="btn-header-action btn-header-secondary" onclick="openConfigModal()">
+                    <i class="fas fa-cog"></i>
+                    Configurar alertas
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card-pro">
+            <div class="stat-icon-pro stat-icon-primary">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="stat-info">
+                <h3>12</h3>
+                <p>Total de notificações</p>
+            </div>
+            <div class="stat-trend trend-up">
+                <i class="fas fa-arrow-up"></i> 2 novas hoje
+            </div>
+        </div>
+
+        <div class="stat-card-pro">
+            <div class="stat-icon-pro stat-icon-warning">
+                <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <div class="stat-info">
+                <h3>5</h3>
+                <p>Orçamentos pendentes</p>
+            </div>
+            <div class="stat-trend" style="color: var(--warning);">
+                <i class="fas fa-clock"></i> Urgente
+            </div>
+        </div>
+
+        <div class="stat-card-pro">
+            <div class="stat-icon-pro stat-icon-success">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+                <h3>3</h3>
+                <p>Novas avaliações</p>
+            </div>
+            <div class="stat-trend trend-up">
+                <i class="fas fa-arrow-up"></i> +1 hoje
+            </div>
+        </div>
+
+        <div class="stat-card-pro">
+            <div class="stat-icon-pro stat-icon-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>2</h3>
+                <p>Alertas importantes</p>
+            </div>
+            <div class="stat-trend" style="color: var(--danger);">
+                <i class="fas fa-exclamation"></i> Atenção
             </div>
         </div>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="main-container">
-        
-        <!-- Filtros -->
-        <div class="filters-container">
-            <div class="filter-groups">
-                <button class="filter-btn active" onclick="filtrarNotificacoes('todas')">
-                    <i class="fas fa-inbox"></i> Todas
-                    <span class="filter-badge" id="countTodas">0</span>
-                </button>
-                <button class="filter-btn" onclick="filtrarNotificacoes('orcamento')">
-                    <i class="fas fa-hand-holding-usd"></i> Orçamentos
-                    <span class="filter-badge" id="countOrcamentos">0</span>
-                </button>
-                <button class="filter-btn" onclick="filtrarNotificacoes('avaliacao')">
-                    <i class="fas fa-star"></i> Avaliações
-                    <span class="filter-badge" id="countAvaliacoes">0</span>
-                </button>
-                <button class="filter-btn" onclick="filtrarNotificacoes('sistema')">
-                    <i class="fas fa-info-circle"></i> Sistema
-                    <span class="filter-badge" id="countSistema">0</span>
-                </button>
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar-pro">
+            <div class="sidebar-title">
+                <i class="fas fa-filter" style="color: var(--primary);"></i>
+                Filtrar Notificações
             </div>
-            
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-filter me-2"></i>Ordenar
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item active" href="#" onclick="ordenarPor('recentes')">Mais recentes</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="ordenarPor('antigas')">Mais antigas</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="ordenarPor('nao-lidas')">Não lidas primeiro</a></li>
-                </ul>
+
+            <div class="filter-section">
+                <div class="filter-section-title">Tipo</div>
+                <div class="filter-item active" onclick="filterNotifications('all', this)">
+                    <div class="filter-item-left">
+                        <i class="fas fa-th-large"></i>
+                        <span>Todas</span>
+                    </div>
+                    <span class="filter-badge">12</span>
+                </div>
+                <div class="filter-item" onclick="filterNotifications('orcamento', this)">
+                    <div class="filter-item-left">
+                        <i class="fas fa-file-invoice-dollar" style="color: var(--secondary);"></i>
+                        <span>Orçamentos</span>
+                    </div>
+                    <span class="filter-badge new">5</span>
+                </div>
+                <div class="filter-item" onclick="filterNotifications('avaliacao', this)">
+                    <div class="filter-item-left">
+                        <i class="fas fa-star" style="color: var(--warning);"></i>
+                        <span>Avaliações</span>
+                    </div>
+                    <span class="filter-badge">3</span>
+                </div>
+                <div class="filter-item" onclick="filterNotifications('sistema', this)">
+                    <div class="filter-item-left">
+                        <i class="fas fa-info-circle" style="color: var(--info);"></i>
+                        <span>Sistema</span>
+                    </div>
+                    <span class="filter-badge">2</span>
+                </div>
+                <div class="filter-item" onclick="filterNotifications('promocao', this)">
+                    <div class="filter-item-left">
+                        <i class="fas fa-gift" style="color: #9b59b6;"></i>
+                        <span>Promoções</span>
+                    </div>
+                    <span class="filter-badge">2</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Lista de Notificações -->
-        <div id="notificationsList" class="notifications-list">
-            <div class="loading-container">
-                <div class="spinner-scanhub"></div>
-                <p>Carregando notificações...</p>
+            <div class="filter-section">
+                <div class="filter-section-title">Status</div>
+                <div class="filter-item active">
+                    <div class="filter-item-left">
+                        <i class="fas fa-envelope"></i>
+                        <span>Não lidas</span>
+                    </div>
+                    <span class="filter-badge new">4</span>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-item-left">
+                        <i class="fas fa-envelope-open"></i>
+                        <span>Lidas</span>
+                    </div>
+                    <span class="filter-badge">8</span>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-item-left">
+                        <i class="fas fa-archive"></i>
+                        <span>Arquivadas</span>
+                    </div>
+                    <span class="filter-badge">0</span>
+                </div>
             </div>
-        </div>
 
-    </div>
-
-    <!-- Modal de Detalhes do Orçamento -->
-    <div class="modal fade" id="modalOrcamento" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header-custom">
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <div>
-                            <h5 class="modal-title mb-1"><i class="fas fa-hand-holding-usd me-2"></i>Novo Orçamento Solicitado</h5>
-                            <small>Recebido em <span id="modalDataOrcamento">--/--/----</span></small>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="filter-section">
+                <div class="filter-section-title">Período</div>
+                <div class="filter-item active">
+                    <div class="filter-item-left">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>Hoje</span>
                     </div>
                 </div>
-                <div class="modal-body-custom">
-                    
-                    <!-- Info do Cliente -->
-                    <div class="cliente-info">
-                        <div class="cliente-header">
-                            <div class="cliente-avatar" id="modalClienteAvatar">?</div>
-                            <div style="flex: 1;">
-                                <h4 class="cliente-nome" id="modalClienteNome">Nome do Cliente</h4>
-                                <div class="cliente-meta">
-                                    <div class="row mt-2">
-                                        <div class="col-md-6 mb-2">
-                                            <i class="fas fa-phone me-2 text-secondary"></i>
-                                            <span id="modalClienteTelefone">(00) 00000-0000</span>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <i class="fas fa-map-marker-alt me-2 text-secondary"></i>
-                                            <span id="modalClienteCidade">Cidade</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-3 border-top">
-                            <div class="detail-label">Descrição do Serviço Solicitado:</div>
-                            <p class="detail-value mb-0" id="modalDescricaoServico" style="white-space: pre-line;">
-                                Descrição virá aqui...
-                            </p>
-                        </div>
+                <div class="filter-item">
+                    <div class="filter-item-left">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>Últimos 7 dias</span>
                     </div>
-
-                    <!-- Formulário de Resposta -->
-                    <div class="resposta-form">
-                        <div class="form-title">
-                            <i class="fas fa-reply"></i> Enviar Proposta de Orçamento
-                        </div>
-                        <form id="formRespostaOrcamento">
-                            <input type="hidden" id="orcamentoId">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Valor Proposto (R$)</label>
-                                    <input type="number" class="form-control-custom" id="valorProposta" 
-                                           placeholder="0,00" min="0" step="0.01" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Prazo Estimado</label>
-                                    <input type="text" class="form-control-custom" id="prazoProposta" 
-                                           placeholder="Ex: 3 dias úteis, 1 semana..." required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mensagem ao Cliente (Opcional)</label>
-                                <textarea class="form-control-custom" id="mensagemProposta" rows="3" 
-                                          placeholder="Detalhes adicionais sobre o serviço..."></textarea>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-secondary flex-fill" onclick="recusarOrcamento()">
-                                    <i class="fas fa-times me-2"></i>Recusar Solicitação
-                                </button>
-                                <button type="submit" class="btn-responder">
-                                    <i class="fas fa-paper-plane me-2"></i>Enviar Orçamento
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="text-center mt-3">
-                        <a href="#" id="linkWhatsAppModal" target="_blank" class="btn btn-success w-100 py-3" style="background: #25D366; border: none; font-weight: 600;">
-                            <i class="fab fa-whatsapp me-2"></i>Conversar direto no WhatsApp
-                        </a>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-item-left">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Este mês</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </aside>
 
-    <!-- Modal de Avaliação -->
-    <div class="modal fade" id="modalAvaliacao" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header" style="background: #f1c40f; color: white; border-radius: 20px 20px 0 0;">
-                    <h5 class="modal-title"><i class="fas fa-star me-2"></i>Nova Avaliação Recebida</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Content Area -->
+        <main class="content-pro">
+            <div class="content-header">
+                <div class="tabs-pro">
+                    <button class="tab-item active" onclick="switchTab('recentes', this)">Recentes</button>
+                    <button class="tab-item" onclick="switchTab('importantes', this)">Importantes</button>
+                    <button class="tab-item" onclick="switchTab('arquivadas', this)">Arquivadas</button>
                 </div>
-                <div class="modal-body p-4 text-center">
-                    <div class="avaliacao-estrelas" id="modalEstrelas">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+
+                <div class="content-tools">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Buscar notificações..." id="searchInput" onkeyup="searchNotifications()">
                     </div>
-                    <h4 class="mb-3" id="modalNomeClienteAvaliacao">Nome do Cliente</h4>
-                    <div class="p-3 bg-light rounded mb-3 text-start">
-                        <p class="mb-0 fst-italic" id="modalComentarioAvaliacao">"Comentário da avaliação..."</p>
-                    </div>
-                    <small class="text-muted" id="modalDataAvaliacao">Avaliado em 00/00/0000</small>
-                </div>
-                <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary" onclick="marcarAvaliacaoLida()" style="background: var(--primary-color); border: none;">
-                        <i class="fas fa-check me-2"></i>Marcar como lida
+                    <button class="btn-icon" title="Atualizar" onclick="refreshNotifications()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn-icon" title="Mais opções">
+                        <i class="fas fa-ellipsis-v"></i>
                     </button>
                 </div>
+            </div>
+
+            <div class="notification-list" id="notificationList">
+                <!-- Notification Card 1 - Orçamento (Não lida) -->
+                <div class="notification-card unread" data-type="orcamento" data-id="1">
+                    <div class="notification-type-icon type-orcamento">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header-row">
+                            <h4 class="notification-title-text">
+                                Novo pedido de orçamento
+                                <span class="badge-new-notification">Novo</span>
+                            </h4>
+                            <span class="notification-time">
+                                <i class="fas fa-clock"></i> Há 10 minutos
+                            </span>
+                        </div>
+                        <p class="notification-description">
+                            <strong>Maria Oliveira</strong> solicitou um orçamento para <strong>Instalação de ventilador de teto</strong> no bairro Jardins. O cliente precisa urgentemente e está comparando preços.
+                        </p>
+                        <div class="notification-tags">
+                            <span class="tag"><i class="fas fa-bolt"></i> Elétrica</span>
+                            <span class="tag"><i class="fas fa-map-marker-alt"></i> 2.5 km</span>
+                            <span class="tag"><i class="fas fa-money-bill-wave"></i> R$ 150-250</span>
+                        </div>
+                        <div class="customer-info">
+                            <span class="info-item">
+                                <i class="fas fa-user"></i> Maria Oliveira
+                            </span>
+                            <span class="info-item">
+                                <i class="fas fa-phone"></i> (11) 98765-4321
+                            </span>
+                            <span class="info-item">
+                                <i class="fas fa-calendar"></i> Preferência: Amanhã
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="btn-action-main btn-responder" onclick="openResponseModal(1)">
+                            <i class="fas fa-reply"></i> Responder
+                        </button>
+                        <button class="btn-action-main btn-whatsapp" onclick="openWhatsApp('11987654321')">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button class="btn-secondary-action" style="padding: 10px; font-size: 0.85rem; border-radius: 10px;" onclick="markAsRead(1)">
+                            <i class="fas fa-check"></i> Marcar como lida
+                        </button>
+                        <button class="btn-delete" onclick="deleteNotification(1)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Card 2 - Avaliação -->
+                <div class="notification-card" data-type="avaliacao" data-id="2">
+                    <div class="notification-type-icon type-avaliacao">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header-row">
+                            <h4 class="notification-title-text">
+                                Nova avaliação recebida
+                                <span class="badge-new-notification" style="background: var(--warning);">5 estrelas</span>
+                            </h4>
+                            <span class="notification-time">
+                                <i class="fas fa-clock"></i> Há 2 horas
+                            </span>
+                        </div>
+                        <p class="notification-description">
+                            <strong>Carlos Mendes</strong> avaliou o serviço de <strong>Reparo de tomadas</strong> com 5 estrelas e deixou um comentário: "Excelente trabalho! Muito profissional e pontual. Super recomendo!"
+                        </p>
+                        <div class="notification-tags">
+                            <span class="tag"><i class="fas fa-star" style="color: var(--warning);"></i> 5.0</span>
+                            <span class="tag"><i class="fas fa-comment"></i> Comentário positivo</span>
+                        </div>
+                        <div class="customer-info">
+                            <span class="info-item">
+                                <i class="fas fa-user"></i> Carlos Mendes
+                            </span>
+                            <span class="info-item">
+                                <i class="fas fa-tools"></i> Reparo elétrico
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="btn-action-main btn-responder" onclick="viewReview(2)">
+                            <i class="fas fa-eye"></i> Ver avaliação
+                        </button>
+                        <button class="btn-action-main btn-secondary-action" onclick="replyReview(2)">
+                            <i class="fas fa-comment"></i> Responder
+                        </button>
+                        <button class="btn-delete" onclick="deleteNotification(2)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Card 3 - Orçamento Urgente -->
+                <div class="notification-card unread urgent" data-type="orcamento" data-id="3">
+                    <div class="notification-type-icon type-orcamento">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header-row">
+                            <h4 class="notification-title-text">
+                                Orçamento urgente - Vence em 2h
+                                <span class="badge-new-notification">Urgente</span>
+                            </h4>
+                            <span class="notification-time" style="color: var(--danger); font-weight: 600;">
+                                <i class="fas fa-clock"></i> Há 30 minutos
+                            </span>
+                        </div>
+                        <p class="notification-description">
+                            <strong>Condomínio Edifício Solar</strong> precisa de orçamento para <strong>Manutenção elétrica predial</strong>. São 12 apartamentos com problemas no quadro elétrico. Grande oportunidade!
+                        </p>
+                        <div class="notification-tags">
+                            <span class="tag" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">
+                                <i class="fas fa-building"></i> Condomínio
+                            </span>
+                            <span class="tag"><i class="fas fa-map-marker-alt"></i> 5.0 km</span>
+                            <span class="tag" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">
+                                <i class="fas fa-fire"></i> Alto valor
+                            </span>
+                        </div>
+                        <div class="customer-info">
+                            <span class="info-item">
+                                <i class="fas fa-user-tie"></i> Síndico: Roberto
+                            </span>
+                            <span class="info-item">
+                                <i class="fas fa-phone"></i> (11) 99999-8888
+                            </span>
+                            <span class="info-item" style="color: var(--danger); font-weight: 600;">
+                                <i class="fas fa-hourglass-half"></i> Expira em 2h
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="btn-action-main btn-responder" onclick="openResponseModal(3)" style="background: var(--danger); box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);">
+                            <i class="fas fa-bolt"></i> Responder Agora
+                        </button>
+                        <button class="btn-action-main btn-whatsapp" onclick="openWhatsApp('11999998888')">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button class="btn-delete" onclick="deleteNotification(3)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Card 4 - Sistema -->
+                <div class="notification-card" data-type="sistema" data-id="4">
+                    <div class="notification-type-icon type-sistema">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header-row">
+                            <h4 class="notification-title-text">
+                                Verificação de segurança
+                            </h4>
+                            <span class="notification-time">
+                                <i class="fas fa-clock"></i> Ontem, 18:30
+                            </span>
+                        </div>
+                        <p class="notification-description">
+                            Detectamos um novo login na sua conta a partir de um dispositivo Samsung Galaxy S21 em São Paulo, SP. Se não foi você, recomendamos alterar sua senha imediatamente.
+                        </p>
+                        <div class="notification-tags">
+                            <span class="tag"><i class="fas fa-mobile-alt"></i> Galaxy S21</span>
+                            <span class="tag"><i class="fas fa-map-pin"></i> São Paulo, SP</span>
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="btn-action-main btn-responder" style="background: var(--dark);">
+                            <i class="fas fa-lock"></i> Verificar
+                        </button>
+                        <button class="btn-delete" onclick="deleteNotification(4)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification Card 5 - Promoção -->
+                <div class="notification-card" data-type="promocao" data-id="5">
+                    <div class="notification-type-icon type-promocao">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header-row">
+                            <h4 class="notification-title-text">
+                                Torne-se Premium - 30% OFF
+                            </h4>
+                            <span class="notification-time">
+                                <i class="fas fa-clock"></i> 2 dias atrás
+                            </span>
+                        </div>
+                        <p class="notification-description">
+                            Aproveite! Últimas 24h para garantir 30% de desconto no plano Premium Anual. Apareça primeiro nos resultados de busca e receba até 3x mais orçamentos!
+                        </p>
+                        <div class="notification-tags">
+                            <span class="tag" style="background: rgba(155, 89, 182, 0.1); color: #9b59b6;">
+                                <i class="fas fa-tag"></i> Oferta limitada
+                            </span>
+                            <span class="tag" style="background: rgba(39, 174, 96, 0.1); color: var(--success);">
+                                <i class="fas fa-percent"></i> Economize R$ 120
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="btn-action-main btn-responder" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+                            <i class="fas fa-crown"></i> Assinar Agora
+                        </button>
+                        <button class="btn-secondary-action" onclick="deleteNotification(5)">
+                            <i class="fas fa-times"></i> Ignorar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-pro">
+                <button class="page-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Resposta -->
+    <div class="modal-overlay" id="responseModal">
+        <div class="modal-pro">
+            <div class="modal-header">
+                <h3><i class="fas fa-reply"></i> Responder Orçamento</h3>
+                <button class="modal-close" onclick="closeModal('responseModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 1.1rem; color: var(--dark);">Solicitação de Maria Oliveira</h4>
+                    <p style="margin: 0; color: #666; font-size: 0.95rem;">
+                        <i class="fas fa-tools" style="color: var(--primary);"></i> Instalação de ventilador de teto<br>
+                        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Bairro Jardins (2.5 km)
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Valor do orçamento (R$)</label>
+                    <input type="text" class="form-control" placeholder="Ex: 180,00" id="valorOrcamento">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Prazo para execução</label>
+                    <select class="form-control">
+                        <option>Em até 24 horas</option>
+                        <option>2 a 3 dias úteis</option>
+                        <option>Esta semana</option>
+                        <option>Próxima semana</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mensagem para o cliente</label>
+                    <textarea class="form-control" placeholder="Olá! Posso realizar este serviço..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+                        <span>Enviar também por WhatsApp</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary-action" style="padding: 12px 24px; border-radius: 12px;" onclick="closeModal('responseModal')">
+                    Cancelar
+                </button>
+                <button class="btn-responder" style="padding: 12px 30px; border-radius: 12px; border: none; font-weight: 600; color: white;" onclick="sendResponse()">
+                    <i class="fas fa-paper-plane"></i> Enviar Proposta
+                </button>
             </div>
         </div>
     </div>
@@ -859,397 +1887,224 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Firebase Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            collection, 
-            query, 
-            where, 
-            getDocs,
-            doc,
-            updateDoc,
-            deleteDoc,
-            orderBy,
-            onSnapshot 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.appspot.com",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let notificacoes = [];
-        let filtroAtual = 'todas';
-        let notificacaoSelecionada = null;
-
-        const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
-        const modalAvaliacao = new bootstrap.Modal(document.getElementById('modalAvaliacao'));
-
-        // Auth State
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                carregarDadosUsuario(user);
-                carregarNotificacoes();
-                // Setup realtime listener
-                setupRealtimeListener();
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        async function carregarDadosUsuario(user) {
-            try {
-                const userDoc = await getDocs(query(collection(db, "usuarios"), where("uid", "==", user.uid)));
-                if (!userDoc.empty) {
-                    const data = userDoc.docs[0].data();
-                    document.getElementById('userName').textContent = `Olá, ${data.apelido || 'Profissional'}`;
-                    document.getElementById('userId').textContent = data.idScanHub || '---';
-                    document.getElementById('userAvatar').textContent = (data.apelido || 'P').charAt(0).toUpperCase();
-                }
-            } catch (error) {
-                console.error('Erro ao carregar usuário:', error);
-            }
-        }
-
-        function setupRealtimeListener() {
-            // Listener para solicitações
-            const q = query(
-                collection(db, "solicitacoes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("dataCriacao", "desc")
-            );
+    <script>
+        // Funções de filtro
+        function filterNotifications(type, element) {
+            // Remove active de todos os filtros
+            document.querySelectorAll('.filter-item').forEach(item => {
+                item.classList.remove('active');
+            });
             
-            onSnapshot(q, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added" && !change.doc.metadata.hasPendingWrites) {
-                        // Nova notificação chegou
-                        showToast('🎉 Nova solicitação de orçamento recebida!', 'success');
-                        carregarNotificacoes();
+            // Adiciona active no clicado
+            element.classList.add('active');
+            
+            // Filtra as notificações
+            const cards = document.querySelectorAll('.notification-card');
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'grid';
+                    setTimeout(() => card.style.opacity = '1', 10);
+                } else {
+                    if (card.dataset.type === type) {
+                        card.style.display = 'grid';
+                        setTimeout(() => card.style.opacity = '1', 10);
+                    } else {
+                        card.style.opacity = '0';
+                        setTimeout(() => card.style.display = 'none', 300);
                     }
-                });
+                }
+            });
+
+            showToast('Filtro aplicado', `Exibindo notificações de ${type === 'all' ? 'todos os tipos' : type}`, 'info');
+        }
+
+        // Switch tabs
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Simulação de mudança de conteúdo
+            showToast('Aba alterada', `Você está visualizando notificações ${tabName}`, 'success');
+        }
+
+        // Marcar como lida
+        function markAsRead(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            card.classList.remove('unread');
+            card.classList.remove('urgent');
+            
+            // Remove a barra lateral colorida
+            card.style.borderLeft = 'none';
+            
+            // Atualiza badge na navbar
+            updateBadgeCount();
+            
+            showToast('Sucesso', 'Notificação marcada como lida', 'success');
+        }
+
+        // Marcar todas como lidas
+        function markAllAsRead() {
+            document.querySelectorAll('.notification-card').forEach(card => {
+                card.classList.remove('unread');
+                card.classList.remove('urgent');
+            });
+            
+            updateBadgeCount(0);
+            showToast('Sucesso', 'Todas as notificações foram marcadas como lidas', 'success');
+        }
+
+        // Deletar notificação
+        function deleteNotification(id) {
+            if (confirm('Tem certeza que deseja excluir esta notificação?')) {
+                const card = document.querySelector(`[data-id="${id}"]`);
+                card.style.transform = 'translateX(100px)';
+                card.style.opacity = '0';
+                
+                setTimeout(() => {
+                    card.remove();
+                    updateBadgeCount();
+                }, 300);
+                
+                showToast('Excluído', 'Notificação removida com sucesso', 'success');
+            }
+        }
+
+        // Atualizar contador de badge
+        function updateBadgeCount(count) {
+            const badge = document.querySelector('.nav-badge');
+            if (count !== undefined) {
+                badge.textContent = count;
+            } else {
+                const unreadCount = document.querySelectorAll('.notification-card.unread').length;
+                badge.textContent = unreadCount;
+            }
+            
+            if (badge.textContent == '0') {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Abrir WhatsApp
+        function openWhatsApp(phone) {
+            const message = "Olá! Vi seu pedido no ScanHub Pro e gostaria de mais detalhes sobre o serviço.";
+            window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        // Modal functions
+        function openResponseModal(id) {
+            document.getElementById('responseModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function sendResponse() {
+            closeModal('responseModal');
+            showToast('Proposta enviada!', 'Sua proposta foi enviada ao cliente com sucesso.', 'success');
+            
+            // Simula marcação como lida após responder
+            setTimeout(() => {
+                markAsRead(1);
+            }, 500);
+        }
+
+        // Busca
+        function searchNotifications() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const cards = document.querySelectorAll('.notification-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    card.style.display = 'grid';
+                } else {
+                    card.style.display = 'none';
+                }
             });
         }
 
-        async function carregarNotificacoes() {
-            const listContainer = document.getElementById('notificationsList');
-            listContainer.innerHTML = '<div class="loading-container"><div class="spinner-scanhub"></div><p>Carregando notificações...</p></div>';
-
-            try {
-                // Buscar solicitações (orçamentos)
-                const qSolicitacoes = query(
-                    collection(db, "solicitacoes"),
-                    where("profissionalId", "==", currentUser.uid),
-                    orderBy("dataCriacao", "desc")
-                );
-                
-                const snapshotSolicitacoes = await getDocs(qSolicitacoes);
-                
-                notificacoes = [];
-                
-                snapshotSolicitacoes.forEach(doc => {
-                    const data = doc.data();
-                    notificacoes.push({
-                        id: doc.id,
-                        tipo: 'orcamento',
-                        titulo: `Novo orçamento - ${data.nomeCliente || 'Cliente'}`,
-                        descricao: data.descricao || 'Solicitação de serviço',
-                        data: data.dataCriacao?.toDate() || new Date(),
-                        lida: data.lida || false,
-                        dados: data
-                    });
-                });
-
-                // Buscar avaliações (simulado - você precisa criar a coleção avaliacoes)
-                // const qAvaliacoes = query(...) 
-                
-                atualizarContadores();
-                renderizarNotificacoes();
-
-            } catch (error) {
-                console.error('Erro ao carregar notificações:', error);
-                listContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle empty-icon"></i>
-                        <h4 class="empty-title">Erro ao carregar</h4>
-                        <p class="empty-text">Tente recarregar a página</p>
-                    </div>
-                `;
-            }
+        // Refresh
+        function refreshNotifications() {
+            const icon = document.querySelector('.fa-sync-alt');
+            icon.classList.add('fa-spin');
+            
+            showToast('Atualizando...', 'Buscando novas notificações', 'info');
+            
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                showToast('Atualizado', 'Você está com as notificações mais recentes', 'success');
+            }, 1500);
         }
 
-        function renderizarNotificacoes() {
-            const container = document.getElementById('notificationsList');
-            let filtradas = notificacoes;
-
-            if (filtroAtual !== 'todas') {
-                filtradas = notificacoes.filter(n => n.tipo === filtroAtual);
-            }
-
-            if (filtradas.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-bell-slash empty-icon"></i>
-                        <h4 class="empty-title">Nenhuma notificação</h4>
-                        <p class="empty-text">Quando houver novas atividades, elas aparecerão aqui</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = filtradas.map(notif => criarCardNotificacao(notif)).join('');
-        }
-
-        function criarCardNotificacao(notif) {
-            const dataFormatada = notif.data.toLocaleDateString('pt-BR', {
-                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-
-            const icones = {
-                'orcamento': 'fa-hand-holding-usd',
-                'avaliacao': 'fa-star',
-                'sistema': 'fa-info-circle'
-            };
-
-            const cores = {
-                'orcamento': 'icon-orcamento',
-                'avaliacao': 'icon-avaliacao',
-                'sistema': 'icon-sistema'
-            };
-
-            const acoes = notif.tipo === 'orcamento' ? `
-                <button class="btn-action-sm btn-ver" onclick="verDetalhesOrcamento('${notif.id}')">
-                    <i class="fas fa-eye"></i> Ver detalhes
-                </button>
-                ${notif.dados.whatsapp ? `
-                <a href="https://wa.me/55${notif.dados.whatsapp.replace(/\D/g,'')}" target="_blank" class="btn-action-sm btn-whatsapp">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
-                </a>` : ''}
-                <button class="btn-action-sm btn-arquivar" onclick="arquivarNotificacao('${notif.id}')">
-                    <i class="fas fa-archive"></i> Arquivar
-                </button>
-            ` : `
-                <button class="btn-action-sm btn-ver" onclick="verDetalhes('${notif.id}')">
-                    <i class="fas fa-eye"></i> Ver
-                </button>
-                <button class="btn-action-sm btn-lida" onclick="marcarLida('${notif.id}')">
-                    <i class="fas fa-check"></i> Marcar lida
-                </button>
-            `;
-
-            return `
-                <div class="notification-card ${notif.lida ? '' : 'nao-lida'} ${notif.tipo}" data-id="${notif.id}">
-                    <div class="notification-icon ${cores[notif.tipo]}">
-                        <i class="fas ${icones[notif.tipo]}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-header">
-                            <div class="notification-title">
-                                ${notif.titulo}
-                                ${notif.lida ? '' : '<span class="badge-novo">Novo</span>'}
-                            </div>
-                            <div class="notification-date">
-                                <i class="fas fa-clock"></i> ${dataFormatada}
-                            </div>
-                        </div>
-                        <div class="notification-text">
-                            ${notif.descricao}
-                        </div>
-                        <div class="notification-meta">
-                            ${notif.tipo === 'orcamento' ? `
-                                <div class="meta-item"><i class="fas fa-user"></i> ${notif.dados.nomeCliente || 'Cliente'}</div>
-                                <div class="meta-item"><i class="fas fa-map-marker-alt"></i> ${notif.dados.cidade || 'Local não informado'}</div>
-                            ` : ''}
-                        </div>
-                        <div class="notification-actions">
-                            ${acoes}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function atualizarContadores() {
-            document.getElementById('countTodas').textContent = notificacoes.length;
-            document.getElementById('countOrcamentos').textContent = notificacoes.filter(n => n.tipo === 'orcamento').length;
-            document.getElementById('countAvaliacoes').textContent = notificacoes.filter(n => n.tipo === 'avaliacao').length;
-            document.getElementById('countSistema').textContent = notificacoes.filter(n => n.tipo === 'sistema').length;
-            
-            // Atualizar no menu principal via localStorage (para o dashboard ler)
-            const naoLidas = notificacoes.filter(n => !n.lida).length;
-            localStorage.setItem('notificacoesNaoLidas', naoLidas);
-        }
-
-        window.filtrarNotificacoes = (tipo) => {
-            filtroAtual = tipo;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.filter-btn').classList.add('active');
-            renderizarNotificacoes();
-        };
-
-        window.verDetalhesOrcamento = (id) => {
-            const notif = notificacoes.find(n => n.id === id);
-            if (!notif) return;
-
-            notificacaoSelecionada = notif;
-            const dados = notif.dados;
-
-            document.getElementById('orcamentoId').value = id;
-            document.getElementById('modalDataOrcamento').textContent = notif.data.toLocaleDateString('pt-BR');
-            document.getElementById('modalClienteNome').textContent = dados.nomeCliente || 'Cliente';
-            document.getElementById('modalClienteTelefone').textContent = dados.telefone || 'Não informado';
-            document.getElementById('modalClienteCidade').textContent = dados.cidade || 'Não informado';
-            document.getElementById('modalDescricaoServico').textContent = dados.descricao || 'Sem descrição';
-            document.getElementById('modalClienteAvatar').textContent = (dados.nomeCliente || 'C').charAt(0).toUpperCase();
-            
-            if (dados.whatsapp) {
-                document.getElementById('linkWhatsAppModal').href = `https://wa.me/55${dados.whatsapp.replace(/\D/g,'')}?text=Olá ${dados.nomeCliente}! Recebi sua solicitação de orçamento pelo ScanHub.`;
-            }
-
-            modalOrcamento.show();
-            
-            // Marcar como lida automaticamente ao abrir
-            if (!notif.lida) marcarLida(id);
-        };
-
-        window.marcarLida = async (id) => {
-            try {
-                const notifRef = doc(db, "solicitacoes", id);
-                await updateDoc(notifRef, { lida: true });
-                
-                const index = notificacoes.findIndex(n => n.id === id);
-                if (index !== -1) notificacoes[index].lida = true;
-                
-                renderizarNotificacoes();
-                atualizarContadores();
-                showToast('Marcado como lido', 'success');
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        };
-
-        window.marcarTodasLidas = async () => {
-            try {
-                const promises = notificacoes
-                    .filter(n => !n.lida)
-                    .map(n => updateDoc(doc(db, "solicitacoes", n.id), { lida: true }));
-                
-                await Promise.all(promises);
-                notificacoes.forEach(n => n.lida = true);
-                renderizarNotificacoes();
-                atualizarContadores();
-                showToast('Todas as notificações foram marcadas como lidas', 'success');
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        };
-
-        window.arquivarNotificacao = async (id) => {
-            if (!confirm('Arquivar esta notificação? Ela não aparecerá mais na lista.')) return;
-            
-            try {
-                await updateDoc(doc(db, "solicitacoes", id), { arquivada: true });
-                notificacoes = notificacoes.filter(n => n.id !== id);
-                renderizarNotificacoes();
-                atualizarContadores();
-                showToast('Notificação arquivada', 'success');
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        };
-
-        window.recusarOrcamento = async () => {
-            if (!confirm('Tem certeza que deseja recusar esta solicitação?')) return;
-            
-            try {
-                const id = document.getElementById('orcamentoId').value;
-                await updateDoc(doc(db, "solicitacoes", id), { 
-                    status: 'recusado',
-                    lida: true 
-                });
-                modalOrcamento.hide();
-                showToast('Solicitação recusada', 'info');
-                carregarNotificacoes();
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        };
-
-        // Formulário de resposta
-        document.getElementById('formRespostaOrcamento').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const id = document.getElementById('orcamentoId').value;
-            const valor = document.getElementById('valorProposta').value;
-            const prazo = document.getElementById('prazoProposta').value;
-            const mensagem = document.getElementById('mensagemProposta').value;
-
-            try {
-                await updateDoc(doc(db, "solicitacoes", id), {
-                    status: 'respondido',
-                    resposta: {
-                        valor: parseFloat(valor),
-                        prazo: prazo,
-                        mensagem: mensagem,
-                        dataResposta: new Date()
-                    },
-                    lida: true
-                });
-                
-                modalOrcamento.hide();
-                showToast('Orçamento enviado com sucesso!', 'success');
-                carregarNotificacoes();
-                
-            } catch (error) {
-                console.error('Erro ao enviar:', error);
-                showToast('Erro ao enviar orçamento', 'error');
-            }
-        });
-
-        window.ordenarPor = (tipo) => {
-            if (tipo === 'recentes') {
-                notificacoes.sort((a, b) => b.data - a.data);
-            } else if (tipo === 'antigas') {
-                notificacoes.sort((a, b) => a.data - b.data);
-            } else if (tipo === 'nao-lidas') {
-                notificacoes.sort((a, b) => (a.lida === b.lida) ? 0 : a.lida ? 1 : -1);
-            }
-            renderizarNotificacoes();
-        };
-
-        function showToast(mensagem, tipo = 'info') {
+        // Toast notification system
+        function showToast(title, message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.className = 'toast-scanhub';
+            toast.className = `toast-pro toast-${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 'info-circle';
+            const color = type === 'success' ? '#27ae60' : '#3498db';
+            
             toast.innerHTML = `
-                <i class="fas ${tipo === 'success' ? 'fa-check-circle text-success' : tipo === 'error' ? 'fa-exclamation-circle text-danger' : 'fa-info-circle text-info'}"></i>
-                <span>${mensagem}</span>
+                <div class="toast-icon" style="background: ${color}15; color: ${color};">
+                    <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="toast-content">
+                    <h4>${title}</h4>
+                    <p>${message}</p>
+                </div>
             `;
+            
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            
+            // Animate in
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
         }
 
-        // Mobile menu toggle
-        document.getElementById('menuToggle').addEventListener('click', () => {
-            document.getElementById('dashboardMenu')?.classList.toggle('show');
+        // View review
+        function viewReview(id) {
+            showToast('Avaliação', 'Abrindo detalhes da avaliação...', 'info');
+        }
+
+        function replyReview(id) {
+            showToast('Responder', 'Abrindo formulário de resposta...', 'info');
+        }
+
+        function openConfigModal() {
+            showToast('Configurações', 'Abrindo configurações de notificações...', 'info');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animação de entrada dos cards
+            const cards = document.querySelectorAll('.notification-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Fechar modal ao clicar fora
+            document.getElementById('responseModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal('responseModal');
+                }
+            });
         });
     </script>
 </body>
