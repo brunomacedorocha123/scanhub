@@ -890,8 +890,8 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Script Principal ATUALIZADO -->
-    <script type="module">
+    <!-- Script Principal COMPLETO E FUNCIONAL -->
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
     getAuth, 
@@ -901,7 +901,13 @@ import {
     getFirestore, 
     doc, 
     getDoc,
-    updateDoc
+    updateDoc,
+    collection,
+    addDoc,
+    serverTimestamp,
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -917,6 +923,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Elementos DOM
 const loadingOverlay = document.getElementById('loadingOverlay');
 const planoBadge = document.getElementById('planoBadge');
 const planoTexto = document.getElementById('planoTexto');
@@ -931,7 +938,7 @@ const especialidadePrincipal = document.getElementById('especialidadePrincipal')
 const anosExperiencia = document.getElementById('anosExperiencia');
 const tagsContainer = document.getElementById('tagsContainer');
 const tagInput = document.getElementById('tagInput');
-const visivelBusca = document.getElementById('visivelBusca'); // NOVO
+const visivelBusca = document.getElementById('visivelBusca');
 const raioKm = document.getElementById('raioKm');
 const cidadeBase = document.getElementById('cidadeBase');
 const cidadesContainer = document.getElementById('cidadesContainer');
@@ -955,10 +962,40 @@ const linksContainer = document.getElementById('linksContainer');
 const btnAddLink = document.getElementById('btnAddLink');
 const btnSalvarPerfil = document.getElementById('btnSalvarPerfil');
 
+// Elementos da página de perfil público
+const loadingState = document.getElementById('loadingState');
+const errorState = document.getElementById('errorState');
+const profileContent = document.getElementById('profileContent');
+const coverContainer = document.getElementById('coverContainer');
+const profileAvatar = document.getElementById('profileAvatar');
+const planBadge = document.getElementById('planBadge');
+const profileName = document.getElementById('profileName');
+const profileSpecialty = document.getElementById('profileSpecialty');
+const profileLocation = document.getElementById('profileLocation');
+const btnWhatsApp = document.getElementById('btnWhatsApp');
+const aboutText = document.getElementById('aboutText');
+const anosExp = document.getElementById('anosExp');
+const badgeGarantia = document.getElementById('badgeGarantia');
+const diasGarantia = document.getElementById('diasGarantia');
+const atendimentoBadges = document.getElementById('atendimentoBadges');
+const pagamentoBadges = document.getElementById('pagamentoBadges');
+const tempoRespostaDisplay = document.getElementById('tempoResposta');
+const tagsContainerPublic = document.getElementById('tagsContainer');
+const galeriaSection = document.getElementById('galeriaSection');
+const galeriaGrid = document.getElementById('galeriaGrid');
+const catalogoVazio = document.getElementById('catalogoVazio');
+const catalogoGrid = document.getElementById('catalogoGrid');
+const countCatalogo = document.getElementById('countCatalogo');
+const modalOrcamento = document.getElementById('modalOrcamento');
+
+// State
 let userData = null;
 let portfolioFotos = [];
 let videos = [];
-let links = [];
+let profissionalData = null;
+let profissionalId = null;
+let servicos = [];
+let produtos = [];
 
 // FUNÇÃO PARA ATUALIZAR BADGE DO PLANO
 function atualizarBadgePlano(plano) {
@@ -1001,16 +1038,19 @@ function atualizarBadgePlano(plano) {
 
 function showLoading() {
     if (loadingOverlay) loadingOverlay.style.display = 'flex';
+    if (loadingState) loadingState.style.display = 'block';
 }
 
 function hideLoading() {
     if (loadingOverlay) loadingOverlay.style.display = 'none';
+    if (loadingState) loadingState.style.display = 'none';
 }
 
 function showAlert(mensagem, tipo = 'success') {
     alert(mensagem);
 }
 
+// Funções para upload de imagem
 async function uploadParaImgur(arquivo) {
     showLoading();
     
@@ -1057,6 +1097,7 @@ function converterParaBase64(arquivo) {
     });
 }
 
+// Funções para tags
 function criarTag(texto, container) {
     const tag = document.createElement('div');
     tag.className = 'tag';
@@ -1089,6 +1130,7 @@ function getTags(container) {
     return tags;
 }
 
+// Portfolio
 portfolioUploadArea.addEventListener('click', () => {
     portfolioInput.click();
 });
@@ -1134,6 +1176,7 @@ window.removerFotoPortfolio = function(url, element) {
     }
 };
 
+// Videos
 btnAddVideo.addEventListener('click', () => {
     const url = videoUrl.value.trim();
     if (!url) return;
@@ -1170,6 +1213,7 @@ window.removerVideo = function(url, element) {
     element.parentElement.remove();
 };
 
+// Links
 btnAddLink.addEventListener('click', () => {
     const inputGroup = document.createElement('div');
     inputGroup.className = 'input-group mb-2';
@@ -1208,7 +1252,16 @@ onAuthStateChanged(auth, async (usuario) => {
             hideLoading();
         }
     } else {
-        window.location.href = 'login.html';
+        // Se não estiver logado, verificar se é página pública
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        
+        if (id) {
+            // É perfil público
+            await carregarPerfilPublico(id);
+        } else {
+            window.location.href = 'login.html';
+        }
     }
 });
 
@@ -1264,7 +1317,7 @@ function carregarDadosUsuario(dados) {
         
         // CAMPO NOVO: Visível em Buscas
         if (visivelBusca) {
-            visivelBusca.checked = prof.visivelBusca !== false; // Default é true
+            visivelBusca.checked = prof.visivelBusca !== false;
         }
         
         const fotoParaCarregar = dados.fotoPerfilProfissional || dados.fotoPerfil;
@@ -1358,6 +1411,7 @@ if (avatarDisplay) {
     }
 }
 
+// Salvar perfil
 btnSalvarPerfil.addEventListener('click', async () => {
     if (!auth.currentUser) {
         showAlert('Você precisa estar logado', 'error');
@@ -1376,7 +1430,7 @@ btnSalvarPerfil.addEventListener('click', async () => {
             especialidadePrincipal: especialidadePrincipal.value,
             anosExperiencia: anosExperiencia.value,
             especialidades: getTags(tagsContainer),
-            visivelBusca: visivelBusca.checked, // NOVO CAMPO
+            visivelBusca: visivelBusca.checked,
             raioKm: parseInt(raioKm.value) || null,
             cidadeBase: cidadeBase.value,
             cidadesAtendidas: getTags(cidadesContainer),
@@ -1420,6 +1474,396 @@ btnSalvarPerfil.addEventListener('click', async () => {
 if (tagsContainer && tagInput) inicializarTags(tagsContainer, tagInput);
 if (cidadesContainer && cidadeInput) inicializarTags(cidadesContainer, cidadeInput);
 if (pagamentosContainer && pagamentoInput) inicializarTags(pagamentosContainer, pagamentoInput);
+
+// ==============================
+// FUNÇÕES PARA PERFIL PÚBLICO
+// ==============================
+
+async function carregarPerfilPublico(id) {
+    profissionalId = id;
+    try {
+        showLoading();
+        await carregarPerfil();
+        await carregarCatalogo();
+        renderizarPerfil();
+        
+        hideLoading();
+        if (profileContent) profileContent.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        hideLoading();
+        if (errorState) {
+            errorState.style.display = 'block';
+            loadingState.style.display = 'none';
+        }
+    }
+}
+
+async function carregarPerfil() {
+    // Buscar dados do profissional
+    const userRef = doc(db, "usuarios", profissionalId);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        throw new Error('Profissional não encontrado');
+    }
+
+    const userData = userSnap.data();
+    
+    // Verificar se é profissional e está visível
+    if (userData.tipoUsuario !== 'profissional' || 
+        userData.status !== 'ativo' || 
+        !userData.profissional?.perfilCompleto ||
+        userData.profissional?.visivelBusca === false) {
+        throw new Error('Profissional não disponível');
+    }
+
+    profissionalData = { ...userData, profissional: userData.profissional };
+}
+
+async function carregarCatalogo() {
+    try {
+        // Buscar serviços
+        const qServicos = query(
+            collection(db, "servicos"),
+            where("profissionalId", "==", profissionalId),
+            where("status", "==", "ativo")
+        );
+        const snapServicos = await getDocs(qServicos);
+        servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
+
+        // Buscar produtos
+        const qProdutos = query(
+            collection(db, "produtos"),
+            where("profissionalId", "==", profissionalId),
+            where("status", "==", "ativo")
+        );
+        const snapProdutos = await getDocs(qProdutos);
+        produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
+
+    } catch (error) {
+        console.error('Erro ao carregar catálogo:', error);
+    }
+}
+
+function renderizarPerfil() {
+    const prof = profissionalData.profissional;
+    
+    // Cover (primeira foto do portfólio ou placeholder)
+    if (coverContainer) {
+        if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
+            coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
+        } else {
+            coverContainer.innerHTML = `
+                <div class="cover-placeholder">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            `;
+        }
+    }
+
+    // Avatar
+    if (profileAvatar) {
+        const avatarUrl = profissionalData.fotoPerfilProfissional || 
+                         profissionalData.fotoPerfil || 
+                         'https://via.placeholder.com/300';
+        profileAvatar.src = avatarUrl;
+    }
+
+    // Badge do plano (só mostra se for Pro ou Enterprise)
+    if (planBadge) {
+        const plano = profissionalData.plano_assinatura;
+        if (plano === 'pro' || plano === 'enterprise') {
+            planBadge.style.display = 'flex';
+            planBadge.querySelector('span').textContent = plano.toUpperCase();
+        }
+    }
+
+    // Nome e especialidade
+    if (profileName) profileName.textContent = prof.nomeProfissional || 'Profissional';
+    if (profileSpecialty) {
+        profileSpecialty.innerHTML = `<i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}`;
+    }
+
+    // Localização
+    if (profileLocation) {
+        profileLocation.innerHTML = `
+            <i class="fas fa-map-marker-alt"></i> 
+            ${prof.cidadeBase || 'Cidade não informada'}
+            ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
+        `;
+    }
+
+    // WhatsApp
+    if (btnWhatsApp && prof.whatsapp) {
+        const whatsappNum = prof.whatsapp.replace(/\D/g, '');
+        btnWhatsApp.href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
+    }
+
+    // Sobre/Descrição
+    if (aboutText) aboutText.textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
+
+    // Anos experiência
+    if (anosExp) anosExp.textContent = formatarExperiencia(prof.anosExperiencia);
+
+    // Garantia
+    if (badgeGarantia && prof.garantiaDias && prof.garantiaDias > 0) {
+        badgeGarantia.style.display = 'flex';
+        diasGarantia.textContent = prof.garantiaDias;
+    }
+
+    // Formas de atendimento
+    if (atendimentoBadges) {
+        atendimentoBadges.innerHTML = '';
+        if (prof.atendeDomicilio) {
+            atendimentoBadges.innerHTML += `
+                <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
+            `;
+        }
+        if (prof.atendeOnline) {
+            atendimentoBadges.innerHTML += `
+                <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
+            `;
+        }
+    }
+
+    // Formas de pagamento
+    if (pagamentoBadges && prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
+        pagamentoBadges.innerHTML = '';
+        prof.formasPagamento.forEach(forma => {
+            pagamentoBadges.innerHTML += `
+                <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
+            `;
+        });
+    }
+
+    // Tempo resposta
+    if (tempoRespostaDisplay && prof.tempoResposta) {
+        tempoRespostaDisplay.innerHTML = `
+            <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
+        `;
+    }
+
+    // Tags/Especialidades
+    if (tagsContainerPublic && prof.especialidades && Array.isArray(prof.especialidades)) {
+        tagsContainerPublic.innerHTML = '';
+        prof.especialidades.forEach(tag => {
+            tagsContainerPublic.innerHTML += `<div class="info-badge">${tag}</div>`;
+        });
+    }
+
+    // Galeria de fotos
+    if (galeriaSection && prof.portfolioFotos && prof.portfolioFotos.length > 1) {
+        galeriaSection.style.display = 'block';
+        const fotos = prof.portfolioFotos.slice(1);
+        galeriaGrid.innerHTML = fotos.map(foto => `
+            <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
+                <img src="${foto}" alt="Portfólio">
+            </div>
+        `).join('');
+    }
+
+    // Catálogo
+    renderizarCatalogo();
+}
+
+function renderizarCatalogo() {
+    const todosItens = [...servicos, ...produtos];
+    
+    if (countCatalogo) countCatalogo.textContent = todosItens.length;
+    
+    if (catalogoGrid && catalogoVazio) {
+        if (todosItens.length === 0) {
+            catalogoVazio.style.display = 'block';
+            catalogoGrid.style.display = 'none';
+            return;
+        }
+
+        catalogoVazio.style.display = 'none';
+        catalogoGrid.style.display = 'grid';
+
+        catalogoGrid.innerHTML = todosItens.map(item => {
+            const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
+                          `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
+            
+            const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
+            const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
+            
+            const metaInfo = item.tipo === 'servico' 
+                ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
+                : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
+
+            return `
+                <div class="item-card">
+                    <div class="item-image">
+                        <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
+                        <span class="item-type ${tipoClass}">${tipoText}</span>
+                    </div>
+                    <div class="item-content">
+                        <h4 class="item-title">${item.nome}</h4>
+                        <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
+                        <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
+                        <div class="item-meta">
+                            ${metaInfo}
+                            <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+// Funções auxiliares
+function formatarEspecialidade(esp) {
+    if (!esp) return 'Profissional';
+    const map = {
+        'eletrica': 'Eletricista',
+        'hidraulica': 'Encanador',
+        'massoterapia': 'Massoterapeuta',
+        'tecnico_celular': 'Técnico de Celular',
+        'veterinaria': 'Veterinário(a)',
+        'manicure': 'Manicure',
+        'pintura': 'Pintor',
+        'ar_condicionado': 'Ar Condicionado',
+        'marcenaria': 'Marceneiro'
+    };
+    return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
+}
+
+function formatarExperiencia(exp) {
+    const map = {
+        '1': 'Menos de 1 ano',
+        '1-3': '1-3 anos',
+        '3-5': '3-5 anos',
+        '5-10': '5-10 anos',
+        '10+': 'Mais de 10 anos'
+    };
+    return map[exp] || exp || 'Não informado';
+}
+
+function formatarMoeda(valor) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valor || 0);
+}
+
+// Modal de orçamento
+const modalOrcamentoInstance = modalOrcamento ? new bootstrap.Modal(modalOrcamento) : null;
+
+window.abrirModalOrcamento = function() {
+    if (modalOrcamentoInstance) modalOrcamentoInstance.show();
+};
+
+// Controle de abas
+window.switchTab = function(tabName) {
+    // Atualizar botões
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.closest('.tab-btn').classList.add('active');
+
+    // Atualizar conteúdo
+    document.querySelectorAll('.tab-content-section').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    if (tabName === 'sobre') {
+        document.getElementById('tabSobre').classList.add('active');
+    } else {
+        document.getElementById('tabCatalogo').classList.add('active');
+    }
+};
+
+// ENVIAR ORÇAMENTO E CRIAR NOTIFICAÇÃO
+document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+    btn.disabled = true;
+
+    try {
+        // Pegar dados do formulário
+        const nomeCliente = document.getElementById('nomeCliente').value;
+        const telefoneCliente = document.getElementById('telefoneCliente').value;
+        const cidadeCliente = document.getElementById('cidadeCliente').value;
+        const descricaoServico = document.getElementById('descricaoServico').value;
+
+        // Verificar se cliente está logado
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Você precisa estar logado para enviar orçamento!');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // 1. Criar notificação no Firestore
+        await addDoc(collection(db, "notificacoes"), {
+            profissionalId: profissionalId, // ID do profissional da URL
+            clienteId: user.uid,
+            clienteNome: nomeCliente,
+            clienteTelefone: telefoneCliente,
+            clienteCidade: cidadeCliente,
+            tipo: "orcamento",
+            titulo: "Novo pedido de orçamento",
+            descricao: `Cliente solicitou orçamento para: ${descricaoServico}`,
+            lida: false,
+            urgente: false,
+            arquivada: false,
+            data: serverTimestamp(),
+            metadata: {
+                clienteNome: nomeCliente,
+                servico: descricaoServico,
+                telefone: telefoneCliente,
+                cidade: cidadeCliente
+            },
+            tags: ["orcamento", "novo"]
+        });
+
+        // 2. Também criar na coleção solicitacoes (opcional)
+        await addDoc(collection(db, "solicitacoes"), {
+            profissionalId: profissionalId,
+            clienteId: user.uid,
+            clienteNome: nomeCliente,
+            clienteTelefone: telefoneCliente,
+            clienteCidade: cidadeCliente,
+            descricao: descricaoServico,
+            status: "pendente",
+            data: serverTimestamp(),
+            tipo: "orcamento"
+        });
+
+        // Fechar modal e limpar formulário
+        if (modalOrcamentoInstance) modalOrcamentoInstance.hide();
+        e.target.reset();
+        
+        // Mostrar mensagem de sucesso
+        alert('Solicitação enviada com sucesso! O profissional entrará em contato em breve.');
+        
+    } catch (error) {
+        console.error('Erro ao enviar orçamento:', error);
+        alert('Erro ao enviar solicitação. Tente novamente.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se estamos na página de perfil público
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    
+    if (id && !auth.currentUser) {
+        // Carregar perfil público
+        carregarPerfilPublico(id);
+    }
+});
 </script>
 </body>
 </html>
