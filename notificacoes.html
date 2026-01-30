@@ -60,24 +60,30 @@
             left: 0;
             right: 0;
             z-index: 1000;
+            height: 80px;
         }
 
         .navbar-container {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 15px;
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0 20px;
         }
 
         /* Logo Grande - Igual ao Dashboard */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
         .navbar-brand-notificacoes {
             display: flex;
             align-items: center;
             transform: scale(2.5);
             transform-origin: left center;
-            margin-right: 40px;
         }
 
         .navbar-brand-notificacoes img {
@@ -99,10 +105,44 @@
             }
         }
 
+        /* User Actions - Igual ao Dashboard */
         .user-actions {
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .user-info-notificacoes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-details h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-details small {
+            color: #666;
+            font-size: 0.75rem;
         }
 
         .btn-back {
@@ -125,7 +165,7 @@
             transform: translateX(-2px);
         }
 
-        .notification-badge {
+        .notification-badge-nav {
             position: relative;
             background: none;
             border: none;
@@ -152,41 +192,6 @@
             border: 2px solid white;
         }
 
-        /* User Info Compacto - Igual ao Dashboard */
-        .user-info-notificacoes {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            border: 3px solid white;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .user-details h5 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .user-details small {
-            color: #666;
-            font-size: 0.75rem;
-        }
-
-        /* Botão Logout */
         .btn-logout-notificacoes {
             padding: 6px 12px;
             border-radius: 6px;
@@ -206,43 +211,11 @@
             color: #e74c3c;
         }
 
-        /* Responsivo Logo */
-        @media (max-width: 1200px) {
-            .navbar-brand-notificacoes {
-                transform: scale(2);
-            }
-        }
-
-        @media (max-width: 992px) {
-            .navbar-brand-notificacoes {
-                transform: scale(1.8);
-                margin-right: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .navbar-brand-notificacoes {
-                transform: scale(1.6);
-            }
-        }
-
-        @media (max-width: 576px) {
-            .navbar-brand-notificacoes {
-                transform: scale(1.4);
-            }
-        }
-
-        @media (max-width: 400px) {
-            .navbar-brand-notificacoes {
-                transform: scale(1.2);
-            }
-        }
-
-        /* Header */
+        /* Header simplificado */
         .header-section {
             background: var(--gradient-primary);
             color: white;
-            padding: 30px 15px;
+            padding: 30px 20px;
             margin-bottom: 20px;
         }
 
@@ -254,7 +227,7 @@
         .header-content h1 {
             font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -270,7 +243,7 @@
         .stats-container {
             max-width: 1400px;
             margin: -20px auto 20px;
-            padding: 0 15px;
+            padding: 0 20px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
@@ -316,7 +289,7 @@
         }
 
         .stat-icon.total { background: rgba(68, 104, 154, 0.1); color: var(--primary); }
-        .stat-icon.pending { background: rgba(241, 196, 15, 0.1); color: var(--warning); }
+        .stat-icon.pending { background: rgba(255, 107, 53, 0.1); color: var(--secondary); }
         .stat-icon.reviews { background: rgba(39, 174, 96, 0.1); color: var(--success); }
         .stat-icon.urgent { background: rgba(231, 76, 60, 0.1); color: var(--danger); }
 
@@ -337,7 +310,7 @@
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 15px 40px;
+            padding: 0 20px 40px;
             display: grid;
             grid-template-columns: 280px 1fr;
             gap: 20px;
@@ -874,8 +847,8 @@
         /* Toast Notifications */
         .toast-container {
             position: fixed;
-            top: 80px;
-            right: 15px;
+            top: 90px;
+            right: 20px;
             z-index: 9999;
             max-width: 350px;
         }
@@ -919,6 +892,11 @@
             color: var(--info);
         }
 
+        .toast-error .toast-icon {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+
         .toast-content h5 {
             font-size: 0.95rem;
             margin-bottom: 3px;
@@ -931,10 +909,32 @@
             margin: 0;
         }
 
-        /* Responsivo User Info */
+        /* Responsivo */
         @media (max-width: 768px) {
+            .navbar-brand-notificacoes {
+                transform: scale(1.8);
+            }
+            
             .user-details {
                 display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-notificacoes {
+                transform: scale(1.4);
+            }
+            
+            .navbar-container {
+                padding: 0 15px;
+            }
+            
+            .stats-container {
+                padding: 0 15px;
+            }
+            
+            .main-container {
+                padding: 0 15px 40px;
             }
         }
     </style>
@@ -948,7 +948,6 @@
                 <a class="navbar-brand-notificacoes" href="dashboard-profissional.html">
                     <img src="logoscanhub.png" alt="ScanHub">
                 </a>
-                <div class="page-title">Central de Notificações</div>
             </div>
             
             <div class="user-actions">
@@ -966,7 +965,7 @@
                     <i class="fas fa-arrow-left"></i>
                 </a>
                 
-                <button class="notification-badge" onclick="refreshNotifications()" title="Atualizar">
+                <button class="notification-badge-nav" onclick="refreshNotifications()" title="Atualizar">
                     <i class="fas fa-sync-alt"></i>
                     <span class="badge-count" id="unreadBadge">0</span>
                 </button>
@@ -1004,7 +1003,7 @@
                 <i class="fas fa-file-invoice-dollar"></i>
             </div>
             <div class="stat-info">
-                <h3 id="pendingBudget">0</h3>
+                <h3 id="pendingOrcamento">0</h3>
                 <p>Orçamentos</p>
             </div>
         </div>
@@ -1177,8 +1176,7 @@
             doc,
             orderBy,
             serverTimestamp,
-            getDoc,
-            addDoc
+            getDoc
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Firebase Configuration
@@ -1218,13 +1216,13 @@
 
         // Stats Elements
         const totalNotificationsEl = document.getElementById('totalNotifications');
-        const pendingBudgetEl = document.getElementById('pendingBudget');
+        const pendingOrcamentoEl = document.getElementById('pendingOrcamento'); // Corrigido
         const newReviewsEl = document.getElementById('newReviews');
         const urgentAlertsEl = document.getElementById('urgentAlerts');
 
-        // Counter Elements - CORRIGIDOS
+        // Counter Elements
         const countAllEl = document.getElementById('countAll');
-        const countOrcamentoEl = document.getElementById('countOrcamento'); // CORRIGIDO: era countBudget
+        const countOrcamentoEl = document.getElementById('countOrcamento'); // Corrigido
         const countReviewEl = document.getElementById('countReview');
         const countMessageEl = document.getElementById('countMessage');
         const countSystemEl = document.getElementById('countSystem');
@@ -1248,7 +1246,7 @@
                             window.location.href = 'login.html';
                         } catch (error) {
                             console.error('Erro ao sair:', error);
-                            showToast('Erro', 'Não foi possível sair da conta', 'info');
+                            showToast('Erro', 'Não foi possível sair da conta', 'error');
                         }
                     });
                     
@@ -1271,17 +1269,15 @@
                     if (userData.apelido) {
                         userName.textContent = userData.apelido;
                         userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
+                        userAvatar.title = userData.apelido;
                     }
                     
-                    // Update user ID if available
+                    // Update user ID
                     if (userData.idScanHub) {
                         userId.textContent = userData.idScanHub;
                     } else {
                         userId.textContent = currentUser.uid.substring(0, 8);
                     }
-                    
-                    // Set user name in avatar title
-                    userAvatar.title = userData.apelido || 'Usuário';
                 }
             } catch (error) {
                 console.error('Erro ao carregar dados do usuário:', error);
@@ -1296,6 +1292,8 @@
                 emptyState.style.display = 'none';
                 notificationList.style.display = 'none';
 
+                console.log('Carregando notificações para profissional:', currentUser.uid);
+                
                 // Query notifications for this professional
                 const q = query(
                     collection(db, "notificacoes"),
@@ -1309,19 +1307,18 @@
                 querySnapshot.forEach((docSnapshot) => {
                     const data = docSnapshot.data();
                     
-                    // Corrigir campo arquivada - garantir que existe
+                    // Garantir que o campo arquivada existe
                     const arquivada = data.arquivada !== undefined ? data.arquivada : false;
                     
                     notifications.push({
                         id: docSnapshot.id,
                         ...data,
                         arquivada: arquivada,
-                        // Convert Firestore timestamp to Date
                         data: data.data?.toDate() || new Date()
                     });
                 });
 
-                console.log('Notificações carregadas:', notifications.length);
+                console.log('Notificações encontradas:', notifications.length);
                 
                 // Update counters
                 updateCounters();
@@ -1343,9 +1340,10 @@
 
             } catch (error) {
                 console.error('Erro ao carregar notificações:', error);
+                console.error('Detalhes do erro:', error.message);
                 loadingState.style.display = 'none';
                 emptyState.style.display = 'block';
-                showToast('Erro', 'Não foi possível carregar as notificações', 'info');
+                showToast('Erro', 'Não foi possível carregar as notificações. Verifique o console para detalhes.', 'error');
             }
         }
 
@@ -1357,7 +1355,7 @@
                     return false;
                 }
                 
-                // Filter by status (read/unread)
+                // Filter by status
                 if (currentStatusFilter === 'unread' && notification.lida) {
                     return false;
                 }
@@ -1382,7 +1380,8 @@
                     const searchableText = (
                         (notification.titulo || '') + ' ' + 
                         (notification.descricao || '') + ' ' + 
-                        (notification.metadata?.clienteNome || '')
+                        (notification.metadata?.clienteNome || '') + ' ' +
+                        (notification.metadata?.servico || '')
                     ).toLowerCase();
                     
                     if (!searchableText.includes(searchTerm)) {
@@ -1424,14 +1423,14 @@
             if (!notification.lida) classes.push('unread');
             if (notification.urgente) classes.push('urgent');
             
-            // Determine type icon and color - CORRIGIDO: agora usa "orcamento" em vez de "budget"
+            // Determine type icon and color
             let typeIcon = 'fas fa-info-circle';
             let typeClass = 'type-system';
             
             switch (notification.tipo) {
                 case 'orcamento':
                     typeIcon = 'fas fa-file-invoice-dollar';
-                    typeClass = 'type-orcamento'; // CORRIGIDO: era type-budget
+                    typeClass = 'type-orcamento';
                     break;
                 case 'review':
                     typeIcon = 'fas fa-star';
@@ -1450,10 +1449,6 @@
             // Format time
             const timeAgo = formatTimeAgo(notification.data);
             
-            // Build notification title with proper display
-            const notificationTitle = notification.titulo || 'Nova notificação';
-            const isUnread = !notification.lida;
-            
             // Build HTML
             div.className = classes.join(' ');
             div.innerHTML = `
@@ -1464,8 +1459,8 @@
                 <div class="notification-content">
                     <div class="notification-header">
                         <div class="notification-title">
-                            ${notificationTitle}
-                            ${isUnread ? '<span class="badge-new">Nova</span>' : ''}
+                            ${notification.titulo || 'Nova notificação'}
+                            ${!notification.lida ? '<span class="badge-new">Nova</span>' : ''}
                         </div>
                         <div class="notification-time">
                             <i class="fas fa-clock"></i> ${timeAgo}
@@ -1544,7 +1539,7 @@
             const total = notifications.length;
             const unread = notifications.filter(n => !n.lida).length;
             const read = notifications.filter(n => n.lida).length;
-            const orcamento = notifications.filter(n => n.tipo === 'orcamento').length; // CORRIGIDO: era budget
+            const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
             const review = notifications.filter(n => n.tipo === 'review').length;
             const message = notifications.filter(n => n.tipo === 'message').length;
             const system = notifications.filter(n => n.tipo === 'system').length;
@@ -1552,13 +1547,13 @@
 
             // Update stats
             totalNotificationsEl.textContent = total;
-            pendingBudgetEl.textContent = orcamento; // CORRIGIDO: agora mostra contagem correta
+            pendingOrcamentoEl.textContent = orcamento;
             newReviewsEl.textContent = review;
             urgentAlertsEl.textContent = urgent;
 
             // Update filter counts
             countAllEl.textContent = total;
-            countOrcamentoEl.textContent = orcamento; // CORRIGIDO: era countBudget
+            countOrcamentoEl.textContent = orcamento;
             countReviewEl.textContent = review;
             countMessageEl.textContent = message;
             countSystemEl.textContent = system;
@@ -1606,7 +1601,7 @@
 
             } catch (error) {
                 console.error('Erro ao atualizar notificação:', error);
-                showToast('Erro', 'Não foi possível atualizar a notificação', 'info');
+                showToast('Erro', 'Não foi possível atualizar a notificação', 'error');
             }
         };
 
@@ -1614,6 +1609,11 @@
         window.markAllAsRead = async function() {
             try {
                 const unreadNotifications = notifications.filter(n => !n.lida);
+                
+                if (unreadNotifications.length === 0) {
+                    showToast('Informação', 'Todas as notificações já estão lidas', 'info');
+                    return;
+                }
                 
                 for (const notification of unreadNotifications) {
                     const notificationRef = doc(db, "notificacoes", notification.id);
@@ -1635,11 +1635,11 @@
 
             } catch (error) {
                 console.error('Erro ao marcar todas como lidas:', error);
-                showToast('Erro', 'Não foi possível marcar todas como lidas', 'info');
+                showToast('Erro', 'Não foi possível marcar todas como lidas', 'error');
             }
         };
 
-        // Filter by type - CORRIGIDO: agora usa "orcamento" em vez de "budget"
+        // Filter by type
         window.filterByType = function(type, element) {
             // Update active filter button
             document.querySelectorAll('.filter-group:first-child .filter-item').forEach(item => {
@@ -1697,17 +1697,14 @@
             window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
         };
 
-        // Respond to orcamento - CORRIGIDO: agora usa "orcamento" em vez de "budget"
+        // Respond to orcamento
         window.respondToOrcamento = async function(notificationId) {
             const notification = notifications.find(n => n.id === notificationId);
             if (!notification) return;
             
             // In a real app, this would open a modal to respond
-            // For now, we'll just mark as read and show a message
-            await markAsRead(notificationId);
-            
-            showToast('Orçamento', 
-                'Para responder ao orçamento, acesse a página de pedidos', 
+            showToast('Informação', 
+                'Para responder ao orçamento, acesse a página de pedidos ou entre em contato pelo WhatsApp', 
                 'info'
             );
         };
@@ -1717,7 +1714,8 @@
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             
-            const icon = type === 'success' ? 'check-circle' : 'info-circle';
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-triangle' : 'info-circle';
             
             toast.innerHTML = `
                 <div class="toast-icon">
