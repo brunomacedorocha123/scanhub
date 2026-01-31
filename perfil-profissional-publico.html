@@ -24,6 +24,9 @@
             --gradient-primary: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
             --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+            --success: #28a745;
+            --warning: #ffc107;
+            --star: #FFD700;
         }
 
         * {
@@ -176,6 +179,62 @@
             align-items: center;
             gap: 6px;
             font-size: 0.95rem;
+        }
+
+        /* Rating no Header */
+        .profile-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .star {
+            color: #ddd;
+            font-size: 1.2rem;
+        }
+
+        .star.filled {
+            color: var(--star);
+        }
+
+        .rating-average {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .rating-count {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .btn-rating {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-rating:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
 
         .profile-actions {
@@ -577,6 +636,233 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
         }
+
+        /* ESTILOS PARA AVALIAÇÕES */
+        
+        /* Resumo de Avaliações */
+        .rating-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .rating-overview {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .rating-score {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .rating-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1;
+        }
+
+        .rating-stars-large {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+
+        .star-large {
+            font-size: 1.5rem;
+            color: #ddd;
+        }
+
+        .star-large.filled {
+            color: var(--star);
+        }
+
+        .rating-distribution {
+            flex: 1;
+        }
+
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .rating-label {
+            width: 80px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .rating-progress {
+            flex: 1;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .rating-fill {
+            height: 100%;
+            background: var(--star);
+            border-radius: 5px;
+        }
+
+        /* Lista de Avaliações */
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reviewer-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .reviewer-details h5 {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark);
+        }
+
+        .review-date {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 3px;
+        }
+
+        .review-star {
+            color: var(--star);
+            font-size: 1rem;
+        }
+
+        .review-content {
+            color: var(--dark);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .review-response {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .response-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Estrelas Interativas */
+        .rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .rating-input input {
+            display: none;
+        }
+
+        .rating-input label {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .rating-input input:checked ~ label,
+        .rating-input label:hover,
+        .rating-input label:hover ~ label {
+            color: var(--star);
+        }
+
+        .rating-input input:checked + label {
+            color: var(--star);
+        }
+
+        /* Botão de Avaliar */
+        .btn-avaliar-flutuante {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 999;
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-avaliar-flutuante:hover {
+            background: #218838;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Modal de Avaliação */
+        .modal-avaliacao .modal-header {
+            background: var(--success);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .char-count.warning {
+            color: var(--secondary);
+        }
+
+        .char-count.error {
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -639,6 +925,22 @@
                             <span>Cidade - RAIO 00km</span>
                         </div>
                         
+                        <!-- Rating no Header -->
+                        <div id="profileRatingHeader" class="profile-rating">
+                            <div class="rating-stars" id="headerStars">
+                                <span class="star"><i class="fas fa-star"></i></span>
+                                <span class="star"><i class="fas fa-star"></i></span>
+                                <span class="star"><i class="fas fa-star"></i></span>
+                                <span class="star"><i class="fas fa-star"></i></span>
+                                <span class="star"><i class="fas fa-star"></i></span>
+                            </div>
+                            <span id="ratingAverage" class="rating-average">0.0</span>
+                            <span id="ratingCount" class="rating-count">(0 avaliações)</span>
+                            <button onclick="abrirModalAvaliacao()" class="btn-rating">
+                                <i class="fas fa-star me-1"></i> Avaliar
+                            </button>
+                        </div>
+                        
                         <div class="profile-actions">
                             <a id="btnWhatsApp" href="#" target="_blank" class="btn-action-primary">
                                 <i class="fab fa-whatsapp"></i> Conversar no WhatsApp
@@ -660,6 +962,9 @@
                 </button>
                 <button class="tab-btn" onclick="switchTab('catalogo')">
                     <i class="fas fa-boxes"></i> Catálogo <span id="countCatalogo" class="badge bg-primary ms-1">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('avaliacoes')">
+                    <i class="fas fa-star"></i> Avaliações <span id="countAvaliacoes" class="badge bg-warning ms-1">0</span>
                 </button>
             </div>
 
@@ -749,8 +1054,100 @@
                     <!-- Itens inseridos via JS -->
                 </div>
             </div>
+
+            <!-- ABA AVALIAÇÕES -->
+            <div id="tabAvaliacoes" class="tab-content-section">
+                <!-- Resumo das Avaliações -->
+                <div class="rating-summary">
+                    <div class="rating-overview">
+                        <div class="rating-score">
+                            <div id="summaryAverage" class="rating-number">0.0</div>
+                            <div class="rating-stars-large" id="summaryStars">
+                                <span class="star-large"><i class="fas fa-star"></i></span>
+                                <span class="star-large"><i class="fas fa-star"></i></span>
+                                <span class="star-large"><i class="fas fa-star"></i></span>
+                                <span class="star-large"><i class="fas fa-star"></i></span>
+                                <span class="star-large"><i class="fas fa-star"></i></span>
+                            </div>
+                            <div id="summaryCount" class="rating-count">0 avaliações</div>
+                        </div>
+                        <div class="rating-distribution">
+                            <!-- Distribuição 5 estrelas -->
+                            <div class="rating-bar">
+                                <div class="rating-label">
+                                    <span>5 estrelas</span>
+                                    <span id="count5">0</span>
+                                </div>
+                                <div class="rating-progress">
+                                    <div id="bar5" class="rating-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="rating-bar">
+                                <div class="rating-label">
+                                    <span>4 estrelas</span>
+                                    <span id="count4">0</span>
+                                </div>
+                                <div class="rating-progress">
+                                    <div id="bar4" class="rating-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="rating-bar">
+                                <div class="rating-label">
+                                    <span>3 estrelas</span>
+                                    <span id="count3">0</span>
+                                </div>
+                                <div class="rating-progress">
+                                    <div id="bar3" class="rating-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="rating-bar">
+                                <div class="rating-label">
+                                    <span>2 estrelas</span>
+                                    <span id="count2">0</span>
+                                </div>
+                                <div class="rating-progress">
+                                    <div id="bar2" class="rating-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="rating-bar">
+                                <div class="rating-label">
+                                    <span>1 estrela</span>
+                                    <span id="count1">0</span>
+                                </div>
+                                <div class="rating-progress">
+                                    <div id="bar1" class="rating-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botão Avaliar -->
+                    <div class="text-center">
+                        <button onclick="abrirModalAvaliacao()" class="btn btn-success px-4 py-2">
+                            <i class="fas fa-star me-2"></i> Deixe sua Avaliação
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Avaliações -->
+                <div id="listaAvaliacoes">
+                    <div id="avaliacoesVazio" class="info-card text-center py-5">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h4>Nenhuma avaliação ainda</h4>
+                        <p class="text-muted">Seja o primeiro a avaliar este profissional!</p>
+                        <button onclick="abrirModalAvaliacao()" class="btn btn-success mt-2">
+                            <i class="fas fa-star me-2"></i> Avaliar Agora
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Botão Flutuante para Avaliar -->
+    <button onclick="abrirModalAvaliacao()" id="btnAvaliarFlutuante" class="btn-avaliar-flutuante" style="display: none;">
+        <i class="fas fa-star"></i> Avaliar
+    </button>
 
     <!-- Modal de Orçamento -->
     <div class="modal fade" id="modalOrcamento" tabindex="-1" aria-hidden="true">
@@ -789,448 +1186,829 @@
         </div>
     </div>
 
+    <!-- Modal de Avaliação -->
+    <div class="modal fade modal-avaliacao" id="modalAvaliacao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-star me-2"></i>Avaliar Profissional
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formAvaliacao">
+                        <!-- Nota -->
+                        <div class="mb-4 text-center">
+                            <label class="form-label fw-bold d-block mb-3">Qual sua nota para este profissional?</label>
+                            <div class="rating-input">
+                                <input type="radio" id="star5" name="rating" value="5">
+                                <label for="star5"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star4" name="rating" value="4">
+                                <label for="star4"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star3" name="rating" value="3">
+                                <label for="star3"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star2" name="rating" value="2">
+                                <label for="star2"><i class="fas fa-star"></i></label>
+                                <input type="radio" id="star1" name="rating" value="1">
+                                <label for="star1"><i class="fas fa-star"></i></label>
+                            </div>
+                            <div id="ratingError" class="text-danger mt-2" style="display: none;">
+                                <i class="fas fa-exclamation-circle me-1"></i> Selecione uma nota
+                            </div>
+                        </div>
+
+                        <!-- Comentário -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Comentário (opcional)</label>
+                            <textarea class="form-control" id="comentarioAvaliacao" rows="4" 
+                                      placeholder="Conte sua experiência com este profissional..." 
+                                      maxlength="500"></textarea>
+                            <div class="char-count">
+                                <span id="charCount">0</span>/500 caracteres
+                            </div>
+                        </div>
+
+                        <!-- Anônimo -->
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="anonimoCheck">
+                            <label class="form-check-label" for="anonimoCheck">
+                                <i class="fas fa-user-secret me-1"></i> Avaliar como anônimo
+                            </label>
+                            <div class="form-text">Seu nome não será exibido publicamente</div>
+                        </div>
+
+                        <!-- Botão Enviar -->
+                        <button type="submit" class="btn btn-success w-100 py-3 fw-bold">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar Avaliação
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Firebase e Lógica COMPLETO E FUNCIONAL -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        getDoc,
-        collection,
-        query,
-        where,
-        getDocs,
-        addDoc,
-        serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            collection,
+            query,
+            where,
+            getDocs,
+            addDoc,
+            serverTimestamp,
+            orderBy
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Config Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.appspot.com",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // State
-    let profissionalData = null;
-    let profissionalId = null;
-    let servicos = [];
-    let produtos = [];
-
-    // Elementos
-    const loadingState = document.getElementById('loadingState');
-    const errorState = document.getElementById('errorState');
-    const profileContent = document.getElementById('profileContent');
-
-    // Modal
-    const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
-    
-    // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
-    window.abrirModalOrcamento = async function() {
-        const user = auth.currentUser;
-        if (!user) {
-            alert('Faça login para solicitar orçamento!');
-            window.location.href = 'login.html';
-            return;
-        }
-
-        try {
-            // Buscar dados do cliente logado
-            const userRef = doc(db, "usuarios", user.uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
-                
-                // Pegar elementos do formulário
-                const nomeField = document.getElementById('nomeCliente');
-                const telefoneField = document.getElementById('telefoneCliente');
-                const cidadeField = document.getElementById('cidadeCliente');
-                
-                // Preencher com dados do cliente
-                nomeField.value = userData.nomeCompleto || userData.apelido || '';
-                telefoneField.value = userData.celular || '';
-                cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
-                
-                // Tornar campos somente leitura para evitar adulteração
-                nomeField.readOnly = true;
-                nomeField.style.backgroundColor = '#f8f9fa';
-                nomeField.style.cursor = 'not-allowed';
-                
-                telefoneField.readOnly = true;
-                telefoneField.style.backgroundColor = '#f8f9fa';
-                telefoneField.style.cursor = 'not-allowed';
-                
-                cidadeField.readOnly = true;
-                cidadeField.style.backgroundColor = '#f8f9fa';
-                cidadeField.style.cursor = 'not-allowed';
-            }
-        } catch (error) {
-            // Se der erro, abre modal vazio
-        }
-        
-        modalOrcamento.show();
-    };
-
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        profissionalId = urlParams.get('id');
-
-        if (!profissionalId) {
-            mostrarErro();
-            return;
-        }
-
-        await carregarPerfil();
-    });
-
-    async function carregarPerfil() {
-        try {
-            const userRef = doc(db, "usuarios", profissionalId);
-            const userSnap = await getDoc(userRef);
-
-            if (!userSnap.exists()) {
-                mostrarErro();
-                return;
-            }
-
-            const userData = userSnap.data();
-            
-            if (userData.tipoUsuario !== 'profissional' || 
-                userData.status !== 'ativo' || 
-                !userData.profissional?.perfilCompleto ||
-                userData.profissional?.visivelBusca === false) {
-                mostrarErro();
-                return;
-            }
-
-            profissionalData = { ...userData, profissional: userData.profissional };
-            
-            await carregarCatalogo();
-            renderizarPerfil();
-            
-            loadingState.style.display = 'none';
-            profileContent.style.display = 'block';
-            
-        } catch (error) {
-            mostrarErro();
-        }
-    }
-
-    async function carregarCatalogo() {
-        try {
-            const qServicos = query(
-                collection(db, "servicos"),
-                where("profissionalId", "==", profissionalId),
-                where("status", "==", "ativo")
-            );
-            const snapServicos = await getDocs(qServicos);
-            servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
-
-            const qProdutos = query(
-                collection(db, "produtos"),
-                where("profissionalId", "==", profissionalId),
-                where("status", "==", "ativo")
-            );
-            const snapProdutos = await getDocs(qProdutos);
-            produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
-
-        } catch (error) {
-            // Não faz nada, catálogo fica vazio
-        }
-    }
-
-    function renderizarPerfil() {
-        const prof = profissionalData.profissional;
-        
-        const coverContainer = document.getElementById('coverContainer');
-        if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
-            coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
-        } else {
-            coverContainer.innerHTML = `
-                <div class="cover-placeholder">
-                    <i class="fas fa-user-tie"></i>
-                </div>
-            `;
-        }
-
-        const avatarUrl = profissionalData.fotoPerfilProfissional || 
-                         profissionalData.fotoPerfil || 
-                         'https://via.placeholder.com/300';
-        document.getElementById('profileAvatar').src = avatarUrl;
-
-        const plano = profissionalData.plano_assinatura;
-        if (plano === 'pro' || plano === 'enterprise') {
-            const badge = document.getElementById('planBadge');
-            badge.style.display = 'flex';
-            badge.querySelector('span').textContent = plano.toUpperCase();
-        }
-
-        document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
-        document.getElementById('profileSpecialty').innerHTML = `
-            <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
-        `;
-
-        document.getElementById('profileLocation').innerHTML = `
-            <i class="fas fa-map-marker-alt"></i> 
-            ${prof.cidadeBase || 'Cidade não informada'}
-            ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
-        `;
-
-        if (prof.whatsapp) {
-            const whatsappNum = prof.whatsapp.replace(/\D/g, '');
-            document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
-        }
-
-        document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
-
-        document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
-
-        if (prof.garantiaDias && prof.garantiaDias > 0) {
-            document.getElementById('badgeGarantia').style.display = 'flex';
-            document.getElementById('diasGarantia').textContent = prof.garantiaDias;
-        }
-
-        const atendimentoContainer = document.getElementById('atendimentoBadges');
-        atendimentoContainer.innerHTML = '';
-        if (prof.atendeDomicilio) {
-            atendimentoContainer.innerHTML += `
-                <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
-            `;
-        }
-        if (prof.atendeOnline) {
-            atendimentoContainer.innerHTML += `
-                <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
-            `;
-        }
-
-        const pagamentoContainer = document.getElementById('pagamentoBadges');
-        pagamentoContainer.innerHTML = '';
-        if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
-            prof.formasPagamento.forEach(forma => {
-                pagamentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
-                `;
-            });
-        }
-
-        if (prof.tempoResposta) {
-            document.getElementById('tempoResposta').innerHTML = `
-                <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
-            `;
-        }
-
-        const tagsContainer = document.getElementById('tagsContainer');
-        tagsContainer.innerHTML = '';
-        if (prof.especialidades && Array.isArray(prof.especialidades)) {
-            prof.especialidades.forEach(tag => {
-                tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
-            });
-        }
-
-        if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
-            const galeriaSection = document.getElementById('galeriaSection');
-            const galeriaGrid = document.getElementById('galeriaGrid');
-            galeriaSection.style.display = 'block';
-            
-            const fotos = prof.portfolioFotos.slice(1);
-            galeriaGrid.innerHTML = fotos.map(foto => `
-                <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
-                    <img src="${foto}" alt="Portfólio">
-                </div>
-            `).join('');
-        }
-
-        renderizarCatalogo();
-    }
-
-    function renderizarCatalogo() {
-        const todosItens = [...servicos, ...produtos];
-        document.getElementById('countCatalogo').textContent = todosItens.length;
-        
-        const grid = document.getElementById('catalogoGrid');
-        const vazio = document.getElementById('catalogoVazio');
-
-        if (todosItens.length === 0) {
-            vazio.style.display = 'block';
-            grid.style.display = 'none';
-            return;
-        }
-
-        vazio.style.display = 'none';
-        grid.style.display = 'grid';
-
-        grid.innerHTML = todosItens.map(item => {
-            const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
-                          `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
-            
-            const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
-            const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
-            
-            const metaInfo = item.tipo === 'servico' 
-                ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
-                : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
-
-            return `
-                <div class="item-card">
-                    <div class="item-image">
-                        <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
-                        <span class="item-type ${tipoClass}">${tipoText}</span>
-                    </div>
-                    <div class="item-content">
-                        <h4 class="item-title">${item.nome}</h4>
-                        <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
-                        <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
-                        <div class="item-meta">
-                            ${metaInfo}
-                            <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function formatarEspecialidade(esp) {
-        if (!esp) return 'Profissional';
-        const map = {
-            'eletrica': 'Eletricista',
-            'hidraulica': 'Encanador',
-            'massoterapia': 'Massoterapeuta',
-            'tecnico_celular': 'Técnico de Celular',
-            'veterinaria': 'Veterinário(a)',
-            'manicure': 'Manicure',
-            'pintura': 'Pintor',
-            'ar_condicionado': 'Ar Condicionado',
-            'marcenaria': 'Marceneiro'
+        // Config Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.appspot.com",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
         };
-        return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
-    }
 
-    function formatarExperiencia(exp) {
-        const map = {
-            '1': 'Menos de 1 ano',
-            '1-3': '1-3 anos',
-            '3-5': '3-5 anos',
-            '5-10': '5-10 anos',
-            '10+': 'Mais de 10 anos'
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let profissionalData = null;
+        let profissionalId = null;
+        let servicos = [];
+        let produtos = [];
+        let avaliacoes = [];
+        let ratingStats = {
+            average: 0,
+            total: 0,
+            distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
         };
-        return map[exp] || exp || 'Não informado';
-    }
 
-    function formatarMoeda(valor) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(valor || 0);
-    }
+        // Elementos
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const profileContent = document.getElementById('profileContent');
+        const btnAvaliarFlutuante = document.getElementById('btnAvaliarFlutuante');
 
-    function mostrarErro() {
-        loadingState.style.display = 'none';
-        errorState.style.display = 'block';
-        profileContent.style.display = 'none';
-    }
+        // Modais
+        const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
+        const modalAvaliacao = new bootstrap.Modal(document.getElementById('modalAvaliacao'));
 
-    window.switchTab = function(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.closest('.tab-btn').classList.add('active');
-
-        document.querySelectorAll('.tab-content-section').forEach(content => {
-            content.classList.remove('active');
-        });
-
-        if (tabName === 'sobre') {
-            document.getElementById('tabSobre').classList.add('active');
-        } else {
-            document.getElementById('tabCatalogo').classList.add('active');
-        }
-    };
-
-    document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const btn = e.target.querySelector('button[type="submit"]');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-        btn.disabled = true;
-
-        try {
-            const nomeCliente = document.getElementById('nomeCliente').value;
-            const telefoneCliente = document.getElementById('telefoneCliente').value;
-            const cidadeCliente = document.getElementById('cidadeCliente').value;
-            const descricaoServico = document.getElementById('descricaoServico').value;
-
+        // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
+        window.abrirModalOrcamento = async function() {
             const user = auth.currentUser;
-            
             if (!user) {
-                alert('Você precisa estar logado para enviar orçamento!');
+                alert('Faça login para solicitar orçamento!');
                 window.location.href = 'login.html';
                 return;
             }
 
-            await addDoc(collection(db, "notificacoes"), {
-                profissionalId: profissionalId,
-                clienteId: user.uid,
-                clienteNome: nomeCliente,
-                clienteTelefone: telefoneCliente,
-                clienteCidade: cidadeCliente,
-                tipo: "orcamento",
-                titulo: "Novo pedido de orçamento",
-                descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
-                lida: false,
-                urgente: false,
-                arquivada: false,
-                data: serverTimestamp(),
-                metadata: {
-                    clienteNome: nomeCliente,
-                    servico: descricaoServico,
-                    telefone: telefoneCliente,
-                    cidade: cidadeCliente
-                },
-                tags: ["orcamento", "novo"]
-            });
-
-            await addDoc(collection(db, "solicitacoes"), {
-                profissionalId: profissionalId,
-                clienteId: user.uid,
-                clienteNome: nomeCliente,
-                clienteTelefone: telefoneCliente,
-                clienteCidade: cidadeCliente,
-                descricao: descricaoServico,
-                status: "pendente",
-                tipo: "orcamento",
-                data: serverTimestamp()
-            });
-
-            modalOrcamento.hide();
-            document.getElementById('descricaoServico').value = '';
+            try {
+                const userRef = doc(db, "usuarios", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    
+                    const nomeField = document.getElementById('nomeCliente');
+                    const telefoneField = document.getElementById('telefoneCliente');
+                    const cidadeField = document.getElementById('cidadeCliente');
+                    
+                    nomeField.value = userData.nomeCompleto || userData.apelido || '';
+                    telefoneField.value = userData.celular || '';
+                    cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
+                    
+                    nomeField.readOnly = true;
+                    nomeField.style.backgroundColor = '#f8f9fa';
+                    nomeField.style.cursor = 'not-allowed';
+                    
+                    telefoneField.readOnly = true;
+                    telefoneField.style.backgroundColor = '#f8f9fa';
+                    telefoneField.style.cursor = 'not-allowed';
+                    
+                    cidadeField.readOnly = true;
+                    cidadeField.style.backgroundColor = '#f8f9fa';
+                    cidadeField.style.cursor = 'not-allowed';
+                }
+            } catch (error) {
+                // Se der erro, abre modal vazio
+            }
             
-            alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
+            modalOrcamento.show();
+        };
+
+        // FUNÇÃO PARA ABRIR MODAL DE AVALIAÇÃO
+        window.abrirModalAvaliacao = function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Faça login para avaliar este profissional!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Verificar se já avaliou
+            const jaAvaliou = avaliacoes.some(av => av.clienteId === user.uid);
+            if (jaAvaliou) {
+                alert('Você já avaliou este profissional! Cada cliente pode avaliar apenas uma vez.');
+                return;
+            }
+
+            // Resetar formulário
+            document.getElementById('formAvaliacao').reset();
+            document.getElementById('ratingError').style.display = 'none';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('comentarioAvaliacao').value = '';
+
+            modalAvaliacao.show();
+        };
+
+        // Contador de caracteres do comentário
+        document.getElementById('comentarioAvaliacao')?.addEventListener('input', function() {
+            const count = this.value.length;
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = count;
             
-        } catch (error) {
-            alert('❌ Erro ao enviar solicitação. Tente novamente.');
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            if (count > 450) {
+                charCount.parentElement.className = 'char-count warning';
+            } else if (count >= 500) {
+                charCount.parentElement.className = 'char-count error';
+            } else {
+                charCount.parentElement.className = 'char-count';
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            profissionalId = urlParams.get('id');
+
+            if (!profissionalId) {
+                mostrarErro();
+                return;
+            }
+
+            await carregarPerfil();
+            await carregarAvaliacoes();
+            
+            // Mostrar botão flutuante se usuário está logado
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // Verificar se já avaliou
+                    const jaAvaliou = avaliacoes.some(av => av.clienteId === user.uid);
+                    if (!jaAvaliou) {
+                        btnAvaliarFlutuante.style.display = 'flex';
+                    }
+                }
+            });
+        });
+
+        async function carregarPerfil() {
+            try {
+                const userRef = doc(db, "usuarios", profissionalId);
+                const userSnap = await getDoc(userRef);
+
+                if (!userSnap.exists()) {
+                    mostrarErro();
+                    return;
+                }
+
+                const userData = userSnap.data();
+                
+                if (userData.tipoUsuario !== 'profissional' || 
+                    userData.status !== 'ativo' || 
+                    !userData.profissional?.perfilCompleto ||
+                    userData.profissional?.visivelBusca === false) {
+                    mostrarErro();
+                    return;
+                }
+
+                profissionalData = { ...userData, profissional: userData.profissional };
+                
+                await carregarCatalogo();
+                renderizarPerfil();
+                
+                loadingState.style.display = 'none';
+                profileContent.style.display = 'block';
+                
+            } catch (error) {
+                mostrarErro();
+            }
         }
-    });
-</script>
+
+        async function carregarCatalogo() {
+            try {
+                const qServicos = query(
+                    collection(db, "servicos"),
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "ativo")
+                );
+                const snapServicos = await getDocs(qServicos);
+                servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
+
+                const qProdutos = query(
+                    collection(db, "produtos"),
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "ativo")
+                );
+                const snapProdutos = await getDocs(qProdutos);
+                produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
+
+            } catch (error) {
+                // Não faz nada, catálogo fica vazio
+            }
+        }
+
+        async function carregarAvaliacoes() {
+            try {
+                const q = query(
+                    collection(db, "avaliacoes"),
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "aprovado"),
+                    orderBy("data", "desc")
+                );
+                const snap = await getDocs(q);
+                
+                avaliacoes = snap.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...data,
+                        data: data.data?.toDate() || new Date()
+                    };
+                });
+
+                // Calcular estatísticas
+                calcularEstatisticasAvaliacoes();
+                renderizarAvaliacoes();
+                atualizarRatingHeader();
+                
+                // Atualizar contador na aba
+                document.getElementById('countAvaliacoes').textContent = avaliacoes.length;
+                
+            } catch (error) {
+                // Se não houver avaliações, continua
+            }
+        }
+
+        function calcularEstatisticasAvaliacoes() {
+            if (avaliacoes.length === 0) {
+                ratingStats = {
+                    average: 0,
+                    total: 0,
+                    distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+                };
+                return;
+            }
+
+            const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            let totalNotas = 0;
+
+            avaliacoes.forEach(av => {
+                const nota = Math.floor(av.nota);
+                if (nota >= 1 && nota <= 5) {
+                    distribution[nota]++;
+                    totalNotas += av.nota;
+                }
+            });
+
+            ratingStats = {
+                average: totalNotas / avaliacoes.length,
+                total: avaliacoes.length,
+                distribution: distribution
+            };
+        }
+
+        function renderizarAvaliacoes() {
+            const listaAvaliacoes = document.getElementById('listaAvaliacoes');
+            const vazio = document.getElementById('avaliacoesVazio');
+
+            if (avaliacoes.length === 0) {
+                vazio.style.display = 'block';
+                listaAvaliacoes.innerHTML = '';
+                return;
+            }
+
+            vazio.style.display = 'none';
+            
+            // Renderizar resumo
+            renderizarResumoAvaliacoes();
+            
+            // Renderizar lista
+            listaAvaliacoes.innerHTML = avaliacoes.map(av => {
+                const notaInt = Math.floor(av.nota);
+                const estrelas = Array(5).fill(0).map((_, i) => 
+                    `<span class="review-star ${i < notaInt ? 'filled' : ''}"><i class="fas fa-star"></i></span>`
+                ).join('');
+                
+                const dataFormatada = formatarData(av.data);
+                const nomeExibido = av.anonimo ? 'Anônimo' : (av.clienteNome || 'Cliente');
+                const avatar = av.anonimo ? 'https://ui-avatars.com/api/?name=Cliente&background=6c757d&color=fff' : 
+                    (av.clienteFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeExibido)}&background=${av.nota >= 4 ? '4CAF50' : av.nota >= 3 ? 'FF9800' : 'F44336'}&color=fff`);
+                
+                let respostaHTML = '';
+                if (av.resposta) {
+                    const dataResposta = av.dataResposta ? formatarData(av.dataResposta.toDate()) : '';
+                    respostaHTML = `
+                        <div class="review-response">
+                            <span class="response-label">
+                                <i class="fas fa-reply me-1"></i> Resposta do profissional
+                                ${dataResposta ? ` • ${dataResposta}` : ''}
+                            </span>
+                            <p class="mb-0">${av.resposta}</p>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <img src="${avatar}" alt="${nomeExibido}" class="reviewer-avatar">
+                                <div class="reviewer-details">
+                                    <h5>${nomeExibido}</h5>
+                                    <div class="review-date">${dataFormatada}</div>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                ${estrelas}
+                                <span class="ms-2 fw-bold">${av.nota.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            ${av.comentario || 'Sem comentário.'}
+                        </div>
+                        ${respostaHTML}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderizarResumoAvaliacoes() {
+            // Atualizar números no resumo
+            document.getElementById('summaryAverage').textContent = ratingStats.average.toFixed(1);
+            document.getElementById('summaryCount').textContent = `${ratingStats.total} avaliação${ratingStats.total !== 1 ? 'es' : ''}`;
+            
+            // Atualizar estrelas no resumo
+            const summaryStars = document.getElementById('summaryStars');
+            const avg = ratingStats.average;
+            summaryStars.innerHTML = Array(5).fill(0).map((_, i) => {
+                const filled = i < Math.floor(avg);
+                const half = i === Math.floor(avg) && (avg % 1) >= 0.5;
+                return `<span class="star-large ${filled || half ? 'filled' : ''}"><i class="fas fa-star${half ? '-half-alt' : ''}"></i></span>`;
+            }).join('');
+            
+            // Atualizar distribuição
+            for (let i = 1; i <= 5; i++) {
+                const count = ratingStats.distribution[i] || 0;
+                const percent = ratingStats.total > 0 ? (count / ratingStats.total) * 100 : 0;
+                
+                document.getElementById(`count${i}`).textContent = count;
+                document.getElementById(`bar${i}`).style.width = `${percent}%`;
+            }
+        }
+
+        function atualizarRatingHeader() {
+            const avg = ratingStats.average;
+            const count = ratingStats.total;
+            
+            // Atualizar média no header
+            document.getElementById('ratingAverage').textContent = avg.toFixed(1);
+            document.getElementById('ratingCount').textContent = `(${count} avaliação${count !== 1 ? 'es' : ''})`;
+            
+            // Atualizar estrelas no header
+            const headerStars = document.getElementById('headerStars');
+            headerStars.innerHTML = Array(5).fill(0).map((_, i) => {
+                const filled = i < Math.floor(avg);
+                const half = i === Math.floor(avg) && (avg % 1) >= 0.5;
+                return `<span class="star ${filled || half ? 'filled' : ''}"><i class="fas fa-star${half ? '-half-alt' : ''}"></i></span>`;
+            }).join('');
+        }
+
+        function renderizarPerfil() {
+            const prof = profissionalData.profissional;
+            
+            const coverContainer = document.getElementById('coverContainer');
+            if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
+                coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
+            } else {
+                coverContainer.innerHTML = `
+                    <div class="cover-placeholder">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                `;
+            }
+
+            const avatarUrl = profissionalData.fotoPerfilProfissional || 
+                             profissionalData.fotoPerfil || 
+                             'https://via.placeholder.com/300';
+            document.getElementById('profileAvatar').src = avatarUrl;
+
+            const plano = profissionalData.plano_assinatura;
+            if (plano === 'pro' || plano === 'enterprise') {
+                const badge = document.getElementById('planBadge');
+                badge.style.display = 'flex';
+                badge.querySelector('span').textContent = plano.toUpperCase();
+            }
+
+            document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
+            document.getElementById('profileSpecialty').innerHTML = `
+                <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
+            `;
+
+            document.getElementById('profileLocation').innerHTML = `
+                <i class="fas fa-map-marker-alt"></i> 
+                ${prof.cidadeBase || 'Cidade não informada'}
+                ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
+            `;
+
+            if (prof.whatsapp) {
+                const whatsappNum = prof.whatsapp.replace(/\D/g, '');
+                document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
+            }
+
+            document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
+
+            document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
+
+            if (prof.garantiaDias && prof.garantiaDias > 0) {
+                document.getElementById('badgeGarantia').style.display = 'flex';
+                document.getElementById('diasGarantia').textContent = prof.garantiaDias;
+            }
+
+            const atendimentoContainer = document.getElementById('atendimentoBadges');
+            atendimentoContainer.innerHTML = '';
+            if (prof.atendeDomicilio) {
+                atendimentoContainer.innerHTML += `
+                    <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
+                `;
+            }
+            if (prof.atendeOnline) {
+                atendimentoContainer.innerHTML += `
+                    <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
+                `;
+            }
+
+            const pagamentoContainer = document.getElementById('pagamentoBadges');
+            pagamentoContainer.innerHTML = '';
+            if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
+                prof.formasPagamento.forEach(forma => {
+                    pagamentoContainer.innerHTML += `
+                        <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
+                    `;
+                });
+            }
+
+            if (prof.tempoResposta) {
+                document.getElementById('tempoResposta').innerHTML = `
+                    <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
+                `;
+            }
+
+            const tagsContainer = document.getElementById('tagsContainer');
+            tagsContainer.innerHTML = '';
+            if (prof.especialidades && Array.isArray(prof.especialidades)) {
+                prof.especialidades.forEach(tag => {
+                    tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
+                });
+            }
+
+            if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
+                const galeriaSection = document.getElementById('galeriaSection');
+                const galeriaGrid = document.getElementById('galeriaGrid');
+                galeriaSection.style.display = 'block';
+                
+                const fotos = prof.portfolioFotos.slice(1);
+                galeriaGrid.innerHTML = fotos.map(foto => `
+                    <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
+                        <img src="${foto}" alt="Portfólio">
+                    </div>
+                `).join('');
+            }
+
+            renderizarCatalogo();
+        }
+
+        function renderizarCatalogo() {
+            const todosItens = [...servicos, ...produtos];
+            document.getElementById('countCatalogo').textContent = todosItens.length;
+            
+            const grid = document.getElementById('catalogoGrid');
+            const vazio = document.getElementById('catalogoVazio');
+
+            if (todosItens.length === 0) {
+                vazio.style.display = 'block';
+                grid.style.display = 'none';
+                return;
+            }
+
+            vazio.style.display = 'none';
+            grid.style.display = 'grid';
+
+            grid.innerHTML = todosItens.map(item => {
+                const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
+                              `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
+                
+                const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
+                const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
+                
+                const metaInfo = item.tipo === 'servico' 
+                    ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
+                    : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
+
+                return `
+                    <div class="item-card">
+                        <div class="item-image">
+                            <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
+                            <span class="item-type ${tipoClass}">${tipoText}</span>
+                        </div>
+                        <div class="item-content">
+                            <h4 class="item-title">${item.nome}</h4>
+                            <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
+                            <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
+                            <div class="item-meta">
+                                ${metaInfo}
+                                <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatarEspecialidade(esp) {
+            if (!esp) return 'Profissional';
+            const map = {
+                'eletrica': 'Eletricista',
+                'hidraulica': 'Encanador',
+                'massoterapia': 'Massoterapeuta',
+                'tecnico_celular': 'Técnico de Celular',
+                'veterinaria': 'Veterinário(a)',
+                'manicure': 'Manicure',
+                'pintura': 'Pintor',
+                'ar_condicionado': 'Ar Condicionado',
+                'marcenaria': 'Marceneiro'
+            };
+            return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
+        }
+
+        function formatarExperiencia(exp) {
+            const map = {
+                '1': 'Menos de 1 ano',
+                '1-3': '1-3 anos',
+                '3-5': '3-5 anos',
+                '5-10': '5-10 anos',
+                '10+': 'Mais de 10 anos'
+            };
+            return map[exp] || exp || 'Não informado';
+        }
+
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor || 0);
+        }
+
+        function formatarData(data) {
+            return new Intl.DateTimeFormat('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).format(data);
+        }
+
+        function mostrarErro() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'block';
+            profileContent.style.display = 'none';
+        }
+
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.tab-btn').classList.add('active');
+
+            document.querySelectorAll('.tab-content-section').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tabName === 'sobre') {
+                document.getElementById('tabSobre').classList.add('active');
+            } else if (tabName === 'catalogo') {
+                document.getElementById('tabCatalogo').classList.add('active');
+            } else {
+                document.getElementById('tabAvaliacoes').classList.add('active');
+            }
+        };
+
+        // ENVIO DE ORÇAMENTO (existente)
+        document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            btn.disabled = true;
+
+            try {
+                const nomeCliente = document.getElementById('nomeCliente').value;
+                const telefoneCliente = document.getElementById('telefoneCliente').value;
+                const cidadeCliente = document.getElementById('cidadeCliente').value;
+                const descricaoServico = document.getElementById('descricaoServico').value;
+
+                const user = auth.currentUser;
+                
+                if (!user) {
+                    alert('Você precisa estar logado para enviar orçamento!');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                await addDoc(collection(db, "notificacoes"), {
+                    profissionalId: profissionalId,
+                    clienteId: user.uid,
+                    clienteNome: nomeCliente,
+                    clienteTelefone: telefoneCliente,
+                    clienteCidade: cidadeCliente,
+                    tipo: "orcamento",
+                    titulo: "Novo pedido de orçamento",
+                    descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
+                    lida: false,
+                    urgente: false,
+                    arquivada: false,
+                    data: serverTimestamp(),
+                    metadata: {
+                        clienteNome: nomeCliente,
+                        servico: descricaoServico,
+                        telefone: telefoneCliente,
+                        cidade: cidadeCliente
+                    },
+                    tags: ["orcamento", "novo"]
+                });
+
+                await addDoc(collection(db, "solicitacoes"), {
+                    profissionalId: profissionalId,
+                    clienteId: user.uid,
+                    clienteNome: nomeCliente,
+                    clienteTelefone: telefoneCliente,
+                    clienteCidade: cidadeCliente,
+                    descricao: descricaoServico,
+                    status: "pendente",
+                    tipo: "orcamento",
+                    data: serverTimestamp()
+                });
+
+                modalOrcamento.hide();
+                document.getElementById('descricaoServico').value = '';
+                
+                alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
+                
+            } catch (error) {
+                alert('❌ Erro ao enviar solicitação. Tente novamente.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // ENVIO DE AVALIAÇÃO
+        document.getElementById('formAvaliacao')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            btn.disabled = true;
+
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    alert('Você precisa estar logado para avaliar!');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Verificar se já avaliou
+                const jaAvaliou = avaliacoes.some(av => av.clienteId === user.uid);
+                if (jaAvaliou) {
+                    alert('Você já avaliou este profissional!');
+                    modalAvaliacao.hide();
+                    return;
+                }
+
+                // Pegar nota
+                const ratingInput = document.querySelector('input[name="rating"]:checked');
+                if (!ratingInput) {
+                    document.getElementById('ratingError').style.display = 'block';
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                const nota = parseFloat(ratingInput.value);
+                const comentario = document.getElementById('comentarioAvaliacao').value.trim();
+                const anonimo = document.getElementById('anonimoCheck').checked;
+
+                // Buscar dados do cliente
+                const userRef = doc(db, "usuarios", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (!userSnap.exists()) {
+                    throw new Error('Usuário não encontrado');
+                }
+
+                const userData = userSnap.data();
+
+                // Salvar avaliação
+                await addDoc(collection(db, "avaliacoes"), {
+                    profissionalId: profissionalId,
+                    clienteId: user.uid,
+                    clienteNome: userData.nomeCompleto || userData.apelido || 'Cliente',
+                    clienteFoto: userData.fotoPerfil || '',
+                    nota: nota,
+                    comentario: comentario,
+                    anonimo: anonimo,
+                    status: "aprovado", // Pode mudar para "pendente" se quiser moderação
+                    data: serverTimestamp(),
+                    resposta: null,
+                    dataResposta: null
+                });
+
+                // Fechar modal e limpar formulário
+                modalAvaliacao.hide();
+                document.getElementById('formAvaliacao').reset();
+                document.getElementById('charCount').textContent = '0';
+
+                // Recarregar avaliações
+                await carregarAvaliacoes();
+                
+                // Esconder botão flutuante
+                btnAvaliarFlutuante.style.display = 'none';
+                
+                // Mostrar mensagem de sucesso
+                alert('✅ Avaliação enviada com sucesso! Obrigado pelo seu feedback.');
+                
+            } catch (error) {
+                alert('❌ Erro ao enviar avaliação. Tente novamente.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
