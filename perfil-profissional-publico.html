@@ -83,6 +83,7 @@
             width: 100%;
             height: 300px;
             object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .cover-placeholder {
@@ -335,6 +336,10 @@
             border: 1px solid #e0e0e0;
         }
 
+        .info-badge i {
+            color: var(--secondary);
+        }
+
         /* Grid de Serviços/Produtos */
         .catalog-grid {
             display: grid;
@@ -354,6 +359,7 @@
         .item-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-hover);
+            border-color: rgba(68, 104, 154, 0.2);
         }
 
         .item-image {
@@ -413,7 +419,24 @@
             margin-bottom: 10px;
         }
 
-        /* Galeria */
+        .item-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .item-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Galeria de Fotos */
+        .gallery-section {
+            margin-top: 20px;
+        }
+
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -425,6 +448,12 @@
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .gallery-item img {
@@ -505,6 +534,7 @@
 
             .tabs-nav {
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
                 padding: 0;
             }
 
@@ -519,7 +549,7 @@
             }
         }
 
-        /* Modal */
+        /* Modal de Orçamento */
         .modal-content {
             border-radius: 20px;
             border: none;
@@ -533,20 +563,36 @@
             padding: 20px 30px;
         }
 
-        /* Estilos para Sistema de Avaliação */
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .form-control-lg {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control-lg:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
+        }
+
+        /* ========== SISTEMA DE AVALIAÇÃO ========== */
         .rating-section {
-            margin: 25px 0;
-            padding: 20px;
-            background: rgba(255, 215, 0, 0.05);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
             border-radius: 15px;
             border: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 25px;
+            margin: 25px 0;
         }
 
         .rating-summary {
             display: flex;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 30px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
         }
 
@@ -556,20 +602,21 @@
             padding: 20px;
             border-radius: 15px;
             box-shadow: var(--shadow);
-            min-width: 120px;
+            min-width: 140px;
         }
 
         .rating-average-number {
-            font-size: 3rem;
-            font-weight: 700;
+            font-size: 3.5rem;
+            font-weight: 800;
             color: #FFD700;
             line-height: 1;
+            margin-bottom: 5px;
         }
 
         .rating-average-stars {
             color: #FFD700;
-            font-size: 1.2rem;
-            margin: 5px 0;
+            font-size: 1.3rem;
+            margin: 10px 0;
         }
 
         .rating-average-count {
@@ -607,6 +654,11 @@
             height: 100%;
             background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
             border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .reviews-container {
+            margin-top: 25px;
         }
 
         .review-item {
@@ -652,11 +704,14 @@
 
         .review-rating {
             color: #FFD700;
+            display: flex;
+            gap: 2px;
         }
 
         .review-content {
             color: var(--dark);
             line-height: 1.6;
+            margin: 10px 0;
         }
 
         .review-response {
@@ -693,13 +748,14 @@
             color: white;
         }
 
-        /* Estrelas */
+        /* Estrelas no Sistema de Avaliação */
         .rating-stars-large {
             font-size: 2rem;
             color: #ddd;
             cursor: pointer;
             display: flex;
             gap: 5px;
+            justify-content: center;
         }
 
         .rating-stars-large i.active {
@@ -714,6 +770,8 @@
             text-align: center;
             margin-top: 10px;
             font-weight: 500;
+            color: var(--dark);
+            min-height: 24px;
         }
 
         /* Modal de Avaliação */
@@ -726,6 +784,22 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .checkbox-anonimo input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-anonimo label {
+            cursor: pointer;
+            color: var(--dark);
+            font-weight: 500;
         }
 
         .form-textarea {
@@ -737,16 +811,95 @@
             font-size: 0.95rem;
             resize: vertical;
             min-height: 120px;
+            transition: all 0.3s;
         }
 
         .form-textarea:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
         }
 
         .required-field::after {
             content: " *";
             color: #e74c3c;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--success);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success {
+            border-left-color: #27ae60;
+        }
+
+        .toast-error {
+            border-left-color: #e74c3c;
+        }
+
+        .toast-info {
+            border-left-color: #3498db;
+        }
+
+        .toast-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .toast-success .toast-icon {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+        }
+
+        .toast-error .toast-icon {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .toast-info .toast-icon {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .toast-content h5 {
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .toast-content p {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin: 0;
         }
     </style>
 </head>
@@ -931,7 +1084,7 @@
                         </div>
 
                         <!-- Galeria -->
-                        <div id="galeriaSection" class="info-card" style="display: none;">
+                        <div id="galeriaSection" class="info-card gallery-section" style="display: none;">
                             <h3><i class="fas fa-images"></i> Portfólio</h3>
                             <div id="galeriaGrid" class="gallery-grid">
                                 <!-- Fotos inseridas via JS -->
@@ -1095,9 +1248,13 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Firebase e Lógica COMPLETO E FUNCIONAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
@@ -1115,7 +1272,8 @@
             addDoc,
             serverTimestamp,
             orderBy,
-            limit
+            limit,
+            startAfter
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Config Firebase
@@ -1138,6 +1296,8 @@
         let servicos = [];
         let produtos = [];
         let avaliacoes = [];
+        let lastVisibleReview = null;
+        const reviewsPerPage = 5;
 
         // Elementos
         const loadingState = document.getElementById('loadingState');
@@ -1163,6 +1323,53 @@
             iniciarSistemaEstrelas();
         });
 
+        // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
+        window.abrirModalOrcamento = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Faça login para solicitar orçamento!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Buscar dados do cliente logado
+                const userRef = doc(db, "usuarios", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    
+                    // Pegar elementos do formulário
+                    const nomeField = document.getElementById('nomeCliente');
+                    const telefoneField = document.getElementById('telefoneCliente');
+                    const cidadeField = document.getElementById('cidadeCliente');
+                    
+                    // Preencher com dados do cliente
+                    nomeField.value = userData.nomeCompleto || userData.apelido || '';
+                    telefoneField.value = userData.celular || '';
+                    cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
+                    
+                    // Tornar campos somente leitura para evitar adulteração
+                    nomeField.readOnly = true;
+                    nomeField.style.backgroundColor = '#f8f9fa';
+                    nomeField.style.cursor = 'not-allowed';
+                    
+                    telefoneField.readOnly = true;
+                    telefoneField.style.backgroundColor = '#f8f9fa';
+                    telefoneField.style.cursor = 'not-allowed';
+                    
+                    cidadeField.readOnly = true;
+                    cidadeField.style.backgroundColor = '#f8f9fa';
+                    cidadeField.style.cursor = 'not-allowed';
+                }
+            } catch (error) {
+                // Se der erro, abre modal vazio
+            }
+            
+            modalOrcamento.show();
+        };
+
         // FUNÇÃO PARA ABRIR MODAL DE AVALIAÇÃO
         window.abrirModalAvaliacao = async function() {
             const user = auth.currentUser;
@@ -1172,12 +1379,13 @@
                 return;
             }
 
+            // Verificar se é o próprio profissional
             if (user.uid === profissionalId) {
                 alert('Você não pode avaliar a si mesmo!');
                 return;
             }
 
-            // Verificar se já avaliou
+            // Verificar se já avaliou este profissional
             try {
                 const q = query(
                     collection(db, "avaliacoes"),
@@ -1191,20 +1399,24 @@
                     return;
                 }
             } catch (error) {
-                // Continua
+                // Se der erro, continua
             }
 
-            // Preencher dados
+            // Preencher dados no modal
             document.getElementById('avaliacaoProfissionalId').value = profissionalId;
             document.getElementById('nomeProfissionalAvaliacao').textContent = 
                 profissionalData?.profissional?.nomeProfissional || 'Profissional';
             
             // Resetar estrelas
             const stars = document.querySelectorAll('#ratingStarsInput i');
-            stars.forEach(star => star.classList.remove('active', 'hover'));
-            for (let i = 0; i < 5; i++) {
-                stars[i].classList.add('active');
-            }
+            stars.forEach(star => {
+                star.classList.remove('active', 'hover');
+            });
+            stars.forEach((star, index) => {
+                if (index < 5) {
+                    star.classList.add('active');
+                }
+            });
             document.getElementById('ratingValue').value = 5;
             document.getElementById('ratingText').textContent = 'Excelente - 5 estrelas';
             
@@ -1232,29 +1444,50 @@
             stars.forEach(star => {
                 star.addEventListener('mouseover', function() {
                     const value = parseInt(this.getAttribute('data-value'));
-                    stars.forEach(s => s.classList.remove('hover'));
+                    
+                    // Resetar todas
+                    stars.forEach(s => s.classList.remove('active', 'hover'));
+                    
+                    // Colorir até esta
                     stars.forEach((s, index) => {
-                        if (index < value) s.classList.add('hover');
+                        if (index < value) {
+                            s.classList.add('hover');
+                        }
                     });
+                    
                     ratingText.textContent = ratingTexts[value] || '';
                 });
                 
                 star.addEventListener('mouseout', function() {
                     const currentValue = parseInt(ratingValue.value);
+                    
+                    // Resetar todas
                     stars.forEach(s => s.classList.remove('hover'));
+                    
+                    // Restaurar valor atual
                     stars.forEach((s, index) => {
-                        if (index < currentValue) s.classList.add('active');
+                        if (index < currentValue) {
+                            s.classList.add('active');
+                        }
                     });
+                    
                     ratingText.textContent = ratingTexts[currentValue] || '';
                 });
                 
                 star.addEventListener('click', function() {
                     const value = parseInt(this.getAttribute('data-value'));
                     ratingValue.value = value;
+                    
+                    // Resetar todas
                     stars.forEach(s => s.classList.remove('active'));
+                    
+                    // Colorir até esta
                     stars.forEach((s, index) => {
-                        if (index < value) s.classList.add('active');
+                        if (index < value) {
+                            s.classList.add('active');
+                        }
                     });
+                    
                     ratingText.textContent = ratingTexts[value] || '';
                 });
             });
@@ -1274,12 +1507,13 @@
                 
                 if (userData.tipoUsuario !== 'profissional' || 
                     userData.status !== 'ativo' || 
-                    !userData.profissional?.perfilCompleto) {
+                    !userData.profissional?.perfilCompleto ||
+                    userData.profissional?.visivelBusca === false) {
                     mostrarErro();
                     return;
                 }
 
-                profissionalData = userData;
+                profissionalData = { ...userData, profissional: userData.profissional };
                 
                 await carregarCatalogo();
                 await carregarAvaliacoes();
@@ -1333,7 +1567,7 @@
                     where("profissionalId", "==", profissionalId),
                     where("status", "==", "aprovado"),
                     orderBy("data", "desc"),
-                    limit(10)
+                    limit(reviewsPerPage)
                 );
 
                 const querySnapshot = await getDocs(q);
@@ -1341,7 +1575,8 @@
                 
                 querySnapshot.forEach((docSnapshot) => {
                     const data = docSnapshot.data();
-                    avaliacoes.push({
+                    
+                    const review = {
                         id: docSnapshot.id,
                         clienteId: data.clienteId,
                         clienteNome: data.clienteNome || 'Cliente',
@@ -1352,11 +1587,70 @@
                         data: data.data?.toDate() || new Date(),
                         resposta: data.resposta || null,
                         dataResposta: data.dataResposta?.toDate() || null
-                    });
+                    };
+                    
+                    avaliacoes.push(review);
                 });
+
+                // Salvar último documento para paginação
+                if (querySnapshot.docs.length > 0) {
+                    lastVisibleReview = querySnapshot.docs[querySnapshot.docs.length - 1];
+                }
 
             } catch (error) {
                 console.log('Erro ao carregar avaliações:', error);
+            }
+        }
+
+        async function carregarMaisAvaliacoes() {
+            try {
+                if (!lastVisibleReview) return;
+
+                const q = query(
+                    collection(db, "avaliacoes"),
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "aprovado"),
+                    orderBy("data", "desc"),
+                    startAfter(lastVisibleReview),
+                    limit(reviewsPerPage)
+                );
+
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((docSnapshot) => {
+                    const data = docSnapshot.data();
+                    
+                    const review = {
+                        id: docSnapshot.id,
+                        clienteId: data.clienteId,
+                        clienteNome: data.clienteNome || 'Cliente',
+                        clienteFoto: data.clienteFoto || '',
+                        nota: data.nota || 0,
+                        comentario: data.comentario || '',
+                        anonimo: data.anonimo || false,
+                        data: data.data?.toDate() || new Date(),
+                        resposta: data.resposta || null,
+                        dataResposta: data.dataResposta?.toDate() || null
+                    };
+                    
+                    avaliacoes.push(review);
+                });
+
+                // Atualizar último documento para paginação
+                if (querySnapshot.docs.length > 0) {
+                    lastVisibleReview = querySnapshot.docs[querySnapshot.docs.length - 1];
+                }
+
+                // Renderizar avaliações
+                renderizarAvaliacoes();
+                
+                // Verificar se há mais avaliações para carregar
+                if (querySnapshot.docs.length < reviewsPerPage) {
+                    document.getElementById('btnLoadMoreReviews').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.log('Erro ao carregar mais avaliações:', error);
             }
         }
 
@@ -1399,14 +1693,17 @@
         function renderizarEstatisticasAvaliacoes() {
             const stats = calcularEstatisticasAvaliacoes();
             
+            // Atualizar média
             document.getElementById('ratingAverage').textContent = stats.media.toFixed(1);
             document.getElementById('ratingCount').textContent = `${stats.total} avaliação${stats.total !== 1 ? 'es' : ''}`;
             
+            // Atualizar barras
             for (let i = 1; i <= 5; i++) {
                 document.getElementById(`bar${i}`).style.width = `${stats.porcentagens[i]}%`;
                 document.getElementById(`count${i}`).textContent = stats.contagem[i];
             }
             
+            // Atualizar estrelas da média
             const starsAverage = document.getElementById('ratingStarsAverage');
             starsAverage.innerHTML = '';
             
@@ -1494,8 +1791,11 @@
                 `;
             }).join('');
             
-            if (avaliacoes.length >= 10) {
+            // Mostrar botão "Carregar mais" se houver mais avaliações
+            if (avaliacoes.length >= reviewsPerPage && lastVisibleReview) {
                 document.getElementById('btnLoadMoreReviews').style.display = 'block';
+            } else {
+                document.getElementById('btnLoadMoreReviews').style.display = 'none';
             }
         }
 
@@ -1522,7 +1822,6 @@
         function renderizarPerfil() {
             const prof = profissionalData.profissional;
             
-            // Capa
             const coverContainer = document.getElementById('coverContainer');
             if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
                 coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
@@ -1534,20 +1833,18 @@
                 `;
             }
 
-            // Avatar
             const avatarUrl = profissionalData.fotoPerfilProfissional || 
                              profissionalData.fotoPerfil || 
                              'https://via.placeholder.com/300';
             document.getElementById('profileAvatar').src = avatarUrl;
 
-            // Plano
-            if (profissionalData.plano_assinatura === 'pro' || profissionalData.plano_assinatura === 'enterprise') {
+            const plano = profissionalData.plano_assinatura;
+            if (plano === 'pro' || plano === 'enterprise') {
                 const badge = document.getElementById('planBadge');
                 badge.style.display = 'flex';
-                badge.querySelector('span').textContent = profissionalData.plano_assinatura.toUpperCase();
+                badge.querySelector('span').textContent = plano.toUpperCase();
             }
 
-            // Informações básicas
             document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
             document.getElementById('profileSpecialty').innerHTML = `
                 <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
@@ -1559,51 +1856,49 @@
                 ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
             `;
 
-            // WhatsApp
             if (prof.whatsapp) {
                 const whatsappNum = prof.whatsapp.replace(/\D/g, '');
                 document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
             }
 
-            // Descrição
             document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
 
-            // Experiência
             document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
 
-            // Garantia
             if (prof.garantiaDias && prof.garantiaDias > 0) {
                 document.getElementById('badgeGarantia').style.display = 'flex';
                 document.getElementById('diasGarantia').textContent = prof.garantiaDias;
             }
 
-            // Formas de atendimento
             const atendimentoContainer = document.getElementById('atendimentoBadges');
             atendimentoContainer.innerHTML = '';
             if (prof.atendeDomicilio) {
-                atendimentoContainer.innerHTML += `<div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>`;
+                atendimentoContainer.innerHTML += `
+                    <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
+                `;
             }
             if (prof.atendeOnline) {
-                atendimentoContainer.innerHTML += `<div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>`;
+                atendimentoContainer.innerHTML += `
+                    <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
+                `;
             }
 
-            // Formas de pagamento
             const pagamentoContainer = document.getElementById('pagamentoBadges');
             pagamentoContainer.innerHTML = '';
             if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
                 prof.formasPagamento.forEach(forma => {
-                    pagamentoContainer.innerHTML += `<div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>`;
+                    pagamentoContainer.innerHTML += `
+                        <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
+                    `;
                 });
             }
 
-            // Tempo de resposta
             if (prof.tempoResposta) {
                 document.getElementById('tempoResposta').innerHTML = `
                     <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
                 `;
             }
 
-            // Especialidades
             const tagsContainer = document.getElementById('tagsContainer');
             tagsContainer.innerHTML = '';
             if (prof.especialidades && Array.isArray(prof.especialidades)) {
@@ -1612,7 +1907,6 @@
                 });
             }
 
-            // Galeria
             if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
                 const galeriaSection = document.getElementById('galeriaSection');
                 const galeriaGrid = document.getElementById('galeriaGrid');
@@ -1626,11 +1920,12 @@
                 `).join('');
             }
 
-            // Avaliações
+            // Renderizar estatísticas de avaliações
             renderizarEstatisticasAvaliacoes();
+            
+            // Renderizar lista de avaliações
             renderizarAvaliacoes();
 
-            // Catálogo
             renderizarCatalogo();
         }
 
@@ -1657,6 +1952,10 @@
                 const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
                 const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
                 
+                const metaInfo = item.tipo === 'servico' 
+                    ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
+                    : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
+
                 return `
                     <div class="item-card">
                         <div class="item-image">
@@ -1667,11 +1966,27 @@
                             <h4 class="item-title">${item.nome}</h4>
                             <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
                             <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
+                            <div class="item-meta">
+                                ${metaInfo}
+                                <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
+
+        // CARREGAR MAIS AVALIAÇÕES
+        window.carregarMaisAvaliacoes = async function() {
+            const btn = document.getElementById('btnLoadMoreReviews');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+            btn.disabled = true;
+            
+            await carregarMaisAvaliacoes();
+            
+            btn.innerHTML = '<i class="fas fa-plus"></i> Carregar mais avaliações';
+            btn.disabled = false;
+        };
 
         // ENVIAR AVALIAÇÃO
         document.getElementById('formAvaliacao').addEventListener('submit', async (e) => {
@@ -1724,25 +2039,28 @@
                     comentario: comentario,
                     anonimo: anonimo,
                     data: serverTimestamp(),
-                    status: "aprovado",
+                    status: "aprovado", // Em produção, poderia ser "pendente" para moderação
                     resposta: null,
                     dataResposta: null
                 });
 
-                // Criar notificação
+                // Criar notificação para o profissional
                 await criarNotificacaoAvaliacao(profissionalId, user.uid, clienteNome, nota, comentario, anonimo);
 
-                // Fechar modal e recarregar
+                // Fechar modal
                 modalAvaliacao.hide();
+                
+                // Recarregar avaliações
                 await carregarAvaliacoes();
                 renderizarEstatisticasAvaliacoes();
                 renderizarAvaliacoes();
                 
-                alert('✅ Avaliação enviada com sucesso! Obrigado por compartilhar sua experiência.');
+                // Mostrar mensagem de sucesso
+                mostrarToast('Sucesso', 'Avaliação enviada com sucesso! Obrigado por compartilhar sua experiência.', 'success');
                 
             } catch (error) {
                 console.error('Erro ao enviar avaliação:', error);
-                alert('❌ Erro ao enviar avaliação. Tente novamente.');
+                mostrarToast('Erro', 'Não foi possível enviar a avaliação. Tente novamente.', 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -1760,13 +2078,17 @@
                 const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
                 const telefoneCliente = clienteData.celular || '';
                 
-                // Texto resumido
+                // Texto da avaliação resumido
                 const comentarioResumido = comentario.length > 80 ? 
                     comentario.substring(0, 80) + '...' : comentario;
                 
-                // Emoji baseado na nota
-                let emoji = '⭐';
+                // Determinar emoji baseado na nota
+                let emoji = '';
                 if (nota >= 4.5) emoji = '🌟';
+                else if (nota >= 4) emoji = '⭐';
+                else if (nota >= 3) emoji = '⭐';
+                else if (nota >= 2) emoji = '⭐';
+                else emoji = '⭐';
                 
                 // Criar notificação
                 await addDoc(collection(db, "notificacoes"), {
@@ -1784,6 +2106,7 @@
                         clienteNome: nomeExibido,
                         nota: nota,
                         comentario: comentario,
+                        comentarioResumido: comentarioResumido,
                         anonimo: anonimo,
                         telefone: telefoneCliente
                     },
@@ -1798,31 +2121,34 @@
             }
         }
 
-        // FUNÇÃO PARA PREENCHER FORMULÁRIO DE ORÇAMENTO
-        window.abrirModalOrcamento = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert('Faça login para solicitar orçamento!');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            try {
-                const userRef = doc(db, "usuarios", user.uid);
-                const userSnap = await getDoc(userRef);
-                
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    document.getElementById('nomeCliente').value = userData.nomeCompleto || userData.apelido || '';
-                    document.getElementById('telefoneCliente').value = userData.celular || '';
-                    document.getElementById('cidadeCliente').value = userData.endereco?.cidade || userData.cidade || '';
-                }
-            } catch (error) {
-                // Continua
-            }
+        // MOSTRAR TOAST NOTIFICATION
+        function mostrarToast(title, message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
             
-            modalOrcamento.show();
-        };
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'error' ? 'exclamation-triangle' : 'info-circle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="toast-content">
+                    <h5>${title}</h5>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
         // Funções auxiliares
         function formatarEspecialidade(esp) {
@@ -1882,7 +2208,7 @@
             }
         };
 
-        // Enviar orçamento
+        // Enviar orçamento (mantido da versão original)
         document.getElementById('formOrcamento').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1899,6 +2225,12 @@
 
                 const user = auth.currentUser;
                 
+                if (!user) {
+                    alert('Você precisa estar logado para enviar orçamento!');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
                 await addDoc(collection(db, "notificacoes"), {
                     profissionalId: profissionalId,
                     clienteId: user.uid,
@@ -1907,7 +2239,7 @@
                     clienteCidade: cidadeCliente,
                     tipo: "orcamento",
                     titulo: "Novo pedido de orçamento",
-                    descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento`,
+                    descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
                     lida: false,
                     urgente: false,
                     arquivada: false,
@@ -1921,13 +2253,25 @@
                     tags: ["orcamento", "novo"]
                 });
 
+                await addDoc(collection(db, "solicitacoes"), {
+                    profissionalId: profissionalId,
+                    clienteId: user.uid,
+                    clienteNome: nomeCliente,
+                    clienteTelefone: telefoneCliente,
+                    clienteCidade: cidadeCliente,
+                    descricao: descricaoServico,
+                    status: "pendente",
+                    tipo: "orcamento",
+                    data: serverTimestamp()
+                });
+
                 modalOrcamento.hide();
                 document.getElementById('descricaoServico').value = '';
                 
-                alert('✅ Solicitação enviada com sucesso!');
+                mostrarToast('Sucesso', 'Solicitação enviada com sucesso! O profissional será notificado.', 'success');
                 
             } catch (error) {
-                alert('❌ Erro ao enviar solicitação. Tente novamente.');
+                mostrarToast('Erro', 'Não foi possível enviar a solicitação. Tente novamente.', 'error');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
