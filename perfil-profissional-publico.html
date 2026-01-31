@@ -1,4 +1,4 @@
-quero que me faça completo  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -178,6 +178,24 @@ quero que me faça completo  <!DOCTYPE html>
             font-size: 0.95rem;
         }
 
+        .profile-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .stars-display {
+            color: #ffc107;
+            font-size: 1.1rem;
+        }
+
+        .rating-count {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
         .profile-actions {
             display: flex;
             gap: 10px;
@@ -241,6 +259,8 @@ quero que me faça completo  <!DOCTYPE html>
             padding: 0 20px;
             border-radius: 15px 15px 0 0;
             box-shadow: var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tab-btn {
@@ -256,6 +276,7 @@ quero que me faça completo  <!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .tab-btn.active {
@@ -461,6 +482,202 @@ quero que me faça completo  <!DOCTYPE html>
             object-fit: cover;
         }
 
+        /* Sistema de Avaliação - ESTRELAS */
+        .rating-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .rating-form-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .star-rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .star-rating-input input {
+            display: none;
+        }
+
+        .star-rating-input label {
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.2s;
+        }
+
+        .star-rating-input label:hover,
+        .star-rating-input label:hover ~ label,
+        .star-rating-input input:checked ~ label {
+            color: #ffc107;
+        }
+
+        .star-rating-input label:hover {
+            transform: scale(1.2);
+        }
+
+        .review-textarea {
+            width: 100%;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s;
+        }
+
+        .review-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .char-counter.warning {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .btn-submit-review {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-submit-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(68, 104, 154, 0.3);
+        }
+
+        .btn-submit-review:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Lista de Avaliações */
+        .reviews-list {
+            margin-top: 30px;
+        }
+
+        .review-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .review-item:hover {
+            box-shadow: var(--shadow);
+            border-color: transparent;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reviewer-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .reviewer-details h5 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .review-date {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .review-stars {
+            color: #ffc107;
+            font-size: 0.9rem;
+        }
+
+        .review-comment {
+            color: var(--gray);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-top: 10px;
+            padding-left: 57px;
+        }
+
+        .review-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .review-empty i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+
+        .alert-login-required {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .alert-login-required a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
         /* Estados */
         .loading-profile {
             text-align: center;
@@ -492,6 +709,17 @@ quero que me faça completo  <!DOCTYPE html>
             font-size: 4rem;
             color: #e74c3c;
             margin-bottom: 20px;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-family: monospace;
         }
 
         /* Responsivo */
@@ -532,19 +760,27 @@ quero que me faça completo  <!DOCTYPE html>
             }
 
             .tabs-nav {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
                 padding: 0;
             }
 
             .tab-btn {
                 padding: 15px 20px;
                 font-size: 0.9rem;
-                white-space: nowrap;
             }
 
             .catalog-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .review-comment {
+                padding-left: 0;
+                margin-top: 15px;
+            }
+
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
         }
 
@@ -599,6 +835,9 @@ quero que me faça completo  <!DOCTYPE html>
     <div id="loadingState" class="loading-profile">
         <div class="spinner-lg"></div>
         <h4>Carregando perfil...</h4>
+        <div id="debugLoading" class="debug-info" style="display: none; margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+            <strong>Debug:</strong> Verificando autenticação e permissões...
+        </div>
     </div>
 
     <!-- Error State -->
@@ -606,6 +845,7 @@ quero que me faça completo  <!DOCTYPE html>
         <i class="fas fa-exclamation-circle"></i>
         <h3>Profissional não encontrado</h3>
         <p>Este profissional pode ter removido o perfil ou não está mais disponível.</p>
+        <div id="debugError" class="debug-info" style="margin-top: 20px; text-align: left;"></div>
         <a href="busca-profissional.html" class="btn btn-primary mt-3">
             <i class="fas fa-search me-2"></i>Buscar Outros
         </a>
@@ -639,6 +879,18 @@ quero que me faça completo  <!DOCTYPE html>
                             <span>Cidade - RAIO 00km</span>
                         </div>
                         
+                        <!-- MÉDIA DE AVALIAÇÕES -->
+                        <div id="profileRating" class="profile-rating" style="display: none;">
+                            <div class="stars-display">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-count" id="ratingText">0 avaliações</span>
+                        </div>
+                        
                         <div class="profile-actions">
                             <a id="btnWhatsApp" href="#" target="_blank" class="btn-action-primary">
                                 <i class="fab fa-whatsapp"></i> Conversar no WhatsApp
@@ -660,6 +912,9 @@ quero que me faça completo  <!DOCTYPE html>
                 </button>
                 <button class="tab-btn" onclick="switchTab('catalogo')">
                     <i class="fas fa-boxes"></i> Catálogo <span id="countCatalogo" class="badge bg-primary ms-1">0</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('avaliacoes')">
+                    <i class="fas fa-star"></i> Avaliações <span id="countAvaliacoes" class="badge bg-primary ms-1">0</span>
                 </button>
             </div>
 
@@ -749,6 +1004,27 @@ quero que me faça completo  <!DOCTYPE html>
                     <!-- Itens inseridos via JS -->
                 </div>
             </div>
+
+            <!-- ABA AVALIAÇÕES -->
+            <div id="tabAvaliacoes" class="tab-content-section">
+                <div class="rating-section">
+                    <h3><i class="fas fa-star" style="color: #ffc107;"></i> Avaliações dos Clientes</h3>
+                    
+                    <!-- Formulário de Avaliação -->
+                    <div id="avaliacaoFormContainer">
+                        <!-- Preenchido via JS conforme login -->
+                    </div>
+
+                    <!-- Lista de Avaliações -->
+                    <div class="reviews-list" id="reviewsList">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando avaliações...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -808,7 +1084,9 @@ quero que me faça completo  <!DOCTYPE html>
         where,
         getDocs,
         addDoc,
-        serverTimestamp
+        serverTimestamp,
+        orderBy,
+        limit
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Config Firebase
@@ -830,11 +1108,16 @@ quero que me faça completo  <!DOCTYPE html>
     let profissionalId = null;
     let servicos = [];
     let produtos = [];
+    let avaliacoes = [];
+    let currentUser = null;
+    let userData = null;
 
     // Elementos
     const loadingState = document.getElementById('loadingState');
     const errorState = document.getElementById('errorState');
     const profileContent = document.getElementById('profileContent');
+    const debugLoading = document.getElementById('debugLoading');
+    const debugError = document.getElementById('debugError');
 
     // Modal
     const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
@@ -880,7 +1163,7 @@ quero que me faça completo  <!DOCTYPE html>
                 cidadeField.style.cursor = 'not-allowed';
             }
         } catch (error) {
-            // Se der erro, abre modal vazio
+            console.error("Erro ao carregar dados do cliente:", error);
         }
         
         modalOrcamento.show();
@@ -892,11 +1175,35 @@ quero que me faça completo  <!DOCTYPE html>
         profissionalId = urlParams.get('id');
 
         if (!profissionalId) {
-            mostrarErro();
+            mostrarErro("ID do profissional não fornecido na URL. Use: ?id=UID_DO_PROFISSIONAL");
             return;
         }
 
-        await carregarPerfil();
+        // Mostrar debug info
+        debugLoading.style.display = 'block';
+        debugLoading.innerHTML = `<strong>Debug:</strong> Buscando profissional ID: ${profissionalId}`;
+
+        // Verificar auth state primeiro
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                // Carregar dados do usuário logado
+                try {
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        userData = userSnap.data();
+                        debugLoading.innerHTML += `<br>Usuário logado: ${user.uid} (Tipo: ${userData.tipoUsuario || 'não definido'})`;
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar dados do usuário:", e);
+                }
+            } else {
+                debugLoading.innerHTML += `<br>Usuário não logado (visualização pública)`;
+            }
+            
+            await carregarPerfil();
+        });
     });
 
     async function carregarPerfil() {
@@ -905,35 +1212,61 @@ quero que me faça completo  <!DOCTYPE html>
             const userSnap = await getDoc(userRef);
 
             if (!userSnap.exists()) {
-                mostrarErro();
+                mostrarErro(`Documento não encontrado no Firestore.<br>ID buscado: ${profissionalId}<br>Verifique se o ID está correto.`);
                 return;
             }
 
-            const userData = userSnap.data();
+            const data = userSnap.data();
+            debugLoading.innerHTML += `<br>Documento encontrado! Tipo: ${data.tipoUsuario}, Status: ${data.status}`;
             
-            if (userData.tipoUsuario !== 'profissional' || 
-                userData.status !== 'ativo' || 
-                !userData.profissional?.perfilCompleto ||
-                userData.profissional?.visivelBusca === false) {
-                mostrarErro();
+            // Verificações rigorosas conforme suas regras de segurança
+            if (data.tipoUsuario !== 'profissional') {
+                mostrarErro(`Usuário não é profissional.<br>tipoUsuario encontrado: "${data.tipoUsuario}"<br>Deve ser: "profissional"`);
                 return;
             }
 
-            profissionalData = { ...userData, profissional: userData.profissional };
+            if (data.status !== 'ativo') {
+                mostrarErro(`Profissional não está ativo.<br>Status encontrado: "${data.status}"<br>Deve ser: "ativo"`);
+                return;
+            }
+
+            if (!data.profissional) {
+                mostrarErro(`Objeto 'profissional' não encontrado no documento.<br>Estrutura esperada: { profissional: { perfilCompleto: true, ... } }`);
+                return;
+            }
+
+            if (data.profissional.perfilCompleto !== true) {
+                mostrarErro(`Perfil não está completo.<br>profissional.perfilCompleto: ${data.profissional.perfilCompleto}<br>Deve ser: true`);
+                return;
+            }
+
+            if (data.profissional.visivelBusca === false) {
+                mostrarErro(`Profissional não está visível na busca.<br>profissional.visivelBusca: false`);
+                return;
+            }
+
+            profissionalData = data;
             
-            await carregarCatalogo();
+            // Carregar dados paralelamente
+            await Promise.all([
+                carregarCatalogo(),
+                carregarAvaliacoes()
+            ]);
+            
             renderizarPerfil();
             
             loadingState.style.display = 'none';
             profileContent.style.display = 'block';
             
         } catch (error) {
-            mostrarErro();
+            console.error("Erro detalhado:", error);
+            mostrarErro(`Erro ao carregar dados: ${error.message}<br>Verifique o console para mais detalhes.`);
         }
     }
 
     async function carregarCatalogo() {
         try {
+            // Carregar serviços
             const qServicos = query(
                 collection(db, "servicos"),
                 where("profissionalId", "==", profissionalId),
@@ -942,6 +1275,7 @@ quero que me faça completo  <!DOCTYPE html>
             const snapServicos = await getDocs(qServicos);
             servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
 
+            // Carregar produtos
             const qProdutos = query(
                 collection(db, "produtos"),
                 where("profissionalId", "==", profissionalId),
@@ -951,13 +1285,55 @@ quero que me faça completo  <!DOCTYPE html>
             produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
 
         } catch (error) {
-            // Não faz nada, catálogo fica vazio
+            console.error("Erro ao carregar catálogo:", error);
+        }
+    }
+
+    async function carregarAvaliacoes() {
+        try {
+            const qAvaliacoes = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "aprovado"),
+                orderBy("data", "desc"),
+                limit(50)
+            );
+            
+            const snapAvaliacoes = await getDocs(qAvaliacoes);
+            avaliacoes = snapAvaliacoes.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Calcular média
+            if (avaliacoes.length > 0) {
+                const soma = avaliacoes.reduce((acc, av) => acc + (av.nota || 0), 0);
+                const media = soma / avaliacoes.length;
+                profissionalData.mediaAvaliacoes = media;
+                profissionalData.totalAvaliacoes = avaliacoes.length;
+            } else {
+                profissionalData.mediaAvaliacoes = 0;
+                profissionalData.totalAvaliacoes = 0;
+            }
+            
+        } catch (error) {
+            console.error("Erro ao carregar avaliações:", error);
+            // Se der erro nas regras de segurança, tentar sem orderBy
+            try {
+                const qSimples = query(
+                    collection(db, "avaliacoes"),
+                    where("profissionalId", "==", profissionalId),
+                    where("status", "==", "aprovado")
+                );
+                const snapSimples = await getDocs(qSimples);
+                avaliacoes = snapSimples.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (e) {
+                console.error("Erro secundário ao carregar avaliações:", e);
+            }
         }
     }
 
     function renderizarPerfil() {
         const prof = profissionalData.profissional;
         
+        // Cover
         const coverContainer = document.getElementById('coverContainer');
         if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
             coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
@@ -969,11 +1345,13 @@ quero que me faça completo  <!DOCTYPE html>
             `;
         }
 
+        // Avatar
         const avatarUrl = profissionalData.fotoPerfilProfissional || 
                          profissionalData.fotoPerfil || 
                          'https://via.placeholder.com/300';
         document.getElementById('profileAvatar').src = avatarUrl;
 
+        // Badge do plano
         const plano = profissionalData.plano_assinatura;
         if (plano === 'pro' || plano === 'enterprise') {
             const badge = document.getElementById('planBadge');
@@ -981,24 +1359,52 @@ quero que me faça completo  <!DOCTYPE html>
             badge.querySelector('span').textContent = plano.toUpperCase();
         }
 
+        // Nome e especialidade
         document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
         document.getElementById('profileSpecialty').innerHTML = `
             <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
         `;
 
+        // Localização
         document.getElementById('profileLocation').innerHTML = `
             <i class="fas fa-map-marker-alt"></i> 
             ${prof.cidadeBase || 'Cidade não informada'}
             ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
         `;
 
+        // Rating no header
+        if (profissionalData.totalAvaliacoes > 0) {
+            const ratingDiv = document.getElementById('profileRating');
+            ratingDiv.style.display = 'flex';
+            
+            const starsContainer = ratingDiv.querySelector('.stars-display');
+            const media = profissionalData.mediaAvaliacoes;
+            
+            // Renderizar estrelas preenchidas conforme média
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.round(media)) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                } else {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+            }
+            starsHtml += ` <span style="color: var(--dark); margin-left: 5px; font-weight: 600;">${media.toFixed(1)}</span>`;
+            starsContainer.innerHTML = starsHtml;
+            
+            document.getElementById('ratingText').textContent = `${profissionalData.totalAvaliacoes} avaliação${profissionalData.totalAvaliacoes > 1 ? 'ões' : ''}`;
+        }
+
+        // WhatsApp
         if (prof.whatsapp) {
             const whatsappNum = prof.whatsapp.replace(/\D/g, '');
             document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
         }
 
+        // Sobre
         document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
 
+        // Experiência
         document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
 
         if (prof.garantiaDias && prof.garantiaDias > 0) {
@@ -1006,6 +1412,7 @@ quero que me faça completo  <!DOCTYPE html>
             document.getElementById('diasGarantia').textContent = prof.garantiaDias;
         }
 
+        // Atendimento
         const atendimentoContainer = document.getElementById('atendimentoBadges');
         atendimentoContainer.innerHTML = '';
         if (prof.atendeDomicilio) {
@@ -1019,6 +1426,7 @@ quero que me faça completo  <!DOCTYPE html>
             `;
         }
 
+        // Pagamento
         const pagamentoContainer = document.getElementById('pagamentoBadges');
         pagamentoContainer.innerHTML = '';
         if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
@@ -1029,12 +1437,14 @@ quero que me faça completo  <!DOCTYPE html>
             });
         }
 
+        // Tempo resposta
         if (prof.tempoResposta) {
             document.getElementById('tempoResposta').innerHTML = `
                 <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
             `;
         }
 
+        // Tags
         const tagsContainer = document.getElementById('tagsContainer');
         tagsContainer.innerHTML = '';
         if (prof.especialidades && Array.isArray(prof.especialidades)) {
@@ -1043,6 +1453,7 @@ quero que me faça completo  <!DOCTYPE html>
             });
         }
 
+        // Galeria
         if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
             const galeriaSection = document.getElementById('galeriaSection');
             const galeriaGrid = document.getElementById('galeriaGrid');
@@ -1057,6 +1468,8 @@ quero que me faça completo  <!DOCTYPE html>
         }
 
         renderizarCatalogo();
+        renderizarAvaliacoes();
+        renderizarFormularioAvaliacao();
     }
 
     function renderizarCatalogo() {
@@ -1106,6 +1519,240 @@ quero que me faça completo  <!DOCTYPE html>
         }).join('');
     }
 
+    function renderizarAvaliacoes() {
+        document.getElementById('countAvaliacoes').textContent = avaliacoes.length;
+        const container = document.getElementById('reviewsList');
+        
+        if (avaliacoes.length === 0) {
+            container.innerHTML = `
+                <div class="review-empty">
+                    <i class="fas fa-star"></i>
+                    <h4>Sem avaliações ainda</h4>
+                    <p>Seja o primeiro a avaliar este profissional!</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = avaliacoes.map(avaliacao => {
+            const data = avaliacao.data?.toDate ? avaliacao.data.toDate() : new Date();
+            const dataFormatada = data.toLocaleDateString('pt-BR', { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            
+            const clienteNome = avaliacao.anonimo ? 'Cliente Anônimo' : (avaliacao.clienteNome || 'Cliente');
+            const inicial = clienteNome.charAt(0).toUpperCase();
+            
+            // Estrelas
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHtml += i <= avaliacao.nota ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+            }
+            
+            return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">${inicial}</div>
+                            <div class="reviewer-details">
+                                <h5>${clienteNome}</h5>
+                                <div class="review-date">${dataFormatada}</div>
+                            </div>
+                        </div>
+                        <div class="review-stars">
+                            ${starsHtml}
+                        </div>
+                    </div>
+                    <div class="review-comment">
+                        ${avaliacao.comentario || 'Sem comentário'}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderizarFormularioAvaliacao() {
+        const container = document.getElementById('avaliacaoFormContainer');
+        
+        // Verificar se usuário está logado
+        if (!currentUser) {
+            container.innerHTML = `
+                <div class="alert-login-required">
+                    <i class="fas fa-lock mb-2" style="font-size: 2rem;"></i>
+                    <h5>Faça login para avaliar</h5>
+                    <p class="mb-0">Você precisa estar logado como cliente para deixar uma avaliação.</p>
+                    <a href="login.html?redirect=${encodeURIComponent(window.location.href)}" class="btn btn-primary mt-2">
+                        Entrar ou Cadastrar
+                    </a>
+                </div>
+            `;
+            return;
+        }
+        
+        // Verificar se é profissional (não pode avaliar outro profissional)
+        if (userData && userData.tipoUsuario === 'profissional') {
+            container.innerHTML = `
+                <div class="alert-login-required" style="background: #e3f2fd; border-color: #90caf9; color: #1565c0;">
+                    <i class="fas fa-info-circle mb-2" style="font-size: 2rem;"></i>
+                    <h5>Acesso restrito</h5>
+                    <p class="mb-0">Profissionais não podem avaliar outros profissionais.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Verificar se já avaliou (simplificado - idealmente verificar no Firestore)
+        container.innerHTML = `
+            <div class="rating-form-container">
+                <h5 class="mb-3">Deixe sua avaliação</h5>
+                <form id="formAvaliacao">
+                    <div class="star-rating-input">
+                        <input type="radio" id="star5" name="rating" value="5" required>
+                        <label for="star5" title="5 estrelas"><i class="fas fa-star"></i></label>
+                        
+                        <input type="radio" id="star4" name="rating" value="4">
+                        <label for="star4" title="4 estrelas"><i class="fas fa-star"></i></label>
+                        
+                        <input type="radio" id="star3" name="rating" value="3">
+                        <label for="star3" title="3 estrelas"><i class="fas fa-star"></i></label>
+                        
+                        <input type="radio" id="star2" name="rating" value="2">
+                        <label for="star2" title="2 estrelas"><i class="fas fa-star"></i></label>
+                        
+                        <input type="radio" id="star1" name="rating" value="1">
+                        <label for="star1" title="1 estrela"><i class="fas fa-star"></i></label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <textarea 
+                            class="review-textarea" 
+                            id="comentarioAvaliacao" 
+                            placeholder="Conte sobre sua experiência com este profissional (opcional)..."
+                            maxlength="500"
+                        ></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span> / 500 caracteres
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit-review" id="btnSubmitAvaliacao">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Avaliação
+                    </button>
+                </form>
+            </div>
+        `;
+        
+        // Contador de caracteres
+        const textarea = document.getElementById('comentarioAvaliacao');
+        const counter = document.getElementById('charCount');
+        
+        textarea.addEventListener('input', function() {
+            const len = this.value.length;
+            counter.textContent = len;
+            if (len >= 450) {
+                counter.parentElement.classList.add('warning');
+            } else {
+                counter.parentElement.classList.remove('warning');
+            }
+        });
+        
+        // Submit da avaliação
+        document.getElementById('formAvaliacao').addEventListener('submit', enviarAvaliacao);
+    }
+
+    async function enviarAvaliacao(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('btnSubmitAvaliacao');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        btn.disabled = true;
+        
+        try {
+            // Pegar dados do formulário
+            const nota = document.querySelector('input[name="rating"]:checked')?.value;
+            const comentario = document.getElementById('comentarioAvaliacao').value.trim();
+            
+            if (!nota) {
+                alert('Por favor, selecione uma nota (estrelas)!');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+            
+            // Verificar se já avaliou este profissional
+            const qJaAvaliou = query(
+                collection(db, "avaliacoes"),
+                where("clienteId", "==", currentUser.uid),
+                where("profissionalId", "==", profissionalId)
+            );
+            const jaAvaliouSnap = await getDocs(qJaAvaliou);
+            
+            if (!jaAvaliouSnap.empty) {
+                alert('Você já avaliou este profissional!');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+            
+            const clienteNome = userData?.nomeCompleto || userData?.apelido || 'Cliente';
+            
+            // Criar avaliação
+            const avaliacaoData = {
+                clienteId: currentUser.uid,
+                profissionalId: profissionalId,
+                nota: parseInt(nota),
+                comentario: comentario,
+                data: serverTimestamp(),
+                status: "aprovado", // Ou "pendente" se quiser moderação
+                clienteNome: clienteNome,
+                anonimo: false // Pode adicionar checkbox para anonimato se desejar
+            };
+            
+            const docRef = await addDoc(collection(db, "avaliacoes"), avaliacaoData);
+            
+            // Criar notificação para o profissional
+            await addDoc(collection(db, "notificacoes"), {
+                profissionalId: profissionalId,
+                clienteId: currentUser.uid,
+                tipo: "avaliacao",
+                titulo: "Nova avaliação recebida!",
+                descricao: `Você recebeu uma avaliação de ${nota} estrela${nota > 1 ? 's' : ''} de ${clienteNome}${comentario ? ': "' + comentario.substring(0, 50) + (comentario.length > 50 ? '...' : '') + '"' : ''}`,
+                lida: false,
+                data: serverTimestamp(),
+                metadata: {
+                    avaliacaoId: docRef.id,
+                    nota: parseInt(nota),
+                    clienteNome: clienteNome
+                },
+                tags: ["avaliacao", "novo"]
+            });
+            
+            // Atualizar contador no documento do profissional (opcional - requer regra de segurança adequada ou Cloud Function)
+            // Por enquanto, só recarregamos a lista
+            
+            alert('✅ Avaliação enviada com sucesso! Obrigado pelo feedback.');
+            
+            // Recarregar avaliações
+            await carregarAvaliacoes();
+            renderizarAvaliacoes();
+            renderizarPerfil(); // Atualizar média no header
+            
+            // Limpar formulário
+            document.getElementById('formAvaliacao').reset();
+            document.getElementById('charCount').textContent = '0';
+            
+        } catch (error) {
+            console.error("Erro ao enviar avaliação:", error);
+            alert('❌ Erro ao enviar avaliação: ' + error.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
     function formatarEspecialidade(esp) {
         if (!esp) return 'Profissional';
         const map = {
@@ -1140,10 +1787,14 @@ quero que me faça completo  <!DOCTYPE html>
         }).format(valor || 0);
     }
 
-    function mostrarErro() {
+    function mostrarErro(mensagemDebug) {
         loadingState.style.display = 'none';
         errorState.style.display = 'block';
         profileContent.style.display = 'none';
+        
+        if (mensagemDebug && debugError) {
+            debugError.innerHTML = `<strong>Detalhes técnicos:</strong><br>${mensagemDebug}<br><br><strong>Dicas:</strong><br>1. Verifique se o ID na URL está correto<br>2. Verifique se o profissional tem perfil completo ativo<br>3. Verifique as regras de segurança do Firestore`;
+        }
     }
 
     window.switchTab = function(tabName) {
@@ -1158,8 +1809,10 @@ quero que me faça completo  <!DOCTYPE html>
 
         if (tabName === 'sobre') {
             document.getElementById('tabSobre').classList.add('active');
-        } else {
+        } else if (tabName === 'catalogo') {
             document.getElementById('tabCatalogo').classList.add('active');
+        } else if (tabName === 'avaliacoes') {
+            document.getElementById('tabAvaliacoes').classList.add('active');
         }
     };
 
@@ -1190,7 +1843,6 @@ quero que me faça completo  <!DOCTYPE html>
                 clienteId: user.uid,
                 clienteNome: nomeCliente,
                 clienteTelefone: telefoneCliente,
-                clienteCidade: cidadeCliente,
                 tipo: "orcamento",
                 titulo: "Novo pedido de orçamento",
                 descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
@@ -1226,6 +1878,7 @@ quero que me faça completo  <!DOCTYPE html>
             
         } catch (error) {
             alert('❌ Erro ao enviar solicitação. Tente novamente.');
+            console.error(error);
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -1233,4 +1886,4 @@ quero que me faça completo  <!DOCTYPE html>
     });
 </script>
 </body>
-</html>  
+</html>
