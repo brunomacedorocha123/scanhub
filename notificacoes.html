@@ -799,7 +799,7 @@ body {
     border-color: rgba(68, 104, 154, 0.1);
 }
 
-/* BOTÃO DE EXCLUIR - ADICIONADO */
+/* BOTÃO DE EXCLUIR - VISÍVEL APENAS NO MOBILE */
 .btn-delete {
     position: absolute;
     top: 15px;
@@ -816,11 +816,12 @@ body {
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.3s;
-    opacity: 0;
+    opacity: 0; /* Invisível no desktop por padrão */
     transform: scale(0.8);
     z-index: 2;
 }
 
+/* Desktop: aparece no hover */
 .notification-card:hover .btn-delete {
     opacity: 1;
     transform: scale(1);
@@ -832,15 +833,27 @@ body {
     transform: scale(1.1) !important;
 }
 
-/* Para mobile, mostrar sempre o botão */
+/* Mobile: SEMPRE VISÍVEL */
 @media (max-width: 768px) {
     .btn-delete {
-        opacity: 1;
-        transform: scale(1);
+        opacity: 1 !important;
+        transform: scale(1) !important;
         top: 10px;
         right: 10px;
-        width: 25px;
-        height: 25px;
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+        background: rgba(231, 76, 60, 0.2); /* Mais visível no mobile */
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+}
+
+/* Para telas muito pequenas */
+@media (max-width: 480px) {
+    .btn-delete {
+        width: 26px;
+        height: 26px;
         font-size: 0.8rem;
     }
 }
