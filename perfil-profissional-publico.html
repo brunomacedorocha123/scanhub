@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+quero que me faça completo  <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -182,7 +182,6 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
-            flex-wrap: wrap;
         }
 
         .btn-action-primary {
@@ -578,329 +577,6 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
         }
-
-        /* ========== SISTEMA DE AVALIAÇÃO ========== */
-        .rating-section {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            padding: 25px;
-            margin: 25px 0;
-        }
-
-        .rating-summary {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .rating-average {
-            text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            min-width: 140px;
-        }
-
-        .rating-average-number {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #FFD700;
-            line-height: 1;
-            margin-bottom: 5px;
-        }
-
-        .rating-average-stars {
-            color: #FFD700;
-            font-size: 1.3rem;
-            margin: 10px 0;
-        }
-
-        .rating-average-count {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        .rating-bars {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .rating-bar-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .rating-bar-label {
-            font-size: 0.9rem;
-            color: var(--dark);
-            width: 80px;
-        }
-
-        .rating-bar {
-            flex: 1;
-            height: 10px;
-            background: #e0e0e0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .rating-bar-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-
-        .reviews-container {
-            margin-top: 25px;
-        }
-
-        .review-item {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 20px 0;
-        }
-
-        .review-item:last-child {
-            border-bottom: none;
-        }
-
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .reviewer-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .reviewer-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: var(--light);
-        }
-
-        .reviewer-name {
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .review-date {
-            font-size: 0.85rem;
-            color: var(--gray);
-        }
-
-        .review-rating {
-            color: #FFD700;
-            display: flex;
-            gap: 2px;
-        }
-
-        .review-content {
-            color: var(--dark);
-            line-height: 1.6;
-            margin: 10px 0;
-        }
-
-        .review-response {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 10px;
-            border-left: 3px solid var(--primary);
-        }
-
-        .response-label {
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 5px;
-            display: block;
-            font-size: 0.9rem;
-        }
-
-        .btn-load-more {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            background: var(--light);
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-load-more:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Estrelas no Sistema de Avaliação */
-        .rating-stars-large {
-            font-size: 2rem;
-            color: #ddd;
-            cursor: pointer;
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-        }
-
-        .rating-stars-large i.active {
-            color: #FFD700;
-        }
-
-        .rating-stars-large i.hover {
-            color: #FFA500;
-        }
-
-        .rating-text {
-            text-align: center;
-            margin-top: 10px;
-            font-weight: 500;
-            color: var(--dark);
-            min-height: 24px;
-        }
-
-        /* Modal de Avaliação */
-        .modal-avaliacao .modal-header {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        }
-
-        .checkbox-anonimo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .checkbox-anonimo input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .checkbox-anonimo label {
-            cursor: pointer;
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        .form-textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.95rem;
-            resize: vertical;
-            min-height: 120px;
-            transition: all 0.3s;
-        }
-
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
-        }
-
-        .required-field::after {
-            content: " *";
-            color: #e74c3c;
-        }
-
-        /* Toast notifications */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-
-        .toast {
-            background: white;
-            border-radius: 10px;
-            padding: 15px 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 4px solid var(--success);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            max-width: 350px;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast-success {
-            border-left-color: #27ae60;
-        }
-
-        .toast-error {
-            border-left-color: #e74c3c;
-        }
-
-        .toast-info {
-            border-left-color: #3498db;
-        }
-
-        .toast-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
-
-        .toast-success .toast-icon {
-            background: rgba(39, 174, 96, 0.1);
-            color: #27ae60;
-        }
-
-        .toast-error .toast-icon {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-        }
-
-        .toast-info .toast-icon {
-            background: rgba(52, 152, 219, 0.1);
-            color: #3498db;
-        }
-
-        .toast-content h5 {
-            font-size: 0.95rem;
-            margin-bottom: 3px;
-            color: var(--dark);
-            font-weight: 600;
-        }
-
-        .toast-content p {
-            font-size: 0.85rem;
-            color: var(--gray);
-            margin: 0;
-        }
     </style>
 </head>
 <body>
@@ -970,9 +646,6 @@
                             <button class="btn-action-secondary" onclick="abrirModalOrcamento()">
                                 <i class="fas fa-clipboard-list"></i> Solicitar Orçamento
                             </button>
-                            <button class="btn-action-secondary" onclick="abrirModalAvaliacao()" id="btnAvaliar">
-                                <i class="fas fa-star"></i> Avaliar Profissional
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -1014,72 +687,6 @@
                                     <i class="fas fa-shield-alt"></i>
                                     <span>Garantia de <span id="diasGarantia">0</span> dias</span>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Avaliações -->
-                        <div class="info-card rating-section">
-                            <h3><i class="fas fa-star"></i> Avaliações dos Clientes</h3>
-                            <div id="avaliacoesResumo">
-                                <div class="rating-summary">
-                                    <div class="rating-average">
-                                        <div class="rating-average-number" id="ratingAverage">0.0</div>
-                                        <div class="rating-average-stars" id="ratingStarsAverage">
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                            <i class="fas fa-star"></i>
-                                        </div>
-                                        <div class="rating-average-count" id="ratingCount">0 avaliações</div>
-                                    </div>
-                                    
-                                    <div class="rating-bars">
-                                        <div class="rating-bar-item">
-                                            <span class="rating-bar-label">5 estrelas</span>
-                                            <div class="rating-bar">
-                                                <div class="rating-bar-fill" id="bar5" style="width: 0%"></div>
-                                            </div>
-                                            <span class="rating-count" id="count5">0</span>
-                                        </div>
-                                        <div class="rating-bar-item">
-                                            <span class="rating-bar-label">4 estrelas</span>
-                                            <div class="rating-bar">
-                                                <div class="rating-bar-fill" id="bar4" style="width: 0%"></div>
-                                            </div>
-                                            <span class="rating-count" id="count4">0</span>
-                                        </div>
-                                        <div class="rating-bar-item">
-                                            <span class="rating-bar-label">3 estrelas</span>
-                                            <div class="rating-bar">
-                                                <div class="rating-bar-fill" id="bar3" style="width: 0%"></div>
-                                            </div>
-                                            <span class="rating-count" id="count3">0</span>
-                                        </div>
-                                        <div class="rating-bar-item">
-                                            <span class="rating-bar-label">2 estrelas</span>
-                                            <div class="rating-bar">
-                                                <div class="rating-bar-fill" id="bar2" style="width: 0%"></div>
-                                            </div>
-                                            <span class="rating-count" id="count2">0</span>
-                                        </div>
-                                        <div class="rating-bar-item">
-                                            <span class="rating-bar-label">1 estrela</span>
-                                            <div class="rating-bar">
-                                                <div class="rating-bar-fill" id="bar1" style="width: 0%"></div>
-                                            </div>
-                                            <span class="rating-count" id="count1">0</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="reviews-container" id="reviewsList">
-                                    <!-- Avaliações serão carregadas aqui -->
-                                </div>
-                                
-                                <button class="btn-load-more" id="btnLoadMoreReviews" style="display: none;" onclick="carregarMaisAvaliacoes()">
-                                    <i class="fas fa-plus"></i> Carregar mais avaliações
-                                </button>
                             </div>
                         </div>
 
@@ -1182,1101 +789,448 @@
         </div>
     </div>
 
-    <!-- Modal de Avaliação -->
-    <div class="modal fade modal-avaliacao" id="modalAvaliacao" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-white">
-                        <i class="fas fa-star me-2"></i>Avaliar Profissional
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form id="formAvaliacao">
-                        <input type="hidden" id="avaliacaoProfissionalId" value="">
-                        
-                        <div class="text-center mb-4">
-                            <h4 id="nomeProfissionalAvaliacao">Nome do Profissional</h4>
-                            <p class="text-muted">Como foi sua experiência?</p>
-                        </div>
-                        
-                        <!-- Sistema de Estrelas -->
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-center mb-2">
-                                <div class="rating-stars-large" id="ratingStarsInput">
-                                    <i class="fas fa-star" data-value="1"></i>
-                                    <i class="fas fa-star" data-value="2"></i>
-                                    <i class="fas fa-star" data-value="3"></i>
-                                    <i class="fas fa-star" data-value="4"></i>
-                                    <i class="fas fa-star" data-value="5"></i>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <small class="text-muted rating-text" id="ratingText">Clique nas estrelas para avaliar</small>
-                                <input type="hidden" id="ratingValue" name="rating" value="5" required>
-                            </div>
-                        </div>
-                        
-                        <!-- Comentário -->
-                        <div class="mb-4">
-                            <label for="comentarioAvaliacao" class="form-label fw-bold required-field">Comentário</label>
-                            <textarea class="form-textarea" id="comentarioAvaliacao" 
-                                      placeholder="Conte como foi sua experiência com este profissional..." 
-                                      rows="4" required></textarea>
-                            <div class="form-text">Seu comentário ajuda outros clientes a fazerem a melhor escolha.</div>
-                        </div>
-                        
-                        <!-- Anônimo -->
-                        <div class="checkbox-anonimo mb-4">
-                            <input type="checkbox" id="anonimoAvaliacao" name="anonimo">
-                            <label for="anonimoAvaliacao">Enviar avaliação de forma anônima</label>
-                        </div>
-                        
-                        <!-- Botões -->
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-warning w-100 py-3 fw-bold">
-                                <i class="fas fa-star me-2"></i>Enviar Avaliação
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Firebase e Lógica COMPLETO E FUNCIONAL -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            query,
-            where,
-            getDocs,
-            addDoc,
-            serverTimestamp,
-            orderBy,
-            limit,
-            startAfter
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        query,
+        where,
+        getDocs,
+        addDoc,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Config Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.appspot.com",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Config Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.appspot.com",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // State
-        let profissionalData = null;
-        let profissionalId = null;
-        let servicos = [];
-        let produtos = [];
-        let avaliacoes = [];
-        let lastVisibleReview = null;
-        const reviewsPerPage = 5;
+    // State
+    let profissionalData = null;
+    let profissionalId = null;
+    let servicos = [];
+    let produtos = [];
 
-        // Elementos
-        const loadingState = document.getElementById('loadingState');
-        const errorState = document.getElementById('errorState');
-        const profileContent = document.getElementById('profileContent');
-        const btnAvaliar = document.getElementById('btnAvaliar');
+    // Elementos
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const profileContent = document.getElementById('profileContent');
 
-        // Modais
-        const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
-        const modalAvaliacao = new bootstrap.Modal(document.getElementById('modalAvaliacao'));
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            profissionalId = urlParams.get('id');
-
-            if (!profissionalId) {
-                mostrarErro();
-                return;
-            }
-
-            await carregarPerfil();
-            iniciarSistemaEstrelas();
-        });
-
-        // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
-        window.abrirModalOrcamento = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert('Faça login para solicitar orçamento!');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            try {
-                // Buscar dados do cliente logado
-                const userRef = doc(db, "usuarios", user.uid);
-                const userSnap = await getDoc(userRef);
-                
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    
-                    // Pegar elementos do formulário
-                    const nomeField = document.getElementById('nomeCliente');
-                    const telefoneField = document.getElementById('telefoneCliente');
-                    const cidadeField = document.getElementById('cidadeCliente');
-                    
-                    // Preencher com dados do cliente
-                    nomeField.value = userData.nomeCompleto || userData.apelido || '';
-                    telefoneField.value = userData.celular || '';
-                    cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
-                    
-                    // Tornar campos somente leitura para evitar adulteração
-                    nomeField.readOnly = true;
-                    nomeField.style.backgroundColor = '#f8f9fa';
-                    nomeField.style.cursor = 'not-allowed';
-                    
-                    telefoneField.readOnly = true;
-                    telefoneField.style.backgroundColor = '#f8f9fa';
-                    telefoneField.style.cursor = 'not-allowed';
-                    
-                    cidadeField.readOnly = true;
-                    cidadeField.style.backgroundColor = '#f8f9fa';
-                    cidadeField.style.cursor = 'not-allowed';
-                }
-            } catch (error) {
-                // Se der erro, abre modal vazio
-            }
-            
-            modalOrcamento.show();
-        };
-
-        // FUNÇÃO PARA ABRIR MODAL DE AVALIAÇÃO
-        window.abrirModalAvaliacao = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert('Faça login para avaliar o profissional!');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Verificar se é o próprio profissional
-            if (user.uid === profissionalId) {
-                alert('Você não pode avaliar a si mesmo!');
-                return;
-            }
-
-            // Verificar se já avaliou este profissional
-            try {
-                const q = query(
-                    collection(db, "avaliacoes"),
-                    where("profissionalId", "==", profissionalId),
-                    where("clienteId", "==", user.uid)
-                );
-                const querySnapshot = await getDocs(q);
-                
-                if (!querySnapshot.empty) {
-                    alert('Você já avaliou este profissional!');
-                    return;
-                }
-            } catch (error) {
-                // Se der erro, continua
-            }
-
-            // Preencher dados no modal
-            document.getElementById('avaliacaoProfissionalId').value = profissionalId;
-            document.getElementById('nomeProfissionalAvaliacao').textContent = 
-                profissionalData?.profissional?.nomeProfissional || 'Profissional';
-            
-            // Resetar estrelas
-            const stars = document.querySelectorAll('#ratingStarsInput i');
-            stars.forEach(star => {
-                star.classList.remove('active', 'hover');
-            });
-            stars.forEach((star, index) => {
-                if (index < 5) {
-                    star.classList.add('active');
-                }
-            });
-            document.getElementById('ratingValue').value = 5;
-            document.getElementById('ratingText').textContent = 'Excelente - 5 estrelas';
-            
-            // Resetar formulário
-            document.getElementById('comentarioAvaliacao').value = '';
-            document.getElementById('anonimoAvaliacao').checked = false;
-            
-            modalAvaliacao.show();
-        };
-
-        // INICIAR SISTEMA DE ESTRELAS
-        function iniciarSistemaEstrelas() {
-            const stars = document.querySelectorAll('#ratingStarsInput i');
-            const ratingValue = document.getElementById('ratingValue');
-            const ratingText = document.getElementById('ratingText');
-            
-            const ratingTexts = {
-                1: 'Péssimo - 1 estrela',
-                2: 'Ruim - 2 estrelas',
-                3: 'Regular - 3 estrelas',
-                4: 'Bom - 4 estrelas',
-                5: 'Excelente - 5 estrelas'
-            };
-            
-            stars.forEach(star => {
-                star.addEventListener('mouseover', function() {
-                    const value = parseInt(this.getAttribute('data-value'));
-                    
-                    // Resetar todas
-                    stars.forEach(s => s.classList.remove('active', 'hover'));
-                    
-                    // Colorir até esta
-                    stars.forEach((s, index) => {
-                        if (index < value) {
-                            s.classList.add('hover');
-                        }
-                    });
-                    
-                    ratingText.textContent = ratingTexts[value] || '';
-                });
-                
-                star.addEventListener('mouseout', function() {
-                    const currentValue = parseInt(ratingValue.value);
-                    
-                    // Resetar todas
-                    stars.forEach(s => s.classList.remove('hover'));
-                    
-                    // Restaurar valor atual
-                    stars.forEach((s, index) => {
-                        if (index < currentValue) {
-                            s.classList.add('active');
-                        }
-                    });
-                    
-                    ratingText.textContent = ratingTexts[currentValue] || '';
-                });
-                
-                star.addEventListener('click', function() {
-                    const value = parseInt(this.getAttribute('data-value'));
-                    ratingValue.value = value;
-                    
-                    // Resetar todas
-                    stars.forEach(s => s.classList.remove('active'));
-                    
-                    // Colorir até esta
-                    stars.forEach((s, index) => {
-                        if (index < value) {
-                            s.classList.add('active');
-                        }
-                    });
-                    
-                    ratingText.textContent = ratingTexts[value] || '';
-                });
-            });
+    // Modal
+    const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
+    
+    // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
+    window.abrirModalOrcamento = async function() {
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Faça login para solicitar orçamento!');
+            window.location.href = 'login.html';
+            return;
         }
 
-        async function carregarPerfil() {
-            try {
-                const userRef = doc(db, "usuarios", profissionalId);
-                const userSnap = await getDoc(userRef);
-
-                if (!userSnap.exists()) {
-                    mostrarErro();
-                    return;
-                }
-
+        try {
+            // Buscar dados do cliente logado
+            const userRef = doc(db, "usuarios", user.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
                 const userData = userSnap.data();
                 
-                if (userData.tipoUsuario !== 'profissional' || 
-                    userData.status !== 'ativo' || 
-                    !userData.profissional?.perfilCompleto ||
-                    userData.profissional?.visivelBusca === false) {
-                    mostrarErro();
-                    return;
-                }
+                // Pegar elementos do formulário
+                const nomeField = document.getElementById('nomeCliente');
+                const telefoneField = document.getElementById('telefoneCliente');
+                const cidadeField = document.getElementById('cidadeCliente');
+                
+                // Preencher com dados do cliente
+                nomeField.value = userData.nomeCompleto || userData.apelido || '';
+                telefoneField.value = userData.celular || '';
+                cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
+                
+                // Tornar campos somente leitura para evitar adulteração
+                nomeField.readOnly = true;
+                nomeField.style.backgroundColor = '#f8f9fa';
+                nomeField.style.cursor = 'not-allowed';
+                
+                telefoneField.readOnly = true;
+                telefoneField.style.backgroundColor = '#f8f9fa';
+                telefoneField.style.cursor = 'not-allowed';
+                
+                cidadeField.readOnly = true;
+                cidadeField.style.backgroundColor = '#f8f9fa';
+                cidadeField.style.cursor = 'not-allowed';
+            }
+        } catch (error) {
+            // Se der erro, abre modal vazio
+        }
+        
+        modalOrcamento.show();
+    };
 
-                profissionalData = { ...userData, profissional: userData.profissional };
-                
-                await carregarCatalogo();
-                await carregarAvaliacoes();
-                renderizarPerfil();
-                
-                loadingState.style.display = 'none';
-                profileContent.style.display = 'block';
-                
-                // Verificar se usuário está logado para habilitar avaliação
-                onAuthStateChanged(auth, (user) => {
-                    if (user && user.uid !== profissionalId) {
-                        btnAvaliar.style.display = 'flex';
-                    } else {
-                        btnAvaliar.style.display = 'none';
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Erro ao carregar perfil:', error);
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        profissionalId = urlParams.get('id');
+
+        if (!profissionalId) {
+            mostrarErro();
+            return;
+        }
+
+        await carregarPerfil();
+    });
+
+    async function carregarPerfil() {
+        try {
+            const userRef = doc(db, "usuarios", profissionalId);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
                 mostrarErro();
-            }
-        }
-
-        async function carregarCatalogo() {
-            try {
-                const qServicos = query(
-                    collection(db, "servicos"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "ativo")
-                );
-                const snapServicos = await getDocs(qServicos);
-                servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
-
-                const qProdutos = query(
-                    collection(db, "produtos"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "ativo")
-                );
-                const snapProdutos = await getDocs(qProdutos);
-                produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
-
-            } catch (error) {
-                console.log('Erro ao carregar catálogo:', error);
-            }
-        }
-
-        async function carregarAvaliacoes() {
-            try {
-                const q = query(
-                    collection(db, "avaliacoes"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "aprovado"),
-                    orderBy("data", "desc"),
-                    limit(reviewsPerPage)
-                );
-
-                const querySnapshot = await getDocs(q);
-                avaliacoes = [];
-                
-                querySnapshot.forEach((docSnapshot) => {
-                    const data = docSnapshot.data();
-                    
-                    const review = {
-                        id: docSnapshot.id,
-                        clienteId: data.clienteId,
-                        clienteNome: data.clienteNome || 'Cliente',
-                        clienteFoto: data.clienteFoto || '',
-                        nota: data.nota || 0,
-                        comentario: data.comentario || '',
-                        anonimo: data.anonimo || false,
-                        data: data.data?.toDate() || new Date(),
-                        resposta: data.resposta || null,
-                        dataResposta: data.dataResposta?.toDate() || null
-                    };
-                    
-                    avaliacoes.push(review);
-                });
-
-                // Salvar último documento para paginação
-                if (querySnapshot.docs.length > 0) {
-                    lastVisibleReview = querySnapshot.docs[querySnapshot.docs.length - 1];
-                }
-
-            } catch (error) {
-                console.log('Erro ao carregar avaliações:', error);
-            }
-        }
-
-        async function carregarMaisAvaliacoes() {
-            try {
-                if (!lastVisibleReview) return;
-
-                const q = query(
-                    collection(db, "avaliacoes"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "aprovado"),
-                    orderBy("data", "desc"),
-                    startAfter(lastVisibleReview),
-                    limit(reviewsPerPage)
-                );
-
-                const querySnapshot = await getDocs(q);
-                
-                querySnapshot.forEach((docSnapshot) => {
-                    const data = docSnapshot.data();
-                    
-                    const review = {
-                        id: docSnapshot.id,
-                        clienteId: data.clienteId,
-                        clienteNome: data.clienteNome || 'Cliente',
-                        clienteFoto: data.clienteFoto || '',
-                        nota: data.nota || 0,
-                        comentario: data.comentario || '',
-                        anonimo: data.anonimo || false,
-                        data: data.data?.toDate() || new Date(),
-                        resposta: data.resposta || null,
-                        dataResposta: data.dataResposta?.toDate() || null
-                    };
-                    
-                    avaliacoes.push(review);
-                });
-
-                // Atualizar último documento para paginação
-                if (querySnapshot.docs.length > 0) {
-                    lastVisibleReview = querySnapshot.docs[querySnapshot.docs.length - 1];
-                }
-
-                // Renderizar avaliações
-                renderizarAvaliacoes();
-                
-                // Verificar se há mais avaliações para carregar
-                if (querySnapshot.docs.length < reviewsPerPage) {
-                    document.getElementById('btnLoadMoreReviews').style.display = 'none';
-                }
-
-            } catch (error) {
-                console.log('Erro ao carregar mais avaliações:', error);
-            }
-        }
-
-        function calcularEstatisticasAvaliacoes() {
-            if (avaliacoes.length === 0) {
-                return {
-                    total: 0,
-                    media: 0,
-                    contagem: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-                    porcentagens: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-                };
-            }
-
-            const contagem = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-            let soma = 0;
-
-            avaliacoes.forEach(review => {
-                const notaInt = Math.floor(review.nota);
-                if (notaInt >= 1 && notaInt <= 5) {
-                    contagem[notaInt]++;
-                }
-                soma += review.nota;
-            });
-
-            const media = soma / avaliacoes.length;
-            const porcentagens = {};
-            
-            for (let i = 1; i <= 5; i++) {
-                porcentagens[i] = (contagem[i] / avaliacoes.length) * 100;
-            }
-
-            return {
-                total: avaliacoes.length,
-                media: media,
-                contagem: contagem,
-                porcentagens: porcentagens
-            };
-        }
-
-        function renderizarEstatisticasAvaliacoes() {
-            const stats = calcularEstatisticasAvaliacoes();
-            
-            // Atualizar média
-            document.getElementById('ratingAverage').textContent = stats.media.toFixed(1);
-            document.getElementById('ratingCount').textContent = `${stats.total} avaliação${stats.total !== 1 ? 'es' : ''}`;
-            
-            // Atualizar barras
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById(`bar${i}`).style.width = `${stats.porcentagens[i]}%`;
-                document.getElementById(`count${i}`).textContent = stats.contagem[i];
-            }
-            
-            // Atualizar estrelas da média
-            const starsAverage = document.getElementById('ratingStarsAverage');
-            starsAverage.innerHTML = '';
-            
-            const fullStars = Math.floor(stats.media);
-            const hasHalfStar = stats.media % 1 >= 0.5;
-            
-            for (let i = 1; i <= 5; i++) {
-                const star = document.createElement('i');
-                if (i <= fullStars) {
-                    star.className = 'fas fa-star';
-                    star.style.color = '#FFD700';
-                } else if (i === fullStars + 1 && hasHalfStar) {
-                    star.className = 'fas fa-star-half-alt';
-                    star.style.color = '#FFD700';
-                } else {
-                    star.className = 'far fa-star';
-                    star.style.color = '#ddd';
-                }
-                starsAverage.appendChild(star);
-            }
-        }
-
-        function renderizarAvaliacoes() {
-            const reviewsList = document.getElementById('reviewsList');
-            
-            if (avaliacoes.length === 0) {
-                reviewsList.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
-                        <h4>Nenhuma avaliação ainda</h4>
-                        <p class="text-muted">Este profissional ainda não recebeu avaliações.</p>
-                    </div>
-                `;
-                document.getElementById('btnLoadMoreReviews').style.display = 'none';
                 return;
             }
 
-            reviewsList.innerHTML = avaliacoes.map((review, index) => {
-                const notaInt = Math.floor(review.nota);
-                const estrelas = Array(5).fill(0).map((_, i) => 
-                    `<span class="review-rating">
-                        <i class="${i < notaInt ? 'fas' : 'far'} fa-star"></i>
-                    </span>`
-                ).join('');
-                
-                const dataFormatada = formatarData(review.data);
-                const nomeExibido = review.anonimo ? 'Anônimo' : review.clienteNome;
-                const avatar = review.anonimo ? 
-                    'https://ui-avatars.com/api/?name=Cliente&background=6c757d&color=fff' : 
-                    (review.clienteFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeExibido)}&background=44689a&color=fff`);
-                
-                let respostaHTML = '';
-                if (review.resposta) {
-                    const dataResposta = review.dataResposta ? formatarData(review.dataResposta) : '';
-                    respostaHTML = `
-                        <div class="review-response">
-                            <span class="response-label">
-                                <i class="fas fa-reply me-1"></i> Resposta do profissional
-                                ${dataResposta ? ` • ${dataResposta}` : ''}
-                            </span>
-                            <p class="mb-0">${review.resposta}</p>
-                        </div>
-                    `;
-                }
-                
-                return `
-                    <div class="review-item ${index > 0 ? 'border-top' : ''}">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <img src="${avatar}" alt="${nomeExibido}" class="reviewer-avatar">
-                                <div>
-                                    <div class="reviewer-name">${nomeExibido}</div>
-                                    <div class="review-date">${dataFormatada}</div>
-                                </div>
-                            </div>
-                            <div class="d-flex">
-                                ${estrelas}
-                            </div>
-                        </div>
-                        <div class="review-content">
-                            ${review.comentario || 'Sem comentário.'}
-                        </div>
-                        ${respostaHTML}
-                    </div>
-                `;
-            }).join('');
+            const userData = userSnap.data();
             
-            // Mostrar botão "Carregar mais" se houver mais avaliações
-            if (avaliacoes.length >= reviewsPerPage && lastVisibleReview) {
-                document.getElementById('btnLoadMoreReviews').style.display = 'block';
-            } else {
-                document.getElementById('btnLoadMoreReviews').style.display = 'none';
-            }
-        }
-
-        function formatarData(data) {
-            const agora = new Date();
-            const diffMs = agora - data;
-            const diffMins = Math.floor(diffMs / (1000 * 60));
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            
-            if (diffMins < 1) return 'Agora mesmo';
-            if (diffMins < 60) return `Há ${diffMins} min`;
-            if (diffHours < 24) return `Há ${diffHours} h`;
-            if (diffDays === 1) return 'Ontem';
-            if (diffDays < 7) return `Há ${diffDays} dias`;
-            
-            return data.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
-
-        function renderizarPerfil() {
-            const prof = profissionalData.profissional;
-            
-            const coverContainer = document.getElementById('coverContainer');
-            if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
-                coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
-            } else {
-                coverContainer.innerHTML = `
-                    <div class="cover-placeholder">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                `;
-            }
-
-            const avatarUrl = profissionalData.fotoPerfilProfissional || 
-                             profissionalData.fotoPerfil || 
-                             'https://via.placeholder.com/300';
-            document.getElementById('profileAvatar').src = avatarUrl;
-
-            const plano = profissionalData.plano_assinatura;
-            if (plano === 'pro' || plano === 'enterprise') {
-                const badge = document.getElementById('planBadge');
-                badge.style.display = 'flex';
-                badge.querySelector('span').textContent = plano.toUpperCase();
-            }
-
-            document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
-            document.getElementById('profileSpecialty').innerHTML = `
-                <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
-            `;
-
-            document.getElementById('profileLocation').innerHTML = `
-                <i class="fas fa-map-marker-alt"></i> 
-                ${prof.cidadeBase || 'Cidade não informada'}
-                ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
-            `;
-
-            if (prof.whatsapp) {
-                const whatsappNum = prof.whatsapp.replace(/\D/g, '');
-                document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
-            }
-
-            document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
-
-            document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
-
-            if (prof.garantiaDias && prof.garantiaDias > 0) {
-                document.getElementById('badgeGarantia').style.display = 'flex';
-                document.getElementById('diasGarantia').textContent = prof.garantiaDias;
-            }
-
-            const atendimentoContainer = document.getElementById('atendimentoBadges');
-            atendimentoContainer.innerHTML = '';
-            if (prof.atendeDomicilio) {
-                atendimentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
-                `;
-            }
-            if (prof.atendeOnline) {
-                atendimentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
-                `;
-            }
-
-            const pagamentoContainer = document.getElementById('pagamentoBadges');
-            pagamentoContainer.innerHTML = '';
-            if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
-                prof.formasPagamento.forEach(forma => {
-                    pagamentoContainer.innerHTML += `
-                        <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
-                    `;
-                });
-            }
-
-            if (prof.tempoResposta) {
-                document.getElementById('tempoResposta').innerHTML = `
-                    <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
-                `;
-            }
-
-            const tagsContainer = document.getElementById('tagsContainer');
-            tagsContainer.innerHTML = '';
-            if (prof.especialidades && Array.isArray(prof.especialidades)) {
-                prof.especialidades.forEach(tag => {
-                    tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
-                });
-            }
-
-            if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
-                const galeriaSection = document.getElementById('galeriaSection');
-                const galeriaGrid = document.getElementById('galeriaGrid');
-                galeriaSection.style.display = 'block';
-                
-                const fotos = prof.portfolioFotos.slice(1);
-                galeriaGrid.innerHTML = fotos.map(foto => `
-                    <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
-                        <img src="${foto}" alt="Portfólio">
-                    </div>
-                `).join('');
-            }
-
-            // Renderizar estatísticas de avaliações
-            renderizarEstatisticasAvaliacoes();
-            
-            // Renderizar lista de avaliações
-            renderizarAvaliacoes();
-
-            renderizarCatalogo();
-        }
-
-        function renderizarCatalogo() {
-            const todosItens = [...servicos, ...produtos];
-            document.getElementById('countCatalogo').textContent = todosItens.length;
-            
-            const grid = document.getElementById('catalogoGrid');
-            const vazio = document.getElementById('catalogoVazio');
-
-            if (todosItens.length === 0) {
-                vazio.style.display = 'block';
-                grid.style.display = 'none';
+            if (userData.tipoUsuario !== 'profissional' || 
+                userData.status !== 'ativo' || 
+                !userData.profissional?.perfilCompleto ||
+                userData.profissional?.visivelBusca === false) {
+                mostrarErro();
                 return;
             }
 
-            vazio.style.display = 'none';
-            grid.style.display = 'grid';
+            profissionalData = { ...userData, profissional: userData.profissional };
+            
+            await carregarCatalogo();
+            renderizarPerfil();
+            
+            loadingState.style.display = 'none';
+            profileContent.style.display = 'block';
+            
+        } catch (error) {
+            mostrarErro();
+        }
+    }
 
-            grid.innerHTML = todosItens.map(item => {
-                const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
-                              `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
-                
-                const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
-                const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
-                
-                const metaInfo = item.tipo === 'servico' 
-                    ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
-                    : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
+    async function carregarCatalogo() {
+        try {
+            const qServicos = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "ativo")
+            );
+            const snapServicos = await getDocs(qServicos);
+            servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
 
-                return `
-                    <div class="item-card">
-                        <div class="item-image">
-                            <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
-                            <span class="item-type ${tipoClass}">${tipoText}</span>
-                        </div>
-                        <div class="item-content">
-                            <h4 class="item-title">${item.nome}</h4>
-                            <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
-                            <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
-                            <div class="item-meta">
-                                ${metaInfo}
-                                <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const qProdutos = query(
+                collection(db, "produtos"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "==", "ativo")
+            );
+            const snapProdutos = await getDocs(qProdutos);
+            produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
+
+        } catch (error) {
+            // Não faz nada, catálogo fica vazio
+        }
+    }
+
+    function renderizarPerfil() {
+        const prof = profissionalData.profissional;
+        
+        const coverContainer = document.getElementById('coverContainer');
+        if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
+            coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
+        } else {
+            coverContainer.innerHTML = `
+                <div class="cover-placeholder">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            `;
         }
 
-        // CARREGAR MAIS AVALIAÇÕES
-        window.carregarMaisAvaliacoes = async function() {
-            const btn = document.getElementById('btnLoadMoreReviews');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
-            btn.disabled = true;
+        const avatarUrl = profissionalData.fotoPerfilProfissional || 
+                         profissionalData.fotoPerfil || 
+                         'https://via.placeholder.com/300';
+        document.getElementById('profileAvatar').src = avatarUrl;
+
+        const plano = profissionalData.plano_assinatura;
+        if (plano === 'pro' || plano === 'enterprise') {
+            const badge = document.getElementById('planBadge');
+            badge.style.display = 'flex';
+            badge.querySelector('span').textContent = plano.toUpperCase();
+        }
+
+        document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
+        document.getElementById('profileSpecialty').innerHTML = `
+            <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
+        `;
+
+        document.getElementById('profileLocation').innerHTML = `
+            <i class="fas fa-map-marker-alt"></i> 
+            ${prof.cidadeBase || 'Cidade não informada'}
+            ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
+        `;
+
+        if (prof.whatsapp) {
+            const whatsappNum = prof.whatsapp.replace(/\D/g, '');
+            document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
+        }
+
+        document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
+
+        document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
+
+        if (prof.garantiaDias && prof.garantiaDias > 0) {
+            document.getElementById('badgeGarantia').style.display = 'flex';
+            document.getElementById('diasGarantia').textContent = prof.garantiaDias;
+        }
+
+        const atendimentoContainer = document.getElementById('atendimentoBadges');
+        atendimentoContainer.innerHTML = '';
+        if (prof.atendeDomicilio) {
+            atendimentoContainer.innerHTML += `
+                <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
+            `;
+        }
+        if (prof.atendeOnline) {
+            atendimentoContainer.innerHTML += `
+                <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
+            `;
+        }
+
+        const pagamentoContainer = document.getElementById('pagamentoBadges');
+        pagamentoContainer.innerHTML = '';
+        if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
+            prof.formasPagamento.forEach(forma => {
+                pagamentoContainer.innerHTML += `
+                    <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
+                `;
+            });
+        }
+
+        if (prof.tempoResposta) {
+            document.getElementById('tempoResposta').innerHTML = `
+                <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
+            `;
+        }
+
+        const tagsContainer = document.getElementById('tagsContainer');
+        tagsContainer.innerHTML = '';
+        if (prof.especialidades && Array.isArray(prof.especialidades)) {
+            prof.especialidades.forEach(tag => {
+                tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
+            });
+        }
+
+        if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
+            const galeriaSection = document.getElementById('galeriaSection');
+            const galeriaGrid = document.getElementById('galeriaGrid');
+            galeriaSection.style.display = 'block';
             
-            await carregarMaisAvaliacoes();
+            const fotos = prof.portfolioFotos.slice(1);
+            galeriaGrid.innerHTML = fotos.map(foto => `
+                <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
+                    <img src="${foto}" alt="Portfólio">
+                </div>
+            `).join('');
+        }
+
+        renderizarCatalogo();
+    }
+
+    function renderizarCatalogo() {
+        const todosItens = [...servicos, ...produtos];
+        document.getElementById('countCatalogo').textContent = todosItens.length;
+        
+        const grid = document.getElementById('catalogoGrid');
+        const vazio = document.getElementById('catalogoVazio');
+
+        if (todosItens.length === 0) {
+            vazio.style.display = 'block';
+            grid.style.display = 'none';
+            return;
+        }
+
+        vazio.style.display = 'none';
+        grid.style.display = 'grid';
+
+        grid.innerHTML = todosItens.map(item => {
+            const imagem = item.imagens && item.imagens.length > 0 ? item.imagens[0] : 
+                          `https://via.placeholder.com/400x300/44689a/ffffff?text=${encodeURIComponent(item.nome || 'Item')}`;
             
-            btn.innerHTML = '<i class="fas fa-plus"></i> Carregar mais avaliações';
-            btn.disabled = false;
+            const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
+            const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
+            
+            const metaInfo = item.tipo === 'servico' 
+                ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
+                : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
+
+            return `
+                <div class="item-card">
+                    <div class="item-image">
+                        <img src="${imagem}" alt="${item.nome}" onerror="this.src='https://via.placeholder.com/400x300?text=Sem+Imagem'">
+                        <span class="item-type ${tipoClass}">${tipoText}</span>
+                    </div>
+                    <div class="item-content">
+                        <h4 class="item-title">${item.nome}</h4>
+                        <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
+                        <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
+                        <div class="item-meta">
+                            ${metaInfo}
+                            <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function formatarEspecialidade(esp) {
+        if (!esp) return 'Profissional';
+        const map = {
+            'eletrica': 'Eletricista',
+            'hidraulica': 'Encanador',
+            'massoterapia': 'Massoterapeuta',
+            'tecnico_celular': 'Técnico de Celular',
+            'veterinaria': 'Veterinário(a)',
+            'manicure': 'Manicure',
+            'pintura': 'Pintor',
+            'ar_condicionado': 'Ar Condicionado',
+            'marcenaria': 'Marceneiro'
         };
+        return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
+    }
 
-        // ENVIAR AVALIAÇÃO
-        document.getElementById('formAvaliacao').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
+    function formatarExperiencia(exp) {
+        const map = {
+            '1': 'Menos de 1 ano',
+            '1-3': '1-3 anos',
+            '3-5': '3-5 anos',
+            '5-10': '5-10 anos',
+            '10+': 'Mais de 10 anos'
+        };
+        return map[exp] || exp || 'Não informado';
+    }
+
+    function formatarMoeda(valor) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor || 0);
+    }
+
+    function mostrarErro() {
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+        profileContent.style.display = 'none';
+    }
+
+    window.switchTab = function(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.closest('.tab-btn').classList.add('active');
+
+        document.querySelectorAll('.tab-content-section').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        if (tabName === 'sobre') {
+            document.getElementById('tabSobre').classList.add('active');
+        } else {
+            document.getElementById('tabCatalogo').classList.add('active');
+        }
+    };
+
+    document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        btn.disabled = true;
+
+        try {
+            const nomeCliente = document.getElementById('nomeCliente').value;
+            const telefoneCliente = document.getElementById('telefoneCliente').value;
+            const cidadeCliente = document.getElementById('cidadeCliente').value;
+            const descricaoServico = document.getElementById('descricaoServico').value;
+
             const user = auth.currentUser;
+            
             if (!user) {
-                alert('Você precisa estar logado para enviar uma avaliação!');
+                alert('Você precisa estar logado para enviar orçamento!');
                 window.location.href = 'login.html';
                 return;
             }
 
-            if (user.uid === profissionalId) {
-                alert('Você não pode avaliar a si mesmo!');
-                return;
-            }
-
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Enviando...';
-            btn.disabled = true;
-
-            try {
-                const nota = parseInt(document.getElementById('ratingValue').value);
-                const comentario = document.getElementById('comentarioAvaliacao').value.trim();
-                const anonimo = document.getElementById('anonimoAvaliacao').checked;
-                
-                if (!comentario) {
-                    alert('Por favor, escreva um comentário sobre sua experiência.');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    return;
-                }
-
-                // Buscar dados do cliente
-                const userRef = doc(db, "usuarios", user.uid);
-                const userSnap = await getDoc(userRef);
-                const userData = userSnap.exists() ? userSnap.data() : {};
-                
-                const clienteNome = userData.apelido || userData.nomeCompleto || 'Cliente';
-                const clienteFoto = userData.fotoPerfil || '';
-
-                // Criar avaliação
-                await addDoc(collection(db, "avaliacoes"), {
-                    profissionalId: profissionalId,
-                    clienteId: user.uid,
-                    clienteNome: clienteNome,
-                    clienteFoto: clienteFoto,
-                    nota: nota,
-                    comentario: comentario,
-                    anonimo: anonimo,
-                    data: serverTimestamp(),
-                    status: "aprovado", // Em produção, poderia ser "pendente" para moderação
-                    resposta: null,
-                    dataResposta: null
-                });
-
-                // Criar notificação para o profissional
-                await criarNotificacaoAvaliacao(profissionalId, user.uid, clienteNome, nota, comentario, anonimo);
-
-                // Fechar modal
-                modalAvaliacao.hide();
-                
-                // Recarregar avaliações
-                await carregarAvaliacoes();
-                renderizarEstatisticasAvaliacoes();
-                renderizarAvaliacoes();
-                
-                // Mostrar mensagem de sucesso
-                mostrarToast('Sucesso', 'Avaliação enviada com sucesso! Obrigado por compartilhar sua experiência.', 'success');
-                
-            } catch (error) {
-                console.error('Erro ao enviar avaliação:', error);
-                mostrarToast('Erro', 'Não foi possível enviar a avaliação. Tente novamente.', 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
-
-        // FUNÇÃO PARA CRIAR NOTIFICAÇÃO DE AVALIAÇÃO
-        async function criarNotificacaoAvaliacao(profissionalId, clienteId, clienteNome, nota, comentario, anonimo) {
-            try {
-                // Buscar dados do cliente
-                const clienteRef = doc(db, "usuarios", clienteId);
-                const clienteSnap = await getDoc(clienteRef);
-                const clienteData = clienteSnap.exists() ? clienteSnap.data() : {};
-                
-                const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
-                const telefoneCliente = clienteData.celular || '';
-                
-                // Texto da avaliação resumido
-                const comentarioResumido = comentario.length > 80 ? 
-                    comentario.substring(0, 80) + '...' : comentario;
-                
-                // Determinar emoji baseado na nota
-                let emoji = '';
-                if (nota >= 4.5) emoji = '🌟';
-                else if (nota >= 4) emoji = '⭐';
-                else if (nota >= 3) emoji = '⭐';
-                else if (nota >= 2) emoji = '⭐';
-                else emoji = '⭐';
-                
-                // Criar notificação
-                await addDoc(collection(db, "notificacoes"), {
-                    profissionalId: profissionalId,
-                    clienteId: clienteId,
-                    clienteNome: nomeExibido,
-                    tipo: "review",
-                    titulo: `${emoji} Nova avaliação recebida!`,
-                    descricao: `${nomeExibido} avaliou você com ${nota} estrelas: "${comentarioResumido}"`,
-                    lida: false,
-                    arquivada: false,
-                    urgente: false,
-                    data: serverTimestamp(),
-                    metadata: {
-                        clienteNome: nomeExibido,
-                        nota: nota,
-                        comentario: comentario,
-                        comentarioResumido: comentarioResumido,
-                        anonimo: anonimo,
-                        telefone: telefoneCliente
-                    },
-                    tags: ["avaliacao", "review", "cliente"]
-                });
-                
-                return true;
-                
-            } catch (error) {
-                console.error('Erro ao criar notificação:', error);
-                return false;
-            }
-        }
-
-        // MOSTRAR TOAST NOTIFICATION
-        function mostrarToast(title, message, type = 'success') {
-            const toastContainer = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            
-            const icon = type === 'success' ? 'check-circle' :
-                        type === 'error' ? 'exclamation-triangle' : 'info-circle';
-            
-            toast.innerHTML = `
-                <div class="toast-icon">
-                    <i class="fas fa-${icon}"></i>
-                </div>
-                <div class="toast-content">
-                    <h5>${title}</h5>
-                    <p>${message}</p>
-                </div>
-            `;
-            
-            toastContainer.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 10);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Funções auxiliares
-        function formatarEspecialidade(esp) {
-            if (!esp) return 'Profissional';
-            const map = {
-                'eletrica': 'Eletricista',
-                'hidraulica': 'Encanador',
-                'massoterapia': 'Massoterapeuta',
-                'tecnico_celular': 'Técnico de Celular',
-                'veterinaria': 'Veterinário(a)',
-                'manicure': 'Manicure',
-                'pintura': 'Pintor',
-                'ar_condicionado': 'Ar Condicionado',
-                'marcenaria': 'Marceneiro'
-            };
-            return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
-        }
-
-        function formatarExperiencia(exp) {
-            const map = {
-                '1': 'Menos de 1 ano',
-                '1-3': '1-3 anos',
-                '3-5': '3-5 anos',
-                '5-10': '5-10 anos',
-                '10+': 'Mais de 10 anos'
-            };
-            return map[exp] || exp || 'Não informado';
-        }
-
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(valor || 0);
-        }
-
-        function mostrarErro() {
-            loadingState.style.display = 'none';
-            errorState.style.display = 'block';
-            profileContent.style.display = 'none';
-        }
-
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.closest('.tab-btn').classList.add('active');
-
-            document.querySelectorAll('.tab-content-section').forEach(content => {
-                content.classList.remove('active');
+            await addDoc(collection(db, "notificacoes"), {
+                profissionalId: profissionalId,
+                clienteId: user.uid,
+                clienteNome: nomeCliente,
+                clienteTelefone: telefoneCliente,
+                clienteCidade: cidadeCliente,
+                tipo: "orcamento",
+                titulo: "Novo pedido de orçamento",
+                descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
+                lida: false,
+                urgente: false,
+                arquivada: false,
+                data: serverTimestamp(),
+                metadata: {
+                    clienteNome: nomeCliente,
+                    servico: descricaoServico,
+                    telefone: telefoneCliente,
+                    cidade: cidadeCliente
+                },
+                tags: ["orcamento", "novo"]
             });
 
-            if (tabName === 'sobre') {
-                document.getElementById('tabSobre').classList.add('active');
-            } else {
-                document.getElementById('tabCatalogo').classList.add('active');
-            }
-        };
+            await addDoc(collection(db, "solicitacoes"), {
+                profissionalId: profissionalId,
+                clienteId: user.uid,
+                clienteNome: nomeCliente,
+                clienteTelefone: telefoneCliente,
+                clienteCidade: cidadeCliente,
+                descricao: descricaoServico,
+                status: "pendente",
+                tipo: "orcamento",
+                data: serverTimestamp()
+            });
 
-        // Enviar orçamento (mantido da versão original)
-        document.getElementById('formOrcamento').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            modalOrcamento.hide();
+            document.getElementById('descricaoServico').value = '';
             
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-            btn.disabled = true;
-
-            try {
-                const nomeCliente = document.getElementById('nomeCliente').value;
-                const telefoneCliente = document.getElementById('telefoneCliente').value;
-                const cidadeCliente = document.getElementById('cidadeCliente').value;
-                const descricaoServico = document.getElementById('descricaoServico').value;
-
-                const user = auth.currentUser;
-                
-                if (!user) {
-                    alert('Você precisa estar logado para enviar orçamento!');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                await addDoc(collection(db, "notificacoes"), {
-                    profissionalId: profissionalId,
-                    clienteId: user.uid,
-                    clienteNome: nomeCliente,
-                    clienteTelefone: telefoneCliente,
-                    clienteCidade: cidadeCliente,
-                    tipo: "orcamento",
-                    titulo: "Novo pedido de orçamento",
-                    descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
-                    lida: false,
-                    urgente: false,
-                    arquivada: false,
-                    data: serverTimestamp(),
-                    metadata: {
-                        clienteNome: nomeCliente,
-                        servico: descricaoServico,
-                        telefone: telefoneCliente,
-                        cidade: cidadeCliente
-                    },
-                    tags: ["orcamento", "novo"]
-                });
-
-                await addDoc(collection(db, "solicitacoes"), {
-                    profissionalId: profissionalId,
-                    clienteId: user.uid,
-                    clienteNome: nomeCliente,
-                    clienteTelefone: telefoneCliente,
-                    clienteCidade: cidadeCliente,
-                    descricao: descricaoServico,
-                    status: "pendente",
-                    tipo: "orcamento",
-                    data: serverTimestamp()
-                });
-
-                modalOrcamento.hide();
-                document.getElementById('descricaoServico').value = '';
-                
-                mostrarToast('Sucesso', 'Solicitação enviada com sucesso! O profissional será notificado.', 'success');
-                
-            } catch (error) {
-                mostrarToast('Erro', 'Não foi possível enviar a solicitação. Tente novamente.', 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
-    </script>
+            alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
+            
+        } catch (error) {
+            alert('❌ Erro ao enviar solicitação. Tente novamente.');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+</script>
 </body>
-</html>
+</html>  
