@@ -1360,41 +1360,37 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
+        getAuth,
+        onAuthStateChanged,
+        signOut
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      getDocs,
-      updateDoc,
-      doc,
-      serverTimestamp,
-      getDoc,
-      deleteDoc,
-      orderBy,
-      addDoc  // ✅ ADICIONAR ESTA IMPORT
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+        updateDoc,
+        doc,
+        serverTimestamp,
+        getDoc,
+        deleteDoc,
+        orderBy
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Firebase Configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-      authDomain: "scanhub-ed512.firebaseapp.com",
-      projectId: "scanhub-ed512",
-      storageBucket: "scanhub-ed512.appspot.com",
-      messagingSenderId: "1083305018831",
-      appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.appspot.com",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // State
     let currentUser = null;
     let userData = null;
     let notifications = [];
@@ -1403,10 +1399,7 @@
     let currentStatusFilter = 'all';
     let currentTab = 'recent';
 
-    // Modais
     const modalReviews = new bootstrap.Modal(document.getElementById('modalReviews'));
-
-    // DOM Elements
     const userAvatar = document.getElementById('userAvatar');
     const userName = document.getElementById('userName');
     const userId = document.getElementById('userId');
@@ -1436,816 +1429,684 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          currentUser = user;
-          await loadUserData();
-          await loadNotifications();
-          await loadReviews(); // Carregar avaliações também
-          
-          btnLogout.addEventListener('click', async () => {
-            try {
-              await signOut(auth);
-              window.location.href = 'login.html';
-            } catch (error) {
-              showToast('Erro', 'Não foi possível sair da conta', 'error');
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                await loadNotifications();
+                await loadReviews();
+                
+                btnLogout.addEventListener('click', async () => {
+                    try {
+                        await signOut(auth);
+                        window.location.href = 'login.html';
+                    } catch (error) {
+                        showToast('Erro', 'Não foi possível sair da conta');
+                    }
+                });
+            } else {
+                window.location.href = 'login.html';
             }
-          });
-        } else {
-          window.location.href = 'login.html';
-        }
-      });
+        });
     });
 
     // Load user data
     async function loadUserData() {
-      try {
-        const userRef = doc(db, "usuarios", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-          userData = userSnap.data();
-          
-          if (userData.apelido) {
-            userName.textContent = userData.apelido;
-            userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
-            userAvatar.title = userData.apelido;
-          }
-          
-          if (userData.idScanHub) {
-            userId.textContent = userData.idScanHub;
-          } else {
-            userId.textContent = currentUser.uid.substring(0, 8);
-          }
+        try {
+            const userRef = doc(db, "usuarios", currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+                userData = userSnap.data();
+                
+                if (userData.apelido) {
+                    userName.textContent = userData.apelido;
+                    userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
+                }
+                
+                if (userData.idScanHub) {
+                    userId.textContent = userData.idScanHub;
+                } else {
+                    userId.textContent = currentUser.uid.substring(0, 8);
+                }
+            }
+        } catch (error) {
+            showToast('Erro', 'Não foi possível carregar dados do usuário');
         }
-      } catch (error) {
-        showToast('Erro', 'Não foi possível carregar dados do usuário', 'error');
-      }
-    }
-
-    // ✅ FUNÇÃO PARA CRIAR NOTIFICAÇÃO DE AVALIAÇÃO
-    async function criarNotificacaoParaProfissional(profissionalId, clienteId, clienteNome, nota, comentario, anonimo) {
-      try {
-        if (!profissionalId || !clienteId) {
-          console.error('IDs não fornecidos para criar notificação');
-          return;
-        }
-
-        // Buscar dados do cliente para garantir que temos as informações
-        const clienteRef = doc(db, "usuarios", clienteId);
-        const clienteSnap = await getDoc(clienteRef);
-        const clienteData = clienteSnap.exists() ? clienteSnap.data() : {};
-        
-        const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
-        const telefoneCliente = clienteData.celular || '';
-        
-        // Criar notificação
-        await addDoc(collection(db, "notificacoes"), {
-          profissionalId: profissionalId,
-          clienteId: clienteId,
-          clienteNome: nomeExibido,
-          tipo: "review",
-          titulo: "⭐ Nova avaliação recebida!",
-          descricao: `${nomeExibido} avaliou você com ${nota} estrelas${comentario ? `: "${comentario.substring(0, 80)}${comentario.length > 80 ? '...' : ''}"` : ''}`,
-          lida: false,
-          arquivada: false,
-          urgente: false,
-          data: serverTimestamp(),
-          metadata: {
-            clienteNome: nomeExibido,
-            nota: nota,
-            comentario: comentario || '',
-            anonimo: anonimo,
-            telefone: telefoneCliente
-          },
-          tags: ["avaliacao", "review", "cliente"]
-        });
-        
-        console.log(`✅ Notificação criada para profissional ${profissionalId}`);
-        return true;
-        
-      } catch (error) {
-        console.error('❌ Erro ao criar notificação:', error);
-        showToast('Erro', 'Não foi possível criar notificação da avaliação', 'error');
-        return false;
-      }
     }
 
     // Load notifications from Firestore
     async function loadNotifications() {
-      try {
-        loadingState.style.display = 'block';
-        emptyState.style.display = 'none';
-        notificationList.style.display = 'none';
+        try {
+            loadingState.style.display = 'block';
+            emptyState.style.display = 'none';
+            notificationList.style.display = 'none';
 
-        const q = query(
-          collection(db, "notificacoes"),
-          where("profissionalId", "==", currentUser.uid)
-        );
+            const q = query(
+                collection(db, "notificacoes"),
+                where("profissionalId", "==", currentUser.uid)
+            );
 
-        const querySnapshot = await getDocs(q);
-        notifications = [];
-        
-        querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data();
-          
-          const notificacao = {
-            id: docSnapshot.id,
-            titulo: data.titulo || 'Nova notificação',
-            descricao: data.descricao || '',
-            tipo: data.tipo || 'system',
-            lida: data.lida !== undefined ? data.lida : false,
-            arquivada: data.arquivada !== undefined ? data.arquivada : false,
-            urgente: data.urgente !== undefined ? data.urgente : false,
-            profissionalId: data.profissionalId || currentUser.uid,
-            data: data.data?.toDate() || new Date(),
-            metadata: data.metadata || {},
-            tags: data.tags || []
-          };
-          
-          notifications.push(notificacao);
-        });
+            const querySnapshot = await getDocs(q);
+            notifications = [];
+            
+            querySnapshot.forEach((docSnapshot) => {
+                const data = docSnapshot.data();
+                notifications.push({
+                    id: docSnapshot.id,
+                    titulo: data.titulo || 'Nova notificação',
+                    descricao: data.descricao || '',
+                    tipo: data.tipo || 'system',
+                    lida: data.lida !== undefined ? data.lida : false,
+                    arquivada: data.arquivada !== undefined ? data.arquivada : false,
+                    urgente: data.urgente !== undefined ? data.urgente : false,
+                    profissionalId: data.profissionalId || currentUser.uid,
+                    data: data.data?.toDate() || new Date(),
+                    metadata: data.metadata || {},
+                    tags: data.tags || []
+                });
+            });
 
-        notifications.sort((a, b) => b.data - a.data);
-        
-        updateCounters();
-        renderNotifications();
-        updateUnreadBadge();
-        
-        loadingState.style.display = 'none';
-        
-        if (notifications.length === 0) {
-          emptyState.style.display = 'block';
-        } else {
-          notificationList.style.display = 'flex';
+            notifications.sort((a, b) => b.data - a.data);
+            updateCounters();
+            renderNotifications();
+            updateUnreadBadge();
+            
+            loadingState.style.display = 'none';
+            
+            if (notifications.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                notificationList.style.display = 'flex';
+            }
+
+        } catch (error) {
+            loadingState.style.display = 'none';
+            emptyState.style.display = 'block';
+            showToast('Erro', 'Não foi possível carregar as notificações');
         }
-
-      } catch (error) {
-        loadingState.style.display = 'none';
-        emptyState.style.display = 'block';
-        showToast('Erro', 'Não foi possível carregar as notificações', 'error');
-      }
     }
 
     // Load reviews from Firestore
     async function loadReviews() {
-      try {
-        const q = query(
-          collection(db, "avaliacoes"),
-          where("profissionalId", "==", currentUser.uid),
-          where("status", "==", "aprovado"),
-          orderBy("data", "desc")
-        );
+        try {
+            const q = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", currentUser.uid),
+                where("status", "==", "aprovado"),
+                orderBy("data", "desc")
+            );
 
-        const querySnapshot = await getDocs(q);
-        reviews = [];
-        
-        querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data();
-          
-          const review = {
-            id: docSnapshot.id,
-            clienteId: data.clienteId,
-            clienteNome: data.clienteNome || 'Cliente',
-            clienteFoto: data.clienteFoto || '',
-            nota: data.nota || 0,
-            comentario: data.comentario || '',
-            anonimo: data.anonimo || false,
-            data: data.data?.toDate() || new Date(),
-            resposta: data.resposta || null,
-            dataResposta: data.dataResposta?.toDate() || null
-          };
-          
-          reviews.push(review);
-        });
+            const querySnapshot = await getDocs(q);
+            reviews = [];
+            
+            querySnapshot.forEach((docSnapshot) => {
+                const data = docSnapshot.data();
+                reviews.push({
+                    id: docSnapshot.id,
+                    clienteId: data.clienteId,
+                    clienteNome: data.clienteNome || 'Cliente',
+                    clienteFoto: data.clienteFoto || '',
+                    nota: data.nota || 0,
+                    comentario: data.comentario || '',
+                    anonimo: data.anonimo || false,
+                    data: data.data?.toDate() || new Date(),
+                    resposta: data.resposta || null,
+                    dataResposta: data.dataResposta?.toDate() || null
+                });
+            });
 
-        // Atualizar estatísticas de avaliações
-        updateReviewStats();
-
-      } catch (error) {
-        console.log('Nenhuma avaliação encontrada ou erro:', error);
-      }
+            updateReviewStats();
+        } catch (error) {}
     }
 
     // Update review statistics
     function updateReviewStats() {
-      const total = reviews.length;
-      if (total === 0) {
-        newReviewsEl.textContent = '0';
-        return;
-      }
+        const total = reviews.length;
+        if (total === 0) {
+            newReviewsEl.textContent = '0';
+            return;
+        }
 
-      // Contar avaliações dos últimos 30 dias
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
 
-      // Calcular média
-      const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
-      const average = totalStars / total;
-
-      // Contar por nota
-      const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
-
-      newReviewsEl.textContent = recentReviews.length;
+        newReviewsEl.textContent = recentReviews.length;
     }
 
     // Render notifications based on filters
     function renderNotifications() {
-      const filteredNotifications = notifications.filter(notification => {
-        if (currentFilter !== 'all' && notification.tipo !== currentFilter) {
-          return false;
-        }
-        
-        if (currentStatusFilter === 'unread' && notification.lida) {
-          return false;
-        }
-        if (currentStatusFilter === 'read' && !notification.lida) {
-          return false;
-        }
-        
-        if (currentTab === 'important' && !notification.urgente) {
-          return false;
-        }
-        if (currentTab === 'archived' && notification.arquivada) {
-          return false;
-        }
-        if (currentTab !== 'archived' && notification.arquivada) {
-          return false;
-        }
-        
-        const searchTerm = searchInput.value.toLowerCase();
-        if (searchTerm) {
-          const searchableText = (
-            (notification.titulo || '') + ' ' +
-            (notification.descricao || '') + ' ' +
-            (notification.metadata?.clienteNome || '') + ' ' +
-            (notification.metadata?.servico || '')
-          ).toLowerCase();
-          
-          if (!searchableText.includes(searchTerm)) {
-            return false;
-          }
-        }
-        
-        return true;
-      });
+        const filteredNotifications = notifications.filter(notification => {
+            if (currentFilter !== 'all' && notification.tipo !== currentFilter) {
+                return false;
+            }
+            
+            if (currentStatusFilter === 'unread' && notification.lida) {
+                return false;
+            }
+            if (currentStatusFilter === 'read' && !notification.lida) {
+                return false;
+            }
+            
+            if (currentTab === 'important' && !notification.urgente) {
+                return false;
+            }
+            if (currentTab === 'archived' && notification.arquivada) {
+                return false;
+            }
+            if (currentTab !== 'archived' && notification.arquivada) {
+                return false;
+            }
+            
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                const searchableText = (
+                    (notification.titulo || '') + ' ' +
+                    (notification.descricao || '') + ' ' +
+                    (notification.metadata?.clienteNome || '') + ' ' +
+                    (notification.metadata?.servico || '')
+                ).toLowerCase();
+                
+                if (!searchableText.includes(searchTerm)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
 
-      notificationList.innerHTML = '';
+        notificationList.innerHTML = '';
 
-      if (filteredNotifications.length === 0) {
-        const emptyMessage = document.createElement('div');
-        emptyMessage.className = 'empty-state';
-        emptyMessage.innerHTML = `
-          <i class="far fa-bell"></i>
-          <h4>Nenhuma notificação encontrada</h4>
-          <p>Tente alterar os filtros ou faça uma nova busca.</p>
-        `;
-        notificationList.appendChild(emptyMessage);
-        return;
-      }
+        if (filteredNotifications.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'empty-state';
+            emptyMessage.innerHTML = `
+                <i class="far fa-bell"></i>
+                <h4>Nenhuma notificação encontrada</h4>
+                <p>Tente alterar os filtros ou faça uma nova busca.</p>
+            `;
+            notificationList.appendChild(emptyMessage);
+            return;
+        }
 
-      filteredNotifications.forEach(notification => {
-        const card = createNotificationCard(notification);
-        notificationList.appendChild(card);
-      });
+        filteredNotifications.forEach(notification => {
+            const card = createNotificationCard(notification);
+            notificationList.appendChild(card);
+        });
     }
 
     // Create notification card HTML
     function createNotificationCard(notification) {
-      const div = document.createElement('div');
-      
-      const classes = ['notification-card'];
-      if (!notification.lida) classes.push('unread');
-      if (notification.urgente) classes.push('urgent');
-      
-      let typeIcon = 'fas fa-info-circle';
-      let typeClass = 'type-system';
-      
-      switch (notification.tipo) {
-        case 'orcamento':
-          typeIcon = 'fas fa-file-invoice-dollar';
-          typeClass = 'type-orcamento';
-          break;
-        case 'review':
-          typeIcon = 'fas fa-star';
-          typeClass = 'type-review';
-          break;
-        case 'message':
-          typeIcon = 'fas fa-comment';
-          typeClass = 'type-message';
-          break;
-        case 'alert':
-          typeIcon = 'fas fa-exclamation-triangle';
-          typeClass = 'type-alert';
-          break;
-      }
+        const div = document.createElement('div');
+        
+        const classes = ['notification-card'];
+        if (!notification.lida) classes.push('unread');
+        if (notification.urgente) classes.push('urgent');
+        
+        let typeIcon = 'fas fa-info-circle';
+        let typeClass = 'type-system';
+        
+        switch (notification.tipo) {
+            case 'orcamento':
+                typeIcon = 'fas fa-file-invoice-dollar';
+                typeClass = 'type-orcamento';
+                break;
+            case 'review':
+                typeIcon = 'fas fa-star';
+                typeClass = 'type-review';
+                break;
+            case 'message':
+                typeIcon = 'fas fa-comment';
+                typeClass = 'type-message';
+                break;
+            case 'alert':
+                typeIcon = 'fas fa-exclamation-triangle';
+                typeClass = 'type-alert';
+                break;
+        }
 
-      const timeAgo = formatTimeAgo(notification.data);
-      
-      div.className = classes.join(' ');
-      div.innerHTML = `
-        <div class="notification-type ${typeClass}">
-          <i class="${typeIcon}"></i>
-        </div>
+        const timeAgo = formatTimeAgo(notification.data);
         
-        <div class="notification-content">
-          <div class="notification-header">
-            <div class="notification-title">
-              ${notification.titulo}
-              ${!notification.lida ? '<span class="badge-new">Nova</span>' : ''}
+        div.className = classes.join(' ');
+        div.innerHTML = `
+            <div class="notification-type ${typeClass}">
+                <i class="${typeIcon}"></i>
             </div>
-            <div class="notification-time">
-              <i class="fas fa-clock"></i> ${timeAgo}
+            
+            <div class="notification-content">
+                <div class="notification-header">
+                    <div class="notification-title">
+                        ${notification.titulo}
+                        ${!notification.lida ? '<span class="badge-new">Nova</span>' : ''}
+                    </div>
+                    <div class="notification-time">
+                        <i class="fas fa-clock"></i> ${timeAgo}
+                    </div>
+                </div>
+                
+                <div class="notification-description">
+                    ${notification.descricao}
+                </div>
+                
+                ${notification.metadata && Object.keys(notification.metadata).length > 0 ? `
+                    <div class="notification-meta">
+                        ${notification.metadata.clienteNome ? `
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>${notification.metadata.clienteNome}</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${notification.metadata.servico ? `
+                            <div class="meta-item">
+                                <i class="fas fa-tools"></i>
+                                <span>${notification.metadata.servico}</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${notification.metadata.telefone ? `
+                            <div class="meta-item">
+                                <i class="fas fa-phone"></i>
+                                <span>${notification.metadata.telefone}</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${notification.metadata.cidade ? `
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${notification.metadata.cidade}</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${notification.metadata.nota ? `
+                            <div class="meta-item">
+                                <div class="rating-stars">
+                                    ${getStarsHTML(notification.metadata.nota)}
+                                    <span class="rating-number">${notification.metadata.nota.toFixed(1)}</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                ${notification.tags && notification.tags.length > 0 ? `
+                    <div class="notification-tags">
+                        ${notification.tags.map(tag => `
+                            <span class="tag">
+                                <i class="fas fa-tag"></i>
+                                ${tag}
+                            </span>
+                        `).join('')}
+                    </div>
+                ` : ''}
             </div>
-          </div>
-          
-          <div class="notification-description">
-            ${notification.descricao}
-          </div>
-          
-          ${notification.metadata && Object.keys(notification.metadata).length > 0 ? `
-            <div class="notification-meta">
-              ${notification.metadata.clienteNome ? `
-                <div class="meta-item">
-                  <i class="fas fa-user"></i>
-                  <span>${notification.metadata.clienteNome}</span>
-                </div>
-              ` : ''}
-              
-              ${notification.metadata.servico ? `
-                <div class="meta-item">
-                  <i class="fas fa-tools"></i>
-                  <span>${notification.metadata.servico}</span>
-                </div>
-              ` : ''}
-              
-              ${notification.metadata.telefone ? `
-                <div class="meta-item">
-                  <i class="fas fa-phone"></i>
-                  <span>${notification.metadata.telefone}</span>
-                </div>
-              ` : ''}
-              
-              ${notification.metadata.cidade ? `
-                <div class="meta-item">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span>${notification.metadata.cidade}</span>
-                </div>
-              ` : ''}
-              
-              ${notification.metadata.nota ? `
-                <div class="meta-item">
-                  <div class="rating-stars">
-                    ${getStarsHTML(notification.metadata.nota)}
-                    <span class="rating-number">${notification.metadata.nota.toFixed(1)}</span>
-                  </div>
-                </div>
-              ` : ''}
+            
+            <div class="notification-actions">
+                ${notification.tipo === 'orcamento' ? `
+                    <button class="btn-action btn-primary" onclick="respondToOrcamento('${notification.id}')">
+                        <i class="fas fa-reply"></i> Responder
+                    </button>
+                ` : ''}
+                
+                ${notification.metadata?.telefone ? `
+                    <button class="btn-action btn-whatsapp" onclick="openWhatsApp('${notification.metadata.telefone}')">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                ` : ''}
+                
+                ${notification.tipo === 'review' ? `
+                    <button class="btn-action btn-view-reviews" onclick="showAllReviews()">
+                        <i class="fas fa-star"></i> Ver Avaliações
+                    </button>
+                ` : ''}
+                
+                <button class="btn-mark-read" onclick="markAsRead('${notification.id}')">
+                    ${notification.lida ?
+                        '<i class="fas fa-envelope"></i> Marcar como não lida' :
+                        '<i class="fas fa-check"></i> Marcar como lida'
+                    }
+                </button>
+                
+                <button class="btn-mark-read btn-delete" onclick="deleteNotification('${notification.id}')">
+                    <i class="fas fa-trash-alt"></i> Excluir
+                </button>
             </div>
-          ` : ''}
-          
-          ${notification.tags && notification.tags.length > 0 ? `
-            <div class="notification-tags">
-              ${notification.tags.map(tag => `
-                <span class="tag">
-                  <i class="fas fa-tag"></i>
-                  ${tag}
-                </span>
-              `).join('')}
-            </div>
-          ` : ''}
-        </div>
+        `;
         
-        <div class="notification-actions">
-          ${notification.tipo === 'orcamento' ? `
-            <button class="btn-action btn-primary" onclick="respondToOrcamento('${notification.id}')">
-              <i class="fas fa-reply"></i> Responder
-            </button>
-          ` : ''}
-          
-          ${notification.metadata?.telefone ? `
-            <button class="btn-action btn-whatsapp" onclick="openWhatsApp('${notification.metadata.telefone}')">
-              <i class="fab fa-whatsapp"></i> WhatsApp
-            </button>
-          ` : ''}
-          
-          ${notification.tipo === 'review' ? `
-            <button class="btn-action btn-view-reviews" onclick="showAllReviews()">
-              <i class="fas fa-star"></i> Ver Avaliações
-            </button>
-          ` : ''}
-          
-          <button class="btn-mark-read" onclick="markAsRead('${notification.id}')">
-            ${notification.lida ?
-              '<i class="fas fa-envelope"></i> Marcar como não lida' :
-              '<i class="fas fa-check"></i> Marcar como lida'
-            }
-          </button>
-          
-          <button class="btn-mark-read btn-delete" onclick="deleteNotification('${notification.id}')" title="Excluir notificação">
-            <i class="fas fa-trash-alt"></i> Excluir
-          </button>
-        </div>
-      `;
-      
-      return div;
+        return div;
     }
 
     // Helper function to get stars HTML
     function getStarsHTML(rating) {
-      const fullStars = Math.floor(rating);
-      const hasHalfStar = rating % 1 >= 0.5;
-      let starsHTML = '';
-      
-      for (let i = 1; i <= 5; i++) {
-        if (i <= fullStars) {
-          starsHTML += '<span class="rating-star"><i class="fas fa-star"></i></span>';
-        } else if (i === fullStars + 1 && hasHalfStar) {
-          starsHTML += '<span class="rating-star"><i class="fas fa-star-half-alt"></i></span>';
-        } else {
-          starsHTML += '<span class="rating-star empty"><i class="far fa-star"></i></span>';
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        let starsHTML = '';
+        
+        for (let i = 1; i <= 5; i++) {
+            if (i <= fullStars) {
+                starsHTML += '<span class="rating-star"><i class="fas fa-star"></i></span>';
+            } else if (i === fullStars + 1 && hasHalfStar) {
+                starsHTML += '<span class="rating-star"><i class="fas fa-star-half-alt"></i></span>';
+            } else {
+                starsHTML += '<span class="rating-star empty"><i class="far fa-star"></i></span>';
+            }
         }
-      }
-      
-      return starsHTML;
+        
+        return starsHTML;
     }
 
     // Update counters
     function updateCounters() {
-      const total = notifications.length;
-      const unread = notifications.filter(n => !n.lida).length;
-      const read = notifications.filter(n => n.lida).length;
-      const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
-      const review = notifications.filter(n => n.tipo === 'review').length;
-      const message = notifications.filter(n => n.tipo === 'message').length;
-      const system = notifications.filter(n => n.tipo === 'system').length;
-      const urgent = notifications.filter(n => n.urgente).length;
+        const total = notifications.length;
+        const unread = notifications.filter(n => !n.lida).length;
+        const read = notifications.filter(n => n.lida).length;
+        const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
+        const review = notifications.filter(n => n.tipo === 'review').length;
+        const message = notifications.filter(n => n.tipo === 'message').length;
+        const system = notifications.filter(n => n.tipo === 'system').length;
+        const urgent = notifications.filter(n => n.urgente).length;
 
-      totalNotificationsEl.textContent = total;
-      pendingOrcamentoEl.textContent = orcamento;
-      urgentAlertsEl.textContent = urgent;
+        totalNotificationsEl.textContent = total;
+        pendingOrcamentoEl.textContent = orcamento;
+        urgentAlertsEl.textContent = urgent;
 
-      // Atualizar estatísticas de avaliações
-      if (reviews.length > 0) {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-        newReviewsEl.textContent = recentReviews.length;
-      } else {
-        newReviewsEl.textContent = '0';
-      }
+        if (reviews.length > 0) {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
+            newReviewsEl.textContent = recentReviews.length;
+        } else {
+            newReviewsEl.textContent = '0';
+        }
 
-      countAllEl.textContent = total;
-      countOrcamentoEl.textContent = orcamento;
-      countReviewEl.textContent = review;
-      countMessageEl.textContent = message;
-      countSystemEl.textContent = system;
-      countUnreadEl.textContent = unread;
-      countReadEl.textContent = read;
-      countStatusAllEl.textContent = total;
+        countAllEl.textContent = total;
+        countOrcamentoEl.textContent = orcamento;
+        countReviewEl.textContent = review;
+        countMessageEl.textContent = message;
+        countSystemEl.textContent = system;
+        countUnreadEl.textContent = unread;
+        countReadEl.textContent = read;
+        countStatusAllEl.textContent = total;
     }
 
     // Update unread badge
     function updateUnreadBadge() {
-      const unreadCount = notifications.filter(n => !n.lida).length;
-      unreadBadge.textContent = unreadCount;
-      
-      if (unreadCount === 0) {
-        unreadBadge.style.display = 'none';
-      } else {
-        unreadBadge.style.display = 'flex';
-      }
+        const unreadCount = notifications.filter(n => !n.lida).length;
+        unreadBadge.textContent = unreadCount;
+        unreadBadge.style.display = unreadCount === 0 ? 'none' : 'flex';
     }
 
-    // Mark notification as read/unread
+    // Funções globais
     window.markAsRead = async function(notificationId) {
-      try {
-        const notification = notifications.find(n => n.id === notificationId);
-        if (!notification) return;
+        try {
+            const notification = notifications.find(n => n.id === notificationId);
+            if (!notification) return;
 
-        const notificationRef = doc(db, "notificacoes", notificationId);
-        await updateDoc(notificationRef, {
-          lida: !notification.lida,
-          atualizadaEm: serverTimestamp()
-        });
+            const notificationRef = doc(db, "notificacoes", notificationId);
+            await updateDoc(notificationRef, {
+                lida: !notification.lida,
+                atualizadaEm: serverTimestamp()
+            });
 
-        notification.lida = !notification.lida;
-        
-        updateCounters();
-        updateUnreadBadge();
-        renderNotifications();
-        
-        showToast('Sucesso',
-          notification.lida ? 'Notificação marcada como lida' : 'Notificação marcada como não lida',
-          'success'
-        );
+            notification.lida = !notification.lida;
+            updateCounters();
+            updateUnreadBadge();
+            renderNotifications();
+            
+            showToast('Sucesso', notification.lida ? 'Notificação marcada como lida' : 'Notificação marcada como não lida');
 
-      } catch (error) {
-        showToast('Erro', 'Não foi possível atualizar a notificação', 'error');
-      }
+        } catch (error) {
+            showToast('Erro', 'Não foi possível atualizar a notificação');
+        }
     };
 
-    // Delete notification
     window.deleteNotification = async function(notificationId) {
-      try {
-        const confirmDelete = confirm('Tem certeza que deseja excluir esta notificação? Esta ação não pode ser desfeita.');
-        
-        if (!confirmDelete) return;
+        try {
+            const confirmDelete = confirm('Tem certeza que deseja excluir esta notificação?');
+            if (!confirmDelete) return;
 
-        const notificationRef = doc(db, "notificacoes", notificationId);
-        await deleteDoc(notificationRef);
+            const notificationRef = doc(db, "notificacoes", notificationId);
+            await deleteDoc(notificationRef);
 
-        const index = notifications.findIndex(n => n.id === notificationId);
-        if (index !== -1) {
-          notifications.splice(index, 1);
+            const index = notifications.findIndex(n => n.id === notificationId);
+            if (index !== -1) {
+                notifications.splice(index, 1);
+            }
+
+            updateCounters();
+            updateUnreadBadge();
+            renderNotifications();
+            showToast('Sucesso', 'Notificação excluída com sucesso');
+
+        } catch (error) {
+            showToast('Erro', 'Não foi possível excluir a notificação');
         }
-
-        updateCounters();
-        updateUnreadBadge();
-        renderNotifications();
-        
-        showToast('Sucesso', 'Notificação excluída com sucesso', 'success');
-
-      } catch (error) {
-        showToast('Erro', 'Não foi possível excluir a notificação', 'error');
-      }
     };
 
-    // Mark all as read
     window.markAllAsRead = async function() {
-      try {
-        const unreadNotifications = notifications.filter(n => !n.lida);
-        
-        if (unreadNotifications.length === 0) {
-          showToast('Informação', 'Todas as notificações já estão lidas', 'info');
-          return;
-        }
-        
-        for (const notification of unreadNotifications) {
-          const notificationRef = doc(db, "notificacoes", notification.id);
-          await updateDoc(notificationRef, {
-            lida: true,
-            atualizadaEm: serverTimestamp()
-          });
-          
-          notification.lida = true;
-        }
+        try {
+            const unreadNotifications = notifications.filter(n => !n.lida);
+            if (unreadNotifications.length === 0) {
+                showToast('Informação', 'Todas as notificações já estão lidas');
+                return;
+            }
+            
+            for (const notification of unreadNotifications) {
+                const notificationRef = doc(db, "notificacoes", notification.id);
+                await updateDoc(notificationRef, {
+                    lida: true,
+                    atualizadaEm: serverTimestamp()
+                });
+                notification.lida = true;
+            }
 
-        updateCounters();
-        updateUnreadBadge();
-        renderNotifications();
-        
-        showToast('Sucesso', 'Todas as notificações foram marcadas como lidas', 'success');
+            updateCounters();
+            updateUnreadBadge();
+            renderNotifications();
+            showToast('Sucesso', 'Todas as notificações foram marcadas como lidas');
 
-      } catch (error) {
-        showToast('Erro', 'Não foi possível marcar todas como lidas', 'error');
-      }
+        } catch (error) {
+            showToast('Erro', 'Não foi possível marcar todas como lidas');
+        }
     };
 
-    // Filter by type
     window.filterByType = function(type, element) {
-      document.querySelectorAll('.filter-group:first-child .filter-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      element.classList.add('active');
-      
-      currentFilter = type;
-      renderNotifications();
+        document.querySelectorAll('.filter-group:first-child .filter-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
+        currentFilter = type;
+        renderNotifications();
     };
 
-    // Filter by status
     window.filterByStatus = function(status, element) {
-      const parent = element.closest('.filter-group');
-      parent.querySelectorAll('.filter-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      element.classList.add('active');
-      
-      currentStatusFilter = status;
-      renderNotifications();
+        const parent = element.closest('.filter-group');
+        parent.querySelectorAll('.filter-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
+        currentStatusFilter = status;
+        renderNotifications();
     };
 
-    // Switch tab
     window.switchTab = function(tab, element) {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      element.classList.add('active');
-      
-      currentTab = tab;
-      renderNotifications();
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        element.classList.add('active');
+        currentTab = tab;
+        renderNotifications();
     };
 
-    // Search notifications
     window.searchNotifications = function() {
-      renderNotifications();
+        renderNotifications();
     };
 
-    // Refresh notifications
     window.refreshNotifications = async function() {
-      await loadNotifications();
-      await loadReviews();
-      showToast('Atualizado', 'Notificações atualizadas com sucesso', 'success');
+        await loadNotifications();
+        await loadReviews();
+        showToast('Atualizado', 'Notificações atualizadas com sucesso');
     };
 
-    // Open WhatsApp
     window.openWhatsApp = function(phone) {
-      const cleanPhone = phone.replace(/\D/g, '');
-      const message = "Olá! Vi sua mensagem no ScanHub e gostaria de conversar sobre o serviço.";
-      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        const cleanPhone = phone.replace(/\D/g, '');
+        const message = "Olá! Vi sua mensagem no ScanHub e gostaria de conversar sobre o serviço.";
+        window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
-    // Respond to orcamento
     window.respondToOrcamento = async function(notificationId) {
-      showToast('Informação',
-        'Para responder ao orçamento, acesse a página de pedidos ou entre em contato pelo WhatsApp',
-        'info'
-      );
+        showToast('Informação', 'Para responder ao orçamento, acesse a página de pedidos ou entre em contato pelo WhatsApp');
     };
 
-    // Show all reviews
     window.showAllReviews = async function() {
-      try {
-        const reviewsListEl = document.getElementById('reviewsList');
-        const reviewStatsEl = document.getElementById('reviewStats');
-        
-        // Calcular estatísticas
-        const total = reviews.length;
-        if (total === 0) {
-          reviewsListEl.innerHTML = `
-            <div class="text-center py-5">
-              <i class="fas fa-star fa-3x text-muted mb-3"></i>
-              <h4>Nenhuma avaliação ainda</h4>
-              <p class="text-muted">Você ainda não recebeu avaliações dos clientes.</p>
-            </div>
-          `;
-          
-          // Atualizar stats
-          document.getElementById('totalReviewsCount').textContent = '0';
-          document.getElementById('averageRating').textContent = '0.0';
-          document.getElementById('fiveStarCount').textContent = '0';
-          document.getElementById('last30Days').textContent = '0';
-          
-          modalReviews.show();
-          return;
+        try {
+            const reviewsListEl = document.getElementById('reviewsList');
+            const reviewStatsEl = document.getElementById('reviewStats');
+            
+            const total = reviews.length;
+            if (total === 0) {
+                reviewsListEl.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h4>Nenhuma avaliação ainda</h4>
+                        <p class="text-muted">Você ainda não recebeu avaliações dos clientes.</p>
+                    </div>
+                `;
+                
+                document.getElementById('totalReviewsCount').textContent = '0';
+                document.getElementById('averageRating').textContent = '0.0';
+                document.getElementById('fiveStarCount').textContent = '0';
+                document.getElementById('last30Days').textContent = '0';
+                
+                modalReviews.show();
+                return;
+            }
+            
+            const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
+            const average = (totalStars / total).toFixed(1);
+            
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
+            
+            const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
+            
+            document.getElementById('totalReviewsCount').textContent = total;
+            document.getElementById('averageRating').textContent = average;
+            document.getElementById('fiveStarCount').textContent = fiveStars;
+            document.getElementById('last30Days').textContent = recentReviews.length;
+            
+            reviewsListEl.innerHTML = reviews.map(review => {
+                const notaInt = Math.floor(review.nota);
+                const estrelas = Array(5).fill(0).map((_, i) => 
+                    `<span class="rating-star ${i < notaInt ? '' : 'empty'}">
+                        <i class="${i < notaInt ? 'fas' : 'far'} fa-star"></i>
+                    </span>`
+                ).join('');
+                
+                const dataFormatada = new Intl.DateTimeFormat('pt-BR').format(review.data);
+                const nomeExibido = review.anonimo ? 'Anônimo' : review.clienteNome;
+                const avatar = review.anonimo ? 
+                    'https://ui-avatars.com/api/?name=Cliente&background=6c757d&color=fff' : 
+                    (review.clienteFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeExibido)}&background=44689a&color=fff`);
+                
+                let respostaHTML = '';
+                if (review.resposta) {
+                    const dataResposta = review.dataResposta ? new Intl.DateTimeFormat('pt-BR').format(review.dataResposta) : '';
+                    respostaHTML = `
+                        <div class="review-response">
+                            <span class="response-label">
+                                <i class="fas fa-reply me-1"></i> Sua resposta
+                                ${dataResposta ? ` • ${dataResposta}` : ''}
+                            </span>
+                            <p class="mb-0">${review.resposta}</p>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <img src="${avatar}" alt="${nomeExibido}" class="reviewer-avatar">
+                                <div>
+                                    <div class="reviewer-name">${nomeExibido}</div>
+                                    <div class="review-date">${dataFormatada}</div>
+                                </div>
+                            </div>
+                            <div class="rating-stars">
+                                ${estrelas}
+                                <span class="rating-number">${review.nota.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            ${review.comentario || 'Sem comentário.'}
+                        </div>
+                        ${respostaHTML}
+                    </div>
+                `;
+            }).join('');
+            
+            modalReviews.show();
+            
+        } catch (error) {
+            showToast('Erro', 'Não foi possível carregar as avaliações');
         }
-        
-        // Calcular estatísticas
-        const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
-        const average = (totalStars / total).toFixed(1);
-        
-        // Contar avaliações dos últimos 30 dias
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-        
-        // Contar por nota
-        const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
-        const fourStars = reviews.filter(r => Math.floor(r.nota) === 4).length;
-        const threeStars = reviews.filter(r => Math.floor(r.nota) === 3).length;
-        const twoStars = reviews.filter(r => Math.floor(r.nota) === 2).length;
-        const oneStars = reviews.filter(r => Math.floor(r.nota) === 1).length;
-        
-        // Atualizar stats
-        document.getElementById('totalReviewsCount').textContent = total;
-        document.getElementById('averageRating').textContent = average;
-        document.getElementById('fiveStarCount').textContent = fiveStars;
-        document.getElementById('last30Days').textContent = recentReviews.length;
-        
-        // Renderizar lista de avaliações
-        reviewsListEl.innerHTML = reviews.map(review => {
-          const notaInt = Math.floor(review.nota);
-          const estrelas = Array(5).fill(0).map((_, i) => 
-            `<span class="rating-star ${i < notaInt ? '' : 'empty'}">
-              <i class="${i < notaInt ? 'fas' : 'far'} fa-star"></i>
-            </span>`
-          ).join('');
-          
-          const dataFormatada = formatDate(review.data);
-          const nomeExibido = review.anonimo ? 'Anônimo' : review.clienteNome;
-          const avatar = review.anonimo ? 
-            'https://ui-avatars.com/api/?name=Cliente&background=6c757d&color=fff' : 
-            (review.clienteFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeExibido)}&background=44689a&color=fff`);
-          
-          let respostaHTML = '';
-          if (review.resposta) {
-            const dataResposta = review.dataResposta ? formatDate(review.dataResposta) : '';
-            respostaHTML = `
-              <div class="review-response">
-                <span class="response-label">
-                  <i class="fas fa-reply me-1"></i> Sua resposta
-                  ${dataResposta ? ` • ${dataResposta}` : ''}
-                </span>
-                <p class="mb-0">${review.resposta}</p>
-              </div>
-            `;
-          }
-          
-          return `
-            <div class="review-item">
-              <div class="review-header">
-                <div class="reviewer-info">
-                  <img src="${avatar}" alt="${nomeExibido}" class="reviewer-avatar">
-                  <div>
-                    <div class="reviewer-name">${nomeExibido}</div>
-                    <div class="review-date">${dataFormatada}</div>
-                  </div>
-                </div>
-                <div class="rating-stars">
-                  ${estrelas}
-                  <span class="rating-number">${review.nota.toFixed(1)}</span>
-                </div>
-              </div>
-              <div class="review-content">
-                ${review.comentario || 'Sem comentário.'}
-              </div>
-              ${respostaHTML}
-            </div>
-          `;
-        }).join('');
-        
-        modalReviews.show();
-        
-      } catch (error) {
-        showToast('Erro', 'Não foi possível carregar as avaliações', 'error');
-      }
     };
 
-    // ✅ FUNÇÃO QUE O PERFIL PÚBLICO VAI CHAMAR PARA CRIAR NOTIFICAÇÃO
-    window.criarNotificacaoAvaliacao = async function(profissionalId, nota, comentario, clienteNome, clienteId, anonimo) {
-      return await criarNotificacaoParaProfissional(profissionalId, clienteId, clienteNome, nota, comentario, anonimo);
-    };
-
-    // Helper function to format date
-    function formatDate(date) {
-      return new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
+    // Helper function to format time ago
+    function formatTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffMins < 1) {
+            return 'Agora mesmo';
+        } else if (diffMins < 60) {
+            return `Há ${diffMins} min`;
+        } else if (diffHours < 24) {
+            return `Há ${diffHours} h`;
+        } else if (diffDays === 1) {
+            return 'Ontem';
+        } else if (diffDays < 7) {
+            return `Há ${diffDays} dias`;
+        } else {
+            return new Intl.DateTimeFormat('pt-BR').format(date);
+        }
     }
 
     // Show toast notification
-    function showToast(title, message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      
-      const icon = type === 'success' ? 'check-circle' :
-            type === 'error' ? 'exclamation-triangle' : 'info-circle';
-      
-      toast.innerHTML = `
-        <div class="toast-icon">
-          <i class="fas fa-${icon}"></i>
-        </div>
-        <div class="toast-content">
-          <h5>${title}</h5>
-          <p>${message}</p>
-        </div>
-      `;
-      
-      toastContainer.appendChild(toast);
-      
-      setTimeout(() => toast.classList.add('show'), 10);
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    // Format time ago
-    function formatTimeAgo(date) {
-      const now = new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      
-      if (diffMins < 1) {
-        return 'Agora mesmo';
-      } else if (diffMins < 60) {
-        return `Há ${diffMins} min`;
-      } else if (diffHours < 24) {
-        return `Há ${diffHours} h`;
-      } else if (diffDays === 1) {
-        return 'Ontem';
-      } else if (diffDays < 7) {
-        return `Há ${diffDays} dias`;
-      } else {
-        return date.toLocaleDateString('pt-BR');
-      }
+    function showToast(title, message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-success';
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="toast-content">
+                <h5>${title}</h5>
+                <p>${message}</p>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     // Auto-refresh notifications every 30 seconds
     setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        loadNotifications();
-        loadReviews();
-      }
+        if (document.visibilityState === 'visible') {
+            loadNotifications();
+            loadReviews();
+        }
     }, 30000);
-  </script>
+</script>
 </body>
 </html>
