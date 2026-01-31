@@ -84,7 +84,6 @@
         .icon-primary { background: rgba(68, 104, 154, 0.1); color: var(--primary-color); }
         .icon-danger { background: rgba(220, 53, 69, 0.1); color: var(--danger-color); }
         .icon-warning { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
-        .icon-success { background: rgba(40, 167, 69, 0.1); color: #28a745; }
 
         .config-text h5 {
             font-weight: 600;
@@ -172,52 +171,6 @@
 
     <!-- Conteúdo Principal -->
     <div class="container-main">
-        <!-- Seção Geral -->
-        <div class="section-card">
-            <h3 class="section-title">
-                <i class="fas fa-cog"></i>Configurações Gerais
-            </h3>
-            
-            <div class="config-item" onclick="window.location.href='perfil-cliente.html'">
-                <div class="config-info">
-                    <div class="config-icon icon-primary">
-                        <i class="fas fa-user-edit"></i>
-                    </div>
-                    <div class="config-text">
-                        <h5>Editar Perfil</h5>
-                        <p>Atualize suas informações pessoais</p>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-muted"></i>
-            </div>
-
-            <div class="config-item">
-                <div class="config-info">
-                    <div class="config-icon icon-success">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="config-text">
-                        <h5>Notificações</h5>
-                        <p>Gerencie suas preferências de notificação</p>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-muted"></i>
-            </div>
-
-            <div class="config-item">
-                <div class="config-info">
-                    <div class="config-icon icon-warning">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="config-text">
-                        <h5>Privacidade e Segurança</h5>
-                        <p>Controle seus dados e segurança</p>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-muted"></i>
-            </div>
-        </div>
-
         <!-- Seção Conta -->
         <div class="section-card">
             <h3 class="section-title">
@@ -353,20 +306,20 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Senha Atual</label>
-                        <input type="password" class="form-control" placeholder="Digite sua senha atual">
+                        <input type="password" class="form-control" id="senhaAtual" placeholder="Digite sua senha atual">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nova Senha</label>
-                        <input type="password" class="form-control" placeholder="Digite a nova senha">
+                        <input type="password" class="form-control" id="novaSenha" placeholder="Digite a nova senha">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Confirmar Nova Senha</label>
-                        <input type="password" class="form-control" placeholder="Digite novamente a nova senha">
+                        <input type="password" class="form-control" id="confirmarNovaSenha" placeholder="Digite novamente a nova senha">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" id="btnSalvarSenha">
                         <i class="fas fa-save me-2"></i>Salvar Nova Senha
                     </button>
                 </div>
@@ -377,122 +330,177 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Firebase e Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            reauthenticateWithCredential,
-            EmailAuthProvider,
-            deleteUser
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            deleteDoc,
-            collection,
-            query,
-            where,
-            getDocs
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- Firebase e Script COMPLETO ATUALIZADO -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        reauthenticateWithCredential,
+        EmailAuthProvider,
+        deleteUser,
+        updatePassword
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        deleteDoc,
+        updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Config Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.appspot.com",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Config Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.appspot.com",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Elementos
-        const confirmPassword = document.getElementById('confirmPassword');
-        const confirmText = document.getElementById('confirmText');
-        const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
-        const modalExcluirConta = new bootstrap.Modal(document.getElementById('modalExcluirConta'));
+    // Elementos
+    const confirmPassword = document.getElementById('confirmPassword');
+    const confirmText = document.getElementById('confirmText');
+    const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
+    const btnSalvarSenha = document.getElementById('btnSalvarSenha');
+    const senhaAtual = document.getElementById('senhaAtual');
+    const novaSenha = document.getElementById('novaSenha');
+    const confirmarNovaSenha = document.getElementById('confirmarNovaSenha');
 
-        // Verificar confirmação
-        confirmText.addEventListener('input', () => {
-            const password = confirmPassword.value;
-            const text = confirmText.value;
-            btnConfirmarExclusao.disabled = !(password && text === 'EXCLUIR');
-        });
+    // Verificar autenticação
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+    });
 
-        confirmPassword.addEventListener('input', () => {
-            const password = confirmPassword.value;
-            const text = confirmText.value;
-            btnConfirmarExclusao.disabled = !(password && text === 'EXCLUIR');
-        });
+    // === FUNÇÃO ALTERAR SENHA ===
+    btnSalvarSenha.addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) return;
 
-        // Excluir conta
-        btnConfirmarExclusao.addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (!user) return;
+        const senhaAtualValor = senhaAtual.value;
+        const novaSenhaValor = novaSenha.value;
+        const confirmarNovaSenhaValor = confirmarNovaSenha.value;
 
-            const password = confirmPassword.value;
-            const email = user.email;
+        // Validações
+        if (!senhaAtualValor || !novaSenhaValor || !confirmarNovaSenhaValor) {
+            alert('Preencha todos os campos!');
+            return;
+        }
 
-            try {
-                // 1. Reautenticar usuário
-                const credential = EmailAuthProvider.credential(email, password);
-                await reauthenticateWithCredential(user, credential);
+        if (novaSenhaValor !== confirmarNovaSenhaValor) {
+            alert('As novas senhas não coincidem!');
+            return;
+        }
 
-                // 2. Deletar dados do Firestore
-                const userId = user.uid;
-                
-                // Deletar usuário da coleção usuarios
-                const userRef = doc(db, "usuarios", userId);
-                await deleteDoc(userRef);
+        if (novaSenhaValor.length < 6) {
+            alert('A nova senha deve ter pelo menos 6 caracteres!');
+            return;
+        }
 
-                // Deletar outras referências (solicitações, notificações, etc.)
-                const collections = ['solicitacoes', 'notificacoes'];
-                for (const collectionName of collections) {
-                    const q = query(
-                        collection(db, collectionName),
-                        where("clienteId", "==", userId)
-                    );
-                    const querySnapshot = await getDocs(q);
-                    const deletePromises = [];
-                    querySnapshot.forEach((docSnapshot) => {
-                        deletePromises.push(deleteDoc(docSnapshot.ref));
-                    });
-                    await Promise.all(deletePromises);
-                }
-
-                // 3. Deletar conta do Firebase Auth
-                await deleteUser(user);
-
-                // 4. Redirecionar para login
-                alert('Conta excluída com sucesso!');
-                window.location.href = 'login.html';
-
-            } catch (error) {
-                console.error('Erro ao excluir conta:', error);
-                
-                if (error.code === 'auth/wrong-password') {
-                    alert('Senha incorreta!');
-                } else if (error.code === 'auth/requires-recent-login') {
-                    alert('Por favor, faça login novamente antes de excluir a conta.');
-                    window.location.href = 'login.html';
-                } else {
-                    alert('Erro ao excluir conta: ' + error.message);
-                }
+        try {
+            // Reautenticar
+            const credential = EmailAuthProvider.credential(user.email, senhaAtualValor);
+            await reauthenticateWithCredential(user, credential);
+            
+            // Atualizar senha
+            await updatePassword(user, novaSenhaValor);
+            
+            alert('✅ Senha alterada com sucesso!');
+            
+            // Fechar modal e limpar campos
+            bootstrap.Modal.getInstance(document.getElementById('modalAlterarSenha')).hide();
+            senhaAtual.value = '';
+            novaSenha.value = '';
+            confirmarNovaSenha.value = '';
+            
+        } catch (error) {
+            console.error('Erro ao alterar senha:', error);
+            
+            if (error.code === 'auth/wrong-password') {
+                alert('❌ Senha atual incorreta!');
+            } else if (error.code === 'auth/requires-recent-login') {
+                alert('⚠️ Por favor, faça login novamente para alterar a senha.');
+            } else {
+                alert('❌ Erro ao alterar senha: ' + error.message);
             }
-        });
+        }
+    });
 
-        // Verificar autenticação
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
+    // === FUNÇÃO EXCLUIR CONTA - VERSÃO FINAL ===
+    // Habilitar botão apenas quando confirmado
+    confirmText.addEventListener('input', () => {
+        const password = confirmPassword.value;
+        const text = confirmText.value;
+        btnConfirmarExclusao.disabled = !(password && text === 'EXCLUIR');
+    });
+
+    confirmPassword.addEventListener('input', () => {
+        const password = confirmPassword.value;
+        const text = confirmText.value;
+        btnConfirmarExclusao.disabled = !(password && text === 'EXCLUIR');
+    });
+
+    // Excluir conta - AGORA COM DELETE TOTAL
+    btnConfirmarExclusao.addEventListener('click', async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const password = confirmPassword.value;
+        const email = user.email;
+
+        try {
+            // 1. Reautenticar usuário
+            const credential = EmailAuthProvider.credential(email, password);
+            await reauthenticateWithCredential(user, credential);
+
+            const userId = user.uid;
+
+            // 2. DELETAR DO FIRESTORE (COMPLETAMENTE)
+            const userRef = doc(db, "usuarios", userId);
+            await deleteDoc(userRef);
+
+            // 3. DELETAR DO AUTHENTICATION (não pode mais logar)
+            await deleteUser(user);
+
+            // 4. Redirecionar para login
+            alert('✅ Conta excluída com sucesso!');
+            window.location.href = 'login.html';
+
+        } catch (error) {
+            console.error('Erro ao excluir conta:', error);
+            
+            if (error.code === 'auth/wrong-password') {
+                alert('❌ Senha incorreta!');
+                confirmPassword.focus();
+            } else if (error.code === 'auth/requires-recent-login') {
+                alert('⚠️ Por favor, faça login novamente antes de excluir a conta.');
                 window.location.href = 'login.html';
+            } else if (error.code === 'auth/user-not-found') {
+                alert('⚠️ Usuário não encontrado. Já pode ter sido excluído.');
+                window.location.href = 'login.html';
+            } else if (error.code === 'permission-denied') {
+                alert('❌ Permissão negada. Contate o suporte.');
+                console.log('Erro de permissão no Firestore:', error);
+            } else {
+                alert('❌ Erro ao excluir conta: ' + error.message);
             }
-        });
-    </script>
+            
+            // Reabilitar botão em caso de erro
+            btnConfirmarExclusao.disabled = false;
+        }
+    });
+
+    // === FUNÇÃO DESATIVAR CONTA (APENAS VISUAL) ===
+    document.querySelector('#modalDesativarConta .btn-warning').addEventListener('click', () => {
+        alert('⚠️ Funcionalidade em desenvolvimento!');
+        bootstrap.Modal.getInstance(document.getElementById('modalDesativarConta')).hide();
+    });
+</script>
 </body>
 </html>
