@@ -83,7 +83,6 @@
             width: 100%;
             height: 300px;
             object-fit: cover;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .cover-placeholder {
@@ -336,10 +335,6 @@
             border: 1px solid #e0e0e0;
         }
 
-        .info-badge i {
-            color: var(--secondary);
-        }
-
         /* Grid de Serviços/Produtos */
         .catalog-grid {
             display: grid;
@@ -359,7 +354,6 @@
         .item-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-hover);
-            border-color: rgba(68, 104, 154, 0.2);
         }
 
         .item-image {
@@ -419,24 +413,7 @@
             margin-bottom: 10px;
         }
 
-        .item-meta {
-            display: flex;
-            gap: 15px;
-            font-size: 0.85rem;
-            color: var(--gray);
-        }
-
-        .item-meta span {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Galeria de Fotos */
-        .gallery-section {
-            margin-top: 20px;
-        }
-
+        /* Galeria */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -448,12 +425,6 @@
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .gallery-item img {
@@ -534,7 +505,6 @@
 
             .tabs-nav {
                 overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
                 padding: 0;
             }
 
@@ -549,7 +519,7 @@
             }
         }
 
-        /* Modal de Orçamento */
+        /* Modal */
         .modal-content {
             border-radius: 20px;
             border: none;
@@ -563,27 +533,11 @@
             padding: 20px 30px;
         }
 
-        .modal-title {
-            font-weight: 600;
-        }
-
-        .form-control-lg {
-            padding: 12px 20px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .form-control-lg:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.25rem rgba(68, 104, 154, 0.1);
-        }
-
         /* Estilos para Sistema de Avaliação */
         .rating-section {
             margin: 25px 0;
             padding: 20px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
+            background: rgba(255, 215, 0, 0.05);
             border-radius: 15px;
             border: 1px solid rgba(255, 215, 0, 0.2);
         }
@@ -655,10 +609,6 @@
             border-radius: 5px;
         }
 
-        .reviews-container {
-            margin-top: 25px;
-        }
-
         .review-item {
             border-bottom: 1px solid #e0e0e0;
             padding: 20px 0;
@@ -673,6 +623,7 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .reviewer-info {
@@ -742,7 +693,7 @@
             color: white;
         }
 
-        /* Estrelas no Sistema de Avaliação */
+        /* Estrelas */
         .rating-stars-large {
             font-size: 2rem;
             color: #ddd;
@@ -775,17 +726,6 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 20px;
-        }
-
-        .checkbox-anonimo input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-        }
-
-        .checkbox-anonimo label {
-            cursor: pointer;
-            color: var(--dark);
         }
 
         .form-textarea {
@@ -982,9 +922,6 @@
                                 
                                 <div class="reviews-container" id="reviewsList">
                                     <!-- Avaliações serão carregadas aqui -->
-                                    <div class="text-center py-3">
-                                        <p class="text-muted">Carregando avaliações...</p>
-                                    </div>
                                 </div>
                                 
                                 <button class="btn-load-more" id="btnLoadMoreReviews" style="display: none;" onclick="carregarMaisAvaliacoes()">
@@ -994,7 +931,7 @@
                         </div>
 
                         <!-- Galeria -->
-                        <div id="galeriaSection" class="info-card gallery-section" style="display: none;">
+                        <div id="galeriaSection" class="info-card" style="display: none;">
                             <h3><i class="fas fa-images"></i> Portfólio</h3>
                             <div id="galeriaGrid" class="gallery-grid">
                                 <!-- Fotos inseridas via JS -->
@@ -1161,7 +1098,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Firebase e Lógica COMPLETO E FUNCIONAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
@@ -1179,8 +1115,7 @@
             addDoc,
             serverTimestamp,
             orderBy,
-            limit,
-            startAfter
+            limit
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Config Firebase
@@ -1203,8 +1138,6 @@
         let servicos = [];
         let produtos = [];
         let avaliacoes = [];
-        let lastVisibleReview = null;
-        const reviewsPerPage = 5;
 
         // Elementos
         const loadingState = document.getElementById('loadingState');
@@ -1230,53 +1163,6 @@
             iniciarSistemaEstrelas();
         });
 
-        // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
-        window.abrirModalOrcamento = async function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert('Faça login para solicitar orçamento!');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            try {
-                // Buscar dados do cliente logado
-                const userRef = doc(db, "usuarios", user.uid);
-                const userSnap = await getDoc(userRef);
-                
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    
-                    // Pegar elementos do formulário
-                    const nomeField = document.getElementById('nomeCliente');
-                    const telefoneField = document.getElementById('telefoneCliente');
-                    const cidadeField = document.getElementById('cidadeCliente');
-                    
-                    // Preencher com dados do cliente
-                    nomeField.value = userData.nomeCompleto || userData.apelido || '';
-                    telefoneField.value = userData.celular || '';
-                    cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
-                    
-                    // Tornar campos somente leitura para evitar adulteração
-                    nomeField.readOnly = true;
-                    nomeField.style.backgroundColor = '#f8f9fa';
-                    nomeField.style.cursor = 'not-allowed';
-                    
-                    telefoneField.readOnly = true;
-                    telefoneField.style.backgroundColor = '#f8f9fa';
-                    telefoneField.style.cursor = 'not-allowed';
-                    
-                    cidadeField.readOnly = true;
-                    cidadeField.style.backgroundColor = '#f8f9fa';
-                    cidadeField.style.cursor = 'not-allowed';
-                }
-            } catch (error) {
-                // Se der erro, abre modal vazio
-            }
-            
-            modalOrcamento.show();
-        };
-
         // FUNÇÃO PARA ABRIR MODAL DE AVALIAÇÃO
         window.abrirModalAvaliacao = async function() {
             const user = auth.currentUser;
@@ -1286,13 +1172,12 @@
                 return;
             }
 
-            // Verificar se é o próprio profissional
             if (user.uid === profissionalId) {
                 alert('Você não pode avaliar a si mesmo!');
                 return;
             }
 
-            // Verificar se já avaliou este profissional
+            // Verificar se já avaliou
             try {
                 const q = query(
                     collection(db, "avaliacoes"),
@@ -1306,24 +1191,20 @@
                     return;
                 }
             } catch (error) {
-                // Se der erro, continua
+                // Continua
             }
 
-            // Preencher dados no modal
+            // Preencher dados
             document.getElementById('avaliacaoProfissionalId').value = profissionalId;
             document.getElementById('nomeProfissionalAvaliacao').textContent = 
                 profissionalData?.profissional?.nomeProfissional || 'Profissional';
             
             // Resetar estrelas
             const stars = document.querySelectorAll('#ratingStarsInput i');
-            stars.forEach(star => {
-                star.classList.remove('active', 'hover');
-            });
-            stars.forEach((star, index) => {
-                if (index < 4) { // 5 estrelas como padrão
-                    star.classList.add('active');
-                }
-            });
+            stars.forEach(star => star.classList.remove('active', 'hover'));
+            for (let i = 0; i < 5; i++) {
+                stars[i].classList.add('active');
+            }
             document.getElementById('ratingValue').value = 5;
             document.getElementById('ratingText').textContent = 'Excelente - 5 estrelas';
             
@@ -1351,50 +1232,29 @@
             stars.forEach(star => {
                 star.addEventListener('mouseover', function() {
                     const value = parseInt(this.getAttribute('data-value'));
-                    
-                    // Resetar todas
-                    stars.forEach(s => s.classList.remove('active', 'hover'));
-                    
-                    // Colorir até esta
+                    stars.forEach(s => s.classList.remove('hover'));
                     stars.forEach((s, index) => {
-                        if (index < value) {
-                            s.classList.add('hover');
-                        }
+                        if (index < value) s.classList.add('hover');
                     });
-                    
                     ratingText.textContent = ratingTexts[value] || '';
                 });
                 
                 star.addEventListener('mouseout', function() {
                     const currentValue = parseInt(ratingValue.value);
-                    
-                    // Resetar todas
                     stars.forEach(s => s.classList.remove('hover'));
-                    
-                    // Restaurar valor atual
                     stars.forEach((s, index) => {
-                        if (index < currentValue) {
-                            s.classList.add('active');
-                        }
+                        if (index < currentValue) s.classList.add('active');
                     });
-                    
                     ratingText.textContent = ratingTexts[currentValue] || '';
                 });
                 
                 star.addEventListener('click', function() {
                     const value = parseInt(this.getAttribute('data-value'));
                     ratingValue.value = value;
-                    
-                    // Resetar todas
                     stars.forEach(s => s.classList.remove('active'));
-                    
-                    // Colorir até esta
                     stars.forEach((s, index) => {
-                        if (index < value) {
-                            s.classList.add('active');
-                        }
+                        if (index < value) s.classList.add('active');
                     });
-                    
                     ratingText.textContent = ratingTexts[value] || '';
                 });
             });
@@ -1414,13 +1274,12 @@
                 
                 if (userData.tipoUsuario !== 'profissional' || 
                     userData.status !== 'ativo' || 
-                    !userData.profissional?.perfilCompleto ||
-                    userData.profissional?.visivelBusca === false) {
+                    !userData.profissional?.perfilCompleto) {
                     mostrarErro();
                     return;
                 }
 
-                profissionalData = { ...userData, profissional: userData.profissional };
+                profissionalData = userData;
                 
                 await carregarCatalogo();
                 await carregarAvaliacoes();
@@ -1439,6 +1298,7 @@
                 });
                 
             } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
                 mostrarErro();
             }
         }
@@ -1462,7 +1322,7 @@
                 produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
 
             } catch (error) {
-                // Não faz nada, catálogo fica vazio
+                console.log('Erro ao carregar catálogo:', error);
             }
         }
 
@@ -1473,7 +1333,7 @@
                     where("profissionalId", "==", profissionalId),
                     where("status", "==", "aprovado"),
                     orderBy("data", "desc"),
-                    limit(reviewsPerPage)
+                    limit(10)
                 );
 
                 const querySnapshot = await getDocs(q);
@@ -1481,8 +1341,7 @@
                 
                 querySnapshot.forEach((docSnapshot) => {
                     const data = docSnapshot.data();
-                    
-                    const review = {
+                    avaliacoes.push({
                         id: docSnapshot.id,
                         clienteId: data.clienteId,
                         clienteNome: data.clienteNome || 'Cliente',
@@ -1493,68 +1352,11 @@
                         data: data.data?.toDate() || new Date(),
                         resposta: data.resposta || null,
                         dataResposta: data.dataResposta?.toDate() || null
-                    };
-                    
-                    avaliacoes.push(review);
+                    });
                 });
-
-                // Salvar último documento para paginação
-                if (querySnapshot.docs.length > 0) {
-                    lastVisibleReview = querySnapshot.docs[querySnapshot.docs.length - 1];
-                }
 
             } catch (error) {
                 console.log('Erro ao carregar avaliações:', error);
-            }
-        }
-
-        async function carregarMaisAvaliacoes() {
-            try {
-                const q = query(
-                    collection(db, "avaliacoes"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "==", "aprovado"),
-                    orderBy("data", "desc"),
-                    startAfter(lastVisibleReview),
-                    limit(reviewsPerPage)
-                );
-
-                const querySnapshot = await getDocs(q);
-                
-                querySnapshot.forEach((docSnapshot) => {
-                    const data = docSnapshot.data();
-                    
-                    const review = {
-                        id: docSnapshot.id,
-                        clienteId: data.clienteId,
-                        clienteNome: data.clienteNome || 'Cliente',
-                        clienteFoto: data.clienteFoto || '',
-                        nota: data.nota || 0,
-                        comentario: data.comentario || '',
-                        anonimo: data.anonimo || false,
-                        data: data.data?.toDate() || new Date(),
-                        resposta: data.resposta || null,
-                        dataResposta: data.dataResposta?.toDate() || null
-                    };
-                    
-                    avaliacoes.push(review);
-                });
-
-                // Atualizar último documento para paginação
-                if (querySnapshot.docs.length > 0) {
-                    lastVisibleReview = querySnapshot.docs[querySnapshot.docs.length - 1];
-                }
-
-                // Renderizar avaliações
-                renderizarAvaliacoes();
-                
-                // Verificar se há mais avaliações para carregar
-                if (querySnapshot.docs.length < reviewsPerPage) {
-                    document.getElementById('btnLoadMoreReviews').style.display = 'none';
-                }
-
-            } catch (error) {
-                console.log('Erro ao carregar mais avaliações:', error);
             }
         }
 
@@ -1597,17 +1399,14 @@
         function renderizarEstatisticasAvaliacoes() {
             const stats = calcularEstatisticasAvaliacoes();
             
-            // Atualizar média
             document.getElementById('ratingAverage').textContent = stats.media.toFixed(1);
             document.getElementById('ratingCount').textContent = `${stats.total} avaliação${stats.total !== 1 ? 'es' : ''}`;
             
-            // Atualizar barras
             for (let i = 1; i <= 5; i++) {
                 document.getElementById(`bar${i}`).style.width = `${stats.porcentagens[i]}%`;
                 document.getElementById(`count${i}`).textContent = stats.contagem[i];
             }
             
-            // Atualizar estrelas da média
             const starsAverage = document.getElementById('ratingStarsAverage');
             starsAverage.innerHTML = '';
             
@@ -1695,8 +1494,9 @@
                 `;
             }).join('');
             
-            // Mostrar botão "Carregar mais" se houver mais avaliações
-            document.getElementById('btnLoadMoreReviews').style.display = 'block';
+            if (avaliacoes.length >= 10) {
+                document.getElementById('btnLoadMoreReviews').style.display = 'block';
+            }
         }
 
         function formatarData(data) {
@@ -1722,6 +1522,7 @@
         function renderizarPerfil() {
             const prof = profissionalData.profissional;
             
+            // Capa
             const coverContainer = document.getElementById('coverContainer');
             if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
                 coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
@@ -1733,18 +1534,20 @@
                 `;
             }
 
+            // Avatar
             const avatarUrl = profissionalData.fotoPerfilProfissional || 
                              profissionalData.fotoPerfil || 
                              'https://via.placeholder.com/300';
             document.getElementById('profileAvatar').src = avatarUrl;
 
-            const plano = profissionalData.plano_assinatura;
-            if (plano === 'pro' || plano === 'enterprise') {
+            // Plano
+            if (profissionalData.plano_assinatura === 'pro' || profissionalData.plano_assinatura === 'enterprise') {
                 const badge = document.getElementById('planBadge');
                 badge.style.display = 'flex';
-                badge.querySelector('span').textContent = plano.toUpperCase();
+                badge.querySelector('span').textContent = profissionalData.plano_assinatura.toUpperCase();
             }
 
+            // Informações básicas
             document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
             document.getElementById('profileSpecialty').innerHTML = `
                 <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
@@ -1756,49 +1559,51 @@
                 ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
             `;
 
+            // WhatsApp
             if (prof.whatsapp) {
                 const whatsappNum = prof.whatsapp.replace(/\D/g, '');
                 document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
             }
 
+            // Descrição
             document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
 
+            // Experiência
             document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
 
+            // Garantia
             if (prof.garantiaDias && prof.garantiaDias > 0) {
                 document.getElementById('badgeGarantia').style.display = 'flex';
                 document.getElementById('diasGarantia').textContent = prof.garantiaDias;
             }
 
+            // Formas de atendimento
             const atendimentoContainer = document.getElementById('atendimentoBadges');
             atendimentoContainer.innerHTML = '';
             if (prof.atendeDomicilio) {
-                atendimentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>
-                `;
+                atendimentoContainer.innerHTML += `<div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>`;
             }
             if (prof.atendeOnline) {
-                atendimentoContainer.innerHTML += `
-                    <div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>
-                `;
+                atendimentoContainer.innerHTML += `<div class="info-badge"><i class="fas fa-laptop"></i> Online/Remoto</div>`;
             }
 
+            // Formas de pagamento
             const pagamentoContainer = document.getElementById('pagamentoBadges');
             pagamentoContainer.innerHTML = '';
             if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
                 prof.formasPagamento.forEach(forma => {
-                    pagamentoContainer.innerHTML += `
-                        <div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>
-                    `;
+                    pagamentoContainer.innerHTML += `<div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${forma}</div>`;
                 });
             }
 
+            // Tempo de resposta
             if (prof.tempoResposta) {
                 document.getElementById('tempoResposta').innerHTML = `
                     <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
                 `;
             }
 
+            // Especialidades
             const tagsContainer = document.getElementById('tagsContainer');
             tagsContainer.innerHTML = '';
             if (prof.especialidades && Array.isArray(prof.especialidades)) {
@@ -1807,6 +1612,7 @@
                 });
             }
 
+            // Galeria
             if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
                 const galeriaSection = document.getElementById('galeriaSection');
                 const galeriaGrid = document.getElementById('galeriaGrid');
@@ -1820,12 +1626,11 @@
                 `).join('');
             }
 
-            // Renderizar estatísticas de avaliações
+            // Avaliações
             renderizarEstatisticasAvaliacoes();
-            
-            // Renderizar lista de avaliações
             renderizarAvaliacoes();
 
+            // Catálogo
             renderizarCatalogo();
         }
 
@@ -1852,10 +1657,6 @@
                 const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
                 const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
                 
-                const metaInfo = item.tipo === 'servico' 
-                    ? `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`
-                    : `<span><i class="fas fa-box"></i> Estoque: ${item.estoqueAtual || 0}</span>`;
-
                 return `
                     <div class="item-card">
                         <div class="item-image">
@@ -1866,30 +1667,14 @@
                             <h4 class="item-title">${item.nome}</h4>
                             <p class="item-desc">${item.descricao || 'Sem descrição'}</p>
                             <div class="item-price">${formatarMoeda(item.precoVenda)}</div>
-                            <div class="item-meta">
-                                ${metaInfo}
-                                <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
-                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // CARREGAR MAIS AVALIAÇÕES
-        window.carregarMaisAvaliacoes = async function() {
-            const btn = document.getElementById('btnLoadMoreReviews');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
-            btn.disabled = true;
-            
-            await carregarMaisAvaliacoes();
-            
-            btn.innerHTML = '<i class="fas fa-plus"></i> Carregar mais avaliações';
-            btn.disabled = false;
-        };
-
         // ENVIAR AVALIAÇÃO
-        document.getElementById('formAvaliacao')?.addEventListener('submit', async (e) => {
+        document.getElementById('formAvaliacao').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const user = auth.currentUser;
@@ -1939,23 +1724,20 @@
                     comentario: comentario,
                     anonimo: anonimo,
                     data: serverTimestamp(),
-                    status: "aprovado", // Em produção, poderia ser "pendente" para moderação
+                    status: "aprovado",
                     resposta: null,
                     dataResposta: null
                 });
 
-                // Criar notificação para o profissional
+                // Criar notificação
                 await criarNotificacaoAvaliacao(profissionalId, user.uid, clienteNome, nota, comentario, anonimo);
 
-                // Fechar modal
+                // Fechar modal e recarregar
                 modalAvaliacao.hide();
-                
-                // Recarregar avaliações
                 await carregarAvaliacoes();
                 renderizarEstatisticasAvaliacoes();
                 renderizarAvaliacoes();
                 
-                // Mostrar mensagem de sucesso
                 alert('✅ Avaliação enviada com sucesso! Obrigado por compartilhar sua experiência.');
                 
             } catch (error) {
@@ -1978,17 +1760,13 @@
                 const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
                 const telefoneCliente = clienteData.celular || '';
                 
-                // Texto da avaliação resumido
+                // Texto resumido
                 const comentarioResumido = comentario.length > 80 ? 
                     comentario.substring(0, 80) + '...' : comentario;
                 
-                // Determinar emoji baseado na nota
-                let emoji = '';
+                // Emoji baseado na nota
+                let emoji = '⭐';
                 if (nota >= 4.5) emoji = '🌟';
-                else if (nota >= 4) emoji = '⭐';
-                else if (nota >= 3) emoji = '⭐';
-                else if (nota >= 2) emoji = '⭐';
-                else emoji = '⭐';
                 
                 // Criar notificação
                 await addDoc(collection(db, "notificacoes"), {
@@ -2006,7 +1784,6 @@
                         clienteNome: nomeExibido,
                         nota: nota,
                         comentario: comentario,
-                        comentarioResumido: comentarioResumido,
                         anonimo: anonimo,
                         telefone: telefoneCliente
                     },
@@ -2020,6 +1797,32 @@
                 return false;
             }
         }
+
+        // FUNÇÃO PARA PREENCHER FORMULÁRIO DE ORÇAMENTO
+        window.abrirModalOrcamento = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Faça login para solicitar orçamento!');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const userRef = doc(db, "usuarios", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    document.getElementById('nomeCliente').value = userData.nomeCompleto || userData.apelido || '';
+                    document.getElementById('telefoneCliente').value = userData.celular || '';
+                    document.getElementById('cidadeCliente').value = userData.endereco?.cidade || userData.cidade || '';
+                }
+            } catch (error) {
+                // Continua
+            }
+            
+            modalOrcamento.show();
+        };
 
         // Funções auxiliares
         function formatarEspecialidade(esp) {
@@ -2079,8 +1882,8 @@
             }
         };
 
-        // Enviar orçamento (mantido da versão anterior)
-        document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+        // Enviar orçamento
+        document.getElementById('formOrcamento').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const btn = e.target.querySelector('button[type="submit"]');
@@ -2096,12 +1899,6 @@
 
                 const user = auth.currentUser;
                 
-                if (!user) {
-                    alert('Você precisa estar logado para enviar orçamento!');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
                 await addDoc(collection(db, "notificacoes"), {
                     profissionalId: profissionalId,
                     clienteId: user.uid,
@@ -2110,7 +1907,7 @@
                     clienteCidade: cidadeCliente,
                     tipo: "orcamento",
                     titulo: "Novo pedido de orçamento",
-                    descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento para: ${descricaoServico}`,
+                    descricao: `Cliente ${nomeCliente} de ${cidadeCliente} solicitou orçamento`,
                     lida: false,
                     urgente: false,
                     arquivada: false,
@@ -2124,22 +1921,10 @@
                     tags: ["orcamento", "novo"]
                 });
 
-                await addDoc(collection(db, "solicitacoes"), {
-                    profissionalId: profissionalId,
-                    clienteId: user.uid,
-                    clienteNome: nomeCliente,
-                    clienteTelefone: telefoneCliente,
-                    clienteCidade: cidadeCliente,
-                    descricao: descricaoServico,
-                    status: "pendente",
-                    tipo: "orcamento",
-                    data: serverTimestamp()
-                });
-
                 modalOrcamento.hide();
                 document.getElementById('descricaoServico').value = '';
                 
-                alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
+                alert('✅ Solicitação enviada com sucesso!');
                 
             } catch (error) {
                 alert('❌ Erro ao enviar solicitação. Tente novamente.');
