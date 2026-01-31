@@ -714,7 +714,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-        <!-- Firebase SDK -->
+           <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
@@ -804,17 +804,16 @@
             }
         }
 
-        // Carregar profissionais do Firestore - CÓDIGO CORRIGIDO AQUI
+        // Carregar profissionais do Firestore
         async function carregarProfissionais() {
             try {
                 showLoading(true);
                 
-                // QUERY CORRIGIDA - REMOVER FILTRO perfilCompleto
+                // Query principal - busca profissionais ativos
                 const q = query(
                     collection(db, "usuarios"),
                     where("tipoUsuario", "==", "profissional"),
                     where("status", "==", "ativo"),
-                    // REMOVIDO: where("profissional.perfilCompleto", "==", true),
                     limit(100)
                 );
 
@@ -827,9 +826,10 @@
                     const data = doc.data();
                     const prof = data.profissional || {};
                     
-                    // CRITÉRIO MAIS FLEXÍVEL - Aceita qualquer profissional ativo
-                    // Se estiver marcado como não visível (false), não mostra
-                    if (prof.visivelBusca !== false) {
+                    // Verifica se o profissional pode ser mostrado
+                    const podeMostrar = prof.visivelBusca !== false;
+                    
+                    if (podeMostrar) {
                         const profissional = {
                             id: doc.id,
                             ...data,
@@ -851,12 +851,6 @@
                     }
                 });
 
-                // Se não encontrou nenhum, tenta buscar SEM FILTRO ALGUM
-                if (todosProfissionais.length === 0) {
-                    console.log('Nenhum profissional com critério atual, buscando todos...');
-                    await carregarTodosProfissionais();
-                }
-
                 // Ordenar por relevância (plano) inicialmente
                 ordenarPorRelevancia();
                 
@@ -871,44 +865,6 @@
                 showToast("Erro ao carregar profissionais. Tente novamente.", "error");
             } finally {
                 showLoading(false);
-            }
-        }
-
-        // Função alternativa se a primeira não encontrar
-        async function carregarTodosProfissionais() {
-            try {
-                const q = query(
-                    collection(db, "usuarios"),
-                    where("tipoUsuario", "==", "profissional"),
-                    limit(100)
-                );
-
-                const snapshot = await getDocs(q);
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const prof = data.profissional || {};
-                    
-                    // Aceita qualquer profissional
-                    if (data.status !== 'inativo') {
-                        const profissional = {
-                            id: doc.id,
-                            ...data,
-                            ...prof,
-                            plano: data.plano_assinatura || 'free'
-                        };
-                        
-                        todosProfissionais.push(profissional);
-                        
-                        if (prof.cidadeBase) {
-                            cidadesDisponiveis.add(prof.cidadeBase);
-                        }
-                    }
-                });
-                
-                console.log(`Carregados ${todosProfissionais.length} profissionais sem filtros`);
-            } catch (error) {
-                console.error("Erro ao carregar todos profissionais:", error);
             }
         }
 
@@ -1056,8 +1012,8 @@
                 badges.push('<span class="service-badge badge-orcamento"><i class="fas fa-gift"></i> Orçamento Grátis</span>');
             }
             
-            // Rating (mock por enquanto, pode vir do banco depois)
-            const rating = (Math.random() * (5 - 4) + 4).toFixed(1); // Simulando 4.0-5.0
+            // Rating
+            const rating = '4.5';
             
             return `
                 <div class="pro-card ${isPremium ? 'premium' : ''}" onclick="verPerfilDetalhado('${prof.id}')">
@@ -1142,11 +1098,7 @@
 
         // Navegação para perfil detalhado
         window.verPerfilDetalhado = function(profissionalId) {
-            // Animação de saída suave
-            document.body.style.opacity = '0.5';
-            setTimeout(() => {
-                window.location.href = `perfil-profissional-publico.html?id=${profissionalId}`;
-            }, 200);
+            window.location.href = `perfil-profissional-publico.html?id=${profissionalId}`;
         };
 
         // Limpar filtros
