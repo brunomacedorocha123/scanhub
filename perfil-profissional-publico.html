@@ -839,14 +839,35 @@
     // Modal
     const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
     
-    // FUNÇÕES GLOBAIS
-    window.abrirModalOrcamento = function() {
+    // FUNÇÃO PARA PREENCHER FORMULÁRIO
+    window.abrirModalOrcamento = async function() {
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Faça login para solicitar orçamento!');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const userRef = doc(db, "usuarios", user.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                
+                document.getElementById('nomeCliente').value = userData.nomeCompleto || '';
+                document.getElementById('telefoneCliente').value = userData.celular || '';
+                document.getElementById('cidadeCliente').value = userData.endereco?.cidade || '';
+            }
+        } catch (error) {
+            // Se der erro, simplesmente abre o modal vazio
+        }
+        
         modalOrcamento.show();
     };
 
     // Inicialização
     document.addEventListener('DOMContentLoaded', async () => {
-        // Pegar ID da URL
         const urlParams = new URLSearchParams(window.location.search);
         profissionalId = urlParams.get('id');
 
@@ -860,7 +881,6 @@
 
     async function carregarPerfil() {
         try {
-            // Buscar dados do profissional
             const userRef = doc(db, "usuarios", profissionalId);
             const userSnap = await getDoc(userRef);
 
@@ -871,7 +891,6 @@
 
             const userData = userSnap.data();
             
-            // Verificar se é profissional e está visível
             if (userData.tipoUsuario !== 'profissional' || 
                 userData.status !== 'ativo' || 
                 !userData.profissional?.perfilCompleto ||
@@ -882,25 +901,19 @@
 
             profissionalData = { ...userData, profissional: userData.profissional };
             
-            // Buscar catálogo (serviços e produtos)
             await carregarCatalogo();
-            
-            // Renderizar
             renderizarPerfil();
             
-            // Esconder loading
             loadingState.style.display = 'none';
             profileContent.style.display = 'block';
             
         } catch (error) {
-            console.error('Erro:', error);
             mostrarErro();
         }
     }
 
     async function carregarCatalogo() {
         try {
-            // Buscar serviços
             const qServicos = query(
                 collection(db, "servicos"),
                 where("profissionalId", "==", profissionalId),
@@ -909,7 +922,6 @@
             const snapServicos = await getDocs(qServicos);
             servicos = snapServicos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'servico' }));
 
-            // Buscar produtos
             const qProdutos = query(
                 collection(db, "produtos"),
                 where("profissionalId", "==", profissionalId),
@@ -919,14 +931,13 @@
             produtos = snapProdutos.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'produto' }));
 
         } catch (error) {
-            console.error('Erro ao carregar catálogo:', error);
+            // Não faz nada, catálogo fica vazio
         }
     }
 
     function renderizarPerfil() {
         const prof = profissionalData.profissional;
         
-        // Cover (primeira foto do portfólio ou placeholder)
         const coverContainer = document.getElementById('coverContainer');
         if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
             coverContainer.innerHTML = `<img src="${prof.portfolioFotos[0]}" class="cover-image" alt="Capa">`;
@@ -938,13 +949,11 @@
             `;
         }
 
-        // Avatar
         const avatarUrl = profissionalData.fotoPerfilProfissional || 
                          profissionalData.fotoPerfil || 
                          'https://via.placeholder.com/300';
         document.getElementById('profileAvatar').src = avatarUrl;
 
-        // Badge do plano (só mostra se for Pro ou Enterprise)
         const plano = profissionalData.plano_assinatura;
         if (plano === 'pro' || plano === 'enterprise') {
             const badge = document.getElementById('planBadge');
@@ -952,38 +961,31 @@
             badge.querySelector('span').textContent = plano.toUpperCase();
         }
 
-        // Nome e especialidade
         document.getElementById('profileName').textContent = prof.nomeProfissional || 'Profissional';
         document.getElementById('profileSpecialty').innerHTML = `
             <i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidadePrincipal)}
         `;
 
-        // Localização
         document.getElementById('profileLocation').innerHTML = `
             <i class="fas fa-map-marker-alt"></i> 
             ${prof.cidadeBase || 'Cidade não informada'}
             ${prof.raioKm ? `• Atende em ${prof.raioKm}km` : ''}
         `;
 
-        // WhatsApp
         if (prof.whatsapp) {
             const whatsappNum = prof.whatsapp.replace(/\D/g, '');
             document.getElementById('btnWhatsApp').href = `https://wa.me/55${whatsappNum}?text=Olá! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`;
         }
 
-        // Sobre/Descrição
         document.getElementById('aboutText').textContent = prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
 
-        // Anos experiência
         document.getElementById('anosExp').textContent = formatarExperiencia(prof.anosExperiencia);
 
-        // Garantia
         if (prof.garantiaDias && prof.garantiaDias > 0) {
             document.getElementById('badgeGarantia').style.display = 'flex';
             document.getElementById('diasGarantia').textContent = prof.garantiaDias;
         }
 
-        // Formas de atendimento
         const atendimentoContainer = document.getElementById('atendimentoBadges');
         atendimentoContainer.innerHTML = '';
         if (prof.atendeDomicilio) {
@@ -997,7 +999,6 @@
             `;
         }
 
-        // Formas de pagamento
         const pagamentoContainer = document.getElementById('pagamentoBadges');
         pagamentoContainer.innerHTML = '';
         if (prof.formasPagamento && Array.isArray(prof.formasPagamento)) {
@@ -1008,14 +1009,12 @@
             });
         }
 
-        // Tempo resposta
         if (prof.tempoResposta) {
             document.getElementById('tempoResposta').innerHTML = `
                 <i class="fas fa-clock me-2"></i> Em até ${prof.tempoResposta} horas
             `;
         }
 
-        // Tags/Especialidades
         const tagsContainer = document.getElementById('tagsContainer');
         tagsContainer.innerHTML = '';
         if (prof.especialidades && Array.isArray(prof.especialidades)) {
@@ -1024,14 +1023,11 @@
             });
         }
 
-        // Galeria de fotos (se tiver mais de 1 foto no portfólio)
         if (prof.portfolioFotos && prof.portfolioFotos.length > 1) {
             const galeriaSection = document.getElementById('galeriaSection');
             const galeriaGrid = document.getElementById('galeriaGrid');
             galeriaSection.style.display = 'block';
             
-            // Pular a primeira (já usada na capa) ou mostrar todas?
-            // Vamos mostrar todas exceto a primeira se for igual à capa
             const fotos = prof.portfolioFotos.slice(1);
             galeriaGrid.innerHTML = fotos.map(foto => `
                 <div class="gallery-item" onclick="window.open('${foto}', '_blank')">
@@ -1040,7 +1036,6 @@
             `).join('');
         }
 
-        // Catálogo
         renderizarCatalogo();
     }
 
@@ -1091,7 +1086,6 @@
         }).join('');
     }
 
-    // Funções auxiliares
     function formatarEspecialidade(esp) {
         if (!esp) return 'Profissional';
         const map = {
@@ -1132,15 +1126,12 @@
         profileContent.style.display = 'none';
     }
 
-    // Controle de abas
     window.switchTab = function(tabName) {
-        // Atualizar botões
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
         event.target.closest('.tab-btn').classList.add('active');
 
-        // Atualizar conteúdo
         document.querySelectorAll('.tab-content-section').forEach(content => {
             content.classList.remove('active');
         });
@@ -1152,7 +1143,6 @@
         }
     };
 
-    // ENVIAR ORÇAMENTO E CRIAR NOTIFICAÇÃO - FUNCIONAL
     document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -1162,13 +1152,11 @@
         btn.disabled = true;
 
         try {
-            // Pegar dados do formulário
             const nomeCliente = document.getElementById('nomeCliente').value;
             const telefoneCliente = document.getElementById('telefoneCliente').value;
             const cidadeCliente = document.getElementById('cidadeCliente').value;
             const descricaoServico = document.getElementById('descricaoServico').value;
 
-            // Verificar se cliente está logado
             const user = auth.currentUser;
             
             if (!user) {
@@ -1177,9 +1165,8 @@
                 return;
             }
 
-            // 1. CRIAR NOTIFICAÇÃO PARA O PROFISSIONAL
             await addDoc(collection(db, "notificacoes"), {
-                profissionalId: profissionalId, // ID do profissional da URL
+                profissionalId: profissionalId,
                 clienteId: user.uid,
                 clienteNome: nomeCliente,
                 clienteTelefone: telefoneCliente,
@@ -1200,7 +1187,6 @@
                 tags: ["orcamento", "novo"]
             });
 
-            // 2. CRIAR NA COLEÇÃO SOLICITAÇÕES
             await addDoc(collection(db, "solicitacoes"), {
                 profissionalId: profissionalId,
                 clienteId: user.uid,
@@ -1213,20 +1199,13 @@
                 data: serverTimestamp()
             });
 
-            // Fechar modal e limpar formulário
             modalOrcamento.hide();
             e.target.reset();
             
-            // Mostrar mensagem de sucesso
             alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
             
         } catch (error) {
-            console.error('Erro ao enviar orçamento:', error);
             alert('❌ Erro ao enviar solicitação. Tente novamente.');
-            
-            // Debug
-            console.log('Detalhes do erro:', error.code, error.message);
-            
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
