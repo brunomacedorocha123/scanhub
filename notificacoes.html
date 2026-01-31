@@ -1375,7 +1375,8 @@
       serverTimestamp,
       getDoc,
       deleteDoc,
-      orderBy
+      orderBy,
+      addDoc  // ✅ ADICIONAR ESTA IMPORT
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Firebase Configuration
@@ -1482,6 +1483,54 @@
       }
     }
 
+    // ✅ FUNÇÃO PARA CRIAR NOTIFICAÇÃO DE AVALIAÇÃO
+    async function criarNotificacaoParaProfissional(profissionalId, clienteId, clienteNome, nota, comentario, anonimo) {
+      try {
+        if (!profissionalId || !clienteId) {
+          console.error('IDs não fornecidos para criar notificação');
+          return;
+        }
+
+        // Buscar dados do cliente para garantir que temos as informações
+        const clienteRef = doc(db, "usuarios", clienteId);
+        const clienteSnap = await getDoc(clienteRef);
+        const clienteData = clienteSnap.exists() ? clienteSnap.data() : {};
+        
+        const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
+        const telefoneCliente = clienteData.celular || '';
+        
+        // Criar notificação
+        await addDoc(collection(db, "notificacoes"), {
+          profissionalId: profissionalId,
+          clienteId: clienteId,
+          clienteNome: nomeExibido,
+          tipo: "review",
+          titulo: "⭐ Nova avaliação recebida!",
+          descricao: `${nomeExibido} avaliou você com ${nota} estrelas${comentario ? `: "${comentario.substring(0, 80)}${comentario.length > 80 ? '...' : ''}"` : ''}`,
+          lida: false,
+          arquivada: false,
+          urgente: false,
+          data: serverTimestamp(),
+          metadata: {
+            clienteNome: nomeExibido,
+            nota: nota,
+            comentario: comentario || '',
+            anonimo: anonimo,
+            telefone: telefoneCliente
+          },
+          tags: ["avaliacao", "review", "cliente"]
+        });
+        
+        console.log(`✅ Notificação criada para profissional ${profissionalId}`);
+        return true;
+        
+      } catch (error) {
+        console.error('❌ Erro ao criar notificação:', error);
+        showToast('Erro', 'Não foi possível criar notificação da avaliação', 'error');
+        return false;
+      }
+    }
+
     // Load notifications from Firestore
     async function loadNotifications() {
       try {
@@ -1574,7 +1623,7 @@
         updateReviewStats();
 
       } catch (error) {
-        // Se não houver avaliações, não faz nada
+        console.log('Nenhuma avaliação encontrada ou erro:', error);
       }
     }
 
@@ -2121,6 +2170,11 @@
       } catch (error) {
         showToast('Erro', 'Não foi possível carregar as avaliações', 'error');
       }
+    };
+
+    // ✅ FUNÇÃO QUE O PERFIL PÚBLICO VAI CHAMAR PARA CRIAR NOTIFICAÇÃO
+    window.criarNotificacaoAvaliacao = async function(profissionalId, nota, comentario, clienteNome, clienteId, anonimo) {
+      return await criarNotificacaoParaProfissional(profissionalId, clienteId, clienteNome, nota, comentario, anonimo);
     };
 
     // Helper function to format date
