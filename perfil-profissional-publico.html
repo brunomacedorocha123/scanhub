@@ -839,7 +839,7 @@
     // Modal
     const modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
     
-    // FUNÇÃO PARA PREENCHER FORMULÁRIO
+    // FUNÇÃO PARA PREENCHER FORMULÁRIO COM DADOS DO CLIENTE
     window.abrirModalOrcamento = async function() {
         const user = auth.currentUser;
         if (!user) {
@@ -849,18 +849,38 @@
         }
 
         try {
+            // Buscar dados do cliente logado
             const userRef = doc(db, "usuarios", user.uid);
             const userSnap = await getDoc(userRef);
             
             if (userSnap.exists()) {
                 const userData = userSnap.data();
                 
-                document.getElementById('nomeCliente').value = userData.nomeCompleto || '';
-                document.getElementById('telefoneCliente').value = userData.celular || '';
-                document.getElementById('cidadeCliente').value = userData.endereco?.cidade || '';
+                // Pegar elementos do formulário
+                const nomeField = document.getElementById('nomeCliente');
+                const telefoneField = document.getElementById('telefoneCliente');
+                const cidadeField = document.getElementById('cidadeCliente');
+                
+                // Preencher com dados do cliente
+                nomeField.value = userData.nomeCompleto || userData.apelido || '';
+                telefoneField.value = userData.celular || '';
+                cidadeField.value = userData.endereco?.cidade || userData.cidade || '';
+                
+                // Tornar campos somente leitura para evitar adulteração
+                nomeField.readOnly = true;
+                nomeField.style.backgroundColor = '#f8f9fa';
+                nomeField.style.cursor = 'not-allowed';
+                
+                telefoneField.readOnly = true;
+                telefoneField.style.backgroundColor = '#f8f9fa';
+                telefoneField.style.cursor = 'not-allowed';
+                
+                cidadeField.readOnly = true;
+                cidadeField.style.backgroundColor = '#f8f9fa';
+                cidadeField.style.cursor = 'not-allowed';
             }
         } catch (error) {
-            // Se der erro, simplesmente abre o modal vazio
+            // Se der erro, abre modal vazio
         }
         
         modalOrcamento.show();
@@ -1200,7 +1220,7 @@
             });
 
             modalOrcamento.hide();
-            e.target.reset();
+            document.getElementById('descricaoServico').value = '';
             
             alert('✅ Solicitação enviada com sucesso! O profissional será notificado e entrará em contato em breve.');
             
