@@ -797,12 +797,6 @@
         const data = doc.data();
         const prof = data.profissional || {};
         
-        console.log(`[EXTRACAO] Processando documento ${doc.id}:`, {
-            tipoUsuario: data.tipoUsuario,
-            perfilCompleto: prof.perfilCompleto,
-            nomeProfissional: prof.nomeProfissional
-        });
-        
         return {
             id: doc.id,
             nome: prof.nomeProfissional || data.apelido || data.nomeCompleto || 'Profissional',
@@ -822,23 +816,18 @@
             especialidades: prof.especialidades || [],
             cidadesAtendidas: prof.cidadesAtendidas || [],
             mediaAvaliacoes: 0,
-            totalAvaliacoes: 0,
-            tipoUsuario: data.tipoUsuario || 'cliente', // Incluir tipoUsuario para debug
-            status: data.status || 'inativo',
-            status_assinatura: data.status_assinatura || 'inativa'
+            totalAvaliacoes: 0
         };
     }
 
     async function carregarAvaliacoes() {
         try {
-            console.log('[AVALIACOES] Carregando avaliações...');
             const q = query(
                 collection(db, "avaliacoes"),
                 where("status", "in", ["ativo", "aprovado"])
             );
             
             const snapshot = await getDocs(q);
-            console.log(`[AVALIACOES] ${snapshot.size} avaliações encontradas`);
             
             snapshot.forEach(doc => {
                 const av = doc.data();
@@ -858,27 +847,20 @@
                 avaliacoesCache[id].media = (dados.soma / dados.quantidade).toFixed(1);
             }
             
-            console.log('[AVALIACOES] Cache atualizado:', Object.keys(avaliacoesCache).length, 'profissionais com avaliações');
-            
         } catch (error) {
-            console.error("[ERRO AVALIACOES] ao carregar avaliações:", error);
+            console.error("Erro ao carregar avaliações:", error);
         }
     }
 
     async function carregarProfissionais() {
         try {
-            console.log('[PROFISSIONAIS] Iniciando carregamento...');
-            
-            // ESTRATÉGIA CORRIGIDA: Buscar apenas por perfil profissional completo
-            // Independente do tipoUsuario
+            // BUSCA DIRETA: Apenas quem tem perfil profissional completo
             const q = query(
                 collection(db, "usuarios"),
                 where("profissional.perfilCompleto", "==", true)
             );
             
-            console.log('[PROFISSIONAIS] Executando query...');
             const snapshot = await getDocs(q);
-            console.log(`[PROFISSIONAIS] Query retornou: ${snapshot.docs.length} documentos`);
             
             // Carregar avaliações
             await carregarAvaliacoes();
@@ -887,80 +869,39 @@
             todosProfissionais = [];
             cidadesUnicas.clear();
             
-            let totalProcessados = 0;
-            let totalIgnorados = 0;
-            
             snapshot.forEach(doc => {
                 try {
                     const data = doc.data();
-                    const prof = data.profissional || {};
                     
-                    // VERIFICAÇÃO 1: Tem perfil profissional completo?
-                    if (!prof.perfilCompleto) {
-                        console.log(`[IGNORADO] ${doc.id}: Sem perfilCompleto`);
-                        totalIgnorados++;
-                        return;
-                    }
-                    
-                    // VERIFICAÇÃO 2: Está ativo de alguma forma?
-                    const estaAtivo = 
-                        data.status === 'ativo' || 
-                        data.status_assinatura === 'ativa' ||
-                        data.assinatura_ativa === true ||
-                        prof.visivelBusca === true;
-                    
-                    if (!estaAtivo) {
-                        console.log(`[IGNORADO] ${doc.id}: Não está ativo`, {
-                            status: data.status,
-                            status_assinatura: data.status_assinatura,
-                            assinatura_ativa: data.assinatura_ativa,
-                            visivelBusca: prof.visivelBusca
-                        });
-                        totalIgnorados++;
-                        return;
-                    }
-                    
-                    // EXTRAIR DADOS DO PROFISSIONAL
-                    const profissional = extrairDadosProfissional(doc);
-                    
-                    // Adicionar dados de avaliação
-                    if (avaliacoesCache[doc.id]) {
-                        profissional.mediaAvaliacoes = avaliacoesCache[doc.id].media;
-                        profissional.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
-                    }
-                    
-                    todosProfissionais.push(profissional);
-                    totalProcessados++;
-                    
-                    console.log(`[ADICIONADO] ${doc.id}: ${profissional.nome} - ${profissional.especialidade}`, {
-                        tipoUsuario: data.tipoUsuario,
-                        cidade: profissional.cidade
-                    });
-                    
-                    // Adicionar cidades ao filtro
-                    if (profissional.cidade && profissional.cidade !== 'Cidade não informada') {
-                        cidadesUnicas.add(profissional.cidade);
-                    }
-                    
-                    if (profissional.cidadesAtendidas && Array.isArray(profissional.cidadesAtendidas)) {
-                        profissional.cidadesAtendidas.forEach(cidade => {
-                            if (cidade && cidade.trim()) {
-                                cidadesUnicas.add(cidade.trim());
-                            }
-                        });
+                    // VERIFICAÇÃO ÚNICA: Tem perfil profissional completo? Se sim, adiciona.
+                    if (data.profissional?.perfilCompleto === true) {
+                        const prof = extrairDadosProfissional(doc);
+                        
+                        // Adicionar dados de avaliação
+                        if (avaliacoesCache[doc.id]) {
+                            prof.mediaAvaliacoes = avaliacoesCache[doc.id].media;
+                            prof.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
+                        }
+                        
+                        todosProfissionais.push(prof);
+                        
+                        // Adicionar cidades ao filtro
+                        if (prof.cidade && prof.cidade !== 'Cidade não informada') {
+                            cidadesUnicas.add(prof.cidade);
+                        }
+                        
+                        if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
+                            prof.cidadesAtendidas.forEach(cidade => {
+                                if (cidade && cidade.trim()) {
+                                    cidadesUnicas.add(cidade.trim());
+                                }
+                            });
+                        }
                     }
                     
                 } catch (err) {
-                    console.error(`[ERRO PROCESSAMENTO] Documento ${doc.id}:`, err);
-                    totalIgnorados++;
+                    console.error("Erro ao processar documento:", doc.id, err);
                 }
-            });
-            
-            console.log(`[PROFISSIONAIS] Processamento concluído:`, {
-                totalEncontrados: snapshot.docs.length,
-                processados: totalProcessados,
-                ignorados: totalIgnorados,
-                tiposUsuarios: [...new Set(todosProfissionais.map(p => p.tipoUsuario))]
             });
             
             // Preencher filtro de cidades
@@ -980,15 +921,13 @@
             if (todosProfissionais.length === 0) {
                 emptyState.style.display = 'block';
                 resultsContainer.style.display = 'none';
-                console.log('[PROFISSIONAIS] Nenhum profissional encontrado');
             } else {
                 resultsContainer.style.display = 'grid';
-                console.log(`[PROFISSIONAIS] Exibindo ${todosProfissionais.length} profissionais`);
                 aplicarFiltros();
             }
             
         } catch (error) {
-            console.error('[ERRO CRÍTICO] ao carregar profissionais:', error);
+            console.error('Erro ao carregar profissionais:', error);
             loadingState.style.display = 'none';
             emptyState.style.display = 'block';
             mostrarToast('Erro ao carregar profissionais. Tente novamente.', 'error');
@@ -1021,10 +960,7 @@
                 'ar_condicionado': 'Ar Condicionado',
                 'marcenaria': 'Marceneiro',
                 'motorista': 'Motorista',
-                'programador': 'Programador/Desenvolvedor',
-                'jogos': 'Desenvolvedor de Jogos',
-                'desenvolvedor': 'Desenvolvedor',
-                'dev': 'Desenvolvedor'
+                'programador': 'Programador/Desenvolvedor'
             };
             return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
         };
@@ -1148,14 +1084,6 @@
         const cidadeSelecionada = filterCidade.value;
         const criterioOrdenacao = sortSelect.value;
 
-        console.log('[FILTROS] Aplicando filtros:', {
-            termoBusca,
-            categoriaSelecionada,
-            cidadeSelecionada,
-            criterioOrdenacao,
-            totalProfissionais: todosProfissionais.length
-        });
-
         // Filtrar
         profissionaisFiltrados = todosProfissionais.filter(prof => {
             // Busca por texto
@@ -1163,10 +1091,7 @@
                 const matchNome = prof.nome.toLowerCase().includes(termoBusca);
                 const matchEspecialidade = prof.especialidade.toLowerCase().includes(termoBusca);
                 const matchDescricao = prof.descricao.toLowerCase().includes(termoBusca);
-                
-                if (!matchNome && !matchEspecialidade && !matchDescricao) {
-                    return false;
-                }
+                if (!matchNome && !matchEspecialidade && !matchDescricao) return false;
             }
 
             // Filtro por categoria
@@ -1187,8 +1112,6 @@
 
             return true;
         });
-
-        console.log('[FILTROS] Após filtragem:', profissionaisFiltrados.length, 'profissionais');
 
         // Ordenar
         const planoPrioridade = (plano) => {
@@ -1226,17 +1149,14 @@
         if (profissionaisFiltrados.length === 0) {
             resultsContainer.style.display = 'none';
             emptyState.style.display = 'block';
-            console.log('[FILTROS] Nenhum resultado encontrado');
         } else {
             emptyState.style.display = 'none';
             resultsContainer.style.display = 'grid';
             resultsContainer.innerHTML = profissionaisFiltrados.map(prof => criarCardHTML(prof)).join('');
-            console.log('[FILTROS] Renderização concluída');
         }
     };
 
     window.limparFiltros = function() {
-        console.log('[FILTROS] Limpando filtros');
         searchInput.value = '';
         filterCategoria.value = '';
         filterCidade.value = '';
@@ -1248,43 +1168,18 @@
     let timeoutBusca;
     searchInput.addEventListener('input', () => {
         clearTimeout(timeoutBusca);
-        timeoutBusca = setTimeout(() => {
-            console.log('[BUSCA] Termo de busca alterado:', searchInput.value);
-            aplicarFiltros();
-        }, 500);
+        timeoutBusca = setTimeout(aplicarFiltros, 500);
     });
 
-    filterCategoria.addEventListener('change', () => {
-        console.log('[FILTRO] Categoria alterada:', filterCategoria.value);
-        aplicarFiltros();
-    });
-
-    filterCidade.addEventListener('change', () => {
-        console.log('[FILTRO] Cidade alterada:', filterCidade.value);
-        aplicarFiltros();
-    });
-
-    sortSelect.addEventListener('change', () => {
-        console.log('[ORDENACAO] Critério alterado:', sortSelect.value);
-        aplicarFiltros();
-    });
+    filterCategoria.addEventListener('change', aplicarFiltros);
+    filterCidade.addEventListener('change', aplicarFiltros);
+    sortSelect.addEventListener('change', aplicarFiltros);
 
     // Inicialização
     onAuthStateChanged(auth, (user) => {
-        console.log('[AUTH] Estado do usuário:', user ? `Logado: ${user.uid}` : 'Não logado');
-        console.log('[INICIALIZACAO] Carregando profissionais...');
         carregarProfissionais();
     });
 
-    // Debug: Expor variáveis para console
-    window.debugScanHub = {
-        getProfissionais: () => todosProfissionais,
-        getFiltrados: () => profissionaisFiltrados,
-        recarregar: () => carregarProfissionais(),
-        aplicarFiltros: aplicarFiltros
-    };
-
-    console.log('[SCANHUB] Sistema de busca inicializado');
 </script>
 </body>
 </html>
