@@ -727,449 +727,712 @@
             limit 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Configuração Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.appspot.com",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+       // CONFIGURAÇÃO FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    query, 
+    where, 
+    getDocs,
+    orderBy,
+    limit,
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+const firebaseConfig = {
+    apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+    authDomain: "scanhub-ed512.firebaseapp.com",
+    projectId: "scanhub-ed512",
+    storageBucket: "scanhub-ed512.appspot.com",
+    messagingSenderId: "1083305018831",
+    appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+};
 
-        // Estado global
-        let todosProfissionais = [];
-        let profissionaisFiltrados = [];
-        let cidadesDisponiveis = new Set();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-        // Elementos DOM
-        const resultsContainer = document.getElementById('resultsContainer');
-        const skeletonContainer = document.getElementById('skeletonContainer');
-        const loadingState = document.getElementById('loadingState');
-        const emptyState = document.getElementById('emptyState');
-        const totalResultados = document.getElementById('totalResultados');
-        const searchInput = document.getElementById('searchInput');
-        const filterCategoria = document.getElementById('filterCategoria');
-        const filterCidade = document.getElementById('filterCidade');
+// ESTADO GLOBAL
+let todosProfissionais = [];
+let profissionaisFiltrados = [];
+let cidadesDisponiveis = new Set();
 
-        // Mapeamento de especialidades
-        const especialidadeMap = {
-            'eletricista': 'eletrica',
-            'encanador': 'hidraulica',
-            'massoterapeuta': 'massoterapia',
-            'tecnico_celular': 'tecnico_celular',
-            'veterinario': 'veterinaria',
-            'manicure': 'manicure',
-            'pintor': 'pintura',
-            'ar_condicionado': 'ar_condicionado',
-            'marceneiro': 'marcenaria',
-            'motorista': 'motorista'
-        };
+// ELEMENTOS DOM
+const resultsContainer = document.getElementById('resultsContainer');
+const skeletonContainer = document.getElementById('skeletonContainer');
+const loadingState = document.getElementById('loadingState');
+const emptyState = document.getElementById('emptyState');
+const totalResultados = document.getElementById('totalResultados');
+const searchInput = document.getElementById('searchInput');
+const filterCategoria = document.getElementById('filterCategoria');
+const filterCidade = document.getElementById('filterCidade');
 
-        // Prioridade dos planos para ordenação
-        const prioridadePlano = {
-            'enterprise': 3,
-            'pro': 2,
-            'basic': 1,
-            'free': 0
-        };
+// MAPEAMENTOS
+const especialidadeMap = {
+    'eletricista': 'eletrica',
+    'encanador': 'hidraulica',
+    'massoterapeuta': 'massoterapia',
+    'tecnico_celular': 'tecnico_celular',
+    'veterinario': 'veterinaria',
+    'manicure': 'manicure',
+    'pintor': 'pintura',
+    'ar_condicionado': 'ar_condicionado',
+    'marceneiro': 'marcenaria',
+    'motorista': 'motorista'
+};
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            renderizarSkeletons();
-            carregarProfissionais();
-            
-            // Event listeners para busca em tempo real
-            searchInput.addEventListener('input', debounce(aplicarFiltros, 300));
-            filterCategoria.addEventListener('change', aplicarFiltros);
-            filterCidade.addEventListener('change', aplicarFiltros);
-        });
+const prioridadePlano = {
+    'enterprise': 3,
+    'pro': 2,
+    'basic': 1,
+    'free': 0
+};
 
-        // Função debounce para otimizar busca
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
+// INICIALIZAÇÃO
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('[DEBUG] Iniciando busca de profissionais...');
+    renderizarSkeletons();
+    carregarProfissionais();
+    
+    // Listeners
+    searchInput?.addEventListener('input', debounce(aplicarFiltros, 300));
+    filterCategoria?.addEventListener('change', aplicarFiltros);
+    filterCidade?.addEventListener('change', aplicarFiltros);
+});
 
-        // Renderizar skeletons enquanto carrega
-        function renderizarSkeletons() {
-            skeletonContainer.innerHTML = '';
-            for (let i = 0; i < 6; i++) {
-                skeletonContainer.innerHTML += `
-                    <div class="skeleton-card">
-                        <div class="skeleton-image"></div>
-                        <div class="skeleton-content">
-                            <div class="skeleton-line short"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line" style="width: 80%"></div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
+// FUNÇÃO PARA PEGAR DADOS DO PROFISSIONAL ( FLEXÍVEL )
+function extrairDadosProfissional(doc) {
+    const data = doc.data();
+    const profId = doc.id;
+    
+    console.log(`[DEBUG] Processando profissional ${profId}:`, data);
+    
+    // Tenta múltiplas estruturas de dados possíveis
+    let nome = 'Profissional';
+    let especialidade = 'Serviços Gerais';
+    let descricao = '';
+    let cidade = 'Cidade não informada';
+    let estado = '';
+    let foto = null;
+    let portfolio = [];
+    let plano = 'free';
+    let atendeDomicilio = false;
+    let atendeOnline = false;
+    let orcamentoGratuito = false;
+    let anosExp = '';
+    let raioKm = '';
+    let whatsapp = '';
+    let visivel = true;
+    
+    // NOME: Tenta várias possibilidades
+    if (data.profissional?.nomeProfissional) {
+        nome = data.profissional.nomeProfissional;
+    } else if (data.nomeProfissional) {
+        nome = data.nomeProfissional;
+    } else if (data.apelido) {
+        nome = data.apelido;
+    } else if (data.nomeCompleto) {
+        nome = data.nomeCompleto;
+    } else if (data.displayName) {
+        nome = data.displayName;
+    } else if (data.email) {
+        nome = data.email.split('@')[0];
+    }
+    
+    // ESPECIALIDADE
+    if (data.profissional?.especialidadePrincipal) {
+        especialidade = data.profissional.especialidadePrincipal;
+    } else if (data.especialidadePrincipal) {
+        especialidade = data.especialidadePrincipal;
+    } else if (data.especialidade) {
+        especialidade = data.especialidade;
+    } else if (data.categoria) {
+        especialidade = data.categoria;
+    }
+    
+    // DESCRIÇÃO
+    if (data.profissional?.descricao) {
+        descricao = data.profissional.descricao;
+    } else if (data.descricao) {
+        descricao = data.descricao;
+    } else if (data.bio) {
+        descricao = data.bio;
+    } else if (data.sobre) {
+        descricao = data.sobre;
+    }
+    
+    // LOCALIZAÇÃO (tenta vários formatos)
+    if (data.profissional?.cidadeBase) {
+        cidade = data.profissional.cidadeBase;
+    } else if (data.cidadeBase) {
+        cidade = data.cidadeBase;
+    } else if (data.endereco?.cidade) {
+        cidade = data.endereco.cidade;
+    } else if (data.cidade) {
+        cidade = data.cidade;
+    } else if (data.localidade) {
+        cidade = data.localidade;
+    }
+    
+    // ESTADO
+    if (data.profissional?.estadoBase) {
+        estado = data.profissional.estadoBase;
+    } else if (data.estadoBase) {
+        estado = data.estadoBase;
+    } else if (data.endereco?.estado) {
+        estado = data.endereco.estado;
+    } else if (data.estado) {
+        estado = data.estado;
+    } else if (data.uf) {
+        estado = data.uf;
+    }
+    
+    // FOTO
+    if (data.profissional?.fotoPerfilProfissional) {
+        foto = data.profissional.fotoPerfilProfissional;
+    } else if (data.fotoPerfilProfissional) {
+        foto = data.fotoPerfilProfissional;
+    } else if (data.fotoPerfil) {
+        foto = data.fotoPerfil;
+    } else if (data.photoURL) {
+        foto = data.photoURL;
+    } else if (data.avatar) {
+        foto = data.avatar;
+    }
+    
+    // PORTFOLIO
+    if (data.profissional?.portfolioFotos && Array.isArray(data.profissional.portfolioFotos)) {
+        portfolio = data.profissional.portfolioFotos;
+    } else if (data.portfolioFotos && Array.isArray(data.portfolioFotos)) {
+        portfolio = data.portfolioFotos;
+    } else if (data.portfolio && Array.isArray(data.portfolio)) {
+        portfolio = data.portfolio;
+    } else if (data.fotos && Array.isArray(data.fotos)) {
+        portfolio = data.fotos;
+    }
+    
+    // PLANO
+    if (data.plano_assinatura) {
+        plano = data.plano_assinatura;
+    } else if (data.plano) {
+        plano = data.plano;
+    } else if (data.assinatura?.plano) {
+        plano = data.assinatura.plano;
+    }
+    
+    // SERVIÇOS
+    if (data.profissional?.atendeDomicilio !== undefined) {
+        atendeDomicilio = data.profissional.atendeDomicilio;
+    } else if (data.atendeDomicilio !== undefined) {
+        atendeDomicilio = data.atendeDomicilio;
+    } else if (data.domicilio !== undefined) {
+        atendeDomicilio = data.domicilio;
+    }
+    
+    if (data.profissional?.atendeOnline !== undefined) {
+        atendeOnline = data.profissional.atendeOnline;
+    } else if (data.atendeOnline !== undefined) {
+        atendeOnline = data.atendeOnline;
+    } else if (data.online !== undefined) {
+        atendeOnline = data.online;
+    }
+    
+    if (data.profissional?.orcamentoGratuito !== undefined) {
+        orcamentoGratuito = data.profissional.orcamentoGratuito;
+    } else if (data.orcamentoGratuito !== undefined) {
+        orcamentoGratuito = data.orcamentoGratuito;
+    }
+    
+    // EXPERIÊNCIA
+    if (data.profissional?.anosExperiencia) {
+        anosExp = data.profissional.anosExperiencia;
+    } else if (data.anosExperiencia) {
+        anosExp = data.anosExperiencia;
+    } else if (data.experiencia) {
+        anosExp = data.experiencia;
+    }
+    
+    // RAIO
+    if (data.profissional?.raioKm) {
+        raioKm = data.profissional.raioKm;
+    } else if (data.raioKm) {
+        raioKm = data.raioKm;
+    } else if (data.raioAtendimento) {
+        raioKm = data.raioAtendimento;
+    }
+    
+    // WHATSAPP
+    if (data.profissional?.whatsapp) {
+        whatsapp = data.profissional.whatsapp;
+    } else if (data.whatsapp) {
+        whatsapp = data.whatsapp;
+    } else if (data.telefone) {
+        whatsapp = data.telefone;
+    } else if (data.celular) {
+        whatsapp = data.celular;
+    }
+    
+    // VISIBILIDADE (importante para as rules)
+    if (data.profissional?.visivelBusca !== undefined) {
+        visivel = data.profissional.visivelBusca !== false;
+    } else if (data.visivelBusca !== undefined) {
+        visivel = data.visivelBusca !== false;
+    } else if (data.visivel !== undefined) {
+        visivel = data.visivel !== false;
+    }
+    
+    // CIDADES ATENDIDAS (array)
+    let cidadesAtendidas = [];
+    if (data.profissional?.cidadesAtendidas && Array.isArray(data.profissional.cidadesAtendidas)) {
+        cidadesAtendidas = data.profissional.cidadesAtendidas;
+    } else if (data.cidadesAtendidas && Array.isArray(data.cidadesAtendidas)) {
+        cidadesAtendidas = data.cidadesAtendidas;
+    }
+    
+    return {
+        id: profId,
+        nome,
+        especialidade,
+        descricao,
+        cidade,
+        estado: estado ? ` - ${estado}` : '',
+        foto,
+        portfolio,
+        plano,
+        atendeDomicilio,
+        atendeOnline,
+        orcamentoGratuito,
+        anosExperiencia: anosExp,
+        raioKm,
+        whatsapp,
+        visivel,
+        cidadesAtendidas,
+        rawData: data // mantém dados brutos para debug se necessário
+    };
+}
 
-        // Carregar profissionais do Firestore
-        async function carregarProfissionais() {
+// CARREGAR PROFISSIONAIS DO FIRESTORE
+async function carregarProfissionais() {
+    try {
+        showLoading(true);
+        console.log('[DEBUG] Buscando profissionais no Firestore...');
+        
+        // Query simplificada para evitar erros de índice
+        // Buscamos todos os profissionais ativos e filtramos no JS se necessário
+        let q = query(
+            collection(db, "usuarios"),
+            where("tipoUsuario", "==", "profissional"),
+            limit(100)
+        );
+        
+        const snapshot = await getDocs(q);
+        console.log(`[DEBUG] Encontrados ${snapshot.docs.length} documentos`);
+        
+        todosProfissionais = [];
+        cidadesDisponiveis.clear();
+        
+        snapshot.forEach(doc => {
             try {
-                showLoading(true);
+                const data = doc.data();
                 
-                // Query principal - busca profissionais ativos
-                const q = query(
-                    collection(db, "usuarios"),
-                    where("tipoUsuario", "==", "profissional"),
-                    where("status", "==", "ativo"),
-                    limit(100)
-                );
-
-                const snapshot = await getDocs(q);
+                // Verifica status (pode ser "ativo", "active", true, ou omitido)
+                const status = data.status || data.situacao || data.ativo;
+                if (status && status !== 'ativo' && status !== 'active' && status !== true) {
+                    console.log(`[DEBUG] Pulando ${doc.id} - status inativo:`, status);
+                    return; // pula se status existir e não for ativo
+                }
                 
-                todosProfissionais = [];
-                cidadesDisponiveis.clear();
+                const prof = extrairDadosProfissional(doc);
                 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const prof = data.profissional || {};
+                // Só adiciona se visível
+                if (prof.visivel !== false) {
+                    todosProfissionais.push(prof);
                     
-                    // Verifica se o profissional pode ser mostrado
-                    const podeMostrar = prof.visivelBusca !== false;
-                    
-                    if (podeMostrar) {
-                        const profissional = {
-                            id: doc.id,
-                            ...data,
-                            ...prof,
-                            plano: data.plano_assinatura || 'free'
-                        };
-                        
-                        todosProfissionais.push(profissional);
-                        
-                        // Coleta cidades para o filtro
-                        if (prof.cidadeBase) {
-                            cidadesDisponiveis.add(prof.cidadeBase);
-                        }
-                        if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
-                            prof.cidadesAtendidas.forEach(cidade => {
-                                if (cidade) cidadesDisponiveis.add(cidade);
-                            });
-                        }
+                    // Coleta cidades
+                    if (prof.cidade && prof.cidade !== 'Cidade não informada') {
+                        cidadesDisponiveis.add(prof.cidade);
                     }
-                });
-
-                // Ordenar por relevância (plano) inicialmente
-                ordenarPorRelevancia();
+                    prof.cidadesAtendidas.forEach(c => {
+                        if (c) cidadesDisponiveis.add(c);
+                    });
+                }
                 
-                // Preencher select de cidades
-                preencherCidades();
-                
-                // Aplicar filtros iniciais
-                aplicarFiltros();
-                
-            } catch (error) {
-                showToast("Erro ao carregar profissionais. Tente novamente.", "error");
-            } finally {
-                showLoading(false);
+            } catch (err) {
+                console.error(`[ERRO] Processando documento ${doc.id}:`, err);
+                // Não quebra o loop, continua com próximo
             }
+        });
+        
+        console.log(`[DEBUG] Total válidos: ${todosProfissionais.length}`);
+        
+        // Ordenar por plano (premium primeiro)
+        todosProfissionais.sort((a, b) => {
+            return (prioridadePlano[b.plano] || 0) - (prioridadePlano[a.plano] || 0);
+        });
+        
+        preencherCidades();
+        aplicarFiltros();
+        
+    } catch (error) {
+        console.error('[ERRO CRÍTICO] ao carregar:', error);
+        
+        // Mostra toast de erro
+        let msgErro = "Erro ao carregar profissionais.";
+        
+        if (error.message && error.message.includes('permission')) {
+            msgErro = "Sem permissão para acessar dados. Verifique as regras do Firestore.";
+        } else if (error.message && error.message.includes('index')) {
+            msgErro = "Erro de índice no Firestore. Contate o administrador.";
         }
+        
+        showToast(msgErro, "error");
+        
+        // Mostrar empty state com mensagem de erro
+        showEmptyState("Erro ao carregar", error.message);
+    } finally {
+        showLoading(false);
+    }
+}
 
-        // Preencher dropdown de cidades dinamicamente
-        function preencherCidades() {
-            const cidadesArray = Array.from(cidadesDisponiveis).sort();
-            const currentValue = filterCidade.value;
+// APLICAR FILTROS
+function aplicarFiltros() {
+    const termoBusca = (searchInput?.value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").trim();
+    const categoriaSelecionada = filterCategoria?.value || '';
+    const cidadeSelecionada = filterCidade?.value || '';
+    
+    console.log(`[DEBUG] Filtrando: termo="${termoBusca}", cat=${categoriaSelecionada}, cidade=${cidadeSelecionada}`);
+    
+    profissionaisFiltrados = todosProfissionais.filter(prof => {
+        // Filtro por texto
+        let matchBusca = true;
+        if (termoBusca) {
+            const nome = prof.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+            const especialidade = prof.especialidade.toLowerCase();
+            const desc = prof.descricao.toLowerCase();
+            const cidadeTermo = prof.cidade.toLowerCase();
             
-            filterCidade.innerHTML = '<option value="">Todas as Cidades</option>';
-            
-            cidadesArray.forEach(cidade => {
-                const option = document.createElement('option');
-                option.value = cidade;
-                option.textContent = cidade;
-                filterCidade.appendChild(option);
-            });
-            
-            filterCidade.value = currentValue;
+            matchBusca = nome.includes(termoBusca) || 
+                        especialidade.includes(termoBusca) || 
+                        desc.includes(termoBusca) ||
+                        cidadeTermo.includes(termoBusca);
         }
-
-        // Aplicar filtros
-        function aplicarFiltros() {
-            const termoBusca = searchInput.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").trim();
-            const categoriaSelecionada = filterCategoria.value;
-            const cidadeSelecionada = filterCidade.value;
-
-            // Converter categoria selecionada para o formato do banco de dados
+        
+        // Filtro por categoria (mapeia para código)
+        let matchCategoria = true;
+        if (categoriaSelecionada) {
             const categoriaCodigo = especialidadeMap[categoriaSelecionada] || categoriaSelecionada;
-
-            profissionaisFiltrados = todosProfissionais.filter(prof => {
-                // Filtro por texto (nome, especialidade, descrição)
-                let matchBusca = true;
-                if (termoBusca) {
-                    const nome = (prof.nomeProfissional || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-                    const especialidade = (prof.especialidadePrincipal || '').toLowerCase();
-                    const descricao = (prof.descricao || '').toLowerCase();
-                    const tags = Array.isArray(prof.especialidades) ? prof.especialidades.join(' ').toLowerCase() : '';
-                    
-                    matchBusca = nome.includes(termoBusca) || 
-                                especialidade.includes(termoBusca) || 
-                                descricao.includes(termoBusca) ||
-                                tags.includes(termoBusca);
-                }
-
-                // Filtro por categoria
-                let matchCategoria = true;
-                if (categoriaCodigo) {
-                    matchCategoria = prof.especialidadePrincipal === categoriaCodigo;
-                }
-
-                // Filtro por cidade
-                let matchCidade = true;
-                if (cidadeSelecionada) {
-                    const cidadeProf = (prof.cidadeBase || '').toLowerCase();
-                    const cidadesAtendidas = Array.isArray(prof.cidadesAtendidas) ? 
-                        prof.cidadesAtendidas.map(c => c.toLowerCase()) : [];
-                    
-                    matchCidade = cidadeProf.includes(cidadeSelecionada.toLowerCase()) ||
-                                 cidadesAtendidas.some(cidade => cidade.includes(cidadeSelecionada.toLowerCase()));
-                }
-
-                return matchBusca && matchCategoria && matchCidade;
-            });
-
-            ordenarResultados();
+            matchCategoria = prof.especialidade === categoriaCodigo || 
+                           prof.especialidade.includes(categoriaCodigo) ||
+                           prof.especialidade.includes(categoriaSelecionada);
         }
-
-        // Ordenar resultados
-        function ordenarResultados() {
-            const tipo = document.getElementById('sortSelect').value;
+        
+        // Filtro por cidade
+        let matchCidade = true;
+        if (cidadeSelecionada) {
+            const cidadeProf = prof.cidade.toLowerCase();
+            const cidadesExtras = prof.cidadesAtendidas.map(c => c.toLowerCase());
             
-            switch(tipo) {
-                case 'nome':
-                    profissionaisFiltrados.sort((a, b) => {
-                        const nomeA = (a.nomeProfissional || '').toLowerCase();
-                        const nomeB = (b.nomeProfissional || '').toLowerCase();
-                        return nomeA.localeCompare(nomeB);
-                    });
-                    break;
-                case 'experiencia':
-                    // Ordenar por anos de experiência (mais para menos)
-                    const expMap = { '10+': 10, '5-10': 5, '3-5': 3, '1-3': 2, '1': 1 };
-                    profissionaisFiltrados.sort((a, b) => {
-                        return (expMap[b.anosExperiencia] || 0) - (expMap[a.anosExperiencia] || 0);
-                    });
-                    break;
-                case 'relevancia':
-                default:
-                    ordenarPorRelevancia();
-                    break;
-            }
-            
-            renderizarResultados();
+            matchCidade = cidadeProf.includes(cidadeSelecionada.toLowerCase()) ||
+                         cidadesExtras.some(c => c.includes(cidadeSelecionada.toLowerCase()));
         }
+        
+        return matchBusca && matchCategoria && matchCidade;
+    });
+    
+    ordenarResultados();
+}
 
-        function ordenarPorRelevancia() {
+// ORDENAR RESULTADOS
+function ordenarResultados() {
+    const tipo = document.getElementById('sortSelect')?.value || 'relevancia';
+    
+    switch(tipo) {
+        case 'nome':
+            profissionaisFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+            break;
+        case 'experiencia':
+            const expMap = { '10+': 10, '5-10': 5, '3-5': 3, '1-3': 2, '1': 1, '0': 0 };
             profissionaisFiltrados.sort((a, b) => {
-                const prioridadeA = prioridadePlano[a.plano] || 0;
-                const prioridadeB = prioridadePlano[b.plano] || 0;
-                
-                if (prioridadeB !== prioridadeA) {
-                    return prioridadeB - prioridadeA;
-                }
-                
-                // Se mesmo plano, ordenar por nome
-                return (a.nomeProfissional || '').localeCompare(b.nomeProfissional || '');
+                return (expMap[b.anosExperiencia] || 0) - (expMap[a.anosExperiencia] || 0);
             });
-        }
+            break;
+        case 'relevancia':
+        default:
+            // Já ordenado por plano no carregamento
+            break;
+    }
+    
+    renderizarResultados();
+}
 
-        // Renderizar cards
-        function renderizarResultados() {
-            totalResultados.textContent = profissionaisFiltrados.length;
-            
-            if (profissionaisFiltrados.length === 0) {
-                resultsContainer.style.display = 'none';
-                emptyState.style.display = 'block';
-                return;
-            }
-            
-            emptyState.style.display = 'none';
-            resultsContainer.style.display = 'grid';
-            
-            resultsContainer.innerHTML = profissionaisFiltrados.map(prof => criarCardHTML(prof)).join('');
+// RENDERIZAR CARDS
+function renderizarResultados() {
+    if (totalResultados) {
+        totalResultados.textContent = profissionaisFiltrados.length;
+    }
+    
+    if (!resultsContainer) return;
+    
+    if (profissionaisFiltrados.length === 0) {
+        resultsContainer.style.display = 'none';
+        if (emptyState) {
+            emptyState.style.display = 'block';
+            emptyState.querySelector('.empty-title').textContent = 'Nenhum profissional encontrado';
+            emptyState.querySelector('.empty-text').textContent = 'Tente ajustar seus filtros de busca';
         }
+        return;
+    }
+    
+    if (emptyState) emptyState.style.display = 'none';
+    resultsContainer.style.display = 'grid';
+    
+    resultsContainer.innerHTML = profissionaisFiltrados.map(prof => criarCardHTML(prof)).join('');
+    
+    console.log(`[DEBUG] Renderizados ${profissionaisFiltrados.length} cards`);
+}
 
-        // Criar HTML do card
-        function criarCardHTML(prof) {
-            const plano = prof.plano || 'free';
-            const isPremium = plano === 'pro' || plano === 'enterprise';
+// CRIAR HTML DO CARD
+function criarCardHTML(prof) {
+    const isPremium = prof.plano === 'pro' || prof.plano === 'enterprise';
+    
+    // Imagem: tenta portfolio primeiro, depois foto de perfil
+    let imagemCapa = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(prof.nome) + '&background=44689a&color=fff&size=400x300';
+    
+    if (prof.portfolio && prof.portfolio.length > 0) {
+        imagemCapa = prof.portfolio[0];
+    } else if (prof.foto) {
+        imagemCapa = prof.foto;
+    }
+    
+    // Badge do plano (só se não for free/basic)
+    let planBadge = '';
+    if (prof.plano === 'pro' || prof.plano === 'enterprise') {
+        planBadge = `<div class="plan-badge ${prof.plano}">
+            <i class="fas fa-crown"></i> ${prof.plano.toUpperCase()}
+        </div>`;
+    }
+    
+    // Badges de serviço
+    const badges = [];
+    if (prof.atendeDomicilio) {
+        badges.push('<span class="service-badge badge-domicilio"><i class="fas fa-home"></i> Domicílio</span>');
+    }
+    if (prof.atendeOnline) {
+        badges.push('<span class="service-badge badge-online"><i class="fas fa-laptop"></i> Online</span>');
+    }
+    if (prof.orcamentoGratuito) {
+        badges.push('<span class="service-badge badge-orcamento"><i class="fas fa-gift"></i> Orçamento Grátis</span>');
+    }
+    
+    // Rating (placeholder até implementar sistema real)
+    const rating = '4.5';
+    
+    return `
+        <div class="pro-card ${isPremium ? 'premium' : ''}" onclick="verPerfilDetalhado('${prof.id}')">
+            <div class="card-image-container">
+                <img src="${imagemCapa}" alt="${prof.nome}" class="card-image" loading="lazy" 
+                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nome)}&background=44689a&color=fff&size=400x300'">
+                <div class="card-image-overlay"></div>
+                ${planBadge}
+            </div>
             
-            // Imagem principal: portfolio ou foto de perfil
-            const imagemCapa = (prof.portfolioFotos && prof.portfolioFotos[0]) || 
-                              prof.fotoPerfilProfissional || 
-                              prof.fotoPerfil || 
-                              'https://via.placeholder.com/400x300/44689a/ffffff?text=Sem+Foto';
-            
-            // Badge do plano
-            const planBadge = plano !== 'free' && plano !== 'basic' ? 
-                `<div class="plan-badge ${plano}">
-                    <i class="fas fa-crown"></i> ${plano.toUpperCase()}
-                 </div>` : '';
-            
-            // Badges de serviço
-            const badges = [];
-            if (prof.atendeDomicilio) {
-                badges.push('<span class="service-badge badge-domicilio"><i class="fas fa-home"></i> Domicílio</span>');
-            }
-            if (prof.atendeOnline) {
-                badges.push('<span class="service-badge badge-online"><i class="fas fa-laptop"></i> Online</span>');
-            }
-            if (prof.orcamentoGratuito) {
-                badges.push('<span class="service-badge badge-orcamento"><i class="fas fa-gift"></i> Orçamento Grátis</span>');
-            }
-            
-            // Rating (será implementado com avaliações reais)
-            const rating = '4.5';
-            
-            return `
-                <div class="pro-card ${isPremium ? 'premium' : ''}" onclick="verPerfilDetalhado('${prof.id}')">
-                    <div class="card-image-container">
-                        <img src="${imagemCapa}" alt="${prof.nomeProfissional}" class="card-image" loading="lazy">
-                        <div class="card-image-overlay"></div>
-                        ${planBadge}
+            <div class="card-body">
+                <div class="card-header-info">
+                    <div>
+                        <h3 class="pro-name">${prof.nome}</h3>
+                        <div class="pro-specialty">
+                            <i class="fas fa-tools"></i>
+                            ${formatarEspecialidade(prof.especialidade)}
+                        </div>
                     </div>
-                    
-                    <div class="card-body">
-                        <div class="card-header-info">
-                            <div>
-                                <h3 class="pro-name">${prof.nomeProfissional || 'Profissional'}</h3>
-                                <div class="pro-specialty">
-                                    <i class="fas fa-tools"></i>
-                                    ${formatarEspecialidade(prof.especialidadePrincipal)}
-                                </div>
-                            </div>
-                            <div class="rating-badge">
-                                <i class="fas fa-star"></i> ${rating}
-                            </div>
-                        </div>
-                        
-                        <p class="pro-description">
-                            ${prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.'}
-                        </p>
-                        
-                        <div class="pro-location">
-                            <i class="fas fa-map-marker-alt location-icon"></i>
-                            <span>${prof.cidadeBase || 'Cidade não informada'} 
-                                ${prof.raioKm ? `• ${prof.raioKm}km raio` : ''}
-                            </span>
-                        </div>
-                        
-                        <div class="service-badges">
-                            ${badges.join('')}
-                        </div>
-                        
-                        <div class="card-footer">
-                            <span class="experience-text">
-                                <i class="fas fa-briefcase me-1"></i>
-                                ${formatarExperiencia(prof.anosExperiencia)}
-                            </span>
-                            <button class="btn-ver-perfil" onclick="event.stopPropagation(); verPerfilDetalhado('${prof.id}')">
-                                Ver Perfil
-                            </button>
-                        </div>
+                    <div class="rating-badge">
+                        <i class="fas fa-star"></i> ${rating}
                     </div>
                 </div>
-            `;
-        }
+                
+                <p class="pro-description">
+                    ${prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.'}
+                </p>
+                
+                <div class="pro-location">
+                    <i class="fas fa-map-marker-alt location-icon"></i>
+                    <span>${prof.cidade}${prof.estado}
+                        ${prof.raioKm ? ` • ${prof.raioKm}km raio` : ''}
+                    </span>
+                </div>
+                
+                <div class="service-badges">
+                    ${badges.join('')}
+                </div>
+                
+                <div class="card-footer">
+                    <span class="experience-text">
+                        <i class="fas fa-briefcase me-1"></i>
+                        ${formatarExperiencia(prof.anosExperiencia)}
+                    </span>
+                    <button class="btn-ver-perfil" onclick="event.stopPropagation(); verPerfilDetalhado('${prof.id}')">
+                        Ver Perfil
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
-        // Helpers de formatação
-        function formatarEspecialidade(esp) {
-            if (!esp) return 'Profissional';
-            const map = {
-                'eletrica': 'Eletricista',
-                'hidraulica': 'Encanador',
-                'massoterapia': 'Massoterapeuta',
-                'tecnico_celular': 'Técnico de Celular',
-                'veterinaria': 'Veterinário(a)',
-                'manicure': 'Manicure/Pedicure',
-                'pintura': 'Pintor',
-                'ar_condicionado': 'Técnico em Ar Condicionado',
-                'marcenaria': 'Marceneiro',
-                'motorista': 'Motorista'
-            };
-            return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
-        }
+// HELPERS DE FORMATAÇÃO
+function formatarEspecialidade(esp) {
+    if (!esp) return 'Profissional';
+    const map = {
+        'eletrica': 'Eletricista',
+        'hidraulica': 'Encanador',
+        'massoterapia': 'Massoterapeuta',
+        'tecnico_celular': 'Técnico de Celular',
+        'veterinaria': 'Veterinário(a)',
+        'manicure': 'Manicure/Pedicure',
+        'pintura': 'Pintor',
+        'ar_condicionado': 'Técnico em Ar Condicionado',
+        'marcenaria': 'Marceneiro',
+        'motorista': 'Motorista'
+    };
+    
+    // Tenta encontrar no mapa, senão capitaliza
+    const lower = esp.toLowerCase();
+    return map[lower] || esp.charAt(0).toUpperCase() + esp.slice(1);
+}
 
-        function formatarExperiencia(exp) {
-            if (!exp) return 'Experiência não informada';
-            const map = {
-                '1': '< 1 ano',
-                '1-3': '1-3 anos',
-                '3-5': '3-5 anos',
-                '5-10': '5-10 anos',
-                '10+': '10+ anos'
-            };
-            return map[exp] || exp;
-        }
+function formatarExperiencia(exp) {
+    if (!exp) return 'Experiência não informada';
+    const map = {
+        '1': '< 1 ano',
+        '1-3': '1-3 anos',
+        '3-5': '3-5 anos',
+        '5-10': '5-10 anos',
+        '10+': '10+ anos',
+        '0': '< 1 ano'
+    };
+    return map[exp] || exp;
+}
 
-        // Navegação para perfil detalhado
-        window.verPerfilDetalhado = function(profissionalId) {
-            window.location.href = `perfil-profissional-publico.html?id=${profissionalId}`;
+// PREENCHER CIDADES NO SELECT
+function preencherCidades() {
+    if (!filterCidade) return;
+    
+    const cidadesArray = Array.from(cidadesDisponiveis).sort();
+    const currentValue = filterCidade.value;
+    
+    filterCidade.innerHTML = '<option value="">Todas as Cidades</option>';
+    
+    cidadesArray.forEach(cidade => {
+        const option = document.createElement('option');
+        option.value = cidade;
+        option.textContent = cidade;
+        filterCidade.appendChild(option);
+    });
+    
+    if (currentValue && cidadesArray.includes(currentValue)) {
+        filterCidade.value = currentValue;
+    }
+}
+
+// CONTROLE DE UI
+function showLoading(show) {
+    if (show) {
+        if (skeletonContainer) skeletonContainer.style.display = 'none';
+        if (resultsContainer) resultsContainer.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
+        if (loadingState) loadingState.style.display = 'block';
+    } else {
+        if (loadingState) loadingState.style.display = 'none';
+        if (skeletonContainer) skeletonContainer.style.display = 'none';
+    }
+}
+
+function renderizarSkeletons() {
+    if (!skeletonContainer) return;
+    
+    skeletonContainer.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+        skeletonContainer.innerHTML += `
+            <div class="skeleton-card">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line" style="width: 80%"></div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function showEmptyState(titulo, texto) {
+    if (emptyState) {
+        emptyState.style.display = 'block';
+        emptyState.querySelector('.empty-title').textContent = titulo || 'Nenhum resultado';
+        emptyState.querySelector('.empty-text').textContent = texto || 'Tente novamente mais tarde';
+    }
+}
+
+// UTILITÁRIOS
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
         };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
-        // Limpar filtros
-        window.limparFiltros = function() {
-            searchInput.value = '';
-            filterCategoria.value = '';
-            filterCidade.value = '';
-            document.getElementById('sortSelect').value = 'relevancia';
-            aplicarFiltros();
-        };
+function showToast(mensagem, tipo = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-scanhub';
+    
+    const icon = tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    const color = tipo === 'error' ? '#dc3545' : '#44689a';
+    
+    toast.innerHTML = `
+        <i class="fas ${icon}" style="color: ${color}; font-size: 1.2rem;"></i>
+        <span>${mensagem}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 
-        // Controle de loading
-        function showLoading(show) {
-            if (show) {
-                skeletonContainer.style.display = 'none';
-                resultsContainer.style.display = 'none';
-                emptyState.style.display = 'none';
-                loadingState.style.display = 'block';
-            } else {
-                loadingState.style.display = 'none';
-                skeletonContainer.style.display = 'none';
-            }
-        }
+// FUNÇÕES GLOBAIS (expostas para onclick no HTML)
+window.verPerfilDetalhado = function(profissionalId) {
+    // IMPORTANTE: Verifique o nome correto do seu arquivo de perfil
+    // Se o arquivo chama perfil-profissional-publica.html:
+    window.location.href = `perfil-profissional-publica.html?id=${profissionalId}`;
+};
 
-        // Toast notification
-        function showToast(mensagem, tipo = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'toast-scanhub';
-            
-            const icon = tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-            const color = tipo === 'error' ? '#dc3545' : '#44689a';
-            
-            toast.innerHTML = `
-                <i class="fas ${icon}" style="color: ${color}; font-size: 1.2rem;"></i>
-                <span>${mensagem}</span>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+window.aplicarFiltros = aplicarFiltros;
+window.ordenarResultados = ordenarResultados;
+window.limparFiltros = function() {
+    if (searchInput) searchInput.value = '';
+    if (filterCategoria) filterCategoria.value = '';
+    if (filterCidade) filterCidade.value = '';
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) sortSelect.value = 'relevancia';
+    aplicarFiltros();
+};
 
-        // Expor funções necessárias globalmente
-        window.aplicarFiltros = aplicarFiltros;
-        window.ordenarResultados = ordenarResultados;
-        window.limparFiltros = limparFiltros;
+// Log de debug inicial
+console.log('[DEBUG] Script de busca carregado com sucesso.');
     </script>
 </body>
 </html>
