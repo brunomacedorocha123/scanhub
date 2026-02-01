@@ -737,7 +737,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-           <script type="module">
+            <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, 
@@ -766,7 +766,6 @@
     let cidadesUnicas = new Set();
     let avaliacoesCache = {};
 
-    // Elementos DOM
     const loadingState = document.getElementById('loadingState');
     const resultsContainer = document.getElementById('resultsContainer');
     const emptyState = document.getElementById('emptyState');
@@ -792,7 +791,6 @@
         }, 3000);
     }
 
-    // Extrair dados conforme estrutura real do Firestore
     function extrairDadosProfissional(doc) {
         const data = doc.data();
         const prof = data.profissional || {};
@@ -841,7 +839,6 @@
                 avaliacoesCache[av.profissionalId].quantidade++;
             });
             
-            // Calcular médias
             for (const id in avaliacoesCache) {
                 const dados = avaliacoesCache[id];
                 avaliacoesCache[id].media = (dados.soma / dados.quantidade).toFixed(1);
@@ -854,7 +851,6 @@
 
     async function carregarProfissionais() {
         try {
-            // BUSCA DIRETA: Apenas quem tem perfil profissional completo
             const q = query(
                 collection(db, "usuarios"),
                 where("profissional.perfilCompleto", "==", true)
@@ -862,10 +858,8 @@
             
             const snapshot = await getDocs(q);
             
-            // Carregar avaliações
             await carregarAvaliacoes();
             
-            // Processar dados
             todosProfissionais = [];
             cidadesUnicas.clear();
             
@@ -873,11 +867,9 @@
                 try {
                     const data = doc.data();
                     
-                    // VERIFICAÇÃO ÚNICA: Tem perfil profissional completo? Se sim, adiciona.
-                    if (data.profissional?.perfilCompleto === true) {
+                    if (data.profissional && data.profissional.perfilCompleto === true) {
                         const prof = extrairDadosProfissional(doc);
                         
-                        // Adicionar dados de avaliação
                         if (avaliacoesCache[doc.id]) {
                             prof.mediaAvaliacoes = avaliacoesCache[doc.id].media;
                             prof.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
@@ -885,7 +877,6 @@
                         
                         todosProfissionais.push(prof);
                         
-                        // Adicionar cidades ao filtro
                         if (prof.cidade && prof.cidade !== 'Cidade não informada') {
                             cidadesUnicas.add(prof.cidade);
                         }
@@ -904,7 +895,6 @@
                 }
             });
             
-            // Preencher filtro de cidades
             const cidadesOrdenadas = Array.from(cidadesUnicas).sort();
             filterCidade.innerHTML = '<option value="">Todas as Cidades</option>';
             
@@ -915,7 +905,6 @@
                 filterCidade.appendChild(option);
             });
             
-            // Esconder loading e mostrar resultados
             loadingState.style.display = 'none';
             
             if (todosProfissionais.length === 0) {
@@ -1077,16 +1066,13 @@
         `;
     }
 
-    // Funções globais
     window.aplicarFiltros = function() {
         const termoBusca = searchInput.value.toLowerCase().trim();
         const categoriaSelecionada = filterCategoria.value;
         const cidadeSelecionada = filterCidade.value;
         const criterioOrdenacao = sortSelect.value;
 
-        // Filtrar
         profissionaisFiltrados = todosProfissionais.filter(prof => {
-            // Busca por texto
             if (termoBusca) {
                 const matchNome = prof.nome.toLowerCase().includes(termoBusca);
                 const matchEspecialidade = prof.especialidade.toLowerCase().includes(termoBusca);
@@ -1094,7 +1080,6 @@
                 if (!matchNome && !matchEspecialidade && !matchDescricao) return false;
             }
 
-            // Filtro por categoria
             if (categoriaSelecionada) {
                 const matchPrincipal = prof.especialidade.toLowerCase().includes(categoriaSelecionada);
                 const matchAdicionais = prof.especialidades.some(esp => 
@@ -1103,7 +1088,6 @@
                 if (!matchPrincipal && !matchAdicionais) return false;
             }
 
-            // Filtro por cidade
             if (cidadeSelecionada) {
                 const matchCidade = prof.cidade === cidadeSelecionada;
                 const matchCidadesAtendidas = prof.cidadesAtendidas.includes(cidadeSelecionada);
@@ -1113,7 +1097,6 @@
             return true;
         });
 
-        // Ordenar
         const planoPrioridade = (plano) => {
             const map = { 'enterprise': 4, 'pro': 3, 'basic': 2, 'free': 1 };
             return map[plano] || 0;
@@ -1133,7 +1116,7 @@
                 profissionaisFiltrados.sort((a, b) => (expVal[b.anosExperiencia] || 0) - (expVal[a.anosExperiencia] || 0));
                 break;
                 
-            default: // relevancia
+            default:
                 profissionaisFiltrados.sort((a, b) => {
                     const planoDiff = planoPrioridade(b.plano) - planoPrioridade(a.plano);
                     if (planoDiff !== 0) return planoDiff;
@@ -1143,7 +1126,6 @@
                 });
         }
 
-        // Renderizar
         totalResultados.textContent = profissionaisFiltrados.length;
         
         if (profissionaisFiltrados.length === 0) {
@@ -1164,7 +1146,6 @@
         aplicarFiltros();
     };
 
-    // Event Listeners
     let timeoutBusca;
     searchInput.addEventListener('input', () => {
         clearTimeout(timeoutBusca);
@@ -1175,11 +1156,10 @@
     filterCidade.addEventListener('change', aplicarFiltros);
     sortSelect.addEventListener('change', aplicarFiltros);
 
-    // Inicialização
     onAuthStateChanged(auth, (user) => {
         carregarProfissionais();
     });
 
 </script>
 </body>
-</html>
+</html>  
