@@ -737,7 +737,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-            <script type="module">
+           <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, 
@@ -856,53 +856,16 @@
         try {
             console.log('[DEBUG] Iniciando carregamento...');
             
-            // ESTRATÉGIA: Duas queries separadas para respeitar as regras do Firestore
-            // Firestore não suporta OR, então fazemos duas buscas e unimos os resultados
-            
-            // Query 1: Profissionais com status = "ativo"
-            const q1 = query(
+            // 🔥 MUDANÇA AQUI: Query única e mais abrangente
+            const q = query(
                 collection(db, "usuarios"),
-                where("profissional.perfilCompleto", "==", true),
-                where("status", "==", "ativo")
+                where("profissional.perfilCompleto", "==", true)
             );
             
-            // Query 2: Profissionais com status_assinatura = "ativa"
-            const q2 = query(
-                collection(db, "usuarios"),
-                where("profissional.perfilCompleto", "==", true),
-                where("status_assinatura", "==", "ativa")
-            );
+            console.log('[DEBUG] Executando query...');
             
-            console.log('[DEBUG] Executando queries...');
-            
-            // Executar em paralelo com tratamento de erro individual
-            const [snap1, snap2] = await Promise.all([
-                getDocs(q1).catch(err => {
-                    console.warn("Erro query 1 (status):", err.message);
-                    return { docs: [] };
-                }),
-                getDocs(q2).catch(err => {
-                    console.warn("Erro query 2 (assinatura):", err.message);
-                    return { docs: [] };
-                })
-            ]);
-            
-            console.log(`[DEBUG] Query1: ${snap1.docs.length} docs, Query2: ${snap2.docs.length} docs`);
-            
-            // Unir resultados em Map para evitar duplicatas
-            const profissionaisMap = new Map();
-            
-            snap1.docs.forEach(doc => {
-                profissionaisMap.set(doc.id, doc);
-            });
-            
-            snap2.docs.forEach(doc => {
-                if (!profissionaisMap.has(doc.id)) {
-                    profissionaisMap.set(doc.id, doc);
-                }
-            });
-            
-            console.log(`[DEBUG] Total únicos: ${profissionaisMap.size}`);
+            const snapshot = await getDocs(q);
+            console.log(`[DEBUG] Query retornou: ${snapshot.docs.length} documentos`);
             
             // Carregar avaliações
             await carregarAvaliacoes();
@@ -911,33 +874,38 @@
             todosProfissionais = [];
             cidadesUnicas.clear();
             
-            profissionaisMap.forEach((doc, id) => {
+            snapshot.forEach(doc => {
                 try {
-                    const prof = extrairDadosProfissional(doc);
+                    const data = doc.data();
                     
-                    // Adicionar dados de avaliação
-                    if (avaliacoesCache[id]) {
-                        prof.mediaAvaliacoes = avaliacoesCache[id].media;
-                        prof.totalAvaliacoes = avaliacoesCache[id].quantidade;
-                    }
-                    
-                    todosProfissionais.push(prof);
-                    
-                    // Adicionar cidades ao filtro
-                    if (prof.cidade && prof.cidade !== 'Cidade não informada') {
-                        cidadesUnicas.add(prof.cidade);
-                    }
-                    
-                    if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
-                        prof.cidadesAtendidas.forEach(cidade => {
-                            if (cidade && cidade.trim()) {
-                                cidadesUnicas.add(cidade.trim());
-                            }
-                        });
+                    // VERIFICAÇÃO SIMPLES: Tem perfil profissional completo?
+                    if (data.profissional && data.profissional.perfilCompleto === true) {
+                        const prof = extrairDadosProfissional(doc);
+                        
+                        // Adicionar dados de avaliação
+                        if (avaliacoesCache[doc.id]) {
+                            prof.mediaAvaliacoes = avaliacoesCache[doc.id].media;
+                            prof.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
+                        }
+                        
+                        todosProfissionais.push(prof);
+                        
+                        // Adicionar cidades ao filtro
+                        if (prof.cidade && prof.cidade !== 'Cidade não informada') {
+                            cidadesUnicas.add(prof.cidade);
+                        }
+                        
+                        if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
+                            prof.cidadesAtendidas.forEach(cidade => {
+                                if (cidade && cidade.trim()) {
+                                    cidadesUnicas.add(cidade.trim());
+                                }
+                            });
+                        }
                     }
                     
                 } catch (err) {
-                    console.error("Erro ao processar documento:", id, err);
+                    console.error("Erro ao processar documento:", doc.id, err);
                 }
             });
             
@@ -1071,7 +1039,6 @@
             raioHTML = `<span class="raio-badge"><i class="fas fa-map-marked-alt"></i> ${profissional.raioKm}km</span>`;
         }
 
-        // 🔥 CORREÇÃO AQUI: Removido onclick do card, só o botão direciona
         return `
             <div class="${classesCard}">
                 <div class="card-image-container">
@@ -1108,7 +1075,6 @@
                         <span class="experience-text">
                             <i class="fas fa-briefcase"></i> ${formatarExperiencia(profissional.anosExperiencia)}
                         </span>
-                        <!-- 🔥 AGORA SÓ ESTE BOTÃO DIRECIONA -->
                         <button class="btn-ver-perfil" onclick="window.location.href='perfil-profissional-publico.html?id=${profissional.id}'">
                             Ver Perfil <i class="fas fa-arrow-right"></i>
                         </button>
@@ -1223,6 +1189,6 @@
         carregarProfissionais();
     });
 
-    </script>
+</script>
 </body>
 </html> 
