@@ -760,7 +760,7 @@
         query,
         where
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     // Configuração Firebase
     const firebaseConfig = {
@@ -782,6 +782,7 @@
     let profissionaisFiltrados = [];
     let cidadesUnicas = new Set();
     let avaliacoesCache = {};
+    let currentUser = null;
 
     // Elementos DOM
     const loadingState = document.getElementById('loadingState');
@@ -877,18 +878,19 @@
             estaAtivo: statusAtivo,
             perfilCompleto: prof.perfilCompleto || false,
             
-           // Serviços
-atendeDomicilio: prof.atendeDomicilio || false,
-atendeOnline: prof.atendeOnline || false,
-orcamentoGratuito: prof.orcamentoGratuito || false,
-anosExperiencia: prof.anosExperiencia || '',
-raioKm: prof.raioKm || '',
-whatsapp: prof.whatsapp || data.celular || '',
-tempoResposta: prof.tempoResposta || '24',
-formasPagamento: prof.formasPagamento || [],
-especialidades: prof.especialidades || [],
-cidadesAtendidas: prof.cidadesAtendidas || [],
-garantiaDias: prof.garantiaDias || 0,
+            // Serviços
+            atendeDomicilio: prof.atendeDomicilio || false,
+            atendeOnline: prof.atendeOnline || false,
+            orcamentoGratuito: prof.orcamentoGratuito !== false,
+            anosExperiencia: prof.anosExperiencia || '',
+            raioKm: prof.raioKm || '',
+            whatsapp: prof.whatsapp || data.celular || '',
+            tempoResposta: prof.tempoResposta || '24',
+            formasPagamento: prof.formasPagamento || [],
+            especialidades: prof.especialidades || [],
+            cidadesAtendidas: prof.cidadesAtendidas || [],
+            garantiaDias: prof.garantiaDias || 0,
+            
             // Dados de avaliação (serão carregados dinamicamente)
             mediaAvaliacoes: 0,
             totalAvaliacoes: 0
@@ -902,6 +904,8 @@ garantiaDias: prof.garantiaDias || 0,
     async function carregarTodasAvaliacoes() {
         try {
             console.log('[AVALIAÇÕES] Carregando avaliações...');
+            
+            // Buscar todas as avaliações ativas
             const q = query(
                 collection(db, "avaliacoes"),
                 where("status", "in", ["ativo", "aprovado"])
@@ -970,10 +974,11 @@ garantiaDias: prof.garantiaDias || 0,
             
             console.log('[DEBUG] Iniciando carregamento de profissionais...');
             
-            // Autenticar anonimamente para ler dados
-            await signInAnonymously(auth);
+            // REMOVIDO: Não precisa de signInAnonymously, usa o auth atual do usuário
+            // ou funciona sem auth devido às regras do Firestore
             
-            // Buscar todos os usuários que são profissionais
+            // Buscar todos os usuários que são profissionais com perfil completo
+            // Como as regras permitem leitura pública de profissionais ativos, não precisa de auth
             const q = query(
                 collection(db, "usuarios"),
                 where("profissional.perfilCompleto", "==", true)
@@ -991,7 +996,6 @@ garantiaDias: prof.garantiaDias || 0,
             
             snapshot.forEach((doc) => {
                 try {
-                    const data = doc.data();
                     const prof = extrairDadosProfissional(doc);
                     
                     // Verificar se está ativo (dupla verificação)
@@ -1332,7 +1336,7 @@ garantiaDias: prof.garantiaDias || 0,
             return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
         };
         
-        // Raio de atendimento (NOVO - conforme solicitado)
+        // Raio de atendimento
         let raioHTML = '';
         if (profissional.raioKm && profissional.raioKm > 0) {
             raioHTML = `<span class="raio-badge"><i class="fas fa-map-marked-alt"></i> ${profissional.raioKm}km</span>`;
@@ -1400,15 +1404,16 @@ garantiaDias: prof.garantiaDias || 0,
     // INICIALIZAÇÃO
     // ============================================
 
-    async function inicializarBusca() {
-        try {
-            console.log('[DEBUG] Iniciando busca...');
-            carregarTodosProfissionais();
+    function inicializar() {
+        // Aguardar estado de autenticação (mas não bloqueia se não estiver logado)
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            console.log('[AUTH] Usuário:', user ? user.uid : 'Não logado');
             
-        } catch (error) {
-            console.error('[ERRO CRÍTICO] na inicialização:', error);
-            mostrarToast('Erro ao inicializar busca', 'error');
-        }
+            // Carregar profissionais independente do estado de auth
+            // porque as regras do Firestore permitem leitura pública
+            carregarTodosProfissionais();
+        });
     }
 
     // ============================================
@@ -1416,7 +1421,7 @@ garantiaDias: prof.garantiaDias || 0,
     // ============================================
 
     window.aplicarFiltros = aplicarFiltros;
-    window.ordenarResultados = aplicarFiltros; // Reaplica filtros com nova ordenação
+    window.ordenarResultados = aplicarFiltros;
 
     window.limparFiltros = function() {
         if (searchInput) searchInput.value = '';
@@ -1450,7 +1455,7 @@ garantiaDias: prof.garantiaDias || 0,
     }
 
     // Iniciar quando DOM estiver pronto
-    document.addEventListener('DOMContentLoaded', inicializarBusca);
+    document.addEventListener('DOMContentLoaded', inicializar);
 
     console.log('[DEBUG] Sistema de busca carregado');
     </script>
