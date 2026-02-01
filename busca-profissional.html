@@ -737,7 +737,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-            <script type="module">
+           <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, 
@@ -797,9 +797,15 @@
         const data = doc.data();
         const prof = data.profissional || {};
         
+        console.log(`[EXTRACAO] Processando documento ${doc.id}:`, {
+            tipoUsuario: data.tipoUsuario,
+            perfilCompleto: prof.perfilCompleto,
+            nomeProfissional: prof.nomeProfissional
+        });
+        
         return {
             id: doc.id,
-            nome: prof.nomeProfissional || data.nomeCompleto || data.apelido || 'Profissional',
+            nome: prof.nomeProfissional || data.apelido || data.nomeCompleto || 'Profissional',
             especialidade: prof.especialidadePrincipal || 'Serviços Gerais',
             descricao: prof.descricao || prof.slogan || '',
             cidade: prof.cidadeBase || (data.endereco && data.endereco.cidade) || 'Cidade não informada',
@@ -816,18 +822,23 @@
             especialidades: prof.especialidades || [],
             cidadesAtendidas: prof.cidadesAtendidas || [],
             mediaAvaliacoes: 0,
-            totalAvaliacoes: 0
+            totalAvaliacoes: 0,
+            tipoUsuario: data.tipoUsuario || 'cliente', // Incluir tipoUsuario para debug
+            status: data.status || 'inativo',
+            status_assinatura: data.status_assinatura || 'inativa'
         };
     }
 
     async function carregarAvaliacoes() {
         try {
+            console.log('[AVALIACOES] Carregando avaliações...');
             const q = query(
                 collection(db, "avaliacoes"),
                 where("status", "in", ["ativo", "aprovado"])
             );
             
             const snapshot = await getDocs(q);
+            console.log(`[AVALIACOES] ${snapshot.size} avaliações encontradas`);
             
             snapshot.forEach(doc => {
                 const av = doc.data();
@@ -847,62 +858,27 @@
                 avaliacoesCache[id].media = (dados.soma / dados.quantidade).toFixed(1);
             }
             
+            console.log('[AVALIACOES] Cache atualizado:', Object.keys(avaliacoesCache).length, 'profissionais com avaliações');
+            
         } catch (error) {
-            console.error("Erro ao carregar avaliações:", error);
+            console.error("[ERRO AVALIACOES] ao carregar avaliações:", error);
         }
     }
 
     async function carregarProfissionais() {
         try {
-            console.log('[DEBUG] Iniciando carregamento...');
+            console.log('[PROFISSIONAIS] Iniciando carregamento...');
             
-            // ESTRATÉGIA: Duas queries separadas para respeitar as regras do Firestore
-            // Firestore não suporta OR, então fazemos duas buscas e unimos os resultados
-            
-            // Query 1: Profissionais com status = "ativo"
-            const q1 = query(
+            // ESTRATÉGIA CORRIGIDA: Buscar apenas por perfil profissional completo
+            // Independente do tipoUsuario
+            const q = query(
                 collection(db, "usuarios"),
-                where("profissional.perfilCompleto", "==", true),
-                where("status", "==", "ativo")
+                where("profissional.perfilCompleto", "==", true)
             );
             
-            // Query 2: Profissionais com status_assinatura = "ativa"
-            const q2 = query(
-                collection(db, "usuarios"),
-                where("profissional.perfilCompleto", "==", true),
-                where("status_assinatura", "==", "ativa")
-            );
-            
-            console.log('[DEBUG] Executando queries...');
-            
-            // Executar em paralelo com tratamento de erro individual
-            const [snap1, snap2] = await Promise.all([
-                getDocs(q1).catch(err => {
-                    console.warn("Erro query 1 (status):", err.message);
-                    return { docs: [] };
-                }),
-                getDocs(q2).catch(err => {
-                    console.warn("Erro query 2 (assinatura):", err.message);
-                    return { docs: [] };
-                })
-            ]);
-            
-            console.log(`[DEBUG] Query1: ${snap1.docs.length} docs, Query2: ${snap2.docs.length} docs`);
-            
-            // Unir resultados em Map para evitar duplicatas
-            const profissionaisMap = new Map();
-            
-            snap1.docs.forEach(doc => {
-                profissionaisMap.set(doc.id, doc);
-            });
-            
-            snap2.docs.forEach(doc => {
-                if (!profissionaisMap.has(doc.id)) {
-                    profissionaisMap.set(doc.id, doc);
-                }
-            });
-            
-            console.log(`[DEBUG] Total únicos: ${profissionaisMap.size}`);
+            console.log('[PROFISSIONAIS] Executando query...');
+            const snapshot = await getDocs(q);
+            console.log(`[PROFISSIONAIS] Query retornou: ${snapshot.docs.length} documentos`);
             
             // Carregar avaliações
             await carregarAvaliacoes();
@@ -911,25 +887,63 @@
             todosProfissionais = [];
             cidadesUnicas.clear();
             
-            profissionaisMap.forEach((doc, id) => {
+            let totalProcessados = 0;
+            let totalIgnorados = 0;
+            
+            snapshot.forEach(doc => {
                 try {
-                    const prof = extrairDadosProfissional(doc);
+                    const data = doc.data();
+                    const prof = data.profissional || {};
+                    
+                    // VERIFICAÇÃO 1: Tem perfil profissional completo?
+                    if (!prof.perfilCompleto) {
+                        console.log(`[IGNORADO] ${doc.id}: Sem perfilCompleto`);
+                        totalIgnorados++;
+                        return;
+                    }
+                    
+                    // VERIFICAÇÃO 2: Está ativo de alguma forma?
+                    const estaAtivo = 
+                        data.status === 'ativo' || 
+                        data.status_assinatura === 'ativa' ||
+                        data.assinatura_ativa === true ||
+                        prof.visivelBusca === true;
+                    
+                    if (!estaAtivo) {
+                        console.log(`[IGNORADO] ${doc.id}: Não está ativo`, {
+                            status: data.status,
+                            status_assinatura: data.status_assinatura,
+                            assinatura_ativa: data.assinatura_ativa,
+                            visivelBusca: prof.visivelBusca
+                        });
+                        totalIgnorados++;
+                        return;
+                    }
+                    
+                    // EXTRAIR DADOS DO PROFISSIONAL
+                    const profissional = extrairDadosProfissional(doc);
                     
                     // Adicionar dados de avaliação
-                    if (avaliacoesCache[id]) {
-                        prof.mediaAvaliacoes = avaliacoesCache[id].media;
-                        prof.totalAvaliacoes = avaliacoesCache[id].quantidade;
+                    if (avaliacoesCache[doc.id]) {
+                        profissional.mediaAvaliacoes = avaliacoesCache[doc.id].media;
+                        profissional.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
                     }
                     
-                    todosProfissionais.push(prof);
+                    todosProfissionais.push(profissional);
+                    totalProcessados++;
+                    
+                    console.log(`[ADICIONADO] ${doc.id}: ${profissional.nome} - ${profissional.especialidade}`, {
+                        tipoUsuario: data.tipoUsuario,
+                        cidade: profissional.cidade
+                    });
                     
                     // Adicionar cidades ao filtro
-                    if (prof.cidade && prof.cidade !== 'Cidade não informada') {
-                        cidadesUnicas.add(prof.cidade);
+                    if (profissional.cidade && profissional.cidade !== 'Cidade não informada') {
+                        cidadesUnicas.add(profissional.cidade);
                     }
                     
-                    if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
-                        prof.cidadesAtendidas.forEach(cidade => {
+                    if (profissional.cidadesAtendidas && Array.isArray(profissional.cidadesAtendidas)) {
+                        profissional.cidadesAtendidas.forEach(cidade => {
                             if (cidade && cidade.trim()) {
                                 cidadesUnicas.add(cidade.trim());
                             }
@@ -937,11 +951,17 @@
                     }
                     
                 } catch (err) {
-                    console.error("Erro ao processar documento:", id, err);
+                    console.error(`[ERRO PROCESSAMENTO] Documento ${doc.id}:`, err);
+                    totalIgnorados++;
                 }
             });
             
-            console.log(`[DEBUG] ${todosProfissionais.length} profissionais processados`);
+            console.log(`[PROFISSIONAIS] Processamento concluído:`, {
+                totalEncontrados: snapshot.docs.length,
+                processados: totalProcessados,
+                ignorados: totalIgnorados,
+                tiposUsuarios: [...new Set(todosProfissionais.map(p => p.tipoUsuario))]
+            });
             
             // Preencher filtro de cidades
             const cidadesOrdenadas = Array.from(cidadesUnicas).sort();
@@ -960,8 +980,10 @@
             if (todosProfissionais.length === 0) {
                 emptyState.style.display = 'block';
                 resultsContainer.style.display = 'none';
+                console.log('[PROFISSIONAIS] Nenhum profissional encontrado');
             } else {
                 resultsContainer.style.display = 'grid';
+                console.log(`[PROFISSIONAIS] Exibindo ${todosProfissionais.length} profissionais`);
                 aplicarFiltros();
             }
             
@@ -999,7 +1021,10 @@
                 'ar_condicionado': 'Ar Condicionado',
                 'marcenaria': 'Marceneiro',
                 'motorista': 'Motorista',
-                'programador': 'Programador/Desenvolvedor'
+                'programador': 'Programador/Desenvolvedor',
+                'jogos': 'Desenvolvedor de Jogos',
+                'desenvolvedor': 'Desenvolvedor',
+                'dev': 'Desenvolvedor'
             };
             return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
         };
@@ -1071,7 +1096,6 @@
             raioHTML = `<span class="raio-badge"><i class="fas fa-map-marked-alt"></i> ${profissional.raioKm}km</span>`;
         }
 
-        // 🔥 CORREÇÃO AQUI: Removido onclick do card, só o botão direciona
         return `
             <div class="${classesCard}">
                 <div class="card-image-container">
@@ -1108,7 +1132,6 @@
                         <span class="experience-text">
                             <i class="fas fa-briefcase"></i> ${formatarExperiencia(profissional.anosExperiencia)}
                         </span>
-                        <!-- 🔥 AGORA SÓ ESTE BOTÃO DIRECIONA -->
                         <button class="btn-ver-perfil" onclick="window.location.href='perfil-profissional-publico.html?id=${profissional.id}'">
                             Ver Perfil <i class="fas fa-arrow-right"></i>
                         </button>
@@ -1125,6 +1148,14 @@
         const cidadeSelecionada = filterCidade.value;
         const criterioOrdenacao = sortSelect.value;
 
+        console.log('[FILTROS] Aplicando filtros:', {
+            termoBusca,
+            categoriaSelecionada,
+            cidadeSelecionada,
+            criterioOrdenacao,
+            totalProfissionais: todosProfissionais.length
+        });
+
         // Filtrar
         profissionaisFiltrados = todosProfissionais.filter(prof => {
             // Busca por texto
@@ -1132,7 +1163,10 @@
                 const matchNome = prof.nome.toLowerCase().includes(termoBusca);
                 const matchEspecialidade = prof.especialidade.toLowerCase().includes(termoBusca);
                 const matchDescricao = prof.descricao.toLowerCase().includes(termoBusca);
-                if (!matchNome && !matchEspecialidade && !matchDescricao) return false;
+                
+                if (!matchNome && !matchEspecialidade && !matchDescricao) {
+                    return false;
+                }
             }
 
             // Filtro por categoria
@@ -1153,6 +1187,8 @@
 
             return true;
         });
+
+        console.log('[FILTROS] Após filtragem:', profissionaisFiltrados.length, 'profissionais');
 
         // Ordenar
         const planoPrioridade = (plano) => {
@@ -1190,14 +1226,17 @@
         if (profissionaisFiltrados.length === 0) {
             resultsContainer.style.display = 'none';
             emptyState.style.display = 'block';
+            console.log('[FILTROS] Nenhum resultado encontrado');
         } else {
             emptyState.style.display = 'none';
             resultsContainer.style.display = 'grid';
             resultsContainer.innerHTML = profissionaisFiltrados.map(prof => criarCardHTML(prof)).join('');
+            console.log('[FILTROS] Renderização concluída');
         }
     };
 
     window.limparFiltros = function() {
+        console.log('[FILTROS] Limpando filtros');
         searchInput.value = '';
         filterCategoria.value = '';
         filterCidade.value = '';
@@ -1209,20 +1248,43 @@
     let timeoutBusca;
     searchInput.addEventListener('input', () => {
         clearTimeout(timeoutBusca);
-        timeoutBusca = setTimeout(aplicarFiltros, 500);
+        timeoutBusca = setTimeout(() => {
+            console.log('[BUSCA] Termo de busca alterado:', searchInput.value);
+            aplicarFiltros();
+        }, 500);
     });
 
-    filterCategoria.addEventListener('change', aplicarFiltros);
-    filterCidade.addEventListener('change', aplicarFiltros);
-    sortSelect.addEventListener('change', aplicarFiltros);
+    filterCategoria.addEventListener('change', () => {
+        console.log('[FILTRO] Categoria alterada:', filterCategoria.value);
+        aplicarFiltros();
+    });
 
-    // Inicialização - aguarda auth mas funciona com usuário logado
+    filterCidade.addEventListener('change', () => {
+        console.log('[FILTRO] Cidade alterada:', filterCidade.value);
+        aplicarFiltros();
+    });
+
+    sortSelect.addEventListener('change', () => {
+        console.log('[ORDENACAO] Critério alterado:', sortSelect.value);
+        aplicarFiltros();
+    });
+
+    // Inicialização
     onAuthStateChanged(auth, (user) => {
-        console.log('[AUTH] Estado:', user ? `Logado: ${user.uid}` : 'Não logado');
-        // Carrega profissionais independente do estado de login (as regras controlam o acesso)
+        console.log('[AUTH] Estado do usuário:', user ? `Logado: ${user.uid}` : 'Não logado');
+        console.log('[INICIALIZACAO] Carregando profissionais...');
         carregarProfissionais();
     });
 
-    </script>
+    // Debug: Expor variáveis para console
+    window.debugScanHub = {
+        getProfissionais: () => todosProfissionais,
+        getFiltrados: () => profissionaisFiltrados,
+        recarregar: () => carregarProfissionais(),
+        aplicarFiltros: aplicarFiltros
+    };
+
+    console.log('[SCANHUB] Sistema de busca inicializado');
+</script>
 </body>
 </html>
