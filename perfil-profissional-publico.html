@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- [Cabeçalho permanece o mesmo - cortado para economia de tokens] -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Perfil Profissional - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --primary: #44689a;
@@ -16,98 +21,853 @@
             --light: #f8f9fa;
             --dark: #2c3e50;
             --gray: #6c757d;
+            --gray-light: #e8ecef;
             --gradient-primary: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
-            --gradient-pro: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            --gradient-secondary: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-sm: 12px;
         }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f5f7fa; }
-        .navbar-public { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 15px 0; }
-        .profile-header { position: relative; background: white; margin-bottom: 30px; }
-        .cover-placeholder { width: 100%; height: 200px; background: var(--gradient-primary); }
-        .profile-info-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; position: relative; margin-top: -50px; }
-        .profile-card { background: white; border-radius: 15px; padding: 25px; box-shadow: var(--shadow); display: flex; gap: 25px; align-items: center; }
-        @media (max-width: 768px) { .profile-card { flex-direction: column; text-align: center; } }
-        .profile-avatar { width: 120px; height: 120px; border-radius: 50%; border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); object-fit: cover; }
-        .profile-name { font-size: 1.8rem; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
-        .rating-display { display: inline-flex; align-items: center; gap: 5px; }
-        .rating-display .stars { color: #FFD700; font-size: 1.2rem; }
-        .rating-input { display: inline-block; direction: rtl; font-size: 1.8rem; }
-        .rating-input input { display: none; }
-        .rating-input label { color: #ddd; cursor: pointer; transition: color 0.3s; }
-        .rating-input label:hover, .rating-input label:hover ~ label, .rating-input input:checked ~ label { color: #FFD700; }
-        .avaliacao-card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 3px solid var(--primary); }
-        .avaliacao-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        .avatar-cliente { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.9rem; }
-        .avaliacao-stars { color: #FFD700; font-size: 0.9rem; }
-        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
-        .toast-scanhub { background: white; border-left: 4px solid var(--secondary); padding: 16px 24px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; margin-top: 10px; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .btn-action-primary { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border: none; padding: 10px 25px; border-radius: 25px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.3s; }
-        .btn-action-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); color: white; }
-        .info-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
-        .info-badge { background: var(--light); color: var(--dark); padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #e0e0e0; margin: 2px; }
-        .loading-profile { text-align: center; padding: 100px 20px; }
-        .spinner-lg { width: 50px; height: 50px; border: 4px solid rgba(68, 104, 154, 0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .tab-btn { padding: 15px 20px; background: none; border: none; font-weight: 600; color: var(--gray); cursor: pointer; position: relative; transition: all 0.3s; }
-        .tab-btn.active { color: var(--primary); }
-        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 3px; background: var(--primary); }
-        .tab-content-section { display: none; }
-        .tab-content-section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-3px);
+        }
+
+        /* Header do Perfil */
+        .profile-header {
+            position: relative;
+            margin-bottom: 80px;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 200px;
+            background: var(--gradient-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        .profile-main-info {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .profile-card-header {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            margin-top: -60px;
+            position: relative;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .avatar-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            object-fit: cover;
+            background: var(--gray-light);
+        }
+
+        .profile-status {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: #2ecc71;
+            border: 3px solid white;
+            border-radius: 50%;
+        }
+
+        .profile-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .profile-specialty {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-location {
+            color: var(--gray);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stars-display {
+            color: #FFD700;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .rating-number {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .rating-count {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        /* Botões de Ação */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
+        }
+
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            color: white;
+        }
+
+        .btn-avaliar {
+            background: var(--gradient-secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
+        }
+
+        .btn-avaliar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+            color: white;
+        }
+
+        /* Tabs */
+        .custom-tabs {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .custom-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-card {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-title i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .info-text {
+            color: var(--gray);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .info-badge {
+            background: var(--gray-light);
+            color: var(--dark);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Seção de Avaliações */
+        .reviews-header {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .reviews-summary {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .big-rating {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1;
+        }
+
+        .btn-write-review {
+            background: var(--gradient-secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-write-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+            color: white;
+        }
+
+        /* Cards de Avaliação */
+        .review-card {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s;
+        }
+
+        .review-card:hover {
+            transform: translateX(5px);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reviewer-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .reviewer-name {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .review-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .review-stars {
+            color: #FFD700;
+            font-size: 0.9rem;
+        }
+
+        .review-comment {
+            color: var(--dark);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-top: 8px;
+            padding-left: 57px;
+        }
+
+        .empty-reviews {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-reviews i {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        /* Modal de Avaliação */
+        .modal-content {
+            border: none;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--gradient-secondary);
+            color: white;
+            border: none;
+            padding: 20px 24px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .rating-input-container {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .rating-label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .star-rating {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 8px;
+            font-size: 2.5rem;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #FFD700;
+            transform: scale(1.1);
+        }
+
+        .star-rating input:checked ~ label {
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .comment-textarea {
+            width: 100%;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(68, 104, 154, 0.1);
+        }
+
+        .anonymous-check {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .anonymous-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--gray-light);
+            padding: 16px 24px;
+            gap: 10px;
+        }
+
+        .btn-submit-review {
+            background: var(--gradient-secondary);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-submit-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+            color: white;
+        }
+
+        .btn-submit-review:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading States */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner-custom {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(68, 104, 154, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            color: var(--gray);
+        }
+
+        .error-screen i {
+            font-size: 4rem;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1055;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .toast-custom {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideUp 0.3s ease;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .toast-custom.success {
+            border-left-color: #27ae60;
+        }
+
+        .toast-custom.error {
+            border-left-color: #e74c3c;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsividade Mobile */
+        @media (max-width: 768px) {
+            .profile-header {
+                margin-bottom: 60px;
+            }
+
+            .cover-image {
+                height: 150px;
+            }
+
+            .profile-card-header {
+                flex-direction: column;
+                text-align: center;
+                margin-top: -40px;
+                padding: 20px;
+            }
+
+            .avatar-container {
+                margin: 0 auto;
+            }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+            }
+
+            .profile-name {
+                font-size: 1.3rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-whatsapp, .btn-avaliar {
+                width: 100%;
+            }
+
+            .review-comment {
+                padding-left: 0;
+                margin-top: 12px;
+            }
+
+            .reviews-summary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .btn-write-review {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .modal-dialog {
+                margin: 10px;
+            }
+
+            .star-rating {
+                font-size: 2rem;
+                gap: 6px;
+            }
+
+            .info-card {
+                padding: 20px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .container-custom {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Utilitários */
+        .text-muted-custom {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--gray-light);
+            margin: 16px 0;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner-custom"></div>
+        <p class="text-muted">Carregando perfil...</p>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="errorScreen" class="error-screen" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i>
+        <h3>Profissional não encontrado</h3>
+        <p>Este profissional pode ter removido o perfil ou ele não está mais disponível.</p>
+        <a href="busca-profissional.html" class="btn btn-primary mt-3 px-4">
+            <i class="fas fa-arrow-left me-2"></i>Voltar à Busca
+        </a>
+    </div>
+
     <!-- Navbar -->
-    <nav class="navbar-public">
+    <nav class="navbar-custom" id="navbar" style="display: none;">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center w-100">
-                <a class="navbar-brand" href="busca-profissional.html">
-                    <img src="logoscanhub.png" alt="ScanHub" height="45">
+                <a href="busca-profissional.html" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
                 </a>
-                <a href="busca-profissional.html" class="btn btn-outline-primary rounded-pill">
-                    <i class="fas fa-arrow-left me-2"></i>Voltar à Busca
+                <a class="navbar-brand" href="#">
+                    <img src="logoscanhub.png" alt="ScanHub">
                 </a>
+                <div style="width: 40px;"></div> <!-- Spacer for centering -->
             </div>
         </div>
     </nav>
 
-    <!-- Loading State -->
-    <div id="loadingState" class="loading-profile">
-        <div class="spinner-lg"></div>
-        <h4>Carregando perfil...</h4>
-    </div>
-
-    <!-- Error State -->
-    <div id="errorState" class="text-center py-5" style="display: none;">
-        <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
-        <h3>Profissional não encontrado</h3>
-        <p class="text-muted">Este profissional pode ter removido o perfil.</p>
-        <a href="busca-profissional.html" class="btn btn-primary mt-3">Buscar Outros</a>
-    </div>
-
-    <!-- Conteúdo -->
-    <div id="profileContent" style="display: none;">
+    <!-- Main Content -->
+    <div id="mainContent" style="display: none;">
+        
+        <!-- Profile Header -->
         <div class="profile-header">
-            <div class="cover-placeholder"></div>
-            <div class="profile-info-container">
-                <div class="profile-card">
-                    <img id="profileAvatar" src="" class="profile-avatar">
-                    <div style="flex: 1;">
-                        <h1 id="profileName" class="profile-name">...</h1>
-                        <div id="profileSpecialty" class="text-primary fw-bold mb-2">...</div>
-                        <div id="profileLocation" class="text-muted mb-2">...</div>
-                        <div id="ratingSummary" class="mb-3">
-                            <span class="stars" id="starsMedia">★★★★★</span>
-                            <span id="totalAvaliacoes" class="badge bg-primary ms-2">0 avaliações</span>
+            <div class="cover-image">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&auto=format&fit=crop" 
+                     alt="Cover" id="coverImage" style="display: none;">
+            </div>
+            
+            <div class="profile-main-info container-custom">
+                <div class="profile-card-header">
+                    <div class="avatar-container">
+                        <img src="" alt="Avatar" class="profile-avatar" id="profileAvatar">
+                        <div class="profile-status"></div>
+                    </div>
+                    
+                    <div class="profile-details">
+                        <h1 class="profile-name" id="profileName">Carregando...</h1>
+                        <div class="profile-specialty">
+                            <i class="fas fa-briefcase"></i>
+                            <span id="profileSpecialty">Especialidade</span>
                         </div>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <a id="btnWhatsApp" href="#" target="_blank" class="btn-action-primary" style="display: none;">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
+                        <div class="profile-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="profileLocation">Localização</span>
+                        </div>
+                        
+                        <div class="rating-summary">
+                            <span class="stars-display" id="starsDisplay">★★★★★</span>
+                            <span class="rating-number" id="ratingNumber">5.0</span>
+                            <span class="rating-count" id="ratingCount">(0 avaliações)</span>
+                        </div>
+
+                        <div class="action-buttons">
+                            <a href="#" id="btnWhatsApp" class="btn-whatsapp" target="_blank">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>Conversar</span>
                             </a>
-                            <button class="btn btn-outline-primary rounded-pill" onclick="switchTab('avaliacoes')">
-                                <i class="fas fa-star me-2"></i>Avaliar
+                            <button class="btn-avaliar" onclick="openReviewModal()">
+                                <i class="fas fa-star"></i>
+                                <span>Avaliar</span>
                             </button>
                         </div>
                     </div>
@@ -115,383 +875,589 @@
             </div>
         </div>
 
-        <div class="container">
-            <div class="d-flex border-bottom mb-4">
-                <button class="tab-btn active" onclick="switchTab('sobre')">Sobre</button>
+        <!-- Content Container -->
+        <div class="container-custom px-3">
+            
+            <!-- Tabs -->
+            <div class="custom-tabs">
+                <button class="tab-btn active" onclick="switchTab('sobre')">
+                    <i class="fas fa-user me-2"></i>Sobre
+                </button>
                 <button class="tab-btn" onclick="switchTab('avaliacoes')">
-                    Avaliações <span id="countAvaliacoes" class="badge bg-warning text-dark ms-1">0</span>
+                    <i class="fas fa-star me-2"></i>Avaliações
+                </button>
+                <button class="tab-btn" onclick="switchTab('portfolio')">
+                    <i class="fas fa-images me-2"></i>Portfólio
                 </button>
             </div>
 
-            <!-- ABA SOBRE -->
-            <div id="tabSobre" class="tab-content-section active">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="info-card">
-                            <h5><i class="fas fa-user me-2"></i>Sobre</h5>
-                            <p id="aboutText" class="text-muted">...</p>
-                        </div>
-                        <div class="info-card">
-                            <h5><i class="fas fa-briefcase me-2"></i>Experiência</h5>
-                            <div id="experienciaBadges"></div>
+            <!-- Tab Sobre -->
+            <div id="tabSobre" class="content-section active">
+                <div class="info-card">
+                    <h3 class="info-title">
+                        <i class="fas fa-info-circle"></i>
+                        Sobre o Profissional
+                    </h3>
+                    <p class="info-text" id="aboutText">
+                        Descrição não disponível.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="info-title">
+                        <i class="fas fa-tools"></i>
+                        Experiência
+                    </h3>
+                    <div class="badge-container" id="experienceBadges">
+                        <!-- Badges serão inseridos aqui -->
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="info-title">
+                        <i class="fas fa-credit-card"></i>
+                        Formas de Pagamento
+                    </h3>
+                    <div class="badge-container" id="paymentBadges">
+                        <!-- Badges serão inseridos aqui -->
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="info-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Garantia
+                    </h3>
+                    <p class="info-text" id="warrantyText">
+                        Garantia não informada.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab Avaliações -->
+            <div id="tabAvaliacoes" class="content-section">
+                <div class="reviews-header">
+                    <div class="reviews-summary">
+                        <div class="big-rating" id="bigRating">0.0</div>
+                        <div>
+                            <div class="stars-display" id="bigStars">★★★★★</div>
+                            <div class="text-muted-custom" id="totalReviewsText">baseado em 0 avaliações</div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="info-card">
-                            <h5><i class="fas fa-info-circle me-2"></i>Informações</h5>
-                            <div class="mb-3">
-                                <strong class="d-block mb-2">Atendimento</strong>
-                                <div id="atendimentoBadges"></div>
-                            </div>
-                            <div class="mb-3">
-                                <strong class="d-block mb-2">Pagamento</strong>
-                                <div id="pagamentoBadges"></div>
-                            </div>
-                            <div>
-                                <strong class="d-block mb-2">Raio de Atendimento</strong>
-                                <p id="raioAtendimento" class="mb-0">Não informado</p>
-                            </div>
-                        </div>
+                    <button class="btn-write-review" onclick="openReviewModal()">
+                        <i class="fas fa-pen"></i>
+                        Escrever Avaliação
+                    </button>
+                </div>
+
+                <div id="reviewsList">
+                    <!-- Avaliações serão inseridas aqui -->
+                </div>
+
+                <div id="emptyReviews" class="empty-reviews" style="display: none;">
+                    <i class="fas fa-star"></i>
+                    <h4>Nenhuma avaliação ainda</h4>
+                    <p>Seja o primeiro a avaliar este profissional!</p>
+                    <button class="btn-write-review mt-3" onclick="openReviewModal()">
+                        <i class="fas fa-pen me-2"></i>Escrever Avaliação
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Portfólio -->
+            <div id="tabPortfolio" class="content-section">
+                <div class="info-card">
+                    <h3 class="info-title">
+                        <i class="fas fa-images"></i>
+                        Galeria de Trabalhos
+                    </h3>
+                    <div id="portfolioGallery" class="row g-3">
+                        <!-- Imagens serão inseridas aqui -->
+                    </div>
+                    <div id="emptyPortfolio" class="empty-reviews" style="display: none;">
+                        <i class="fas fa-camera"></i>
+                        <h4>Sem fotos no portfólio</h4>
+                        <p>Este profissional ainda não adicionou fotos.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- ABA AVALIAÇÕES -->
-            <div id="tabAvaliacoes" class="tab-content-section">
-                <div class="info-card">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0">Avaliações dos Clientes</h5>
-                        <button id="btnAvaliar" class="btn btn-primary" onclick="abrirModalAvaliacao()">
-                            <i class="fas fa-plus me-2"></i>Avaliar
-                        </button>
+        </div>
+    </div>
+
+    <!-- Modal de Avaliação -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-star me-2"></i>
+                        Avaliar Profissional
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h6 class="mb-2" id="modalProName">Nome do Profissional</h6>
+                        <p class="text-muted small mb-0">Como foi sua experiência?</p>
                     </div>
 
-                    <div id="formNovaAvaliacao" style="display: none;" class="mb-4 p-4 bg-light rounded">
-                        <h6 class="mb-3">Deixe sua avaliação</h6>
-                        <div class="text-center mb-3">
-                            <div class="rating-input mb-2">
-                                <input type="radio" id="star5" name="rating" value="5" onchange="updateRatingLabel(5)">
-                                <label for="star5"><i class="fas fa-star"></i></label>
-                                <input type="radio" id="star4" name="rating" value="4" onchange="updateRatingLabel(4)">
-                                <label for="star4"><i class="fas fa-star"></i></label>
-                                <input type="radio" id="star3" name="rating" value="3" onchange="updateRatingLabel(3)">
-                                <label for="star3"><i class="fas fa-star"></i></label>
-                                <input type="radio" id="star2" name="rating" value="2" onchange="updateRatingLabel(2)">
-                                <label for="star2"><i class="fas fa-star"></i></label>
-                                <input type="radio" id="star1" name="rating" value="1" onchange="updateRatingLabel(1)">
-                                <label for="star1"><i class="fas fa-star"></i></label>
-                            </div>
-                            <small class="text-muted" id="ratingLabel">Selecione uma nota</small>
+                    <div class="rating-input-container">
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5">
+                            <label for="star5"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star4" name="rating" value="4">
+                            <label for="star4"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star3" name="rating" value="3">
+                            <label for="star3"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star2" name="rating" value="2">
+                            <label for="star2"><i class="fas fa-star"></i></label>
+                            
+                            <input type="radio" id="star1" name="rating" value="1">
+                            <label for="star1"><i class="fas fa-star"></i></label>
                         </div>
-                        <div class="mb-3">
-                            <textarea id="comentarioAvaliacao" class="form-control" rows="3" placeholder="Como foi sua experiência? (opcional)"></textarea>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="avaliacaoAnonima">
-                            <label class="form-check-label" for="avaliacaoAnonima">Avaliar anonimamente</label>
-                        </div>
-                        <button class="btn btn-primary" onclick="enviarAvaliacao()">Enviar Avaliação</button>
-                        <button class="btn btn-outline-secondary ms-2" onclick="cancelarAvaliacao()">Cancelar</button>
+                        <small class="text-muted d-block mt-2" id="ratingText">Toque nas estrelas para avaliar</small>
                     </div>
 
-                    <div id="listaAvaliacoes"></div>
-                    <div id="semAvaliacoes" class="text-center py-5 text-muted">
-                        <i class="fas fa-star fa-3x mb-3"></i>
-                        <p>Este profissional ainda não tem avaliações.<br>Seja o primeiro a avaliar!</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Deixe seu comentário (opcional)</label>
+                        <textarea 
+                            class="comment-textarea" 
+                            id="reviewComment" 
+                            placeholder="Conte mais sobre sua experiência com este profissional. O que você gostou? O que poderia melhorar?"
+                            maxlength="500"
+                        ></textarea>
+                        <div class="text-end mt-1">
+                            <small class="text-muted" id="charCount">0/500</small>
+                        </div>
                     </div>
+
+                    <label class="anonymous-check">
+                        <input type="checkbox" id="anonymousCheck">
+                        <span>Avaliar anonimamente</span>
+                    </label>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-submit-review" id="btnSubmitReview" onclick="submitReview()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Avaliação
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Firebase -->
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            collection, 
+            query, 
+            where, 
+            getDocs, 
+            addDoc, 
+            serverTimestamp,
+            updateDoc,
+            orderBy 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.appspot.com",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let profissionalData = null;
-    let profissionalId = null;
-    let currentUser = null;
-    let avaliacoes = [];
-
-    // Extrair dados conforme estrutura real
-    function extrairDadosProfissional(doc) {
-        const data = doc.data();
-        const prof = data.profissional || {};
-        
-        const estaAtivo = data.status === 'ativo' || 
-                         data.assinatura_ativa === true || 
-                         data.status_assinatura === 'ativa';
-        
-        return {
-            id: doc.id,
-            nome: prof.nomeProfissional || data.apelido || 'Profissional',
-            especialidade: prof.especialidadePrincipal || 'Serviços Gerais',
-            descricao: prof.descricao || prof.slogan || '',
-            cidade: prof.cidadeBase || (data.endereco?.cidade) || '',
-            estado: prof.estadoBase || (data.endereco?.estado) || '',
-            foto: prof.fotoPerfilProfissional || data.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nomeProfissional || 'P')}&background=44689a&color=fff`,
-            whatsapp: prof.whatsapp || data.celular || '',
-            raioKm: prof.raioKm || '',
-            anosExperiencia: prof.anosExperiencia || '',
-            atendeDomicilio: prof.atendeDomicilio || false,
-            atendeOnline: prof.atendeOnline || false,
-            orcamentoGratuito: prof.orcamentoGratuito !== false,
-            formasPagamento: prof.formasPagamento || [],
-            garantiaDias: prof.garantiaDias || 0,
-            estaAtivo: estaAtivo,
-            plano: data.plano_assinatura || 'free'
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.appspot.com",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
         };
-    }
 
-    function mostrarToast(mensagem, tipo = 'success') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = 'toast-scanhub';
-        toast.innerHTML = `<i class="fas ${tipo === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger'}"></i><span>${mensagem}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-    function gerarEstrelas(nota) {
-        const num = Math.round(nota) || 0;
-        let html = '';
-        for(let i=1; i<=5; i++) {
-            html += `<i class="fas fa-star${i <= num ? '' : ' text-muted'}"></i>`;
-        }
-        return html;
-    }
+        // Variáveis globais
+        let professionalId = null;
+        let professionalData = null;
+        let currentUser = null;
+        let reviews = [];
+        let reviewModal = null;
 
-    async function carregarPerfil() {
-        try {
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            
+            // Capturar ID da URL
             const urlParams = new URLSearchParams(window.location.search);
-            profissionalId = urlParams.get('id');
+            professionalId = urlParams.get('id');
             
-            if (!profissionalId) throw new Error('ID não fornecido');
-            
-            await signInAnonymously(auth);
-            
-            const docRef = doc(db, "usuários", profissionalId);
+            if (!professionalId) {
+                showError();
+                return;
+            }
+
+            try {
+                // Autenticação anônima para leitura
+                await signInAnonymously(auth);
+                
+                // Carregar dados
+                await loadProfile();
+                await loadReviews();
+                
+                // Mostrar conteúdo
+                document.getElementById('loadingScreen').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('navbar').style.display = 'block';
+                    document.getElementById('mainContent').style.display = 'block';
+                }, 300);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                showError();
+            }
+        });
+
+        // Carregar perfil do profissional
+        async function loadProfile() {
+            const docRef = doc(db, "usuarios", professionalId);
             const docSnap = await getDoc(docRef);
             
-            if (!docSnap.exists()) throw new Error('Profissional não encontrado');
-            
+            if (!docSnap.exists()) {
+                throw new Error('Profissional não encontrado');
+            }
+
             const data = docSnap.data();
+            
+            // Verificar se é profissional ativo
             if (!data.profissional?.perfilCompleto || 
                 !(data.status === 'ativo' || data.assinatura_ativa || data.status_assinatura === 'ativa')) {
                 throw new Error('Profissional não disponível');
             }
+
+            professionalData = data;
+            const prof = data.profissional || {};
+
+            // Preencher dados
+            document.getElementById('profileName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
+            document.getElementById('modalProName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
+            document.getElementById('profileSpecialty').textContent = formatSpecialty(prof.especialidadePrincipal) || 'Serviços Profissionais';
             
-            profissionalData = extrairDadosProfissional(docSnap);
+            const location = [];
+            if (prof.cidadeBase) location.push(prof.cidadeBase);
+            if (prof.estadoBase) location.push(prof.estadoBase);
+            document.getElementById('profileLocation').textContent = location.length > 0 ? location.join(' - ') : 'Localização não informada';
             
-            // Renderizar
-            document.getElementById('profileName').textContent = profissionalData.nome;
-            document.getElementById('profileSpecialty').textContent = profissionalData.especialidade;
-            document.getElementById('profileLocation').innerHTML = `<i class="fas fa-map-marker-alt me-2"></i>${profissionalData.cidade}${profissionalData.estado ? ' - ' + profissionalData.estado : ''}`;
-            document.getElementById('profileAvatar').src = profissionalData.foto;
-            document.getElementById('aboutText').textContent = profissionalData.descricao || 'Sem descrição disponível.';
-            
-            // Raio
-            if (profissionalData.raioKm) {
-                document.getElementById('raioAtendimento').innerHTML = `<i class="fas fa-map-marked-alt me-2 text-primary"></i>Atende em até ${profissionalData.raioKm} km`;
-            }
+            // Avatar
+            const avatarUrl = prof.fotoPerfilProfissional || data.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nomeProfissional || 'P')}&background=44689a&color=fff&size=256`;
+            document.getElementById('profileAvatar').src = avatarUrl;
             
             // WhatsApp
-            if (profissionalData.whatsapp) {
-                const num = profissionalData.whatsapp.replace(/\D/g, '');
-                document.getElementById('btnWhatsApp').href = `https://wa.me/55${num}?text=Olá ${profissionalData.nome}, encontrei você no ScanHub!`;
-                document.getElementById('btnWhatsApp').style.display = 'inline-flex';
+            if (prof.whatsapp) {
+                const num = prof.whatsapp.replace(/\D/g, '');
+                document.getElementById('btnWhatsApp').href = `https://wa.me/55${num}?text=Olá! Encontrei você no ScanHub e gostaria de conversar sobre seus serviços.`;
+            } else {
+                document.getElementById('btnWhatsApp').style.display = 'none';
             }
-            
-            // Badges
-            let atendHTML = '';
-            if (profissionalData.atendeDomicilio) atendHTML += `<span class="info-badge"><i class="fas fa-home"></i>Domicílio</span>`;
-            if (profissionalData.atendeOnline) atendHTML += `<span class="info-badge"><i class="fas fa-laptop"></i>Online</span>`;
-            document.getElementById('atendimentoBadges').innerHTML = atendHTML || '<span class="text-muted">Não informado</span>';
-            
-            let pagHTML = '';
-            (profissionalData.formasPagamento || []).forEach(pag => {
-                pagHTML += `<span class="info-badge"><i class="fas fa-money-bill-wave"></i>${pag}</span>`;
-            });
-            document.getElementById('pagamentoBadges').innerHTML = pagHTML || '<span class="text-muted">Não informado</span>';
+
+            // Sobre
+            document.getElementById('aboutText').textContent = prof.descricao || prof.slogan || 'Este profissional ainda não adicionou uma descrição detalhada.';
             
             // Experiência
-            const expMap = {'1': '< 1 ano', '1-3': '1-3 anos', '3-5': '3-5 anos', '5-10': '5-10 anos', '10+': '10+ anos'};
-            document.getElementById('experienciaBadges').innerHTML = `<span class="info-badge"><i class="fas fa-calendar-alt"></i>${expMap[profissionalData.anosExperiencia] || 'Não informado'}</span>`;
+            const expMap = {
+                '1': 'Menos de 1 ano',
+                '1-3': '1 a 3 anos',
+                '3-5': '3 a 5 anos',
+                '5-10': '5 a 10 anos',
+                '10+': 'Mais de 10 anos'
+            };
             
-            // Carregar avaliações
-            await carregarAvaliacoes();
-            
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('profileContent').style.display = 'block';
-            
-        } catch (error) {
-            console.error(error);
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-        }
-    }
+            const expContainer = document.getElementById('experienceBadges');
+            expContainer.innerHTML = '';
+            if (prof.anosExperiencia) {
+                expContainer.innerHTML = `<span class="info-badge"><i class="fas fa-calendar-alt"></i>${expMap[prof.anosExperiencia]}</span>`;
+            }
+            if (prof.atendeDomicilio) {
+                expContainer.innerHTML += `<span class="info-badge"><i class="fas fa-home"></i>Atende em Domicílio</span>`;
+            }
+            if (prof.atendeOnline) {
+                expContainer.innerHTML += `<span class="info-badge"><i class="fas fa-laptop"></i>Atendimento Online</span>`;
+            }
 
-    async function carregarAvaliacoes() {
-        try {
+            // Pagamento
+            const payContainer = document.getElementById('paymentBadges');
+            if (prof.formasPagamento && prof.formasPagamento.length > 0) {
+                payContainer.innerHTML = prof.formasPagamento.map(p => `<span class="info-badge"><i class="fas fa-check"></i>${p}</span>`).join('');
+            } else {
+                payContainer.innerHTML = '<span class="text-muted-custom">Não informado</span>';
+            }
+
+            // Garantia
+            if (prof.garantiaDias && prof.garantiaDias > 0) {
+                document.getElementById('warrantyText').textContent = `Este profissional oferece ${prof.garantiaDias} dias de garantia em seus serviços.`;
+            }
+
+            // Portfólio
+            const gallery = document.getElementById('portfolioGallery');
+            if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
+                gallery.innerHTML = prof.portfolioFotos.map(foto => `
+                    <div class="col-6 col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <img src="${foto}" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 12px;" alt="Portfólio">
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('emptyPortfolio').style.display = 'none';
+            } else {
+                document.getElementById('emptyPortfolio').style.display = 'block';
+            }
+        }
+
+        // Carregar avaliações
+        async function loadReviews() {
             const q = query(
                 collection(db, "avaliacoes"),
-                where("profissionalId", "==", profissionalId),
-                where("status", "in", ["ativo", "aprovado"])
+                where("profissionalId", "==", professionalId),
+                where("status", "==", "ativo"),
+                orderBy("data", "desc")
             );
             
             const snapshot = await getDocs(q);
-            avaliacoes = [];
-            let soma = 0;
+            reviews = [];
+            let totalRating = 0;
             
             snapshot.forEach(doc => {
-                const av = doc.data();
-                avaliacoes.push({...av, id: doc.id});
-                if (av.nota) soma += av.nota;
+                const review = { id: doc.id, ...doc.data() };
+                reviews.push(review);
+                if (review.nota) totalRating += review.nota;
             });
-            
-            // Ordenar por data
-            avaliacoes.sort((a, b) => (b.data?.seconds || 0) - (a.data?.seconds || 0));
-            
-            const media = avaliacoes.length > 0 ? (soma / avaliacoes.length).toFixed(1) : 0;
+
+            // Calcular média
+            const average = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
             
             // Atualizar UI
-            document.getElementById('starsMedia').innerHTML = gerarEstrelas(media);
-            document.getElementById('totalAvaliacoes').textContent = `${avaliacoes.length} avaliações`;
-            document.getElementById('countAvaliacoes').textContent = avaliacoes.length;
+            updateRatingDisplay(average, reviews.length);
+            renderReviews();
+        }
+
+        // Atualizar display de rating
+        function updateRatingDisplay(average, count) {
+            const stars = generateStars(average);
             
-            const lista = document.getElementById('listaAvaliacoes');
-            const semAval = document.getElementById('semAvaliacoes');
+            document.getElementById('ratingNumber').textContent = average;
+            document.getElementById('starsDisplay').innerHTML = stars;
+            document.getElementById('ratingCount').textContent = `(${count} avaliações)`;
             
-            if (avaliacoes.length === 0) {
-                lista.innerHTML = '';
-                semAval.style.display = 'block';
-            } else {
-                semAval.style.display = 'none';
-                lista.innerHTML = avaliacoes.map(av => {
-                    const data = av.data ? new Date(av.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Data não disponível';
-                    const nome = av.anonimo ? 'Cliente Anônimo' : (av.clienteNome || 'Cliente');
-                    return `
-                        <div class="avaliacao-card">
-                            <div class="avaliacao-header">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="avatar-cliente">${nome.charAt(0)}</div>
-                                    <div>
-                                        <div class="fw-bold">${nome}</div>
-                                        <small class="text-muted">${data}</small>
-                                    </div>
-                                </div>
-                                <div class="avaliacao-stars">${gerarEstrelas(av.nota)}</div>
-                            </div>
-                            ${av.comentario ? `<p class="mb-0 mt-2">${av.comentario}</p>` : ''}
-                        </div>
-                    `;
-                }).join('');
+            document.getElementById('bigRating').textContent = average;
+            document.getElementById('bigStars').innerHTML = stars;
+            document.getElementById('totalReviewsText').textContent = `baseado em ${count} avaliações`;
+        }
+
+        // Gerar estrelas HTML
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalf = rating % 1 >= 0.5;
+            let html = '';
+            
+            for (let i = 1; i <= 5; i++) {
+                if (i <= fullStars) {
+                    html += '<i class="fas fa-star"></i>';
+                } else if (i === fullStars + 1 && hasHalf) {
+                    html += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    html += '<i class="far fa-star" style="color: #ddd;"></i>';
+                }
+            }
+            return html;
+        }
+
+        // Renderizar lista de avaliações
+        function renderReviews() {
+            const container = document.getElementById('reviewsList');
+            
+            if (reviews.length === 0) {
+                container.innerHTML = '';
+                document.getElementById('emptyReviews').style.display = 'block';
+                return;
             }
             
-            // Verificar se usuário já avaliou
-            onAuthStateChanged(auth, async (user) => {
-                currentUser = user;
-                if (user && !user.isAnonymous) {
-                    const jaAvaliou = avaliacoes.some(av => av.clienteId === user.uid);
-                    document.getElementById('btnAvaliar').style.display = jaAvaliou ? 'none' : 'inline-block';
-                } else {
-                    document.getElementById('btnAvaliar').style.display = 'inline-block';
-                }
+            document.getElementById('emptyReviews').style.display = 'none';
+            
+            container.innerHTML = reviews.map(review => {
+                const date = review.data ? new Date(review.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Data não disponível';
+                const name = review.anonimo ? 'Cliente Anônimo' : (review.clienteNome || 'Cliente');
+                const initial = name.charAt(0).toUpperCase();
+                
+                return `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">${initial}</div>
+                                <div>
+                                    <div class="reviewer-name">${name}</div>
+                                    <div class="review-date">${date}</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">
+                                ${generateStars(review.nota)}
+                            </div>
+                        </div>
+                        ${review.comentario ? `<div class="review-comment">${review.comentario}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Abrir modal de avaliação
+        window.openReviewModal = function() {
+            // Verificar se usuário está logado (simplificado - na produção verificar autenticação real)
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('Você precisa estar logado para avaliar', 'error');
+                return;
+            }
+            
+            // Resetar modal
+            document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+            document.getElementById('reviewComment').value = '';
+            document.getElementById('anonymousCheck').checked = false;
+            document.getElementById('charCount').textContent = '0/500';
+            document.getElementById('ratingText').textContent = 'Toque nas estrelas para avaliar';
+            
+            reviewModal.show();
+        };
+
+        // Contador de caracteres
+        document.getElementById('reviewComment').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = `${this.value.length}/500`;
+        });
+
+        // Atualizar texto das estrelas no modal
+        document.querySelectorAll('input[name="rating"]').forEach(star => {
+            star.addEventListener('change', function() {
+                const labels = {
+                    '1': 'Péssimo',
+                    '2': 'Ruim', 
+                    '3': 'Regular',
+                    '4': 'Bom',
+                    '5': 'Excelente'
+                };
+                document.getElementById('ratingText').textContent = labels[this.value];
             });
+        });
+
+        // Enviar avaliação
+        window.submitReview = async function() {
+            const rating = document.querySelector('input[name="rating"]:checked')?.value;
+            const comment = document.getElementById('reviewComment').value.trim();
+            const anonymous = document.getElementById('anonymousCheck').checked;
             
-        } catch (error) {
-            console.error('Erro ao carregar avaliações:', error);
+            if (!rating) {
+                showToast('Por favor, selecione uma nota de 1 a 5 estrelas', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('btnSubmitReview');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            
+            try {
+                const user = auth.currentUser;
+                
+                // Adicionar avaliação
+                await addDoc(collection(db, "avaliacoes"), {
+                    profissionalId: professionalId,
+                    clienteId: user.uid,
+                    clienteNome: anonymous ? null : (user.displayName || 'Cliente'),
+                    nota: parseInt(rating),
+                    comentario: comment || null,
+                    anonimo: anonymous,
+                    status: "ativo",
+                    data: serverTimestamp()
+                });
+                
+                // Atualizar média no perfil do profissional
+                const newTotal = reviews.length + 1;
+                const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
+                const newAverage = ((currentSum + parseInt(rating)) / newTotal).toFixed(1);
+                
+                await updateDoc(doc(db, "usuarios", professionalId), {
+                    "profissional.mediaAvaliacoes": newAverage,
+                    "profissional.totalAvaliacoes": newTotal,
+                    ultimaAtualizacao: new Date().toISOString()
+                });
+                
+                reviewModal.hide();
+                showToast('Avaliação enviada com sucesso!', 'success');
+                
+                // Recarregar avaliações
+                await loadReviews();
+                
+            } catch (error) {
+                console.error('Erro ao enviar:', error);
+                showToast('Erro ao enviar avaliação. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Avaliação';
+            }
+        };
+
+        // Switch tabs
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+        };
+
+        // Utilitários
+        function formatSpecialty(esp) {
+            if (!esp) return 'Profissional';
+            const map = {
+                'eletrica': 'Eletricista',
+                'hidraulica': 'Encanador',
+                'massoterapia': 'Massoterapia',
+                'tecnico_celular': 'Técnico de Celular',
+                'manicure': 'Manicure e Pedicure',
+                'pintura': 'Pintor',
+                'ar_condicionado': 'Ar Condicionado'
+            };
+            return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
         }
-    }
 
-    // Funções globais
-    window.switchTab = function(tab) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content-section').forEach(s => s.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-    };
-
-    window.abrirModalAvaliacao = function() {
-        if (!currentUser || currentUser.isAnonymous) {
-            mostrarToast('Faça login como cliente para avaliar', 'error');
-            return;
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-custom ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger'} fa-lg"></i>
+                <span class="fw-medium">${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
-        document.getElementById('formNovaAvaliacao').style.display = 'block';
-        document.getElementById('btnAvaliar').style.display = 'none';
-    };
 
-    window.cancelarAvaliacao = function() {
-        document.getElementById('formNovaAvaliacao').style.display = 'none';
-        document.getElementById('btnAvaliar').style.display = 'inline-block';
-    };
-
-    window.updateRatingLabel = function(nota) {
-        const labels = {1: 'Muito ruim', 2: 'Ruim', 3: 'Regular', 4: 'Bom', 5: 'Excelente'};
-        document.getElementById('ratingLabel').textContent = labels[nota];
-    };
-
-    window.enviarAvaliacao = async function() {
-        const notaInput = document.querySelector('input[name="rating"]:checked');
-        if (!notaInput) {
-            mostrarToast('Selecione uma nota', 'error');
-            return;
+        function showError() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('errorScreen').style.display = 'flex';
         }
-        
-        const nota = parseInt(notaInput.value);
-        const comentario = document.getElementById('comentarioAvaliacao').value;
-        const anonimo = document.getElementById('avaliacaoAnonima').checked;
-        
-        try {
-            await addDoc(collection(db, "avaliacoes"), {
-                profissionalId: profissionalId,
-                clienteId: currentUser.uid,
-                clienteNome: anonimo ? null : (currentUser.displayName || 'Cliente'),
-                nota: nota,
-                comentario: comentario || null,
-                anonimo: anonimo,
-                status: "ativo",
-                data: serverTimestamp()
-            });
-            
-            // Atualizar média no documento do profissional
-            const novaAval = [...avaliacoes, {nota}];
-            const soma = novaAval.reduce((acc, av) => acc + (av.nota || 0), 0);
-            const media = (soma / novaAval.length).toFixed(1);
-            
-            await updateDoc(doc(db, "usuarios", profissionalId), {
-                "profissional.mediaAvaliacoes": media,
-                "profissional.totalAvaliacoes": novaAval.length
-            });
-            
-            mostrarToast('Avaliação enviada com sucesso!');
-            cancelarAvaliacao();
-            await carregarAvaliacoes();
-            
-        } catch (error) {
-            console.error(error);
-            mostrarToast('Erro ao enviar avaliação', 'error');
-        }
-    };
 
-    document.addEventListener('DOMContentLoaded', carregarPerfil);
+        // Auth state
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+        });
     </script>
 </body>
 </html>
