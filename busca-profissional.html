@@ -17,11 +17,9 @@
             --primary: #44689a;
             --primary-dark: #365a8a;
             --secondary: #FF6B35;
-            --accent: #FF6B35;
             --light: #f8f9fa;
             --dark: #2c3e50;
             --gray: #6c757d;
-            --border: #e0e0e0;
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
             --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
             --gradient-primary: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
@@ -43,7 +41,7 @@
             line-height: 1.6;
         }
 
-        /* Navbar Premium */
+        /* Navbar */
         .navbar-scanhub {
             background: white;
             box-shadow: var(--shadow);
@@ -69,6 +67,10 @@
             padding: 8px 24px;
             font-weight: 500;
             transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-voltar:hover {
@@ -77,7 +79,7 @@
             transform: translateX(-3px);
         }
 
-        /* Hero Section com Busca */
+        /* Hero Section */
         .hero-busca {
             background: var(--gradient-primary);
             padding: 60px 0 80px;
@@ -106,14 +108,17 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            text-align: center;
         }
 
         .hero-subtitle {
             color: rgba(255,255,255,0.9);
             font-size: 1.1rem;
             margin-bottom: 30px;
+            text-align: center;
         }
 
+        /* Search Container */
         .search-container {
             background: white;
             border-radius: 20px;
@@ -131,11 +136,11 @@
         .search-input {
             width: 100%;
             padding: 18px 25px 18px 55px;
-            border: 2px solid var(--border);
+            border: 2px solid #e0e0e0;
             border-radius: 15px;
             font-size: 1.1rem;
-            transition: all 0.3s;
             font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
         }
 
         .search-input:focus {
@@ -163,7 +168,7 @@
             flex: 1;
             min-width: 200px;
             padding: 12px 20px;
-            border: 2px solid var(--border);
+            border: 2px solid #e0e0e0;
             border-radius: 12px;
             font-family: 'Poppins', sans-serif;
             font-size: 0.95rem;
@@ -175,10 +180,11 @@
         .filter-select:focus {
             border-color: var(--primary);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(68, 104, 154, 0.1);
         }
 
         .btn-buscar {
-            background: var(--accent);
+            background: var(--secondary);
             color: white;
             border: none;
             padding: 12px 40px;
@@ -190,6 +196,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            white-space: nowrap;
         }
 
         .btn-buscar:hover {
@@ -197,7 +204,7 @@
             box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
         }
 
-        /* Área de Resultados */
+        /* Results Section */
         .results-section {
             padding: 40px 0 80px;
         }
@@ -223,20 +230,21 @@
 
         .sort-select {
             padding: 10px 20px;
-            border: 2px solid var(--border);
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-family: 'Poppins', sans-serif;
             cursor: pointer;
+            background: white;
         }
 
-        /* Grid de Cards */
+        /* Grid */
         .professionals-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
         }
 
-        /* Card Premium */
+        /* Cards */
         .pro-card {
             background: white;
             border-radius: 20px;
@@ -315,21 +323,10 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .plan-badge.enterprise {
-            background: var(--gradient-enterprise);
-        }
-
-        .plan-badge.pro {
-            background: var(--gradient-pro);
-        }
-
-        .plan-badge.basic {
-            background: var(--gradient-basic);
-        }
-
-        .plan-badge.free {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-        }
+        .plan-badge.enterprise { background: var(--gradient-enterprise); }
+        .plan-badge.pro { background: var(--gradient-pro); }
+        .plan-badge.basic { background: var(--gradient-basic); }
+        .plan-badge.free { background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); }
 
         .card-body {
             padding: 25px;
@@ -340,6 +337,7 @@
             justify-content: space-between;
             align-items: start;
             margin-bottom: 15px;
+            gap: 10px;
         }
 
         .pro-name {
@@ -370,6 +368,7 @@
             align-items: center;
             gap: 5px;
             flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .rating-badge.no-reviews {
@@ -380,6 +379,7 @@
         .stars-small {
             color: #FFD700;
             font-size: 0.85rem;
+            letter-spacing: 1px;
         }
 
         .pro-description {
@@ -400,10 +400,21 @@
             color: var(--gray);
             font-size: 0.9rem;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .location-icon {
-            color: var(--accent);
+            color: var(--secondary);
+        }
+
+        .raio-badge {
+            font-size: 0.8rem;
+            color: var(--primary);
+            background: rgba(68, 104, 154, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-left: auto;
         }
 
         .service-badges {
@@ -423,20 +434,9 @@
             gap: 6px;
         }
 
-        .badge-domicilio {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-        }
-
-        .badge-online {
-            background: rgba(68, 104, 154, 0.1);
-            color: var(--primary);
-        }
-
-        .badge-orcamento {
-            background: rgba(255, 107, 53, 0.1);
-            color: var(--accent);
-        }
+        .badge-domicilio { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+        .badge-online { background: rgba(68, 104, 154, 0.1); color: var(--primary); }
+        .badge-orcamento { background: rgba(255, 107, 53, 0.1); color: var(--secondary); }
 
         .card-footer {
             padding-top: 15px;
@@ -444,21 +444,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .experience-text {
             font-size: 0.85rem;
             color: var(--gray);
             font-weight: 500;
-        }
-
-        .raio-badge {
-            font-size: 0.8rem;
-            color: var(--primary);
-            background: rgba(68, 104, 154, 0.1);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
         }
 
         .btn-ver-perfil {
@@ -522,17 +515,18 @@
 
         .empty-text {
             color: var(--gray);
+            margin-bottom: 20px;
         }
 
         .btn-limpar {
             background: transparent;
-            border: 2px solid var(--border);
+            border: 2px solid #e0e0e0;
             color: var(--gray);
             padding: 10px 30px;
             border-radius: 25px;
-            margin-top: 20px;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
 
         .btn-limpar:hover {
@@ -540,43 +534,7 @@
             color: var(--primary);
         }
 
-        /* Skeleton Loading */
-        .skeleton-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-
-        .skeleton-image {
-            height: 220px;
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        .skeleton-content {
-            padding: 25px;
-        }
-
-        .skeleton-line {
-            height: 15px;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            animation: shimmer 1.5s infinite;
-        }
-
-        .skeleton-line.short {
-            width: 60%;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-
-        /* Toast Notification */
+        /* Toast */
         .toast-container {
             position: fixed;
             bottom: 20px;
@@ -586,7 +544,7 @@
 
         .toast-scanhub {
             background: white;
-            border-left: 4px solid var(--accent);
+            border-left: 4px solid var(--secondary);
             padding: 16px 24px;
             border-radius: 8px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
@@ -598,14 +556,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         /* Responsivo */
@@ -630,17 +582,56 @@
             
             .filter-select {
                 width: 100%;
+                min-width: unset;
+            }
+            
+            .btn-buscar {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .sort-select {
+                width: 100%;
+            }
+            
+            .card-header-info {
+                flex-direction: column;
+            }
+            
+            .rating-badge {
+                align-self: flex-start;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .pro-name {
+                font-size: 1.1rem;
             }
             
             .plan-badge {
                 font-size: 0.65rem;
                 padding: 4px 12px;
             }
-        }
-
-        /* Badge para plano básico */
-        .plan-badge.basic i {
-            color: #3498db;
+            
+            .pro-card.premium::before {
+                font-size: 0.65rem;
+                padding: 4px 30px;
+            }
+            
+            .card-footer {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .btn-ver-perfil {
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -710,7 +701,7 @@
                 <div class="results-count">
                     <strong id="totalResultados">0</strong> profissionais encontrados
                 </div>
-                <select class="sort-select" id="sortSelect" onchange="ordenarResultados()">
+                <select class="sort-select" id="sortSelect" onchange="aplicarFiltros()">
                     <option value="relevancia">Ordenar por: Relevância</option>
                     <option value="nome">Nome (A-Z)</option>
                     <option value="melhor-avaliado">Melhor Avaliado</option>
@@ -719,19 +710,9 @@
             </div>
 
             <!-- Loading State -->
-            <div id="loadingState" class="loading-container" style="display: none;">
+            <div id="loadingState" class="loading-container">
                 <div class="spinner-scanhub"></div>
-                <p>Buscando profissionais...</p>
-            </div>
-
-            <!-- Skeleton Loading (inicial) -->
-            <div id="skeletonContainer" class="professionals-grid">
-                <!-- Gerado via JS -->
-            </div>
-
-            <!-- Resultados Grid -->
-            <div id="resultsContainer" class="professionals-grid" style="display: none;">
-                <!-- Cards inseridos via JS -->
+                <p>Carregando profissionais...</p>
             </div>
 
             <!-- Empty State -->
@@ -744,6 +725,11 @@
                 <button class="btn-limpar" onclick="limparFiltros()">
                     <i class="fas fa-times me-2"></i>Limpar Filtros
                 </button>
+            </div>
+
+            <!-- Resultados Grid -->
+            <div id="resultsContainer" class="professionals-grid" style="display: none;">
+                <!-- Cards serão inseridos aqui -->
             </div>
         </div>
     </section>
@@ -762,7 +748,6 @@
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Configuração Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
         authDomain: "scanhub-ed512.firebaseapp.com",
@@ -772,21 +757,17 @@
         appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Estado global
     let todosProfissionais = [];
     let profissionaisFiltrados = [];
     let cidadesUnicas = new Set();
     let avaliacoesCache = {};
-    let currentUser = null;
 
     // Elementos DOM
     const loadingState = document.getElementById('loadingState');
-    const skeletonContainer = document.getElementById('skeletonContainer');
     const resultsContainer = document.getElementById('resultsContainer');
     const emptyState = document.getElementById('emptyState');
     const totalResultados = document.getElementById('totalResultados');
@@ -794,22 +775,6 @@
     const filterCidade = document.getElementById('filterCidade');
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
-
-    // ============================================
-    // FUNÇÕES DE UTILIDADE
-    // ============================================
-
-    function mostrarLoading(mostrar) {
-        if (mostrar) {
-            loadingState.style.display = 'block';
-            skeletonContainer.style.display = 'block';
-            resultsContainer.style.display = 'none';
-            emptyState.style.display = 'none';
-        } else {
-            loadingState.style.display = 'none';
-            skeletonContainer.style.display = 'none';
-        }
-    }
 
     function mostrarToast(mensagem, tipo = 'success') {
         const toastContainer = document.getElementById('toastContainer');
@@ -827,44 +792,13 @@
         }, 3000);
     }
 
-    // ============================================
-    // SKELETON LOADING
-    // ============================================
-
-    function gerarSkeletonCards(qtd = 6) {
-        skeletonContainer.innerHTML = '';
-        for (let i = 0; i < qtd; i++) {
-            const skeleton = document.createElement('div');
-            skeleton.className = 'skeleton-card';
-            skeleton.innerHTML = `
-                <div class="skeleton-image"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-line" style="width: 70%"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                    <div class="skeleton-line" style="width: 40%"></div>
-                </div>
-            `;
-            skeletonContainer.appendChild(skeleton);
-        }
-    }
-
-    // ============================================
-    // EXTRATOR DE DADOS (BASEADO NA ESTRUTURA REAL)
-    // ============================================
-
+    // Extrair dados conforme estrutura real do Firestore
     function extrairDadosProfissional(doc) {
         const data = doc.data();
         const prof = data.profissional || {};
         
-        // Verificar se está ativo (múltiplas flags possíveis)
-        const statusAtivo = data.status === 'ativo' || 
-                           data.assinatura_ativa === true || 
-                           data.status_assinatura === 'ativa';
-        
         return {
             id: doc.id,
-            // Dados do profissional (subobjeto)
             nome: prof.nomeProfissional || data.nomeCompleto || data.apelido || 'Profissional',
             especialidade: prof.especialidadePrincipal || 'Serviços Gerais',
             descricao: prof.descricao || prof.slogan || '',
@@ -872,40 +806,22 @@
             estado: prof.estadoBase || (data.endereco && data.endereco.estado) || '',
             foto: prof.fotoPerfilProfissional || data.fotoPerfil || 
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nomeProfissional || 'P')}&background=44689a&color=fff&size=200`,
-            
-            // Plano e status
             plano: data.plano_assinatura || 'free',
-            estaAtivo: statusAtivo,
-            perfilCompleto: prof.perfilCompleto || false,
-            
-            // Serviços
             atendeDomicilio: prof.atendeDomicilio || false,
             atendeOnline: prof.atendeOnline || false,
             orcamentoGratuito: prof.orcamentoGratuito !== false,
             anosExperiencia: prof.anosExperiencia || '',
             raioKm: prof.raioKm || '',
             whatsapp: prof.whatsapp || data.celular || '',
-            tempoResposta: prof.tempoResposta || '24',
-            formasPagamento: prof.formasPagamento || [],
             especialidades: prof.especialidades || [],
             cidadesAtendidas: prof.cidadesAtendidas || [],
-            garantiaDias: prof.garantiaDias || 0,
-            
-            // Dados de avaliação (serão carregados dinamicamente)
             mediaAvaliacoes: 0,
             totalAvaliacoes: 0
         };
     }
 
-    // ============================================
-    // CARREGAR AVALIAÇÕES DE TODOS OS PROFISSIONAIS
-    // ============================================
-
-    async function carregarTodasAvaliacoes() {
+    async function carregarAvaliacoes() {
         try {
-            console.log('[AVALIAÇÕES] Carregando avaliações...');
-            
-            // Buscar todas as avaliações ativas
             const q = query(
                 collection(db, "avaliacoes"),
                 where("status", "in", ["ativo", "aprovado"])
@@ -913,40 +829,147 @@
             
             const snapshot = await getDocs(q);
             
-            // Agrupar avaliações por profissional
-            const avaliacoesPorProfissional = {};
-            
             snapshot.forEach(doc => {
                 const av = doc.data();
-                if (!av.profissionalId) return;
+                if (!av.profissionalId || !av.nota) return;
                 
-                if (!avaliacoesPorProfissional[av.profissionalId]) {
-                    avaliacoesPorProfissional[av.profissionalId] = {
-                        soma: 0,
-                        quantidade: 0
-                    };
+                if (!avaliacoesCache[av.profissionalId]) {
+                    avaliacoesCache[av.profissionalId] = { soma: 0, quantidade: 0 };
                 }
                 
-                if (av.nota) {
-                    avaliacoesPorProfissional[av.profissionalId].soma += av.nota;
-                    avaliacoesPorProfissional[av.profissionalId].quantidade++;
-                }
+                avaliacoesCache[av.profissionalId].soma += av.nota;
+                avaliacoesCache[av.profissionalId].quantidade++;
             });
             
             // Calcular médias
-            for (const [profId, dados] of Object.entries(avaliacoesPorProfissional)) {
-                if (dados.quantidade > 0) {
-                    avaliacoesCache[profId] = {
-                        media: (dados.soma / dados.quantidade).toFixed(1),
-                        quantidade: dados.quantidade
-                    };
-                }
+            for (const id in avaliacoesCache) {
+                const dados = avaliacoesCache[id];
+                avaliacoesCache[id].media = (dados.soma / dados.quantidade).toFixed(1);
             }
             
-            console.log(`[AVALIAÇÕES] ${snapshot.size} avaliações carregadas`);
+        } catch (error) {
+            console.error("Erro ao carregar avaliações:", error);
+        }
+    }
+
+    async function carregarProfissionais() {
+        try {
+            console.log('[DEBUG] Iniciando carregamento...');
+            
+            // ESTRATÉGIA: Duas queries separadas para respeitar as regras do Firestore
+            // Firestore não suporta OR, então fazemos duas buscas e unimos os resultados
+            
+            // Query 1: Profissionais com status = "ativo"
+            const q1 = query(
+                collection(db, "usuarios"),
+                where("profissional.perfilCompleto", "==", true),
+                where("status", "==", "ativo")
+            );
+            
+            // Query 2: Profissionais com status_assinatura = "ativa"
+            const q2 = query(
+                collection(db, "usuarios"),
+                where("profissional.perfilCompleto", "==", true),
+                where("status_assinatura", "==", "ativa")
+            );
+            
+            console.log('[DEBUG] Executando queries...');
+            
+            // Executar em paralelo com tratamento de erro individual
+            const [snap1, snap2] = await Promise.all([
+                getDocs(q1).catch(err => {
+                    console.warn("Erro query 1 (status):", err.message);
+                    return { docs: [] };
+                }),
+                getDocs(q2).catch(err => {
+                    console.warn("Erro query 2 (assinatura):", err.message);
+                    return { docs: [] };
+                })
+            ]);
+            
+            console.log(`[DEBUG] Query1: ${snap1.docs.length} docs, Query2: ${snap2.docs.length} docs`);
+            
+            // Unir resultados em Map para evitar duplicatas
+            const profissionaisMap = new Map();
+            
+            snap1.docs.forEach(doc => {
+                profissionaisMap.set(doc.id, doc);
+            });
+            
+            snap2.docs.forEach(doc => {
+                if (!profissionaisMap.has(doc.id)) {
+                    profissionaisMap.set(doc.id, doc);
+                }
+            });
+            
+            console.log(`[DEBUG] Total únicos: ${profissionaisMap.size}`);
+            
+            // Carregar avaliações
+            await carregarAvaliacoes();
+            
+            // Processar dados
+            todosProfissionais = [];
+            cidadesUnicas.clear();
+            
+            profissionaisMap.forEach((doc, id) => {
+                try {
+                    const prof = extrairDadosProfissional(doc);
+                    
+                    // Adicionar dados de avaliação
+                    if (avaliacoesCache[id]) {
+                        prof.mediaAvaliacoes = avaliacoesCache[id].media;
+                        prof.totalAvaliacoes = avaliacoesCache[id].quantidade;
+                    }
+                    
+                    todosProfissionais.push(prof);
+                    
+                    // Adicionar cidades ao filtro
+                    if (prof.cidade && prof.cidade !== 'Cidade não informada') {
+                        cidadesUnicas.add(prof.cidade);
+                    }
+                    
+                    if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
+                        prof.cidadesAtendidas.forEach(cidade => {
+                            if (cidade && cidade.trim()) {
+                                cidadesUnicas.add(cidade.trim());
+                            }
+                        });
+                    }
+                    
+                } catch (err) {
+                    console.error("Erro ao processar documento:", id, err);
+                }
+            });
+            
+            console.log(`[DEBUG] ${todosProfissionais.length} profissionais processados`);
+            
+            // Preencher filtro de cidades
+            const cidadesOrdenadas = Array.from(cidadesUnicas).sort();
+            filterCidade.innerHTML = '<option value="">Todas as Cidades</option>';
+            
+            cidadesOrdenadas.forEach(cidade => {
+                const option = document.createElement('option');
+                option.value = cidade;
+                option.textContent = cidade;
+                filterCidade.appendChild(option);
+            });
+            
+            // Esconder loading e mostrar resultados
+            loadingState.style.display = 'none';
+            
+            if (todosProfissionais.length === 0) {
+                emptyState.style.display = 'block';
+                resultsContainer.style.display = 'none';
+            } else {
+                resultsContainer.style.display = 'grid';
+                aplicarFiltros();
+            }
             
         } catch (error) {
-            console.error('[ERRO] ao carregar avaliações:', error);
+            console.error('[ERRO CRÍTICO] ao carregar profissionais:', error);
+            loadingState.style.display = 'none';
+            emptyState.style.display = 'block';
+            mostrarToast('Erro ao carregar profissionais. Tente novamente.', 'error');
         }
     }
 
@@ -963,362 +986,7 @@
         return html;
     }
 
-    // ============================================
-    // CARREGAR PROFISSIONAIS
-    // ============================================
-
-    async function carregarTodosProfissionais() {
-        try {
-            mostrarLoading(true);
-            gerarSkeletonCards(4);
-            
-            console.log('[DEBUG] Iniciando carregamento de profissionais...');
-            
-            // REMOVIDO: Não precisa de signInAnonymously, usa o auth atual do usuário
-            // ou funciona sem auth devido às regras do Firestore
-            
-            // Buscar todos os usuários que são profissionais com perfil completo
-            // Como as regras permitem leitura pública de profissionais ativos, não precisa de auth
-            const q = query(
-                collection(db, "usuarios"),
-                where("profissional.perfilCompleto", "==", true)
-            );
-            
-            const snapshot = await getDocs(q);
-            
-            todosProfissionais = [];
-            cidadesUnicas.clear();
-            
-            console.log('[DEBUG] Total de documentos encontrados:', snapshot.size);
-            
-            // Primeiro carregar todas as avaliações
-            await carregarTodasAvaliacoes();
-            
-            snapshot.forEach((doc) => {
-                try {
-                    const prof = extrairDadosProfissional(doc);
-                    
-                    // Verificar se está ativo (dupla verificação)
-                    if (!prof.estaAtivo || !prof.perfilCompleto) {
-                        return;
-                    }
-                    
-                    // Adicionar dados de avaliação do cache
-                    if (avaliacoesCache[doc.id]) {
-                        prof.mediaAvaliacoes = avaliacoesCache[doc.id].media;
-                        prof.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
-                    }
-                    
-                    todosProfissionais.push(prof);
-                    
-                    // Adicionar cidade para filtro
-                    if (prof.cidade && prof.cidade !== 'Cidade não informada') {
-                        cidadesUnicas.add(prof.cidade);
-                    }
-                    
-                    // Adicionar cidades atendidas
-                    if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
-                        prof.cidadesAtendidas.forEach(cidade => {
-                            if (cidade && cidade.trim()) {
-                                cidadesUnicas.add(cidade);
-                            }
-                        });
-                    }
-                    
-                    console.log('[DEBUG] Profissional adicionado:', prof.nome);
-                    
-                } catch (error) {
-                    console.error('[ERRO] ao processar documento:', doc.id, error);
-                }
-            });
-            
-            console.log(`[DEBUG] ${todosProfissionais.length} profissionais válidos carregados`);
-            
-            // Preencher filtro de cidades
-            preencherFiltroCidades();
-            
-            // Aplicar filtros iniciais
-            aplicarFiltros();
-            
-        } catch (error) {
-            console.error('[ERRO CRÍTICO] ao carregar profissionais:', error);
-            mostrarToast('Erro ao carregar profissionais. Tente novamente.', 'error');
-            
-            resultsContainer.style.display = 'none';
-            emptyState.style.display = 'block';
-            
-        } finally {
-            mostrarLoading(false);
-        }
-    }
-
-    function preencherFiltroCidades() {
-        if (!filterCidade) return;
-        
-        filterCidade.innerHTML = '<option value="">Todas as Cidades</option>';
-        
-        const cidadesOrdenadas = Array.from(cidadesUnicas).sort();
-        
-        cidadesOrdenadas.forEach(cidade => {
-            const option = document.createElement('option');
-            option.value = cidade;
-            option.textContent = cidade;
-            filterCidade.appendChild(option);
-        });
-        
-        console.log(`[DEBUG] ${cidadesOrdenadas.length} cidades carregadas`);
-    }
-
-    // ============================================
-    // FILTRAGEM E ORDENAÇÃO
-    // ============================================
-
-    function aplicarFiltros() {
-        const termoBusca = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const categoriaSelecionada = filterCategoria ? filterCategoria.value : '';
-        const cidadeSelecionada = filterCidade ? filterCidade.value : '';
-        
-        // Filtrar profissionais
-        profissionaisFiltrados = todosProfissionais.filter(profissional => {
-            let passa = true;
-            
-            // Filtro por termo de busca
-            if (termoBusca && passa) {
-                const buscaNome = profissional.nome.toLowerCase().includes(termoBusca);
-                const buscaEspecialidade = profissional.especialidade.toLowerCase().includes(termoBusca);
-                const buscaDescricao = profissional.descricao.toLowerCase().includes(termoBusca);
-                
-                if (!buscaNome && !buscaEspecialidade && !buscaDescricao) {
-                    passa = false;
-                }
-            }
-            
-            // Filtro por categoria
-            if (categoriaSelecionada && passa) {
-                const categoriaProfissional = profissional.especialidade.toLowerCase();
-                const categoriaBuscada = categoriaSelecionada.toLowerCase();
-                
-                let encontrou = categoriaProfissional.includes(categoriaBuscada);
-                
-                if (!encontrou && profissional.especialidades && profissional.especialidades.length > 0) {
-                    encontrou = profissional.especialidades.some(esp => 
-                        esp.toLowerCase().includes(categoriaBuscada)
-                    );
-                }
-                
-                if (!encontrou) passa = false;
-            }
-            
-            // Filtro por cidade
-            if (cidadeSelecionada && passa) {
-                const cidadeBuscada = cidadeSelecionada.toLowerCase();
-                
-                const cidadeBaseMatch = profissional.cidade.toLowerCase().includes(cidadeBuscada);
-                
-                let cidadesAtendidasMatch = false;
-                if (profissional.cidadesAtendidas && Array.isArray(profissional.cidadesAtendidas)) {
-                    cidadesAtendidasMatch = profissional.cidadesAtendidas.some(cidade => 
-                        cidade.toLowerCase().includes(cidadeBuscada)
-                    );
-                }
-                
-                if (!cidadeBaseMatch && !cidadesAtendidasMatch) {
-                    passa = false;
-                }
-            }
-            
-            return passa;
-        });
-        
-        // Ordenar resultados
-        ordenarResultados();
-        
-        // Atualizar contador
-        if (totalResultados) {
-            totalResultados.textContent = profissionaisFiltrados.length;
-        }
-        
-        // Renderizar resultados
-        renderizarCards();
-    }
-
-    function ordenarResultados() {
-        const criterio = sortSelect ? sortSelect.value : 'relevancia';
-        
-        const planoPrioridade = (plano) => {
-            const map = {
-                'enterprise': 4,
-                'pro': 3,
-                'basic': 2,
-                'free': 1
-            };
-            return map[plano] || 0;
-        };
-        
-        switch(criterio) {
-            case 'nome':
-                profissionaisFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-                break;
-                
-            case 'melhor-avaliado':
-                profissionaisFiltrados.sort((a, b) => {
-                    const mediaA = parseFloat(a.mediaAvaliacoes) || 0;
-                    const mediaB = parseFloat(b.mediaAvaliacoes) || 0;
-                    
-                    if (mediaB !== mediaA) {
-                        return mediaB - mediaA;
-                    }
-                    
-                    return planoPrioridade(b.plano) - planoPrioridade(a.plano);
-                });
-                break;
-                
-            case 'experiencia':
-                const experienciaValor = (exp) => {
-                    const map = {
-                        '10+': 5,
-                        '5-10': 4,
-                        '3-5': 3,
-                        '1-3': 2,
-                        '1': 1
-                    };
-                    return map[exp] || 0;
-                };
-                
-                profissionaisFiltrados.sort((a, b) => {
-                    const expDiff = experienciaValor(b.anosExperiencia) - experienciaValor(a.anosExperiencia);
-                    if (expDiff !== 0) return expDiff;
-                    
-                    return planoPrioridade(b.plano) - planoPrioridade(a.plano);
-                });
-                break;
-                
-            case 'relevancia':
-            default:
-                profissionaisFiltrados.sort((a, b) => {
-                    const planoDiff = planoPrioridade(b.plano) - planoPrioridade(a.plano);
-                    if (planoDiff !== 0) return planoDiff;
-                    
-                    const mediaA = parseFloat(a.mediaAvaliacoes) || 0;
-                    const mediaB = parseFloat(b.mediaAvaliacoes) || 0;
-                    if (mediaB !== mediaA) {
-                        return mediaB - mediaA;
-                    }
-                    
-                    return a.nome.localeCompare(b.nome);
-                });
-                break;
-        }
-    }
-
-    // ============================================
-    // RENDERIZAÇÃO DOS CARDS
-    // ============================================
-
-    function renderizarCards() {
-        if (!resultsContainer) return;
-        
-        if (profissionaisFiltrados.length === 0) {
-            resultsContainer.style.display = 'none';
-            emptyState.style.display = 'block';
-            return;
-        }
-        
-        emptyState.style.display = 'none';
-        resultsContainer.style.display = 'grid';
-        
-        resultsContainer.innerHTML = '';
-        
-        profissionaisFiltrados.forEach(profissional => {
-            try {
-                const card = criarCardProfissional(profissional);
-                if (card) {
-                    resultsContainer.appendChild(card);
-                }
-            } catch (error) {
-                console.error('[ERRO] ao criar card:', profissional.nome, error);
-            }
-        });
-    }
-
-    function criarCardProfissional(profissional) {
-        const card = document.createElement('div');
-        
-        let classesCard = 'pro-card';
-        if (profissional.plano === 'pro' || profissional.plano === 'enterprise') {
-            classesCard += ' premium';
-        }
-        
-        let badgePlano = '';
-        let classeBadge = '';
-        
-        switch(profissional.plano) {
-            case 'enterprise':
-                badgePlano = '<i class="fas fa-building"></i> ENTERPRISE';
-                classeBadge = 'enterprise';
-                break;
-            case 'pro':
-                badgePlano = '<i class="fas fa-crown"></i> PRO';
-                classeBadge = 'pro';
-                break;
-            case 'basic':
-                badgePlano = '<i class="fas fa-star"></i> BASIC';
-                classeBadge = 'basic';
-                break;
-            default:
-                badgePlano = '<i class="fas fa-user"></i> FREE';
-                classeBadge = 'free';
-        }
-        
-        // Badge de avaliação (real do Firestore)
-        let avaliacaoHTML = '';
-        if (profissional.totalAvaliacoes > 0) {
-            avaliacaoHTML = `
-                <div class="rating-badge">
-                    <div class="stars-small">
-                        ${gerarEstrelasHTML(profissional.mediaAvaliacoes)}
-                    </div>
-                    <span>${profissional.mediaAvaliacoes}</span>
-                    <small class="ms-1">(${profissional.totalAvaliacoes})</small>
-                </div>
-            `;
-        } else {
-            avaliacaoHTML = `
-                <div class="rating-badge no-reviews">
-                    <i class="far fa-star"></i>
-                    <span>Novo</span>
-                </div>
-            `;
-        }
-        
-        // Badges de atendimento
-        let badgesAtendimento = '';
-        if (profissional.atendeDomicilio) {
-            badgesAtendimento += '<span class="service-badge badge-domicilio"><i class="fas fa-home"></i> Domicílio</span>';
-        }
-        if (profissional.atendeOnline) {
-            badgesAtendimento += '<span class="service-badge badge-online"><i class="fas fa-laptop"></i> Online</span>';
-        }
-        if (profissional.orcamentoGratuito) {
-            badgesAtendimento += '<span class="service-badge badge-orcamento"><i class="fas fa-clipboard-check"></i> Orçamento Grátis</span>';
-        }
-        
-        // Formatar experiência
-        const formatarExperiencia = (exp) => {
-            const map = {
-                '1': '< 1 ano',
-                '1-3': '1-3 anos',
-                '3-5': '3-5 anos',
-                '5-10': '5-10 anos',
-                '10+': '10+ anos'
-            };
-            return map[exp] || (exp ? exp + ' anos' : 'Experiência não informada');
-        };
-        
-        // Foto do profissional
-        const fotoUrl = profissional.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(profissional.nome)}&background=44689a&color=fff&size=400`;
-        
-        // Formatar especialidade
+    function criarCardHTML(profissional) {
         const formatarEspecialidade = (esp) => {
             const map = {
                 'eletrica': 'Eletricista',
@@ -1335,129 +1003,224 @@
             };
             return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
         };
+
+        const formatarExperiencia = (exp) => {
+            const map = {
+                '1': '< 1 ano',
+                '1-3': '1-3 anos',
+                '3-5': '3-5 anos',
+                '5-10': '5-10 anos',
+                '10+': '10+ anos'
+            };
+            return map[exp] || 'Experiência não informada';
+        };
+
+        let classesCard = 'pro-card';
+        if (profissional.plano === 'pro' || profissional.plano === 'enterprise') {
+            classesCard += ' premium';
+        }
+
+        let planoBadgeHTML = '';
+        switch(profissional.plano) {
+            case 'enterprise':
+                planoBadgeHTML = '<div class="plan-badge enterprise"><i class="fas fa-building"></i> ENTERPRISE</div>';
+                break;
+            case 'pro':
+                planoBadgeHTML = '<div class="plan-badge pro"><i class="fas fa-crown"></i> PRO</div>';
+                break;
+            case 'basic':
+                planoBadgeHTML = '<div class="plan-badge basic"><i class="fas fa-star"></i> BASIC</div>';
+                break;
+            default:
+                planoBadgeHTML = '<div class="plan-badge free"><i class="fas fa-user"></i> FREE</div>';
+        }
+
+        let avaliacaoHTML = '';
+        if (profissional.totalAvaliacoes > 0) {
+            avaliacaoHTML = `
+                <div class="rating-badge">
+                    <div class="stars-small">${gerarEstrelasHTML(profissional.mediaAvaliacoes)}</div>
+                    <span>${profissional.mediaAvaliacoes}</span>
+                    <small class="ms-1">(${profissional.totalAvaliacoes})</small>
+                </div>
+            `;
+        } else {
+            avaliacaoHTML = `
+                <div class="rating-badge no-reviews">
+                    <i class="far fa-star"></i>
+                    <span>Novo</span>
+                </div>
+            `;
+        }
+
+        let badgesHTML = '';
+        if (profissional.atendeDomicilio) {
+            badgesHTML += '<span class="service-badge badge-domicilio"><i class="fas fa-home"></i> Domicílio</span>';
+        }
+        if (profissional.atendeOnline) {
+            badgesHTML += '<span class="service-badge badge-online"><i class="fas fa-laptop"></i> Online</span>';
+        }
+        if (profissional.orcamentoGratuito) {
+            badgesHTML += '<span class="service-badge badge-orcamento"><i class="fas fa-clipboard-check"></i> Orçamento Grátis</span>';
+        }
+
+        const fotoURL = profissional.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(profissional.nome)}&background=44689a&color=fff&size=400`;
         
-        // Raio de atendimento
         let raioHTML = '';
         if (profissional.raioKm && profissional.raioKm > 0) {
             raioHTML = `<span class="raio-badge"><i class="fas fa-map-marked-alt"></i> ${profissional.raioKm}km</span>`;
         }
-        
-        card.className = classesCard;
-        card.innerHTML = `
-            <div class="card-image-container">
-                <img src="${fotoUrl}" alt="${profissional.nome}" class="card-image" 
-                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(profissional.nome.charAt(0))}&background=44689a&color=fff&size=400'">
-                <div class="card-image-overlay"></div>
-                <div class="plan-badge ${classeBadge}">
-                    ${badgePlano}
+
+        return `
+            <div class="${classesCard}" onclick="window.location.href='perfil-profissional-publico.html?id=${profissional.id}'">
+                <div class="card-image-container">
+                    <img src="${fotoURL}" alt="${profissional.nome}" class="card-image" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(profissional.nome)}&background=44689a&color=fff&size=400'">
+                    <div class="card-image-overlay"></div>
+                    ${planoBadgeHTML}
                 </div>
-            </div>
-            
-            <div class="card-body">
-                <div class="card-header-info">
-                    <div style="flex: 1;">
-                        <h3 class="pro-name">${profissional.nome}</h3>
-                        <p class="pro-specialty">
-                            <i class="fas fa-tools"></i> ${formatarEspecialidade(profissional.especialidade)}
-                        </p>
+                
+                <div class="card-body">
+                    <div class="card-header-info">
+                        <div style="flex: 1;">
+                            <h3 class="pro-name">${profissional.nome}</h3>
+                            <div class="pro-specialty">
+                                <i class="fas fa-tools"></i> ${formatarEspecialidade(profissional.especialidade)}
+                            </div>
+                        </div>
+                        ${avaliacaoHTML}
                     </div>
-                    ${avaliacaoHTML}
-                </div>
-                
-                <p class="pro-description">
-                    ${profissional.descricao || 'Profissional qualificado para atender suas necessidades.'}
-                </p>
-                
-                <div class="pro-location">
-                    <i class="fas fa-map-marker-alt location-icon"></i>
-                    <span>${profissional.cidade}${profissional.estado ? ' - ' + profissional.estado : ''}</span>
-                    ${raioHTML}
-                </div>
-                
-                <div class="service-badges">
-                    ${badgesAtendimento}
-                </div>
-                
-                <div class="card-footer">
-                    <span class="experience-text">
-                        <i class="fas fa-briefcase"></i> ${formatarExperiencia(profissional.anosExperiencia)}
-                    </span>
-                    <a href="perfil-profissional-publico.html?id=${profissional.id}" class="btn-ver-perfil">
-                        Ver Perfil <i class="fas fa-arrow-right"></i>
-                    </a>
+                    
+                    <p class="pro-description">${profissional.descricao || 'Profissional qualificado para atender suas necessidades.'}</p>
+                    
+                    <div class="pro-location">
+                        <i class="fas fa-map-marker-alt location-icon"></i>
+                        <span>${profissional.cidade}${profissional.estado ? ' - ' + profissional.estado : ''}</span>
+                        ${raioHTML}
+                    </div>
+                    
+                    <div class="service-badges">
+                        ${badgesHTML}
+                    </div>
+                    
+                    <div class="card-footer">
+                        <span class="experience-text">
+                            <i class="fas fa-briefcase"></i> ${formatarExperiencia(profissional.anosExperiencia)}
+                        </span>
+                        <a href="perfil-profissional-publico.html?id=${profissional.id}" class="btn-ver-perfil" onclick="event.stopPropagation()">
+                            Ver Perfil <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
-        
-        // Click no card redireciona para perfil
-        card.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' || e.target.closest('a')) {
-                return;
+    }
+
+    // Funções globais
+    window.aplicarFiltros = function() {
+        const termoBusca = searchInput.value.toLowerCase().trim();
+        const categoriaSelecionada = filterCategoria.value;
+        const cidadeSelecionada = filterCidade.value;
+        const criterioOrdenacao = sortSelect.value;
+
+        // Filtrar
+        profissionaisFiltrados = todosProfissionais.filter(prof => {
+            // Busca por texto
+            if (termoBusca) {
+                const matchNome = prof.nome.toLowerCase().includes(termoBusca);
+                const matchEspecialidade = prof.especialidade.toLowerCase().includes(termoBusca);
+                const matchDescricao = prof.descricao.toLowerCase().includes(termoBusca);
+                if (!matchNome && !matchEspecialidade && !matchDescricao) return false;
             }
-            window.location.href = `perfil-profissional-publico.html?id=${profissional.id}`;
+
+            // Filtro por categoria
+            if (categoriaSelecionada) {
+                const matchPrincipal = prof.especialidade.toLowerCase().includes(categoriaSelecionada);
+                const matchAdicionais = prof.especialidades.some(esp => 
+                    esp.toLowerCase().includes(categoriaSelecionada)
+                );
+                if (!matchPrincipal && !matchAdicionais) return false;
+            }
+
+            // Filtro por cidade
+            if (cidadeSelecionada) {
+                const matchCidade = prof.cidade === cidadeSelecionada;
+                const matchCidadesAtendidas = prof.cidadesAtendidas.includes(cidadeSelecionada);
+                if (!matchCidade && !matchCidadesAtendidas) return false;
+            }
+
+            return true;
         });
+
+        // Ordenar
+        const planoPrioridade = (plano) => {
+            const map = { 'enterprise': 4, 'pro': 3, 'basic': 2, 'free': 1 };
+            return map[plano] || 0;
+        };
+
+        switch(criterioOrdenacao) {
+            case 'nome':
+                profissionaisFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+                break;
+                
+            case 'melhor-avaliado':
+                profissionaisFiltrados.sort((a, b) => (b.mediaAvaliacoes || 0) - (a.mediaAvaliacoes || 0));
+                break;
+                
+            case 'experiencia':
+                const expVal = { '10+': 5, '5-10': 4, '3-5': 3, '1-3': 2, '1': 1 };
+                profissionaisFiltrados.sort((a, b) => (expVal[b.anosExperiencia] || 0) - (expVal[a.anosExperiencia] || 0));
+                break;
+                
+            default: // relevancia
+                profissionaisFiltrados.sort((a, b) => {
+                    const planoDiff = planoPrioridade(b.plano) - planoPrioridade(a.plano);
+                    if (planoDiff !== 0) return planoDiff;
+                    const mediaDiff = (b.mediaAvaliacoes || 0) - (a.mediaAvaliacoes || 0);
+                    if (mediaDiff !== 0) return mediaDiff;
+                    return a.nome.localeCompare(b.nome);
+                });
+        }
+
+        // Renderizar
+        totalResultados.textContent = profissionaisFiltrados.length;
         
-        return card;
-    }
-
-    // ============================================
-    // INICIALIZAÇÃO
-    // ============================================
-
-    function inicializar() {
-        // Aguardar estado de autenticação (mas não bloqueia se não estiver logado)
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            console.log('[AUTH] Usuário:', user ? user.uid : 'Não logado');
-            
-            // Carregar profissionais independente do estado de auth
-            // porque as regras do Firestore permitem leitura pública
-            carregarTodosProfissionais();
-        });
-    }
-
-    // ============================================
-    // FUNÇÕES GLOBAIS E EVENTOS
-    // ============================================
-
-    window.aplicarFiltros = aplicarFiltros;
-    window.ordenarResultados = aplicarFiltros;
+        if (profissionaisFiltrados.length === 0) {
+            resultsContainer.style.display = 'none';
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+            resultsContainer.style.display = 'grid';
+            resultsContainer.innerHTML = profissionaisFiltrados.map(prof => criarCardHTML(prof)).join('');
+        }
+    };
 
     window.limparFiltros = function() {
-        if (searchInput) searchInput.value = '';
-        if (filterCategoria) filterCategoria.value = '';
-        if (filterCidade) filterCidade.value = '';
-        if (sortSelect) sortSelect.value = 'relevancia';
+        searchInput.value = '';
+        filterCategoria.value = '';
+        filterCidade.value = '';
+        sortSelect.value = 'relevancia';
         aplicarFiltros();
     };
 
-    // Event listeners
-    if (searchInput) {
-        let timeoutBusca;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(timeoutBusca);
-            timeoutBusca = setTimeout(() => {
-                aplicarFiltros();
-            }, 500);
-        });
-    }
+    // Event Listeners
+    let timeoutBusca;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(timeoutBusca);
+        timeoutBusca = setTimeout(aplicarFiltros, 500);
+    });
 
-    if (filterCategoria) {
-        filterCategoria.addEventListener('change', aplicarFiltros);
-    }
+    filterCategoria.addEventListener('change', aplicarFiltros);
+    filterCidade.addEventListener('change', aplicarFiltros);
+    sortSelect.addEventListener('change', aplicarFiltros);
 
-    if (filterCidade) {
-        filterCidade.addEventListener('change', aplicarFiltros);
-    }
+    // Inicialização - aguarda auth mas funciona com usuário logado
+    onAuthStateChanged(auth, (user) => {
+        console.log('[AUTH] Estado:', user ? `Logado: ${user.uid}` : 'Não logado');
+        // Carrega profissionais independente do estado de login (as regras controlam o acesso)
+        carregarProfissionais();
+    });
 
-    if (sortSelect) {
-        sortSelect.addEventListener('change', aplicarFiltros);
-    }
-
-    // Iniciar quando DOM estiver pronto
-    document.addEventListener('DOMContentLoaded', inicializar);
-
-    console.log('[DEBUG] Sistema de busca carregado');
     </script>
 </body>
 </html>
