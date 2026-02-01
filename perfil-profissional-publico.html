@@ -20,6 +20,9 @@
             --dark: #2c3e50;
             --gray: #6c757d;
             --gradient-primary: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
+            --gradient-pro: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            --gradient-enterprise: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            --gradient-basic: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
             --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
         }
@@ -130,8 +133,6 @@
             position: absolute;
             bottom: 5px;
             right: 5px;
-            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-            color: white;
             padding: 4px 12px;
             border-radius: 15px;
             font-size: 0.7rem;
@@ -140,6 +141,23 @@
             align-items: center;
             gap: 5px;
             border: 2px solid white;
+            color: white;
+        }
+
+        .plan-badge-profile.enterprise {
+            background: var(--gradient-enterprise);
+        }
+
+        .plan-badge-profile.pro {
+            background: var(--gradient-pro);
+        }
+
+        .plan-badge-profile.basic {
+            background: var(--gradient-basic);
+        }
+
+        .plan-badge-profile.free {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
 
         .profile-text {
@@ -563,6 +581,7 @@
 
         .avaliacao-stars {
             color: #FFD700;
+            font-size: 0.9rem;
         }
 
         .avaliacao-data {
@@ -614,6 +633,38 @@
             color: white;
             border-radius: 15px 15px 0 0;
             padding: 15px 20px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast-scanhub {
+            background: white;
+            border-left: 4px solid var(--secondary);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -938,6 +989,9 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -960,881 +1014,877 @@
         addDoc,
         serverTimestamp,
         orderBy,
-        limit
+        limit,
+        updateDoc
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // CONFIGURAÇÃO FIREBASE
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getFirestore, 
-    doc, 
-    getDoc,
-    collection,
-    query,
-    where,
-    getDocs,
-    addDoc,
-    serverTimestamp,
-    orderBy,
-    limit,
-    updateDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.appspot.com",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-    authDomain: "scanhub-ed512.firebaseapp.com",
-    projectId: "scanhub-ed512",
-    storageBucket: "scanhub-ed512.appspot.com",
-    messagingSenderId: "1083305018831",
-    appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-};
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+    // ESTADO GLOBAL
+    let profissionalData = null;
+    let profissionalId = null;
+    let currentUser = null;
+    let userType = null;
+    let jaAvaliou = false;
+    let avaliacoes = [];
+    let catalogoItens = [];
 
-// ESTADO GLOBAL
-let profissionalData = null;
-let profissionalId = null;
-let currentUser = null;
-let userType = null; // 'cliente' ou 'profissional'
-let jaAvaliou = false;
-let avaliacoes = [];
+    // CONTROLE DE ABAS
+    let currentTab = 'sobre';
+    let modalAvaliacao = null;
+    let modalOrcamento = null;
 
-// CONTROLE DE ABAS
-let currentTab = 'sobre';
-
-// INICIALIZAÇÃO
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('[DEBUG] Iniciando perfil público...');
-    
-    // Inicializar modals do Bootstrap
-    window.modalAvaliacao = new bootstrap.Modal(document.getElementById('modalAvaliacao'));
-    window.modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
-    
-    // Verificar autenticação
-    onAuthStateChanged(auth, async (user) => {
-        currentUser = user;
+    // INICIALIZAÇÃO
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('[PERFIL] Iniciando perfil público...');
         
-        if (user) {
-            console.log('[DEBUG] Usuário logado:', user.uid);
-            // Verificar tipo do usuário (cliente ou profissional)
-            await verificarTipoUsuario(user.uid);
-        } else {
-            console.log('[DEBUG] Usuário não logado');
-            // Login anônimo para permitir visualização
-            try {
-                await signInAnonymously(auth);
-                console.log('[DEBUG] Login anônimo OK');
-            } catch (e) {
-                console.log('[DEBUG] Erro login anônimo:', e);
-            }
-        }
+        // Inicializar modals do Bootstrap
+        modalAvaliacao = new bootstrap.Modal(document.getElementById('modalAvaliacao'));
+        modalOrcamento = new bootstrap.Modal(document.getElementById('modalOrcamento'));
         
         // Carregar perfil
-        await carregarPerfil();
+        carregarPerfil();
     });
-});
 
-// VERIFICAR TIPO DE USUÁRIO (para controle de avaliação)
-async function verificarTipoUsuario(uid) {
-    try {
-        const userDoc = await getDoc(doc(db, "usuarios", uid));
-        if (userDoc.exists()) {
-            const data = userDoc.data();
-            userType = data.tipoUsuario || 'cliente';
-            console.log('[DEBUG] Tipo de usuário:', userType);
-        } else {
-            userType = 'cliente'; // Default
-        }
-    } catch (error) {
-        console.error('[ERRO] ao verificar tipo:', error);
-        userType = 'cliente';
-    }
-}
+    // ============================================
+    // FUNÇÕES DE UTILIDADE
+    // ============================================
 
-// EXTRATOR DE DADOS FLEXÍVEL (igual ao da busca)
-function extrairDadosProfissional(doc) {
-    const data = doc.data();
-    
-    // Helper para pegar valor de vários campos possíveis
-    const get = (...fields) => {
-        for (let field of fields) {
-            if (field.includes('.')) {
-                const parts = field.split('.');
-                let val = data;
-                for (let part of parts) {
-                    val = val?.[part];
-                    if (val === undefined) break;
-                }
-                if (val !== undefined && val !== null && val !== '') return val;
-            } else if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
-                return data[field];
-            }
-        }
-        return null;
-    };
-    
-    return {
-        id: doc.id,
-        nome: get('profissional.nomeProfissional', 'nomeProfissional', 'apelido', 'nomeCompleto', 'displayName', 'email') || 'Profissional',
-        especialidade: get('profissional.especialidadePrincipal', 'especialidadePrincipal', 'especialidade', 'categoria') || 'Serviços Gerais',
-        descricao: get('profissional.descricao', 'descricao', 'bio', 'sobre') || '',
-        cidade: get('profissional.cidadeBase', 'cidadeBase', 'endereco.cidade', 'cidade', 'localidade') || 'Cidade não informada',
-        estado: get('profissional.estadoBase', 'estadoBase', 'endereco.estado', 'estado', 'uf') || '',
-        foto: get('profissional.fotoPerfilProfissional', 'fotoPerfilProfissional', 'fotoPerfil', 'photoURL', 'avatar'),
-        portfolio: data.profissional?.portfolioFotos || data.portfolioFotos || data.portfolio || data.fotos || [],
-        plano: get('plano_assinatura', 'plano', 'assinatura.plano') || 'free',
-        atendeDomicilio: get('profissional.atendeDomicilio', 'atendeDomicilio', 'domicilio') || false,
-        atendeOnline: get('profissional.atendeOnline', 'atendeOnline', 'online') || false,
-        orcamentoGratuito: get('profissional.orcamentoGratuito', 'orcamentoGratuito') || false,
-        anosExperiencia: get('profissional.anosExperiencia', 'anosExperiencia', 'experiencia') || '',
-        raioKm: get('profissional.raioKm', 'raioKm', 'raioAtendimento') || '',
-        whatsapp: get('profissional.whatsapp', 'whatsapp', 'telefone', 'celular') || '',
-        tempoResposta: get('profissional.tempoResposta', 'tempoResposta') || '24',
-        formasPagamento: data.profissional?.formasPagamento || data.formasPagamento || [],
-        especialidades: data.profissional?.especialidades || data.especialidades || [],
-        cidadesAtendidas: data.profissional?.cidadesAtendidas || data.cidadesAtendidas || [],
-        garantiaDias: get('profissional.garantiaDias', 'garantiaDias') || 0,
-        instagram: get('profissional.instagram', 'instagram', 'social.instagram') || '',
-        website: get('profissional.website', 'website', 'site') || '',
-        emailContato: get('profissional.emailContato', 'emailContato', 'email') || '',
-        // Dados brutos para debug se necessário
-        rawData: data
-    };
-}
-
-// CARREGAR PERFIL COMPLETO
-async function carregarPerfil() {
-    try {
-        // Pegar ID da URL
-        const urlParams = new URLSearchParams(window.location.search);
-        profissionalId = urlParams.get('id');
-        
-        if (!profissionalId) {
-            mostrarErro('ID do profissional não encontrado na URL');
-            return;
-        }
-        
-        console.log('[DEBUG] Carregando perfil:', profissionalId);
-        
-        // Buscar documento
-        const docRef = doc(db, "usuarios", profissionalId);
-        const docSnap = await getDoc(docRef);
-        
-        if (!docSnap.exists()) {
-            mostrarErro('Profissional não encontrado');
-            return;
-        }
-        
-        const data = docSnap.data();
-        
-        // Verificar se é profissional e está ativo
-        const tipo = data.tipoUsuario;
-        const status = data.status || data.situacao;
-        
-        if (tipo !== 'profissional') {
-            mostrarErro('Este usuário não é um profissional');
-            return;
-        }
-        
-        if (status && status !== 'ativo' && status !== 'active' && status !== true) {
-            mostrarErro('Este profissional não está ativo no momento');
-            return;
-        }
-        
-        // Extrair dados
-        profissionalData = extrairDadosProfissional(docSnap);
-        console.log('[DEBUG] Dados extraídos:', profissionalData);
-        
-        // Carregar dados paralelos
-        await Promise.all([
-            carregarAvaliacoes(),
-            carregarCatalogo(),
-            verificarSeJaAvaliou()
-        ]);
-        
-        // Renderizar
-        renderizarPerfil();
-        renderizarAvaliacoes();
-        renderizarCatalogo();
-        
-        // Mostrar conteúdo
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('profileContent').style.display = 'block';
-        
-    } catch (error) {
-        console.error('[ERRO CRÍTICO]', error);
-        mostrarErro('Erro ao carregar perfil: ' + error.message);
-    }
-}
-
-// CARREGAR AVALIAÇÕES
-async function carregarAvaliacoes() {
-    try {
-        const q = query(
-            collection(db, "avaliacoes"),
-            where("profissionalId", "==", profissionalId),
-            where("status", "in", ["aprovado", "ativo"]),
-            orderBy("data", "desc"),
-            limit(50)
-        );
-        
-        const snapshot = await getDocs(q);
-        avaliacoes = [];
-        let somaNotas = 0;
-        
-        snapshot.forEach(doc => {
-            const av = doc.data();
-            avaliacoes.push({
-                id: doc.id,
-                ...av,
-                data: av.data?.toDate ? av.data.toDate() : new Date(),
-                dataFormatada: formatarData(av.data?.toDate ? av.data.toDate() : new Date())
-            });
-            somaNotas += (av.nota || 0);
-        });
-        
-        // Calcular média
-        const media = avaliacoes.length > 0 ? (somaNotas / avaliacoes.length).toFixed(1) : 0;
-        
-        // Atualizar UI da média
-        atualizarMediaAvaliacoes(media, avaliacoes.length);
-        
-        console.log(`[DEBUG] ${avaliacoes.length} avaliações carregadas, média: ${media}`);
-        
-    } catch (error) {
-        console.error('[ERRO] ao carregar avaliações:', error);
-        // Se der erro de índice, tenta sem orderBy
-        if (error.message.includes('index')) {
-            try {
-                const qSimples = query(
-                    collection(db, "avaliacoes"),
-                    where("profissionalId", "==", profissionalId),
-                    where("status", "in", ["aprovado", "ativo"])
-                );
-                const snapshot = await getDocs(qSimples);
-                avaliacoes = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    data: doc.data().data?.toDate ? doc.data().data.toDate() : new Date()
-                })).sort((a, b) => b.data - a.data); // Ordena no JS
-            } catch (e2) {
-                console.error('[ERRO] Falha também na query simples:', e2);
-            }
-        }
-    }
-}
-
-// VERIFICAR SE JÁ AVALIOU (para não permitir duplicado)
-async function verificarSeJaAvaliou() {
-    if (!currentUser || currentUser.isAnonymous) {
-        jaAvaliou = false;
-        atualizarBotaoAvaliar();
-        return;
-    }
-    
-    try {
-        const q = query(
-            collection(db, "avaliacoes"),
-            where("profissionalId", "==", profissionalId),
-            where("clienteId", "==", currentUser.uid),
-            limit(1)
-        );
-        
-        const snapshot = await getDocs(q);
-        jaAvaliou = !snapshot.empty;
-        
-        if (jaAvaliou) {
-            console.log('[DEBUG] Usuário já avaliou este profissional');
-        }
-        
-        atualizarBotaoAvaliar();
-        
-    } catch (error) {
-        console.error('[ERRO] ao verificar avaliação:', error);
-        jaAvaliou = false;
-    }
-}
-
-// ATUALIZAR BOTÃO DE AVALIAR (visibilidade)
-function atualizarBotaoAvaliar() {
-    const btnAvaliar = document.getElementById('btnAvaliar');
-    const btnAvaliarPrimeiro = document.getElementById('btnAvaliarPrimeiro');
-    
-    // Só mostra se:
-    // 1. Está logado (não anônimo)
-    // 2. É cliente (não profissional)
-    // 3. Não é o próprio profissional
-    // 4. Ainda não avaliou
-    
-    const podeAvaliar = currentUser && 
-                       !currentUser.isAnonymous && 
-                       userType === 'cliente' && 
-                       currentUser.uid !== profissionalId &&
-                       !jaAvaliou;
-    
-    if (btnAvaliar) {
-        btnAvaliar.style.display = podeAvaliar ? 'block' : 'none';
-    }
-    
-    if (btnAvaliarPrimeiro && avaliacoes.length === 0) {
-        btnAvaliarPrimeiro.style.display = podeAvaliar ? 'block' : 'none';
-    }
-}
-
-// ATUALIZAR MÉDIA DE AVALIAÇÕES NA UI
-function atualizarMediaAvaliacoes(media, total) {
-    const starsMedia = document.getElementById('starsMedia');
-    const totalAvaliacoes = document.getElementById('totalAvaliacoes');
-    const countAvaliacoes = document.getElementById('countAvaliacoes');
-    
-    if (totalAvaliacoes) totalAvaliacoes.textContent = total;
-    if (countAvaliacoes) countAvaliacoes.textContent = total;
-    
-    if (starsMedia) {
-        starsMedia.innerHTML = gerarEstrelasHTML(media);
-        starsMedia.style.color = total > 0 ? '#FFD700' : '#ddd';
-    }
-}
-
-// RENDERIZAR PERFIL
-function renderizarPerfil() {
-    const p = profissionalData;
-    
-    // Avatar
-    const avatarUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nome)}&background=44689a&color=fff&size=200`;
-    document.getElementById('profileAvatar').src = avatarUrl;
-    
-    // Plano Badge
-    const planBadge = document.getElementById('planBadge');
-    const planoTipo = document.getElementById('planoTipo');
-    if (p.plano === 'pro' || p.plano === 'enterprise') {
-        planBadge.style.display = 'flex';
-        planoTipo.textContent = p.plano.toUpperCase();
-    } else {
-        planBadge.style.display = 'none';
-    }
-    
-    // Nome
-    document.getElementById('profileName').textContent = p.nome;
-    
-    // Especialidade
-    document.getElementById('profileSpecialty').innerHTML = `
-        <i class="fas fa-tools"></i> ${formatarEspecialidade(p.especialidade)}
-    `;
-    
-    // Localização
-    let locText = p.cidade;
-    if (p.estado) locText += ` - ${p.estado}`;
-    if (p.raioKm) locText += ` • Atende em ${p.raioKm}km`;
-    document.getElementById('profileLocation').innerHTML = `
-        <i class="fas fa-map-marker-alt"></i> <span>${locText}</span>
-    `;
-    
-    // WhatsApp
-    const btnWhats = document.getElementById('btnWhatsApp');
-    if (p.whatsapp) {
-        const num = p.whatsapp.replace(/\D/g, '');
-        const msg = encodeURIComponent(`Olá ${p.nome}! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`);
-        btnWhats.href = `https://wa.me/55${num}?text=${msg}`;
-        btnWhats.style.display = 'inline-flex';
-    } else {
-        btnWhats.style.display = 'none';
-    }
-    
-    // Sobre
-    document.getElementById('aboutText').textContent = p.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
-    
-    // Experiência
-    document.getElementById('anosExp').textContent = formatarExperiencia(p.anosExperiencia);
-    
-    // Garantia
-    const badgeGarantia = document.getElementById('badgeGarantia');
-    if (p.garantiaDias > 0) {
-        badgeGarantia.style.display = 'flex';
-        document.getElementById('diasGarantia').textContent = p.garantiaDias;
-    } else {
-        badgeGarantia.style.display = 'none';
-    }
-    
-    // Formas de Atendimento
-    const atendBadges = document.getElementById('atendimentoBadges');
-    atendBadges.innerHTML = '';
-    if (p.atendeDomicilio) {
-        atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>`;
-    }
-    if (p.atendeOnline) {
-        atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-laptop"></i> Online</div>`;
-    }
-    if (p.atendeOnline && p.atendeDomicilio) {
-        atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-store"></i> Estabelecimento</div>`;
-    }
-    
-    // Formas de Pagamento
-    const pagBadges = document.getElementById('pagamentoBadges');
-    pagBadges.innerHTML = '';
-    if (p.formasPagamento && p.formasPagamento.length > 0) {
-        p.formasPagamento.forEach(fp => {
-            let icon = 'fa-money-bill-wave';
-            if (fp.toLowerCase().includes('cartão') || fp.toLowerCase().includes('card')) icon = 'fa-credit-card';
-            if (fp.toLowerCase().includes('pix')) icon = 'fa-qrcode';
-            pagBadges.innerHTML += `<div class="info-badge"><i class="fas ${icon}"></i> ${fp}</div>`;
-        });
-    } else {
-        pagBadges.innerHTML = '<span class="text-muted">Não informado</span>';
-    }
-    
-    // Tempo de Resposta
-    document.getElementById('tempoResposta').innerHTML = `
-        <i class="fas fa-clock me-2"></i> Em até ${p.tempoResposta} horas
-    `;
-    
-    // Especialidades/Tags
-    const tagsContainer = document.getElementById('tagsContainer');
-    tagsContainer.innerHTML = '';
-    if (p.especialidades && p.especialidades.length > 0) {
-        p.especialidades.forEach(tag => {
-            tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
-        });
-    } else {
-        tagsContainer.innerHTML = `<div class="info-badge">${formatarEspecialidade(p.especialidade)}</div>`;
-    }
-    
-    // Galeria/Portfólio
-    const galeriaSection = document.getElementById('galeriaSection');
-    const galeriaGrid = document.getElementById('galeriaGrid');
-    if (p.portfolio && p.portfolio.length > 0) {
-        galeriaSection.style.display = 'block';
-        galeriaGrid.innerHTML = p.portfolio.map((foto, index) => `
-            <div class="gallery-item" onclick="abrirLightbox(${index})">
-                <img src="${foto}" alt="Trabalho ${index + 1}" 
-                     onerror="this.src='https://via.placeholder.com/150/44689a/ffffff?text=Foto'">
-            </div>
-        `).join('');
-    } else {
-        galeriaSection.style.display = 'none';
-    }
-}
-
-// CARREGAR CATÁLOGO (Serviços e Produtos)
-async function carregarCatalogo() {
-    try {
-        // Buscar serviços
-        const qServ = query(
-            collection(db, "servicos"),
-            where("profissionalId", "==", profissionalId),
-            where("status", "in", ["ativo", "active", true])
-        );
-        const snapServ = await getDocs(qServ);
-        const servicos = snapServ.docs.map(d => ({...d.data(), id: d.id, tipo: 'servico'}));
-        
-        // Buscar produtos
-        const qProd = query(
-            collection(db, "produtos"),
-            where("profissionalId", "==", profissionalId),
-            where("status", "in", ["ativo", "active", true])
-        );
-        const snapProd = await getDocs(qProd);
-        const produtos = snapProd.docs.map(d => ({...d.data(), id: d.id, tipo: 'produto'}));
-        
-        // Juntar
-        profissionalData.catalogo = [...servicos, ...produtos];
-        
-        document.getElementById('countCatalogo').textContent = profissionalData.catalogo.length;
-        
-    } catch (error) {
-        console.error('[ERRO] ao carregar catálogo:', error);
-        profissionalData.catalogo = [];
-    }
-}
-
-// RENDERIZAR CATÁLOGO
-function renderizarCatalogo() {
-    const container = document.getElementById('catalogoGrid');
-    const vazio = document.getElementById('catalogoVazio');
-    const itens = profissionalData.catalogo || [];
-    
-    if (itens.length === 0) {
-        container.style.display = 'none';
-        vazio.style.display = 'block';
-        return;
-    }
-    
-    vazio.style.display = 'none';
-    container.style.display = 'grid';
-    
-    container.innerHTML = itens.map(item => {
-        const imagem = item.imagens?.[0] || item.foto || item.imagem || 
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome || 'Item')}&background=44689a&color=fff&size=400x300`;
-        
-        const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
-        const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
-        const preco = item.preco || item.precoVenda || item.valor || 0;
-        
-        let meta = '';
-        if (item.tipo === 'servico') {
-            meta = `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`;
-        } else {
-            meta = `<span><i class="fas fa-box"></i> Estoque: ${item.estoque || item.quantidade || 'Disponível'}</span>`;
-        }
-        
-        return `
-            <div class="item-card">
-                <div class="item-image">
-                    <img src="${imagem}" alt="${item.nome}" loading="lazy"
-                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome || 'Item')}&background=44689a&color=fff&size=400x300'">
-                    <span class="item-type ${tipoClass}">${tipoText}</span>
-                </div>
-                <div class="item-content">
-                    <h4 class="item-title">${item.nome}</h4>
-                    <p class="item-desc">${item.descricao || 'Sem descrição disponível'}</p>
-                    <div class="item-price">${formatarMoeda(preco)}</div>
-                    <div class="item-meta">
-                        ${meta}
-                        <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
-                    </div>
-                </div>
-            </div>
+    function mostrarToast(mensagem, tipo = 'success') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast-scanhub';
+        toast.innerHTML = `
+            <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" 
+               style="color: ${tipo === 'success' ? '#28a745' : '#dc3545'}"></i>
+            <span>${mensagem}</span>
         `;
-    }).join('');
-}
-
-// RENDERIZAR AVALIAÇÕES
-function renderizarAvaliacoes() {
-    const lista = document.getElementById('listaAvaliacoes');
-    const semAval = document.getElementById('semAvaliacoes');
-    
-    if (avaliacoes.length === 0) {
-        lista.innerHTML = '';
-        semAval.style.display = 'block';
-        return;
-    }
-    
-    semAval.style.display = 'none';
-    
-    lista.innerHTML = avaliacoes.map(av => {
-        const nome = av.anonimo ? 'Cliente Anônimo' : (av.clienteNome || 'Cliente');
-        const inicial = nome.charAt(0).toUpperCase();
+        toastContainer.appendChild(toast);
         
-        return `
-            <div class="avaliacao-card">
-                <div class="avaliacao-header">
-                    <div class="avaliacao-cliente">
-                        <div class="avatar-cliente">${inicial}</div>
-                        <div class="cliente-info">
-                            <h6>${nome}</h6>
-                            <small>${av.dataFormatada}</small>
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function mostrarErro(titulo, mensagem) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+        if (titulo) document.getElementById('errorTitle').textContent = titulo;
+        if (mensagem) document.getElementById('errorMessage').textContent = mensagem;
+    }
+
+    function gerarEstrelasHTML(nota) {
+        const notaNum = parseFloat(nota) || 0;
+        const cheias = Math.floor(notaNum);
+        const meia = notaNum % 1 >= 0.5;
+        const vazias = 5 - cheias - (meia ? 1 : 0);
+        
+        let html = '';
+        for (let i = 0; i < cheias; i++) html += '<i class="fas fa-star"></i>';
+        if (meia) html += '<i class="fas fa-star-half-alt"></i>';
+        for (let i = 0; i < vazias; i++) html += '<i class="far fa-star"></i>';
+        return html;
+    }
+
+    function formatarData(data) {
+        if (!data) return 'Data não informada';
+        const date = data.toDate ? data.toDate() : new Date(data);
+        return new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).format(date);
+    }
+
+    function formatarMoeda(valor) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(valor || 0);
+    }
+
+    function formatarEspecialidade(esp) {
+        const map = {
+            'eletrica': 'Eletricista',
+            'hidraulica': 'Encanador',
+            'massoterapia': 'Massoterapeuta',
+            'tecnico_celular': 'Técnico de Celular',
+            'veterinaria': 'Veterinário(a)',
+            'manicure': 'Manicure/Pedicure',
+            'pintura': 'Pintor',
+            'ar_condicionado': 'Ar Condicionado',
+            'marcenaria': 'Marceneiro',
+            'motorista': 'Motorista',
+            'programador': 'Programador/Desenvolvedor'
+        };
+        return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
+    }
+
+    function formatarExperiencia(exp) {
+        const map = {
+            '1': 'Menos de 1 ano',
+            '1-3': '1 a 3 anos',
+            '3-5': '3 a 5 anos',
+            '5-10': '5 a 10 anos',
+            '10+': 'Mais de 10 anos'
+        };
+        return map[exp] || (exp ? exp + ' anos' : 'Não informado');
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // EXTRATOR DE DADOS FLEXÍVEL
+    // ============================================
+
+    function extrairDadosProfissional(doc) {
+        const data = doc.data();
+        
+        // Helper para pegar valor de vários campos possíveis
+        const get = (...fields) => {
+            for (let field of fields) {
+                if (field.includes('.')) {
+                    const parts = field.split('.');
+                    let val = data;
+                    for (let part of parts) {
+                        val = val?.[part];
+                        if (val === undefined) break;
+                    }
+                    if (val !== undefined && val !== null && val !== '') return val;
+                } else if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
+                    return data[field];
+                }
+            }
+            return null;
+        };
+        
+        return {
+            id: doc.id,
+            nome: get('profissional.nomeProfissional', 'nomeProfissional', 'apelido', 'nomeCompleto') || 'Profissional',
+            especialidade: get('profissional.especialidadePrincipal', 'especialidadePrincipal', 'especialidade') || 'Serviços Gerais',
+            descricao: get('profissional.descricao', 'descricao', 'bio') || '',
+            cidade: get('profissional.cidadeBase', 'cidadeBase', 'endereco.cidade', 'cidade') || 'Cidade não informada',
+            estado: get('profissional.estadoBase', 'estadoBase', 'endereco.estado', 'estado') || '',
+            foto: get('profissional.fotoPerfilProfissional', 'fotoPerfilProfissional', 'fotoPerfil') || 
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(get('profissional.nomeProfissional', 'apelido') || 'P')}&background=44689a&color=fff&size=200`,
+            plano: get('plano_assinatura', 'plano') || 'free',
+            atendeDomicilio: get('profissional.atendeDomicilio', 'atendeDomicilio') || false,
+            atendeOnline: get('profissional.atendeOnline', 'atendeOnline') || false,
+            orcamentoGratuito: get('profissional.orcamentoGratuito', 'orcamentoGratuito') !== false,
+            anosExperiencia: get('profissional.anosExperiencia', 'anosExperiencia') || '',
+            raioKm: get('profissional.raioKm', 'raioKm') || '',
+            whatsapp: get('profissional.whatsapp', 'whatsapp', 'celular') || '',
+            tempoResposta: get('profissional.tempoResposta', 'tempoResposta') || '24',
+            formasPagamento: data.profissional?.formasPagamento || [],
+            especialidades: data.profissional?.especialidades || [],
+            cidadesAtendidas: data.profissional?.cidadesAtendidas || [],
+            garantiaDias: get('profissional.garantiaDias', 'garantiaDias') || 0,
+            portfolio: data.profissional?.portfolioFotos || [],
+            // Para controle
+            tipoUsuario: data.tipoUsuario || 'cliente',
+            status: data.status || 'ativo',
+            perfilCompleto: data.profissional?.perfilCompleto || false
+        };
+    }
+
+    // ============================================
+    // CARREGAR PERFIL COMPLETO
+    // ============================================
+
+    async function carregarPerfil() {
+        try {
+            console.log('[PERFIL] Iniciando carregamento do perfil...');
+            
+            // Pegar ID da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            profissionalId = urlParams.get('id');
+            
+            if (!profissionalId) {
+                mostrarErro('ID não encontrado', 'O ID do profissional não foi encontrado na URL.');
+                return;
+            }
+            
+            console.log('[PERFIL] Carregando profissional:', profissionalId);
+            
+            // Fazer login anônimo para permitir acesso
+            await signInAnonymously(auth);
+            console.log('[PERFIL] Login anônimo OK');
+            
+            // Buscar dados do profissional
+            const docRef = doc(db, "usuarios", profissionalId);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+                mostrarErro('Profissional não encontrado', 'Este profissional pode ter removido o perfil.');
+                return;
+            }
+            
+            const data = docSnap.data();
+            
+            // Verificar se é profissional
+            if (data.tipoUsuario !== 'profissional') {
+                mostrarErro('Não é profissional', 'Este usuário não é um profissional.');
+                return;
+            }
+            
+            // Verificar se está ativo
+            if (data.status !== 'ativo') {
+                mostrarErro('Profissional inativo', 'Este profissional não está disponível no momento.');
+                return;
+            }
+            
+            // Extrair dados
+            profissionalData = extrairDadosProfissional(docSnap);
+            console.log('[PERFIL] Dados extraídos:', profissionalData);
+            
+            // Carregar dados paralelos
+            await Promise.all([
+                carregarAvaliacoes(),
+                carregarCatalogo(),
+                verificarUsuarioAtual()
+            ]);
+            
+            // Renderizar tudo
+            renderizarPerfil();
+            renderizarAvaliacoes();
+            renderizarCatalogo();
+            
+            // Mostrar conteúdo
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+            
+            console.log('[PERFIL] Perfil carregado com sucesso!');
+            
+        } catch (error) {
+            console.error('[ERRO PERFIL]', error);
+            mostrarErro('Erro ao carregar', 'Não foi possível carregar o perfil. Tente novamente.');
+        }
+    }
+
+    async function verificarUsuarioAtual() {
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            
+            if (user && !user.isAnonymous) {
+                try {
+                    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                    if (userDoc.exists()) {
+                        userType = userDoc.data().tipoUsuario || 'cliente';
+                    }
+                } catch (error) {
+                    console.error('[ERRO] ao verificar tipo:', error);
+                    userType = 'cliente';
+                }
+            } else {
+                userType = 'cliente';
+            }
+            
+            // Verificar se já avaliou
+            await verificarSeJaAvaliou();
+        });
+    }
+
+    // ============================================
+    // CARREGAR AVALIAÇÕES
+    // ============================================
+
+    async function carregarAvaliacoes() {
+        try {
+            console.log('[PERFIL] Carregando avaliações...');
+            
+            const q = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "in", ["ativo", "aprovado"])
+            );
+            
+            const snapshot = await getDocs(q);
+            avaliacoes = [];
+            let somaNotas = 0;
+            
+            snapshot.forEach(doc => {
+                const av = doc.data();
+                avaliacoes.push({
+                    id: doc.id,
+                    ...av,
+                    dataFormatada: av.data ? formatarData(av.data) : 'Data não informada'
+                });
+                
+                if (av.nota) {
+                    somaNotas += av.nota;
+                }
+            });
+            
+            // Ordenar por data (mais recente primeiro)
+            avaliacoes.sort((a, b) => {
+                const dateA = a.data?.toDate ? a.data.toDate() : new Date(0);
+                const dateB = b.data?.toDate ? b.data.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+            
+            // Calcular média
+            const media = avaliacoes.length > 0 ? (somaNotas / avaliacoes.length).toFixed(1) : 0;
+            
+            // Atualizar UI
+            atualizarMediaAvaliacoes(media, avaliacoes.length);
+            
+            console.log(`[PERFIL] ${avaliacoes.length} avaliações carregadas, média: ${media}`);
+            
+        } catch (error) {
+            console.error('[ERRO AVALIAÇÕES]', error);
+            avaliacoes = [];
+        }
+    }
+
+    async function verificarSeJaAvaliou() {
+        if (!currentUser || currentUser.isAnonymous) {
+            jaAvaliou = false;
+            atualizarBotaoAvaliar();
+            return;
+        }
+        
+        try {
+            const q = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", profissionalId),
+                where("clienteId", "==", currentUser.uid),
+                limit(1)
+            );
+            
+            const snapshot = await getDocs(q);
+            jaAvaliou = !snapshot.empty;
+            
+            atualizarBotaoAvaliar();
+            
+        } catch (error) {
+            console.error('[ERRO] ao verificar avaliação:', error);
+            jaAvaliou = false;
+        }
+    }
+
+    function atualizarBotaoAvaliar() {
+        const btnAvaliar = document.getElementById('btnAvaliar');
+        const btnAvaliarPrimeiro = document.getElementById('btnAvaliarPrimeiro');
+        
+        // Verificar condições para poder avaliar
+        const podeAvaliar = currentUser && 
+                           !currentUser.isAnonymous && 
+                           userType === 'cliente' && 
+                           currentUser.uid !== profissionalId &&
+                           !jaAvaliou;
+        
+        if (btnAvaliar) {
+            btnAvaliar.style.display = podeAvaliar ? 'block' : 'none';
+        }
+        
+        if (btnAvaliarPrimeiro) {
+            btnAvaliarPrimeiro.style.display = (avaliacoes.length === 0 && podeAvaliar) ? 'block' : 'none';
+        }
+    }
+
+    function atualizarMediaAvaliacoes(media, total) {
+        const starsMedia = document.getElementById('starsMedia');
+        const totalAvaliacoes = document.getElementById('totalAvaliacoes');
+        const countAvaliacoes = document.getElementById('countAvaliacoes');
+        
+        if (totalAvaliacoes) totalAvaliacoes.textContent = total;
+        if (countAvaliacoes) countAvaliacoes.textContent = total;
+        
+        if (starsMedia) {
+            starsMedia.innerHTML = gerarEstrelasHTML(media);
+            starsMedia.style.color = total > 0 ? '#FFD700' : '#ddd';
+        }
+    }
+
+    // ============================================
+    // CARREGAR CATÁLOGO
+    // ============================================
+
+    async function carregarCatalogo() {
+        try {
+            console.log('[PERFIL] Carregando catálogo...');
+            
+            // Buscar serviços
+            const qServ = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "in", ["ativo", "active", true])
+            );
+            const snapServ = await getDocs(qServ);
+            const servicos = snapServ.docs.map(d => ({...d.data(), id: d.id, tipo: 'servico'}));
+            
+            // Buscar produtos
+            const qProd = query(
+                collection(db, "produtos"),
+                where("profissionalId", "==", profissionalId),
+                where("status", "in", ["ativo", "active", true])
+            );
+            const snapProd = await getDocs(qProd);
+            const produtos = snapProd.docs.map(d => ({...d.data(), id: d.id, tipo: 'produto'}));
+            
+            // Juntar tudo
+            catalogoItens = [...servicos, ...produtos];
+            
+            // Atualizar contador
+            document.getElementById('countCatalogo').textContent = catalogoItens.length;
+            
+            console.log(`[PERFIL] ${catalogoItens.length} itens no catálogo`);
+            
+        } catch (error) {
+            console.error('[ERRO CATÁLOGO]', error);
+            catalogoItens = [];
+        }
+    }
+
+    // ============================================
+    // RENDERIZAÇÃO
+    // ============================================
+
+    function renderizarPerfil() {
+        const p = profissionalData;
+        if (!p) return;
+        
+        // Avatar
+        const avatarUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nome)}&background=44689a&color=fff&size=200`;
+        document.getElementById('profileAvatar').src = avatarUrl;
+        
+        // Plano Badge
+        const planBadge = document.getElementById('planBadge');
+        const planoTipo = document.getElementById('planoTipo');
+        if (p.plano && p.plano !== 'free') {
+            planBadge.style.display = 'flex';
+            planBadge.className = `plan-badge-profile ${p.plano}`;
+            planoTipo.textContent = p.plano.toUpperCase();
+        } else {
+            planBadge.style.display = 'none';
+        }
+        
+        // Nome
+        document.getElementById('profileName').textContent = p.nome || 'Profissional';
+        
+        // Especialidade
+        const especialidadeFormatada = formatarEspecialidade(p.especialidade);
+        document.getElementById('profileSpecialty').innerHTML = `
+            <i class="fas fa-tools"></i> ${especialidadeFormatada}
+        `;
+        
+        // Localização
+        let locText = p.cidade;
+        if (p.estado) locText += ` - ${p.estado}`;
+        if (p.raioKm) locText += ` • Atende em ${p.raioKm}km`;
+        document.getElementById('profileLocation').innerHTML = `
+            <i class="fas fa-map-marker-alt"></i> <span>${locText}</span>
+        `;
+        
+        // WhatsApp
+        const btnWhats = document.getElementById('btnWhatsApp');
+        if (p.whatsapp) {
+            const num = p.whatsapp.replace(/\D/g, '');
+            const msg = encodeURIComponent(`Olá ${p.nome}! Encontrei seu perfil no ScanHub e gostaria de saber mais sobre seus serviços.`);
+            btnWhats.href = `https://wa.me/55${num}?text=${msg}`;
+            btnWhats.style.display = 'inline-flex';
+        } else {
+            btnWhats.style.display = 'none';
+        }
+        
+        // Sobre
+        document.getElementById('aboutText').textContent = p.descricao || 'Profissional qualificado à disposição para atender suas necessidades.';
+        
+        // Experiência
+        document.getElementById('anosExp').textContent = formatarExperiencia(p.anosExperiencia);
+        
+        // Garantia
+        const badgeGarantia = document.getElementById('badgeGarantia');
+        if (p.garantiaDias > 0) {
+            badgeGarantia.style.display = 'flex';
+            document.getElementById('diasGarantia').textContent = p.garantiaDias;
+        } else {
+            badgeGarantia.style.display = 'none';
+        }
+        
+        // Formas de Atendimento
+        const atendBadges = document.getElementById('atendimentoBadges');
+        atendBadges.innerHTML = '';
+        if (p.atendeDomicilio) {
+            atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>`;
+        }
+        if (p.atendeOnline) {
+            atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-laptop"></i> Online</div>`;
+        }
+        if (!p.atendeOnline && !p.atendeDomicilio) {
+            atendBadges.innerHTML = '<span class="text-muted">Não informado</span>';
+        }
+        
+        // Formas de Pagamento
+        const pagBadges = document.getElementById('pagamentoBadges');
+        pagBadges.innerHTML = '';
+        if (p.formasPagamento && p.formasPagamento.length > 0) {
+            p.formasPagamento.forEach(fp => {
+                let icon = 'fa-money-bill-wave';
+                if (fp.toLowerCase().includes('cartão') || fp.toLowerCase().includes('card')) icon = 'fa-credit-card';
+                if (fp.toLowerCase().includes('pix')) icon = 'fa-qrcode';
+                pagBadges.innerHTML += `<div class="info-badge"><i class="fas ${icon}"></i> ${fp}</div>`;
+            });
+        } else {
+            pagBadges.innerHTML = '<span class="text-muted">Não informado</span>';
+        }
+        
+        // Tempo de Resposta
+        document.getElementById('tempoResposta').innerHTML = `
+            <i class="fas fa-clock me-2"></i> Em até ${p.tempoResposta || 24} horas
+        `;
+        
+        // Especialidades/Tags
+        const tagsContainer = document.getElementById('tagsContainer');
+        tagsContainer.innerHTML = '';
+        if (p.especialidades && p.especialidades.length > 0) {
+            p.especialidades.forEach(tag => {
+                if (tag && tag.trim()) {
+                    tagsContainer.innerHTML += `<div class="info-badge">${tag}</div>`;
+                }
+            });
+        } else {
+            tagsContainer.innerHTML = `<div class="info-badge">${especialidadeFormatada}</div>`;
+        }
+        
+        // Galeria/Portfólio
+        const galeriaSection = document.getElementById('galeriaSection');
+        const galeriaGrid = document.getElementById('galeriaGrid');
+        if (p.portfolio && p.portfolio.length > 0) {
+            galeriaSection.style.display = 'block';
+            galeriaGrid.innerHTML = p.portfolio.map((foto, index) => `
+                <div class="gallery-item">
+                    <img src="${foto}" alt="Trabalho ${index + 1}" 
+                         onerror="this.src='https://via.placeholder.com/150/44689a/ffffff?text=Foto'">
+                </div>
+            `).join('');
+        } else {
+            galeriaSection.style.display = 'none';
+        }
+    }
+
+    function renderizarCatalogo() {
+        const container = document.getElementById('catalogoGrid');
+        const vazio = document.getElementById('catalogoVazio');
+        
+        if (!catalogoItens || catalogoItens.length === 0) {
+            container.style.display = 'none';
+            vazio.style.display = 'block';
+            return;
+        }
+        
+        vazio.style.display = 'none';
+        container.style.display = 'grid';
+        
+        container.innerHTML = catalogoItens.map(item => {
+            const imagem = item.imagens?.[0] || item.foto || item.imagem || 
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome || 'Item')}&background=44689a&color=fff&size=400x300`;
+            
+            const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
+            const tipoText = item.tipo === 'servico' ? 'Serviço' : 'Produto';
+            const preco = item.preco || item.precoVenda || item.valor || 0;
+            
+            let meta = '';
+            if (item.tipo === 'servico') {
+                meta = `<span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>`;
+            } else {
+                meta = `<span><i class="fas fa-box"></i> Estoque: ${item.estoque || item.quantidade || 'Disponível'}</span>`;
+            }
+            
+            return `
+                <div class="item-card">
+                    <div class="item-image">
+                        <img src="${imagem}" alt="${item.nome}" loading="lazy"
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome || 'Item')}&background=44689a&color=fff&size=400x300'">
+                        <span class="item-type ${tipoClass}">${tipoText}</span>
+                    </div>
+                    <div class="item-content">
+                        <h4 class="item-title">${item.nome || 'Sem nome'}</h4>
+                        <p class="item-desc">${item.descricao || 'Sem descrição disponível'}</p>
+                        <div class="item-price">${formatarMoeda(preco)}</div>
+                        <div class="item-meta">
+                            ${meta}
+                            <span><i class="fas fa-tag"></i> ${item.categoria || 'Geral'}</span>
                         </div>
                     </div>
-                    <div class="avaliacao-stars">
-                        ${gerarEstrelasHTML(av.nota)}
-                    </div>
                 </div>
-                
-                ${av.comentario ? `
-                <div class="avaliacao-comentario">
-                    <p>${escapeHtml(av.comentario)}</p>
-                </div>
-                ` : ''}
-                
-                ${av.resposta ? `
-                <div class="avaliacao-resposta">
-                    <div class="resposta-profissional">
-                        <i class="fas fa-reply me-1"></i> Resposta do profissional:
-                    </div>
-                    <p>${escapeHtml(av.resposta)}</p>
-                </div>
-                ` : ''}
-            </div>
-        `;
-    }).join('');
-}
-
-// FUNÇÕES GLOBAIS (onclick no HTML)
-window.switchTab = function(tabName) {
-    // Atualizar botões
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.closest('.tab-btn').classList.add('active');
-    
-    // Esconder todas as abas
-    document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
-    
-    // Mostrar aba selecionada
-    const tabMap = {
-        'sobre': 'tabSobre',
-        'catalogo': 'tabCatalogo',
-        'avaliacoes': 'tabAvaliacoes'
-    };
-    
-    const el = document.getElementById(tabMap[tabName]);
-    if (el) el.classList.add('active');
-    
-    currentTab = tabName;
-};
-
-window.abrirModalAvaliacao = function() {
-    if (!currentUser || currentUser.isAnonymous) {
-        alert('Para avaliar, você precisa fazer login como cliente!');
-        // Salvar URL para redirecionar de volta
-        localStorage.setItem('redirectAfterLogin', window.location.href);
-        window.location.href = 'login.html';
-        return;
+            `;
+        }).join('');
     }
-    
-    if (userType === 'profissional') {
-        alert('Profissionais não podem avaliar outros profissionais.');
-        return;
-    }
-    
-    if (currentUser.uid === profissionalId) {
-        alert('Você não pode avaliar a si mesmo!');
-        return;
-    }
-    
-    if (jaAvaliou) {
-        alert('Você já avaliou este profissional!');
-        return;
-    }
-    
-    // Resetar formulário
-    document.getElementById('formAvaliacao').reset();
-    document.getElementById('ratingLabel').textContent = 'Selecione uma nota';
-    document.getElementById('charCount').textContent = '0';
-    
-    window.modalAvaliacao.show();
-};
 
-window.abrirModalOrcamento = function() {
-    window.modalOrcamento.show();
-};
-
-// ENVIAR AVALIAÇÃO
-document.getElementById('formAvaliacao')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const btn = e.target.querySelector('button[type="submit"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-    btn.disabled = true;
-    
-    try {
-        // Validar nota
-        const notaInput = document.querySelector('input[name="rating"]:checked');
-        if (!notaInput) {
-            alert('Por favor, selecione uma nota (1 a 5 estrelas)!');
+    function renderizarAvaliacoes() {
+        const lista = document.getElementById('listaAvaliacoes');
+        const semAval = document.getElementById('semAvaliacoes');
+        
+        if (!avaliacoes || avaliacoes.length === 0) {
+            lista.innerHTML = '';
+            semAval.style.display = 'block';
             return;
         }
-        const nota = parseInt(notaInput.value);
         
-        const comentario = document.getElementById('comentarioAvaliacao').value.trim();
-        const anonimo = document.getElementById('avaliacaoAnonima').checked;
+        semAval.style.display = 'none';
         
-        // Criar avaliação
-        const avaliacaoData = {
-            profissionalId: profissionalId,
-            clienteId: currentUser.uid,
-            clienteNome: anonimo ? null : (currentUser.displayName || 'Cliente'),
-            clienteEmail: currentUser.email,
-            nota: nota,
-            comentario: comentario || null,
-            anonimo: anonimo,
-            status: "aprovado", // ou "ativo" dependendo da sua regra
-            data: serverTimestamp(),
-            resposta: null,
-            dataResposta: null
+        lista.innerHTML = avaliacoes.map(av => {
+            const nome = av.anonimo ? 'Cliente Anônimo' : (av.clienteNome || 'Cliente');
+            const inicial = nome.charAt(0).toUpperCase();
+            
+            return `
+                <div class="avaliacao-card">
+                    <div class="avaliacao-header">
+                        <div class="avaliacao-cliente">
+                            <div class="avatar-cliente">${inicial}</div>
+                            <div class="cliente-info">
+                                <h6>${nome}</h6>
+                                <small>${av.dataFormatada}</small>
+                            </div>
+                        </div>
+                        <div class="avaliacao-stars">
+                            ${gerarEstrelasHTML(av.nota)}
+                        </div>
+                    </div>
+                    
+                    ${av.comentario ? `
+                    <div class="avaliacao-comentario">
+                        <p>${escapeHtml(av.comentario)}</p>
+                    </div>
+                    ` : ''}
+                    
+                    ${av.resposta ? `
+                    <div class="avaliacao-resposta">
+                        <div class="resposta-profissional">
+                            <i class="fas fa-reply me-1"></i> Resposta do profissional:
+                        </div>
+                        <p>${escapeHtml(av.resposta)}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ============================================
+    // FUNÇÕES GLOBAIS (onclick no HTML)
+    // ============================================
+
+    window.switchTab = function(tabName) {
+        // Atualizar botões
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.closest('.tab-btn').classList.add('active');
+        
+        // Esconder todas as abas
+        document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
+        
+        // Mostrar aba selecionada
+        const tabMap = {
+            'sobre': 'tabSobre',
+            'catalogo': 'tabCatalogo',
+            'avaliacoes': 'tabAvaliacoes'
         };
         
-        await addDoc(collection(db, "avaliacoes"), avaliacaoData);
+        const el = document.getElementById(tabMap[tabName]);
+        if (el) el.classList.add('active');
         
-        // Criar notificação para o profissional
-        await addDoc(collection(db, "notificacoes"), {
-            profissionalId: profissionalId,
-            tipo: "avaliacao",
-            titulo: "Nova avaliação recebida!",
-            descricao: `Você recebeu uma avaliação de ${nota} estrela${nota > 1 ? 's' : ''}`,
-            lida: false,
-            data: serverTimestamp(),
-            metadata: {
+        currentTab = tabName;
+    };
+
+    window.abrirModalAvaliacao = function() {
+        if (!currentUser || currentUser.isAnonymous) {
+            alert('Para avaliar, você precisa fazer login como cliente!');
+            return;
+        }
+        
+        if (userType === 'profissional') {
+            alert('Profissionais não podem avaliar outros profissionais.');
+            return;
+        }
+        
+        if (currentUser.uid === profissionalId) {
+            alert('Você não pode avaliar a si mesmo!');
+            return;
+        }
+        
+        if (jaAvaliou) {
+            alert('Você já avaliou este profissional!');
+            return;
+        }
+        
+        // Resetar formulário
+        document.getElementById('formAvaliacao').reset();
+        document.getElementById('ratingLabel').textContent = 'Selecione uma nota';
+        document.getElementById('charCount').textContent = '0';
+        
+        modalAvaliacao.show();
+    };
+
+    window.abrirModalOrcamento = function() {
+        modalOrcamento.show();
+    };
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+
+    // ENVIAR AVALIAÇÃO
+    document.getElementById('formAvaliacao')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        btn.disabled = true;
+        
+        try {
+            // Validar nota
+            const notaInput = document.querySelector('input[name="rating"]:checked');
+            if (!notaInput) {
+                alert('Por favor, selecione uma nota (1 a 5 estrelas)!');
+                return;
+            }
+            const nota = parseInt(notaInput.value);
+            
+            const comentario = document.getElementById('comentarioAvaliacao').value.trim();
+            const anonimo = document.getElementById('avaliacaoAnonima').checked;
+            
+            // Criar avaliação
+            const avaliacaoData = {
+                profissionalId: profissionalId,
+                clienteId: currentUser.uid,
+                clienteNome: anonimo ? null : (currentUser.displayName || 'Cliente'),
+                clienteEmail: currentUser.email,
                 nota: nota,
-                anonimo: anonimo
-            }
-        });
-        
-        // Fechar modal
-        window.modalAvaliacao.hide();
-        
-        // Recarregar avaliações
-        await carregarAvaliacoes();
-        renderizarAvaliacoes();
-        verificarSeJaAvaliou();
-        
-        // Mudar para aba de avaliações
-        document.querySelector('[onclick="switchTab(\'avaliacoes\')"]').click();
-        
-        alert('✅ Avaliação enviada com sucesso! Obrigado pelo feedback.');
-        
-    } catch (error) {
-        console.error('[ERRO] ao enviar avaliação:', error);
-        alert('❌ Erro ao enviar avaliação. Tente novamente.');
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-});
-
-// ENVIAR ORÇAMENTO
-document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const btn = e.target.querySelector('button[type="submit"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-    btn.disabled = true;
-    
-    try {
-        const nome = document.getElementById('nomeCliente').value.trim();
-        const telefone = document.getElementById('telefoneCliente').value.trim();
-        const cidade = document.getElementById('cidadeCliente').value.trim();
-        const descricao = document.getElementById('descricaoServico').value.trim();
-        
-        const solicitacaoData = {
-            profissionalId: profissionalId,
-            clienteId: currentUser?.uid || 'anonimo',
-            clienteNome: nome,
-            clienteTelefone: telefone,
-            clienteCidade: cidade,
-            descricao: descricao,
-            status: "pendente",
-            tipo: "orcamento",
-            data: serverTimestamp(),
-            vista: false
-        };
-        
-        // Salvar em solicitacoes
-        await addDoc(collection(db, "solicitacoes"), solicitacaoData);
-        
-        // Criar notificação
-        await addDoc(collection(db, "notificacoes"), {
-            profissionalId: profissionalId,
-            tipo: "orcamento",
-            titulo: "Novo pedido de orçamento!",
-            descricao: `${nome} solicitou um orçamento: ${descricao.substring(0, 50)}...`,
-            lida: false,
-            data: serverTimestamp(),
-            metadata: {
-                clienteNome: nome,
-                telefone: telefone,
-                cidade: cidade
-            }
-        });
-        
-        window.modalOrcamento.hide();
-        e.target.reset();
-        
-        alert('✅ Solicitação enviada! O profissional entrará em contato em breve.');
-        
-    } catch (error) {
-        console.error('[ERRO] ao enviar orçamento:', error);
-        alert('❌ Erro ao enviar solicitação. Verifique sua conexão.');
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-});
-
-// LISTENERS DO MODAL DE AVALIAÇÃO
-document.querySelectorAll('input[name="rating"]').forEach(input => {
-    input.addEventListener('change', (e) => {
-        const nota = e.target.value;
-        const labels = {
-            '1': 'Muito ruim 😠',
-            '2': 'Ruim 😞',
-            '3': 'Regular 😐',
-            '4': 'Bom 🙂',
-            '5': 'Excelente! 😍'
-        };
-        document.getElementById('ratingLabel').textContent = labels[nota];
+                comentario: comentario || null,
+                anonimo: anonimo,
+                status: "ativo",
+                data: serverTimestamp(),
+                resposta: null,
+                dataResposta: null
+            };
+            
+            await addDoc(collection(db, "avaliacoes"), avaliacaoData);
+            
+            // Atualizar contador no perfil do profissional
+            await atualizarContadorAvaliacoes();
+            
+            // Fechar modal
+            modalAvaliacao.hide();
+            
+            // Recarregar avaliações
+            await carregarAvaliacoes();
+            renderizarAvaliacoes();
+            await verificarSeJaAvaliou();
+            
+            // Mudar para aba de avaliações
+            switchTab('avaliacoes');
+            
+            mostrarToast('Avaliação enviada com sucesso! Obrigado pelo feedback.', 'success');
+            
+        } catch (error) {
+            console.error('[ERRO] ao enviar avaliação:', error);
+            mostrarToast('Erro ao enviar avaliação. Tente novamente.', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     });
-});
 
-document.getElementById('comentarioAvaliacao')?.addEventListener('input', (e) => {
-    document.getElementById('charCount').textContent = e.target.value.length;
-});
+    async function atualizarContadorAvaliacoes() {
+        try {
+            const avaliacoesData = await carregarAvaliacoes();
+            const docRef = doc(db, "usuarios", profissionalId);
+            
+            await updateDoc(docRef, {
+                "profissional.mediaAvaliacoes": parseFloat(avaliacoesData.media) || 0,
+                "profissional.totalAvaliacoes": avaliacoesData.total || 0
+            });
+            
+        } catch (error) {
+            console.error('[ERRO] ao atualizar contador:', error);
+        }
+    }
 
-// HELPERS
-function gerarEstrelasHTML(nota) {
-    const cheias = Math.floor(nota);
-    const meia = nota % 1 >= 0.5;
-    const vazias = 5 - cheias - (meia ? 1 : 0);
-    
-    let html = '';
-    for (let i = 0; i < cheias; i++) html += '<i class="fas fa-star"></i>';
-    if (meia) html += '<i class="fas fa-star-half-alt"></i>';
-    for (let i = 0; i < vazias; i++) html += '<i class="far fa-star"></i>';
-    return html;
-}
+    // ENVIAR ORÇAMENTO
+    document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        btn.disabled = true;
+        
+        try {
+            const nome = document.getElementById('nomeCliente').value.trim();
+            const telefone = document.getElementById('telefoneCliente').value.trim();
+            const cidade = document.getElementById('cidadeCliente').value.trim();
+            const descricao = document.getElementById('descricaoServico').value.trim();
+            
+            const solicitacaoData = {
+                profissionalId: profissionalId,
+                clienteId: currentUser?.uid || 'anonimo',
+                clienteNome: nome,
+                clienteTelefone: telefone,
+                clienteCidade: cidade,
+                descricao: descricao,
+                status: "pendente",
+                tipo: "orcamento",
+                data: serverTimestamp(),
+                vista: false
+            };
+            
+            // Salvar em solicitacoes
+            await addDoc(collection(db, "solicitacoes"), solicitacaoData);
+            
+            // Fechar modal
+            modalOrcamento.hide();
+            e.target.reset();
+            
+            mostrarToast('Solicitação enviada! O profissional entrará em contato em breve.', 'success');
+            
+        } catch (error) {
+            console.error('[ERRO] ao enviar orçamento:', error);
+            mostrarToast('Erro ao enviar solicitação. Verifique sua conexão.', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
 
-function formatarData(data) {
-    if (!data) return 'Data não informada';
-    return new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    }).format(data);
-}
+    // LISTENERS DO MODAL DE AVALIAÇÃO
+    document.querySelectorAll('input[name="rating"]').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const nota = e.target.value;
+            const labels = {
+                '1': 'Muito ruim 😠',
+                '2': 'Ruim 😞',
+                '3': 'Regular 😐',
+                '4': 'Bom 🙂',
+                '5': 'Excelente! 😍'
+            };
+            document.getElementById('ratingLabel').textContent = labels[nota];
+        });
+    });
 
-function formatarMoeda(valor) {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(valor || 0);
-}
+    document.getElementById('comentarioAvaliacao')?.addEventListener('input', (e) => {
+        document.getElementById('charCount').textContent = e.target.value.length;
+    });
 
-function formatarEspecialidade(esp) {
-    const map = {
-        'eletrica': 'Eletricista',
-        'hidraulica': 'Encanador',
-        'massoterapia': 'Massoterapeuta',
-        'tecnico_celular': 'Técnico de Celular',
-        'veterinaria': 'Veterinário(a)',
-        'manicure': 'Manicure/Pedicure',
-        'pintura': 'Pintor',
-        'ar_condicionado': 'Ar Condicionado',
-        'marcenaria': 'Marceneiro',
-        'motorista': 'Motorista'
-    };
-    return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
-}
-
-function formatarExperiencia(exp) {
-    const map = {
-        '1': 'Menos de 1 ano',
-        '1-3': '1 a 3 anos',
-        '3-5': '3 a 5 anos',
-        '5-10': '5 a 10 anos',
-        '10+': 'Mais de 10 anos'
-    };
-    return map[exp] || (exp ? exp + ' anos' : 'Não informado');
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function mostrarErro(titulo, mensagem) {
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('errorState').style.display = 'block';
-    document.getElementById('errorTitle').textContent = titulo || 'Erro';
-    document.getElementById('errorMessage').textContent = mensagem || 'Não foi possível carregar o perfil';
-}
-
-// Debug
-console.log('[DEBUG] Script de perfil carregado');
+    console.log('[PERFIL] Sistema de perfil público carregado e pronto');
     </script>
 </body>
 </html>
