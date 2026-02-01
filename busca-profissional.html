@@ -751,7 +751,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let todosProfissionais = [];
-let profissionaisFiltrados = [];
 
 const resultsContainer = document.getElementById('resultsContainer');
 const skeletonContainer = document.getElementById('skeletonContainer');
@@ -762,26 +761,6 @@ const searchInput = document.getElementById('searchInput');
 const filterCategoria = document.getElementById('filterCategoria');
 const filterCidade = document.getElementById('filterCidade');
 
-const especialidadeMap = {
-    'eletricista': 'eletrica',
-    'encanador': 'hidraulica',
-    'massoterapeuta': 'massoterapia',
-    'tecnico_celular': 'tecnico_celular',
-    'veterinario': 'veterinaria',
-    'manicure': 'manicure',
-    'pintor': 'pintura',
-    'ar_condicionado': 'ar_condicionado',
-    'marceneiro': 'marcenaria',
-    'motorista': 'motorista'
-};
-
-const prioridadePlano = {
-    'enterprise': 3,
-    'pro': 2,
-    'basic': 1,
-    'free': 0
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     renderizarSkeletons();
     carregarProfissionais();
@@ -791,54 +770,48 @@ document.addEventListener('DOMContentLoaded', () => {
     filterCidade?.addEventListener('change', aplicarFiltros);
 });
 
-function extrairDadosProfissional(doc) {
+function extrairDados(doc) {
     const data = doc.data();
     
-    const getValor = (...caminhos) => {
-        for (let caminho of caminhos) {
-            if (caminho.includes('.')) {
-                const partes = caminho.split('.');
-                let valor = data;
-                for (let parte of partes) {
-                    valor = valor?.[parte];
-                    if (valor === undefined) break;
-                }
-                if (valor !== undefined && valor !== null && valor !== '') return valor;
-            } else if (data[caminho] !== undefined && data[caminho] !== null && data[caminho] !== '') {
-                return data[caminho];
-            }
-        }
-        return null;
-    };
+    // Se os dados estiverem dentro de data.profissional
+    if (data.profissional) {
+        return {
+            id: doc.id,
+            nome: data.profissional.nomeProfissional || data.apelido || 'Profissional',
+            especialidade: data.profissional.especialidadePrincipal || 'Serviços',
+            descricao: data.profissional.descricao || '',
+            cidade: data.profissional.cidadeBase || 'Cidade não informada',
+            foto: data.profissional.portfolioFotos?.[0] || data.fotoPerfilProfissional || null,
+            plano: data.plano_assinatura || 'free',
+            visivel: data.profissional.visivelBusca !== false
+        };
+    }
     
+    // Se os dados estiverem soltos (fallback)
     return {
         id: doc.id,
-        nome: getValor('profissional.nomeProfissional', 'nomeProfissional', 'apelido', 'nomeCompleto', 'displayName', 'nome', 'email') || 'Profissional',
-        especialidade: getValor('profissional.especialidadePrincipal', 'especialidadePrincipal', 'especialidade', 'categoria', 'profissao') || 'Serviços Gerais',
-        descricao: getValor('profissional.descricao', 'descricao', 'bio', 'sobre') || '',
-        cidade: getValor('profissional.cidadeBase', 'cidadeBase', 'endereco.cidade', 'cidade', 'localidade', 'municipio') || 'Cidade não informada',
-        estado: getValor('profissional.estadoBase', 'estadoBase', 'endereco.estado', 'estado', 'uf') || '',
-        foto: getValor('profissional.fotoPerfilProfissional', 'fotoPerfilProfissional', 'fotoPerfil', 'photoURL', 'avatar', 'imagem'),
-        portfolio: getValor('profissional.portfolioFotos', 'portfolioFotos', 'portfolio', 'fotos', 'galeria') || [],
-        plano: getValor('plano_assinatura', 'plano', 'assinatura.plano', 'tipoPlano') || 'free',
-        atendeDomicilio: getValor('profissional.atendeDomicilio', 'atendeDomicilio', 'domicilio', 'aDomicilio') || false,
-        atendeOnline: getValor('profissional.atendeOnline', 'atendeOnline', 'online', 'atendimentoOnline') || false,
-        orcamentoGratuito: getValor('profissional.orcamentoGratuito', 'orcamentoGratuito', 'orcamentoGratis') || false,
-        anosExperiencia: getValor('profissional.anosExperiencia', 'anosExperiencia', 'experiencia', 'tempoExperiencia') || '',
-        raioKm: getValor('profissional.raioKm', 'raioKm', 'raioAtendimento', 'alcance') || '',
-        cidadesAtendidas: getValor('profissional.cidadesAtendidas', 'cidadesAtendidas', 'areasAtendidas') || [],
-        status: getValor('status', 'situacao', 'ativo') || 'ativo'
+        nome: data.nomeProfissional || data.apelido || 'Profissional',
+        especialidade: data.especialidadePrincipal || 'Serviços',
+        descricao: data.descricao || '',
+        cidade: data.cidadeBase || 'Cidade não informada',
+        foto: data.fotoPerfilProfissional || null,
+        plano: data.plano_assinatura || 'free',
+        visivel: true
     };
 }
 
 async function carregarProfissionais() {
     try {
-        showLoading(true);
+        loadingState.style.display = 'block';
+        skeletonContainer.style.display = 'none';
+        resultsContainer.style.display = 'none';
+        emptyState.style.display = 'none';
         
+        // Busca SIMPLES: só filtra por tipoUsuario
         const q = query(
             collection(db, "usuarios"),
             where("tipoUsuario", "==", "profissional"),
-            limit(100)
+            limit(50)
         );
         
         const snapshot = await getDocs(q);
@@ -846,67 +819,62 @@ async function carregarProfissionais() {
         todosProfissionais = [];
         
         snapshot.forEach(doc => {
-            try {
-                const prof = extrairDadosProfissional(doc);
-                
-                const status = prof.status;
-                if (status === 'ativo' || status === 'active' || status === true || status === 'pendente' || !status) {
-                    todosProfissionais.push(prof);
-                }
-            } catch (e) {
-                // Ignora documentos com erro
+            const prof = extrairDados(doc);
+            
+            // Só mostra se estiver visível
+            if (prof.visivel !== false) {
+                todosProfissionais.push(prof);
             }
         });
         
-        todosProfissionais.sort((a, b) => (prioridadePlano[b.plano] || 0) - (prioridadePlano[a.plano] || 0));
+        // Ordena: Pro/Enterprise primeiro
+        const prioridade = { 'enterprise': 3, 'pro': 2, 'basic': 1, 'free': 0 };
+        todosProfissionais.sort((a, b) => (prioridade[b.plano] || 0) - (prioridade[a.plano] || 0));
         
         preencherCidades();
         aplicarFiltros();
         
     } catch (error) {
-        showEmptyState("Erro ao carregar dados", "Tente recarregar a página");
+        emptyState.style.display = 'block';
+        emptyState.querySelector('.empty-title').textContent = 'Erro ao carregar';
+        emptyState.querySelector('.empty-text').textContent = 'Tente recarregar a página';
     } finally {
-        showLoading(false);
+        loadingState.style.display = 'none';
     }
 }
 
 function aplicarFiltros() {
-    const termo = (searchInput?.value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").trim();
+    const termo = (searchInput?.value || '').toLowerCase().trim();
     const categoria = filterCategoria?.value || '';
-    const cidade = filterCidade?.value || '';
+    const cidadeSelecionada = filterCidade?.value || '';
     
-    profissionaisFiltrados = todosProfissionais.filter(prof => {
-        let matchBusca = true;
-        if (termo) {
-            const nome = prof.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-            matchBusca = nome.includes(termo) || 
-                        prof.especialidade.toLowerCase().includes(termo) || 
-                        prof.cidade.toLowerCase().includes(termo);
-        }
-        
-        let matchCategoria = true;
-        if (categoria) {
-            const catCodigo = especialidadeMap[categoria] || categoria;
-            matchCategoria = prof.especialidade === catCodigo || 
-                           prof.especialidade.toLowerCase().includes(categoria.toLowerCase());
-        }
-        
-        let matchCidade = true;
-        if (cidade) {
-            matchCidade = prof.cidade.toLowerCase().includes(cidade.toLowerCase()) ||
-                         prof.cidadesAtendidas.some(c => c.toLowerCase().includes(cidade.toLowerCase()));
-        }
-        
-        return matchBusca && matchCategoria && matchCidade;
-    });
+    let filtrados = todosProfissionais;
     
-    renderizarResultados();
+    if (termo) {
+        filtrados = filtrados.filter(p => 
+            p.nome.toLowerCase().includes(termo) || 
+            p.especialidade.toLowerCase().includes(termo) ||
+            p.cidade.toLowerCase().includes(termo)
+        );
+    }
+    
+    if (categoria) {
+        filtrados = filtrados.filter(p => 
+            p.especialidade.toLowerCase().includes(categoria.toLowerCase())
+        );
+    }
+    
+    if (cidadeSelecionada) {
+        filtrados = filtrados.filter(p => p.cidade === cidadeSelecionada);
+    }
+    
+    renderizarCards(filtrados);
 }
 
-function renderizarResultados() {
-    if (totalResultados) totalResultados.textContent = profissionaisFiltrados.length;
+function renderizarCards(lista) {
+    totalResultados.textContent = lista.length;
     
-    if (profissionaisFiltrados.length === 0) {
+    if (lista.length === 0) {
         resultsContainer.style.display = 'none';
         emptyState.style.display = 'block';
         return;
@@ -915,91 +883,46 @@ function renderizarResultados() {
     emptyState.style.display = 'none';
     resultsContainer.style.display = 'grid';
     
-    resultsContainer.innerHTML = profissionaisFiltrados.map(prof => criarCard(prof)).join('');
-}
-
-function criarCard(prof) {
-    const isPremium = prof.plano === 'pro' || prof.plano === 'enterprise';
-    
-    let imagem = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(prof.nome) + '&background=44689a&color=fff&size=400x300';
-    if (prof.portfolio && prof.portfolio.length > 0) {
-        imagem = prof.portfolio[0];
-    } else if (prof.foto) {
-        imagem = prof.foto;
-    }
-    
-    let planBadge = '';
-    if (isPremium) {
-        planBadge = `<div class="plan-badge ${prof.plano}"><i class="fas fa-crown"></i> ${prof.plano.toUpperCase()}</div>`;
-    }
-    
-    const badges = [];
-    if (prof.atendeDomicilio) badges.push('<span class="service-badge badge-domicilio"><i class="fas fa-home"></i> Domicílio</span>');
-    if (prof.atendeOnline) badges.push('<span class="service-badge badge-online"><i class="fas fa-laptop"></i> Online</span>');
-    if (prof.orcamentoGratuito) badges.push('<span class="service-badge badge-orcamento"><i class="fas fa-gift"></i> Orçamento Grátis</span>');
-    
-    return `
-        <div class="pro-card ${isPremium ? 'premium' : ''}" onclick="window.location.href='perfil-profissional-publico.html?id=${prof.id}'">
-            <div class="card-image-container">
-                <img src="${imagem}" alt="${prof.nome}" class="card-image" loading="lazy" 
-                     onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nome)}&background=44689a&color=fff&size=400x300'">
-                <div class="card-image-overlay"></div>
-                ${planBadge}
-            </div>
-            <div class="card-body">
-                <div class="card-header-info">
-                    <div>
-                        <h3 class="pro-name">${prof.nome}</h3>
-                        <div class="pro-specialty"><i class="fas fa-tools"></i> ${formatarEspecialidade(prof.especialidade)}</div>
+    resultsContainer.innerHTML = lista.map(prof => {
+        const isPremium = prof.plano === 'pro' || prof.plano === 'enterprise';
+        const imagem = prof.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nome)}&background=44689a&color=fff&size=400x300`;
+        
+        return `
+            <div class="pro-card ${isPremium ? 'premium' : ''}" onclick="window.location.href='perfil-profissional-publico.html?id=${prof.id}'">
+                <div class="card-image-container">
+                    <img src="${imagem}" class="card-image" loading="lazy" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nome)}&background=44689a&color=fff&size=400x300'">
+                    <div class="card-image-overlay"></div>
+                    ${isPremium ? `<div class="plan-badge ${prof.plano}"><i class="fas fa-crown"></i> ${prof.plano.toUpperCase()}</div>` : ''}
+                </div>
+                <div class="card-body">
+                    <div class="card-header-info">
+                        <div>
+                            <h3 class="pro-name">${prof.nome}</h3>
+                            <div class="pro-specialty"><i class="fas fa-tools"></i> ${prof.especialidade}</div>
+                        </div>
+                        <div class="rating-badge"><i class="fas fa-star"></i> 4.5</div>
                     </div>
-                    <div class="rating-badge"><i class="fas fa-star"></i> 4.5</div>
-                </div>
-                <p class="pro-description">${prof.descricao || 'Profissional qualificado à disposição para atender suas necessidades.'}</p>
-                <div class="pro-location">
-                    <i class="fas fa-map-marker-alt location-icon"></i>
-                    <span>${prof.cidade}${prof.estado ? ' - ' + prof.estado : ''}${prof.raioKm ? ' • ' + prof.raioKm + 'km' : ''}</span>
-                </div>
-                <div class="service-badges">${badges.join('')}</div>
-                <div class="card-footer">
-                    <span class="experience-text"><i class="fas fa-briefcase me-1"></i> ${formatarExperiencia(prof.anosExperiencia)}</span>
-                    <button class="btn-ver-perfil" onclick="event.stopPropagation(); window.location.href='perfil-profissional-publico.html?id=${prof.id}'">Ver Perfil</button>
+                    <p class="pro-description">${prof.descricao || 'Profissional qualificado para atender suas necessidades.'}</p>
+                    <div class="pro-location">
+                        <i class="fas fa-map-marker-alt location-icon"></i>
+                        <span>${prof.cidade}</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="experience-text"><i class="fas fa-briefcase"></i> Ver perfil</span>
+                        <button class="btn-ver-perfil" onclick="event.stopPropagation(); window.location.href='perfil-profissional-publico.html?id=${prof.id}'">Ver Perfil</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-}
-
-function formatarEspecialidade(esp) {
-    const map = {
-        'eletrica': 'Eletricista', 'hidraulica': 'Encanador', 'massoterapia': 'Massoterapeuta',
-        'tecnico_celular': 'Técnico de Celular', 'veterinaria': 'Veterinário(a)', 'manicure': 'Manicure',
-        'pintura': 'Pintor', 'ar_condicionado': 'Ar Condicionado', 'marcenaria': 'Marceneiro', 'motorista': 'Motorista'
-    };
-    return map[esp?.toLowerCase()] || (esp ? esp.charAt(0).toUpperCase() + esp.slice(1) : 'Serviços Gerais');
-}
-
-function formatarExperiencia(exp) {
-    const map = { '1': '< 1 ano', '1-3': '1-3 anos', '3-5': '3-5 anos', '5-10': '5-10 anos', '10+': '10+ anos' };
-    return map[exp] || (exp ? exp + ' anos' : 'Experiência não informada');
+        `;
+    }).join('');
 }
 
 function preencherCidades() {
     if (!filterCidade) return;
-    const cidades = [...new Set(todosProfissionais.map(p => p.cidade).filter(c => c && c !== 'Cidade não informada'))].sort();
-    const atual = filterCidade.value;
-    filterCidade.innerHTML = '<option value="">Todas as Cidades</option>' + cidades.map(c => `<option value="${c}">${c}</option>`).join('');
-    filterCidade.value = atual;
-}
-
-function showLoading(show) {
-    if (show) {
-        skeletonContainer.style.display = 'none';
-        resultsContainer.style.display = 'none';
-        emptyState.style.display = 'none';
-        loadingState.style.display = 'block';
-    } else {
-        loadingState.style.display = 'none';
-    }
+    const cidades = [...new Set(todosProfissionais.map(p => p.cidade))].sort();
+    filterCidade.innerHTML = '<option value="">Todas as Cidades</option>' + 
+        cidades.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
 function renderizarSkeletons() {
@@ -1016,14 +939,6 @@ function renderizarSkeletons() {
     `).join('');
 }
 
-function showEmptyState(titulo, texto) {
-    if (emptyState) {
-        emptyState.style.display = 'block';
-        emptyState.querySelector('.empty-title').textContent = titulo;
-        emptyState.querySelector('.empty-text').textContent = texto;
-    }
-}
-
 function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -1032,7 +947,6 @@ function debounce(func, wait) {
     };
 }
 
-window.aplicarFiltros = aplicarFiltros;
 window.limparFiltros = function() {
     if (searchInput) searchInput.value = '';
     if (filterCategoria) filterCategoria.value = '';
