@@ -642,15 +642,15 @@
                 <div class="filters-row">
                     <select class="filter-select" id="filterCategoria">
                         <option value="">Todas as Categorias</option>
-                        <option value="eletrica">Eletricista</option>
-                        <option value="hidraulica">Encanador</option>
-                        <option value="massoterapia">Massoterapia</option>
+                        <option value="eletricista">Eletricista</option>
+                        <option value="encanador">Encanador</option>
+                        <option value="massoterapeuta">Massoterapeuta</option>
                         <option value="tecnico_celular">Técnico de Celular</option>
-                        <option value="veterinaria">Veterinária</option>
+                        <option value="veterinario">Veterinário</option>
                         <option value="manicure">Manicure</option>
-                        <option value="pintura">Pintor</option>
+                        <option value="pintor">Pintor</option>
                         <option value="ar_condicionado">Ar Condicionado</option>
-                        <option value="marcenaria">Marceneiro</option>
+                        <option value="marceneiro">Marceneiro</option>
                         <option value="motorista">Motorista</option>
                     </select>
                     
@@ -714,7 +714,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-           <!-- Firebase SDK -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
@@ -754,6 +754,20 @@
         const searchInput = document.getElementById('searchInput');
         const filterCategoria = document.getElementById('filterCategoria');
         const filterCidade = document.getElementById('filterCidade');
+
+        // Mapeamento de especialidades
+        const especialidadeMap = {
+            'eletricista': 'eletrica',
+            'encanador': 'hidraulica',
+            'massoterapeuta': 'massoterapia',
+            'tecnico_celular': 'tecnico_celular',
+            'veterinario': 'veterinaria',
+            'manicure': 'manicure',
+            'pintor': 'pintura',
+            'ar_condicionado': 'ar_condicionado',
+            'marceneiro': 'marcenaria',
+            'motorista': 'motorista'
+        };
 
         // Prioridade dos planos para ordenação
         const prioridadePlano = {
@@ -861,7 +875,6 @@
                 aplicarFiltros();
                 
             } catch (error) {
-                console.error("Erro ao carregar profissionais:", error);
                 showToast("Erro ao carregar profissionais. Tente novamente.", "error");
             } finally {
                 showLoading(false);
@@ -887,9 +900,12 @@
 
         // Aplicar filtros
         function aplicarFiltros() {
-            const termoBusca = searchInput.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-            const categoria = filterCategoria.value;
-            const cidade = filterCidade.value;
+            const termoBusca = searchInput.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").trim();
+            const categoriaSelecionada = filterCategoria.value;
+            const cidadeSelecionada = filterCidade.value;
+
+            // Converter categoria selecionada para o formato do banco de dados
+            const categoriaCodigo = especialidadeMap[categoriaSelecionada] || categoriaSelecionada;
 
             profissionaisFiltrados = todosProfissionais.filter(prof => {
                 // Filtro por texto (nome, especialidade, descrição)
@@ -898,7 +914,7 @@
                     const nome = (prof.nomeProfissional || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
                     const especialidade = (prof.especialidadePrincipal || '').toLowerCase();
                     const descricao = (prof.descricao || '').toLowerCase();
-                    const tags = (prof.especialidades || []).join(' ').toLowerCase();
+                    const tags = Array.isArray(prof.especialidades) ? prof.especialidades.join(' ').toLowerCase() : '';
                     
                     matchBusca = nome.includes(termoBusca) || 
                                 especialidade.includes(termoBusca) || 
@@ -908,21 +924,25 @@
 
                 // Filtro por categoria
                 let matchCategoria = true;
-                if (categoria) {
-                    matchCategoria = prof.especialidadePrincipal === categoria;
+                if (categoriaCodigo) {
+                    matchCategoria = prof.especialidadePrincipal === categoriaCodigo;
                 }
 
                 // Filtro por cidade
                 let matchCidade = true;
-                if (cidade) {
-                    matchCidade = prof.cidadeBase === cidade || 
-                                 (prof.cidadesAtendidas && prof.cidadesAtendidas.includes(cidade));
+                if (cidadeSelecionada) {
+                    const cidadeProf = (prof.cidadeBase || '').toLowerCase();
+                    const cidadesAtendidas = Array.isArray(prof.cidadesAtendidas) ? 
+                        prof.cidadesAtendidas.map(c => c.toLowerCase()) : [];
+                    
+                    matchCidade = cidadeProf.includes(cidadeSelecionada.toLowerCase()) ||
+                                 cidadesAtendidas.some(cidade => cidade.includes(cidadeSelecionada.toLowerCase()));
                 }
 
                 return matchBusca && matchCategoria && matchCidade;
             });
 
-            renderizarResultados();
+            ordenarResultados();
         }
 
         // Ordenar resultados
@@ -1012,7 +1032,7 @@
                 badges.push('<span class="service-badge badge-orcamento"><i class="fas fa-gift"></i> Orçamento Grátis</span>');
             }
             
-            // Rating
+            // Rating (será implementado com avaliações reais)
             const rating = '4.5';
             
             return `
