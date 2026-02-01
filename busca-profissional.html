@@ -731,12 +731,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
     getFirestore, 
-    collection, 
-    query, 
-    where, 
+    doc, 
+    getDoc,
+    collection,
+    query,
+    where,
     getDocs,
-    limit 
+    addDoc,
+    serverTimestamp,
+    orderBy,
+    limit
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
@@ -749,210 +755,360 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-let todosProfissionais = [];
+let profissionalData = null;
+let profissionalId = null;
+let currentUser = null;
+let userType = null;
+let jaAvaliou = false;
+let avaliacoes = [];
 
-const resultsContainer = document.getElementById('resultsContainer');
-const skeletonContainer = document.getElementById('skeletonContainer');
+// Elementos DOM
 const loadingState = document.getElementById('loadingState');
-const emptyState = document.getElementById('emptyState');
-const totalResultados = document.getElementById('totalResultados');
-const searchInput = document.getElementById('searchInput');
-const filterCategoria = document.getElementById('filterCategoria');
-const filterCidade = document.getElementById('filterCidade');
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderizarSkeletons();
-    carregarProfissionais();
-    
-    searchInput?.addEventListener('input', debounce(aplicarFiltros, 300));
-    filterCategoria?.addEventListener('change', aplicarFiltros);
-    filterCidade?.addEventListener('change', aplicarFiltros);
-});
+const errorState = document.getElementById('errorState');
+const profileContent = document.getElementById('profileContent');
 
 function extrairDados(doc) {
     const data = doc.data();
     
-    // Se os dados estiverem dentro de data.profissional
-    if (data.profissional) {
+    if (data.profissional && typeof data.profissional === 'object') {
         return {
             id: doc.id,
             nome: data.profissional.nomeProfissional || data.apelido || 'Profissional',
             especialidade: data.profissional.especialidadePrincipal || 'Serviços',
             descricao: data.profissional.descricao || '',
             cidade: data.profissional.cidadeBase || 'Cidade não informada',
+            estado: data.profissional.estadoBase || '',
             foto: data.profissional.portfolioFotos?.[0] || data.fotoPerfilProfissional || null,
+            portfolio: data.profissional.portfolioFotos || [],
             plano: data.plano_assinatura || 'free',
-            visivel: data.profissional.visivelBusca !== false
+            atendeDomicilio: data.profissional.atendeDomicilio || false,
+            atendeOnline: data.profissional.atendeOnline || false,
+            orcamentoGratuito: data.profissional.orcamentoGratuito !== false,
+            anosExperiencia: data.profissional.anosExperiencia || '',
+            raioKm: data.profissional.raioKm || '',
+            whatsapp: data.profissional.whatsapp || '',
+            tempoResposta: data.profissional.tempoResposta || '24',
+            formasPagamento: data.profissional.formasPagamento || [],
+            especialidades: data.profissional.especialidades || [],
+            garantiaDias: data.profissional.garantiaDias || 0
         };
     }
     
-    // Se os dados estiverem soltos (fallback)
     return {
         id: doc.id,
         nome: data.nomeProfissional || data.apelido || 'Profissional',
         especialidade: data.especialidadePrincipal || 'Serviços',
         descricao: data.descricao || '',
         cidade: data.cidadeBase || 'Cidade não informada',
+        estado: data.estadoBase || '',
         foto: data.fotoPerfilProfissional || null,
+        portfolio: [],
         plano: data.plano_assinatura || 'free',
-        visivel: true
+        atendeDomicilio: false,
+        atendeOnline: false,
+        orcamentoGratuito: false,
+        anosExperiencia: '',
+        raioKm: '',
+        whatsapp: '',
+        tempoResposta: '24',
+        formasPagamento: [],
+        especialidades: [],
+        garantiaDias: 0
     };
 }
 
-async function carregarProfissionais() {
-    try {
-        loadingState.style.display = 'block';
-        skeletonContainer.style.display = 'none';
-        resultsContainer.style.display = 'none';
-        emptyState.style.display = 'none';
-        
-        // Busca SIMPLES: só filtra por tipoUsuario
-        const q = query(
-            collection(db, "usuarios"),
-            where("tipoUsuario", "==", "profissional"),
-            limit(50)
-        );
-        
-        const snapshot = await getDocs(q);
-        
-        todosProfissionais = [];
-        
-        snapshot.forEach(doc => {
-            const prof = extrairDados(doc);
-            
-            // Só mostra se estiver visível
-            if (prof.visivel !== false) {
-                todosProfissionais.push(prof);
-            }
-        });
-        
-        // Ordena: Pro/Enterprise primeiro
-        const prioridade = { 'enterprise': 3, 'pro': 2, 'basic': 1, 'free': 0 };
-        todosProfissionais.sort((a, b) => (prioridade[b.plano] || 0) - (prioridade[a.plano] || 0));
-        
-        preencherCidades();
-        aplicarFiltros();
-        
-    } catch (error) {
-        emptyState.style.display = 'block';
-        emptyState.querySelector('.empty-title').textContent = 'Erro ao carregar';
-        emptyState.querySelector('.empty-text').textContent = 'Tente recarregar a página';
-    } finally {
-        loadingState.style.display = 'none';
-    }
-}
-
-function aplicarFiltros() {
-    const termo = (searchInput?.value || '').toLowerCase().trim();
-    const categoria = filterCategoria?.value || '';
-    const cidadeSelecionada = filterCidade?.value || '';
+async function carregarPerfil() {
+    const urlParams = new URLSearchParams(window.location.search);
+    profissionalId = urlParams.get('id');
     
-    let filtrados = todosProfissionais;
-    
-    if (termo) {
-        filtrados = filtrados.filter(p => 
-            p.nome.toLowerCase().includes(termo) || 
-            p.especialidade.toLowerCase().includes(termo) ||
-            p.cidade.toLowerCase().includes(termo)
-        );
-    }
-    
-    if (categoria) {
-        filtrados = filtrados.filter(p => 
-            p.especialidade.toLowerCase().includes(categoria.toLowerCase())
-        );
-    }
-    
-    if (cidadeSelecionada) {
-        filtrados = filtrados.filter(p => p.cidade === cidadeSelecionada);
-    }
-    
-    renderizarCards(filtrados);
-}
-
-function renderizarCards(lista) {
-    totalResultados.textContent = lista.length;
-    
-    if (lista.length === 0) {
-        resultsContainer.style.display = 'none';
-        emptyState.style.display = 'block';
+    if (!profissionalId) {
+        mostrarErro('ID não encontrado');
         return;
     }
     
-    emptyState.style.display = 'none';
-    resultsContainer.style.display = 'grid';
-    
-    resultsContainer.innerHTML = lista.map(prof => {
-        const isPremium = prof.plano === 'pro' || prof.plano === 'enterprise';
-        const imagem = prof.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nome)}&background=44689a&color=fff&size=400x300`;
+    try {
+        const docRef = doc(db, "usuarios", profissionalId);
+        const docSnap = await getDoc(docRef);
         
-        return `
-            <div class="pro-card ${isPremium ? 'premium' : ''}" onclick="window.location.href='perfil-profissional-publico.html?id=${prof.id}'">
-                <div class="card-image-container">
-                    <img src="${imagem}" class="card-image" loading="lazy" 
-                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nome)}&background=44689a&color=fff&size=400x300'">
-                    <div class="card-image-overlay"></div>
-                    ${isPremium ? `<div class="plan-badge ${prof.plano}"><i class="fas fa-crown"></i> ${prof.plano.toUpperCase()}</div>` : ''}
+        if (!docSnap.exists()) {
+            mostrarErro('Profissional não encontrado');
+            return;
+        }
+        
+        const data = docSnap.data();
+        
+        if (data.tipoUsuario !== 'profissional') {
+            mostrarErro('Usuário não é profissional');
+            return;
+        }
+        
+        profissionalData = extrairDados(docSnap);
+        
+        await Promise.all([carregarAvaliacoes(), carregarCatalogo()]);
+        renderizarTudo();
+        
+        loadingState.style.display = 'none';
+        profileContent.style.display = 'block';
+        
+    } catch (error) {
+        mostrarErro('Erro ao carregar', error.message);
+    }
+}
+
+async function carregarAvaliacoes() {
+    try {
+        const q = query(
+            collection(db, "avaliacoes"),
+            where("profissionalId", "==", profissionalId),
+            orderBy("data", "desc"),
+            limit(20)
+        );
+        
+        const snapshot = await getDocs(q);
+        avaliacoes = snapshot.docs.map(d => ({
+            id: d.id,
+            ...d.data(),
+            dataFormatada: new Date(d.data().data?.seconds * 1000).toLocaleDateString('pt-BR')
+        }));
+        
+        const media = avaliacoes.length > 0 
+            ? (avaliacoes.reduce((s, a) => s + (a.nota || 0), 0) / avaliacoes.length).toFixed(1)
+            : 0;
+            
+        document.getElementById('totalAvaliacoes').textContent = avaliacoes.length;
+        document.getElementById('countAvaliacoes').textContent = avaliacoes.length;
+        document.getElementById('starsMedia').innerHTML = gerarEstrelas(media);
+        
+    } catch (e) {
+        avaliacoes = [];
+    }
+}
+
+async function carregarCatalogo() {
+    try {
+        const [snapServ, snapProd] = await Promise.all([
+            getDocs(query(collection(db, "servicos"), where("profissionalId", "==", profissionalId))),
+            getDocs(query(collection(db, "produtos"), where("profissionalId", "==", profissionalId)))
+        ]);
+        
+        profissionalData.servicos = snapServ.docs.map(d => ({...d.data(), id: d.id, tipo: 'servico'}));
+        profissionalData.produtos = snapProd.docs.map(d => ({...d.data(), id: d.id, tipo: 'produto'}));
+        
+    } catch (e) {
+        profissionalData.servicos = [];
+        profissionalData.produtos = [];
+    }
+}
+
+function renderizarTudo() {
+    const p = profissionalData;
+    
+    // Header
+    const avatarUrl = p.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nome)}&background=44689a&color=fff&size=200`;
+    document.getElementById('profileAvatar').src = avatarUrl;
+    document.getElementById('profileName').textContent = p.nome;
+    document.getElementById('profileSpecialty').innerHTML = `<i class="fas fa-tools"></i> ${p.especialidade}`;
+    
+    let locText = p.cidade;
+    if (p.estado) locText += ` - ${p.estado}`;
+    if (p.raioKm) locText += ` • ${p.raioKm}km`;
+    document.getElementById('profileLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> <span>${locText}</span>`;
+    
+    // Plano badge
+    const planBadge = document.getElementById('planBadge');
+    if (p.plano === 'pro' || p.plano === 'enterprise') {
+        planBadge.style.display = 'flex';
+        document.getElementById('planoTipo').textContent = p.plano.toUpperCase();
+    }
+    
+    // WhatsApp
+    if (p.whatsapp) {
+        const num = p.whatsapp.replace(/\D/g, '');
+        document.getElementById('btnWhatsApp').href = `https://wa.me/55${num}?text=Olá ${p.nome}! Encontrei seu perfil no ScanHub`;
+        document.getElementById('btnWhatsApp').style.display = 'inline-flex';
+    }
+    
+    // Conteúdo
+    document.getElementById('aboutText').textContent = p.descricao || 'Profissional qualificado.';
+    document.getElementById('anosExp').textContent = formatarExp(p.anosExperiencia);
+    
+    // Garantia
+    if (p.garantiaDias > 0) {
+        document.getElementById('badgeGarantia').style.display = 'flex';
+        document.getElementById('diasGarantia').textContent = p.garantiaDias;
+    }
+    
+    // Badges atendimento
+    const atendBadges = document.getElementById('atendimentoBadges');
+    atendBadges.innerHTML = '';
+    if (p.atendeDomicilio) atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-home"></i> Domicílio</div>`;
+    if (p.atendeOnline) atendBadges.innerHTML += `<div class="info-badge"><i class="fas fa-laptop"></i> Online</div>`;
+    
+    // Pagamento
+    const pagBadges = document.getElementById('pagamentoBadges');
+    pagBadges.innerHTML = p.formasPagamento.map(fp => `<div class="info-badge"><i class="fas fa-money-bill-wave"></i> ${fp}</div>`).join('');
+    
+    // Tempo resposta
+    document.getElementById('tempoResposta').innerHTML = `<i class="fas fa-clock me-2"></i> Em até ${p.tempoResposta} horas`;
+    
+    // Tags
+    document.getElementById('tagsContainer').innerHTML = p.especialidades.map(t => `<div class="info-badge">${t}</div>`).join('');
+    
+    // Galeria
+    if (p.portfolio.length > 0) {
+        document.getElementById('galeriaSection').style.display = 'block';
+        document.getElementById('galeriaGrid').innerHTML = p.portfolio.map(f => `
+            <div class="gallery-item" onclick="window.open('${f}', '_blank')">
+                <img src="${f}" onerror="this.style.display='none'">
+            </div>
+        `).join('');
+    }
+    
+    // Catálogo
+    const todosItens = [...profissionalData.servicos, ...profissionalData.produtos];
+    document.getElementById('countCatalogo').textContent = todosItens.length;
+    
+    if (todosItens.length === 0) {
+        document.getElementById('catalogoVazio').style.display = 'block';
+        document.getElementById('catalogoGrid').style.display = 'none';
+    } else {
+        document.getElementById('catalogoVazio').style.display = 'none';
+        document.getElementById('catalogoGrid').style.display = 'grid';
+        document.getElementById('catalogoGrid').innerHTML = todosItens.map(item => {
+            const img = item.imagens?.[0] || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome)}&background=44689a&color=fff&size=400x300`;
+            const tipoClass = item.tipo === 'servico' ? 'type-servico' : 'type-produto';
+            return `
+                <div class="item-card">
+                    <div class="item-image">
+                        <img src="${img}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(item.nome)}&background=44689a&color=fff&size=400x300'">
+                        <span class="item-type ${tipoClass}">${item.tipo === 'servico' ? 'Serviço' : 'Produto'}</span>
+                    </div>
+                    <div class="item-content">
+                        <h4 class="item-title">${item.nome}</h4>
+                        <p class="item-desc">${item.descricao || ''}</p>
+                        <div class="item-price">R$ ${item.precoVenda || item.preco || 0}</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="card-header-info">
-                        <div>
-                            <h3 class="pro-name">${prof.nome}</h3>
-                            <div class="pro-specialty"><i class="fas fa-tools"></i> ${prof.especialidade}</div>
+            `;
+        }).join('');
+    }
+    
+    // Avaliações lista
+    const listaAval = document.getElementById('listaAvaliacoes');
+    const semAval = document.getElementById('semAvaliacoes');
+    
+    if (avaliacoes.length === 0) {
+        listaAval.innerHTML = '';
+        semAval.style.display = 'block';
+    } else {
+        semAval.style.display = 'none';
+        listaAval.innerHTML = avaliacoes.map(av => `
+            <div class="avaliacao-card">
+                <div class="avaliacao-header">
+                    <div class="avaliacao-cliente">
+                        <div class="avatar-cliente">${(av.anonimo ? 'A' : av.clienteNome?.[0] || 'C').toUpperCase()}</div>
+                        <div class="cliente-info">
+                            <h6>${av.anonimo ? 'Anônimo' : av.clienteNome || 'Cliente'}</h6>
+                            <small>${av.dataFormatada}</small>
                         </div>
-                        <div class="rating-badge"><i class="fas fa-star"></i> 4.5</div>
                     </div>
-                    <p class="pro-description">${prof.descricao || 'Profissional qualificado para atender suas necessidades.'}</p>
-                    <div class="pro-location">
-                        <i class="fas fa-map-marker-alt location-icon"></i>
-                        <span>${prof.cidade}</span>
-                    </div>
-                    <div class="card-footer">
-                        <span class="experience-text"><i class="fas fa-briefcase"></i> Ver perfil</span>
-                        <button class="btn-ver-perfil" onclick="event.stopPropagation(); window.location.href='perfil-profissional-publico.html?id=${prof.id}'">Ver Perfil</button>
-                    </div>
+                    <div class="avaliacao-stars">${gerarEstrelas(av.nota)}</div>
                 </div>
+                ${av.comentario ? `<div class="avaliacao-comentario"><p>${av.comentario}</p></div>` : ''}
             </div>
-        `;
-    }).join('');
+        `).join('');
+    }
 }
 
-function preencherCidades() {
-    if (!filterCidade) return;
-    const cidades = [...new Set(todosProfissionais.map(p => p.cidade))].sort();
-    filterCidade.innerHTML = '<option value="">Todas as Cidades</option>' + 
-        cidades.map(c => `<option value="${c}">${c}</option>`).join('');
+function gerarEstrelas(nota) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+        html += i <= nota ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+    }
+    return html;
 }
 
-function renderizarSkeletons() {
-    if (!skeletonContainer) return;
-    skeletonContainer.innerHTML = Array(6).fill(`
-        <div class="skeleton-card">
-            <div class="skeleton-image"></div>
-            <div class="skeleton-content">
-                <div class="skeleton-line short"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line" style="width: 80%"></div>
-            </div>
-        </div>
-    `).join('');
+function formatarExp(exp) {
+    const map = { '1': '< 1 ano', '1-3': '1-3 anos', '3-5': '3-5 anos', '5-10': '5-10 anos', '10+': '10+ anos' };
+    return map[exp] || exp || 'Não informado';
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
+function mostrarErro(titulo, msg) {
+    loadingState.style.display = 'none';
+    errorState.style.display = 'block';
+    document.getElementById('errorTitle').textContent = titulo;
+    document.getElementById('errorMessage').textContent = msg || '';
+}
+
+// Eventos
+document.addEventListener('DOMContentLoaded', () => {
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (!user) await signInAnonymously(auth);
+        await carregarPerfil();
+    });
+    
+    // Tabs
+    window.switchTab = (tab) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content-section').forEach(c => c.classList.remove('active'));
+        event.target.closest('.tab-btn').classList.add('active');
+        document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
     };
-}
-
-window.limparFiltros = function() {
-    if (searchInput) searchInput.value = '';
-    if (filterCategoria) filterCategoria.value = '';
-    if (filterCidade) filterCidade.value = '';
-    aplicarFiltros();
-};
+    
+    // Avaliação
+    window.abrirModalAvaliacao = () => {
+        if (!currentUser || currentUser.isAnonymous) {
+            alert('Faça login para avaliar');
+            return;
+        }
+        new bootstrap.Modal(document.getElementById('modalAvaliacao')).show();
+    };
+    
+    // Form avaliação
+    document.getElementById('formAvaliacao')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nota = document.querySelector('input[name="rating"]:checked')?.value;
+        if (!nota) return alert('Selecione uma nota');
+        
+        await addDoc(collection(db, "avaliacoes"), {
+            profissionalId,
+            clienteId: currentUser.uid,
+            nota: parseInt(nota),
+            comentario: document.getElementById('comentarioAvaliacao').value,
+            anonimo: document.getElementById('avaliacaoAnonima').checked,
+            data: serverTimestamp()
+        });
+        
+        bootstrap.Modal.getInstance(document.getElementById('modalAvaliacao')).hide();
+        await carregarAvaliacoes();
+        renderizarTudo();
+        alert('Avaliação enviada!');
+    });
+    
+    // Orçamento
+    window.abrirModalOrcamento = () => {
+        new bootstrap.Modal(document.getElementById('modalOrcamento')).show();
+    };
+    
+    document.getElementById('formOrcamento')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await addDoc(collection(db, "solicitacoes"), {
+            profissionalId,
+            clienteNome: document.getElementById('nomeCliente').value,
+            clienteTelefone: document.getElementById('telefoneCliente').value,
+            clienteCidade: document.getElementById('cidadeCliente').value,
+            descricao: document.getElementById('descricaoServico').value,
+            status: "pendente",
+            data: serverTimestamp()
+        });
+        bootstrap.Modal.getInstance(document.getElementById('modalOrcamento')).hide();
+        e.target.reset();
+        alert('Solicitação enviada!');
+    });
+});
     </script>
 </body>
 </html>
