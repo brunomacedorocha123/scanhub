@@ -737,7 +737,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <script type="module">
+        <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, 
@@ -1071,8 +1071,9 @@
             raioHTML = `<span class="raio-badge"><i class="fas fa-map-marked-alt"></i> ${profissional.raioKm}km</span>`;
         }
 
+        // 🔥 CORREÇÃO AQUI: Removido onclick do card, só o botão direciona
         return `
-            <div class="${classesCard}" onclick="window.location.href='perfil-profissional-publico.html?id=${profissional.id}'">
+            <div class="${classesCard}">
                 <div class="card-image-container">
                     <img src="${fotoURL}" alt="${profissional.nome}" class="card-image" 
                          onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(profissional.nome)}&background=44689a&color=fff&size=400'">
@@ -1107,9 +1108,10 @@
                         <span class="experience-text">
                             <i class="fas fa-briefcase"></i> ${formatarExperiencia(profissional.anosExperiencia)}
                         </span>
-                        <a href="perfil-profissional-publico.html?id=${profissional.id}" class="btn-ver-perfil" onclick="event.stopPropagation()">
+                        <!-- 🔥 AGORA SÓ ESTE BOTÃO DIRECIONA -->
+                        <button class="btn-ver-perfil" onclick="window.location.href='perfil-profissional-publico.html?id=${profissional.id}'">
                             Ver Perfil <i class="fas fa-arrow-right"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
