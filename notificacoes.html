@@ -1442,7 +1442,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentUser = user;
             await loadUserData();
             await loadNotifications();
-            await loadReviewsForStats(); // Carregar avaliações para estatísticas
             
             btnLogout.addEventListener('click', async () => {
                 try {
@@ -1484,7 +1483,7 @@ async function loadUserData() {
     }
 }
 
-// ✅ FUNÇÃO PRINCIPAL PARA CARREGAR NOTIFICAÇÕES
+// ✅ FUNÇÃO PRINCIPAL PARA CARREGAR TODAS AS NOTIFICAÇÕES
 async function loadNotifications() {
     try {
         loadingState.style.display = 'block';
@@ -1492,13 +1491,13 @@ async function loadNotifications() {
         notificationList.style.display = 'none';
 
         notifications = []; // Reset array
+        reviews = []; // Reset reviews
 
         // ✅ 1. CARREGAR NOTIFICAÇÕES DA COLEÇÃO notificacoes
         try {
             const qNotificacoes = query(
                 collection(db, "notificacoes"),
-                where("profissionalId", "==", currentUser.uid),
-                orderBy("data", "desc")
+                where("profissionalId", "==", currentUser.uid)
             );
 
             const notificacoesSnapshot = await getDocs(qNotificacoes);
@@ -1508,7 +1507,7 @@ async function loadNotifications() {
                 
                 const notificacao = {
                     id: docSnapshot.id,
-                    source: 'notificacoes', // Marcar a origem
+                    source: 'notificacoes',
                     titulo: data.titulo || 'Nova notificação',
                     descricao: data.descricao || '',
                     tipo: data.tipo || 'system',
@@ -1531,9 +1530,7 @@ async function loadNotifications() {
         try {
             const qAvaliacoes = query(
                 collection(db, "avaliacoes"),
-                where("profissionalId", "==", currentUser.uid),
-                where("status", "==", "ativo"),
-                orderBy("data", "desc")
+                where("profissionalId", "==", currentUser.uid)
             );
 
             const avaliacoesSnapshot = await getDocs(qAvaliacoes);
@@ -1541,38 +1538,57 @@ async function loadNotifications() {
             avaliacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
                 
-                // Criar uma notificação a partir da avaliação
-                const notificacaoAvaliacao = {
+                // ✅ GUARDAR PARA ESTATÍSTICAS
+                const review = {
                     id: docSnapshot.id,
-                    source: 'avaliacoes', // Marcar a origem
-                    titulo: "⭐ Nova avaliação recebida!",
-                    descricao: `${data.anonimo ? 'Cliente Anônimo' : (data.clienteNome || 'Cliente')} avaliou você com ${data.nota || 0} estrelas${data.comentario ? `: "${data.comentario.substring(0, 80)}${data.comentario.length > 80 ? '...' : ''}"` : ''}`,
-                    tipo: 'review',
-                    lida: false, // Avaliações são sempre consideradas "não lidas" inicialmente
-                    arquivada: false,
-                    urgente: false,
-                    profissionalId: data.profissionalId,
+                    clienteId: data.clienteId,
+                    clienteNome: data.clienteNome || 'Cliente',
+                    clienteFoto: data.clienteFoto || '',
+                    nota: data.nota || 0,
+                    comentario: data.comentario || '',
+                    anonimo: data.anonimo || false,
                     data: data.data?.toDate() || new Date(),
-                    metadata: {
-                        clienteNome: data.anonimo ? 'Anônimo' : (data.clienteNome || 'Cliente'),
-                        nota: data.nota || 0,
-                        comentario: data.comentario || '',
-                        anonimo: data.anonimo || false,
-                        clienteId: data.clienteId,
-                        avaliacaoId: docSnapshot.id
-                    },
-                    tags: ["avaliacao", "review", "cliente"]
+                    resposta: data.resposta || null,
+                    dataResposta: data.dataResposta?.toDate() || null,
+                    status: data.status || 'ativo'
                 };
                 
-                // Verificar se já existe notificação para esta avaliação
-                const existeNotificacao = notifications.some(n => 
-                    n.source === 'notificacoes' && 
-                    n.metadata && 
-                    n.metadata.avaliacaoId === docSnapshot.id
-                );
+                reviews.push(review);
                 
-                if (!existeNotificacao) {
-                    notifications.push(notificacaoAvaliacao);
+                // ✅ CRIAR NOTIFICAÇÃO APENAS PARA AVALIAÇÕES ATIVAS
+                if (data.status === 'ativo' || !data.status) {
+                    const notificacaoAvaliacao = {
+                        id: docSnapshot.id,
+                        source: 'avaliacoes',
+                        titulo: "⭐ Nova avaliação recebida!",
+                        descricao: `${data.anonimo ? 'Cliente Anônimo' : (data.clienteNome || 'Cliente')} avaliou você com ${data.nota || 0} estrelas${data.comentario ? `: "${data.comentario.substring(0, 80)}${data.comentario.length > 80 ? '...' : ''}"` : ''}`,
+                        tipo: 'review',
+                        lida: false,
+                        arquivada: false,
+                        urgente: false,
+                        profissionalId: data.profissionalId,
+                        data: data.data?.toDate() || new Date(),
+                        metadata: {
+                            clienteNome: data.anonimo ? 'Anônimo' : (data.clienteNome || 'Cliente'),
+                            nota: data.nota || 0,
+                            comentario: data.comentario || '',
+                            anonimo: data.anonimo || false,
+                            clienteId: data.clienteId,
+                            avaliacaoId: docSnapshot.id
+                        },
+                        tags: ["avaliacao", "review", "cliente"]
+                    };
+                    
+                    // Verificar se já existe notificação para esta avaliação
+                    const existeNotificacao = notifications.some(n => 
+                        n.source === 'notificacoes' && 
+                        n.metadata && 
+                        n.metadata.avaliacaoId === docSnapshot.id
+                    );
+                    
+                    if (!existeNotificacao) {
+                        notifications.push(notificacaoAvaliacao);
+                    }
                 }
             });
         } catch (error) {
@@ -1584,8 +1600,7 @@ async function loadNotifications() {
             const qSolicitacoes = query(
                 collection(db, "solicitacoes"),
                 where("profissionalId", "==", currentUser.uid),
-                where("status", "==", "pendente"),
-                orderBy("dataSolicitacao", "desc")
+                where("status", "==", "pendente")
             );
 
             const solicitacoesSnapshot = await getDocs(qSolicitacoes);
@@ -1593,10 +1608,9 @@ async function loadNotifications() {
             solicitacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
                 
-                // Criar uma notificação a partir da solicitação
                 const notificacaoSolicitacao = {
                     id: docSnapshot.id,
-                    source: 'solicitacoes', // Marcar a origem
+                    source: 'solicitacoes',
                     titulo: "📋 Novo pedido de orçamento!",
                     descricao: `${data.clienteNome || 'Cliente'} solicitou um orçamento: "${data.descricao?.substring(0, 80) || 'Novo pedido'}${data.descricao && data.descricao.length > 80 ? '...' : ''}"`,
                     tipo: 'orcamento',
@@ -1635,7 +1649,7 @@ async function loadNotifications() {
         // Ordenar todas as notificações por data (mais recente primeiro)
         notifications.sort((a, b) => b.data - a.data);
         
-        // Atualizar contadores
+        // ✅ ATUALIZAR CONTADORES E ESTATÍSTICAS
         updateCounters();
         renderNotifications();
         updateUnreadBadge();
@@ -1656,66 +1670,55 @@ async function loadNotifications() {
     }
 }
 
-// Carregar avaliações para estatísticas
-async function loadReviewsForStats() {
-    try {
-        const q = query(
-            collection(db, "avaliacoes"),
-            where("profissionalId", "==", currentUser.uid),
-            where("status", "==", "ativo")
-        );
+// ✅ FUNÇÃO PARA ATUALIZAR TODOS OS CONTADORES CORRETAMENTE
+function updateCounters() {
+    // ✅ CONTAR NOTIFICAÇÕES POR TIPO
+    const total = notifications.length;
+    const unread = notifications.filter(n => !n.lida).length;
+    const read = notifications.filter(n => n.lida).length;
+    const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
+    const review = notifications.filter(n => n.tipo === 'review').length;
+    const message = notifications.filter(n => n.tipo === 'message').length;
+    const system = notifications.filter(n => n.tipo === 'system').length;
+    const urgent = notifications.filter(n => n.urgente).length;
 
-        const querySnapshot = await getDocs(q);
-        reviews = [];
-        
-        querySnapshot.forEach((docSnapshot) => {
-            const data = docSnapshot.data();
-            
-            const review = {
-                id: docSnapshot.id,
-                clienteId: data.clienteId,
-                clienteNome: data.clienteNome || 'Cliente',
-                clienteFoto: data.clienteFoto || '',
-                nota: data.nota || 0,
-                comentario: data.comentario || '',
-                anonimo: data.anonimo || false,
-                data: data.data?.toDate() || new Date(),
-                resposta: data.resposta || null,
-                dataResposta: data.dataResposta?.toDate() || null
-            };
-            
-            reviews.push(review);
-        });
+    // ✅ ATUALIZAR CARTÕES DE ESTATÍSTICAS
+    totalNotificationsEl.textContent = total;
+    pendingOrcamentoEl.textContent = orcamento;
+    urgentAlertsEl.textContent = urgent;
 
-        // Atualizar estatísticas de avaliações
-        updateReviewStats();
-
-    } catch (error) {
-        console.log('Nenhuma avaliação encontrada ou erro:', error);
+    // ✅ ATUALIZAR ESTATÍSTICAS DE AVALIAÇÕES (AVALIAÇÕES ATIVAS DOS ÚLTIMOS 30 DIAS)
+    const avaliacoesAtivas = reviews.filter(r => r.status === 'ativo' || !r.status);
+    if (avaliacoesAtivas.length > 0) {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const recentReviews = avaliacoesAtivas.filter(r => r.data >= thirtyDaysAgo);
+        newReviewsEl.textContent = recentReviews.length;
+    } else {
+        newReviewsEl.textContent = '0';
     }
+
+    // ✅ ATUALIZAR FILTROS LATERAIS
+    countAllEl.textContent = total;
+    countOrcamentoEl.textContent = orcamento;
+    countReviewEl.textContent = review; // ✅ AGORA MOSTRA O NÚMERO CORRETO
+    countMessageEl.textContent = message;
+    countSystemEl.textContent = system;
+    countUnreadEl.textContent = unread;
+    countReadEl.textContent = read;
+    countStatusAllEl.textContent = total;
 }
 
-// Update review statistics
-function updateReviewStats() {
-    const total = reviews.length;
-    if (total === 0) {
-        newReviewsEl.textContent = '0';
-        return;
+// Update unread badge
+function updateUnreadBadge() {
+    const unreadCount = notifications.filter(n => !n.lida).length;
+    unreadBadge.textContent = unreadCount;
+    
+    if (unreadCount === 0) {
+        unreadBadge.style.display = 'none';
+    } else {
+        unreadBadge.style.display = 'flex';
     }
-
-    // Contar avaliações dos últimos 30 dias
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-
-    // Calcular média
-    const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
-    const average = totalStars / total;
-
-    // Contar por nota
-    const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
-
-    newReviewsEl.textContent = recentReviews.length;
 }
 
 // Render notifications based on filters
@@ -1939,54 +1942,7 @@ function getStarsHTML(rating) {
     return starsHTML;
 }
 
-// Update counters
-function updateCounters() {
-    const total = notifications.length;
-    const unread = notifications.filter(n => !n.lida).length;
-    const read = notifications.filter(n => n.lida).length;
-    const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
-    const review = notifications.filter(n => n.tipo === 'review').length;
-    const message = notifications.filter(n => n.tipo === 'message').length;
-    const system = notifications.filter(n => n.tipo === 'system').length;
-    const urgent = notifications.filter(n => n.urgente).length;
-
-    totalNotificationsEl.textContent = total;
-    pendingOrcamentoEl.textContent = orcamento;
-    urgentAlertsEl.textContent = urgent;
-
-    // Atualizar estatísticas de avaliações
-    if (reviews.length > 0) {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-        newReviewsEl.textContent = recentReviews.length;
-    } else {
-        newReviewsEl.textContent = '0';
-    }
-
-    countAllEl.textContent = total;
-    countOrcamentoEl.textContent = orcamento;
-    countReviewEl.textContent = review;
-    countMessageEl.textContent = message;
-    countSystemEl.textContent = system;
-    countUnreadEl.textContent = unread;
-    countReadEl.textContent = read;
-    countStatusAllEl.textContent = total;
-}
-
-// Update unread badge
-function updateUnreadBadge() {
-    const unreadCount = notifications.filter(n => !n.lida).length;
-    unreadBadge.textContent = unreadCount;
-    
-    if (unreadCount === 0) {
-        unreadBadge.style.display = 'none';
-    } else {
-        unreadBadge.style.display = 'flex';
-    }
-}
-
-// ✅ FUNÇÃO PARA MARCAR COMO LIDA/NÃO LIDA (AGORA FUNCIONA COM TODAS AS FONTES)
+// ✅ FUNÇÃO PARA MARCAR COMO LIDA/NÃO LIDA
 window.markAsRead = async function(notificationId, source) {
     try {
         const notification = notifications.find(n => n.id === notificationId && n.source === source);
@@ -2000,11 +1956,6 @@ window.markAsRead = async function(notificationId, source) {
                 atualizadaEm: serverTimestamp()
             });
         } 
-        // Se for de avaliacoes, atualizar como visualizado localmente apenas
-        else if (source === 'avaliacoes') {
-            // Não atualiza no Firestore, apenas localmente
-            // Poderia adicionar um campo "visualizado" na avaliação se necessário
-        }
         // Se for de solicitacoes, atualizar no Firestore
         else if (source === 'solicitacoes') {
             const solicitacaoRef = doc(db, "solicitacoes", notificationId);
@@ -2013,6 +1964,7 @@ window.markAsRead = async function(notificationId, source) {
                 atualizadaEm: serverTimestamp()
             });
         }
+        // Para avaliacoes, apenas atualizar localmente (não altera a avaliação)
 
         // Atualizar localmente
         notification.lida = !notification.lida;
@@ -2044,13 +1996,9 @@ window.deleteNotification = async function(notificationId, source) {
             const notificationRef = doc(db, "notificacoes", notificationId);
             await deleteDoc(notificationRef);
         } 
-        // Se for de avaliacoes, não excluir do Firestore (mantém a avaliação)
-        else if (source === 'avaliacoes') {
-            // Apenas remove localmente, mantém a avaliação no sistema
-        }
-        // Se for de solicitacoes, não excluir do Firestore (mantém o histórico)
-        else if (source === 'solicitacoes') {
-            // Apenas remove localmente, mantém a solicitação no sistema
+        // Se for de avaliacoes ou solicitacoes, apenas remove localmente
+        else {
+            // Apenas remove localmente, mantém o dado original no Firestore
         }
 
         // Remover localmente
@@ -2157,7 +2105,6 @@ window.searchNotifications = function() {
 // ✅ Refresh notifications
 window.refreshNotifications = async function() {
     await loadNotifications();
-    await loadReviewsForStats();
     showToast('Atualizado', 'Notificações atualizadas com sucesso', 'success');
 };
 
@@ -2168,9 +2115,8 @@ window.openWhatsApp = function(phone) {
     window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
 };
 
-// ✅ Respond to orcamento (agora sabe a fonte)
+// ✅ Respond to orcamento
 window.respondToOrcamento = async function(notificationId, source) {
-    // Buscar a notificação original
     const notification = notifications.find(n => n.id === notificationId && n.source === source);
     
     if (notification && notification.metadata?.telefone) {
@@ -2189,10 +2135,9 @@ window.respondToOrcamento = async function(notificationId, source) {
 window.showAllReviews = async function() {
     try {
         const reviewsListEl = document.getElementById('reviewsList');
-        const reviewStatsEl = document.getElementById('reviewStats');
+        const avaliacoesAtivas = reviews.filter(r => r.status === 'ativo' || !r.status);
         
-        // Se já carregamos as avaliações, usar elas
-        if (reviews.length === 0) {
+        if (avaliacoesAtivas.length === 0) {
             reviewsListEl.innerHTML = `
                 <div class="text-center py-5">
                     <i class="fas fa-star fa-3x text-muted mb-3"></i>
@@ -2201,7 +2146,6 @@ window.showAllReviews = async function() {
                 </div>
             `;
             
-            // Atualizar stats
             document.getElementById('totalReviewsCount').textContent = '0';
             document.getElementById('averageRating').textContent = '0.0';
             document.getElementById('fiveStarCount').textContent = '0';
@@ -2212,17 +2156,17 @@ window.showAllReviews = async function() {
         }
         
         // Calcular estatísticas
-        const total = reviews.length;
-        const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
+        const total = avaliacoesAtivas.length;
+        const totalStars = avaliacoesAtivas.reduce((sum, r) => sum + r.nota, 0);
         const average = (totalStars / total).toFixed(1);
         
         // Contar avaliações dos últimos 30 dias
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
+        const recentReviews = avaliacoesAtivas.filter(r => r.data >= thirtyDaysAgo);
         
         // Contar por nota
-        const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
+        const fiveStars = avaliacoesAtivas.filter(r => Math.floor(r.nota) === 5).length;
         
         // Atualizar stats
         document.getElementById('totalReviewsCount').textContent = total;
@@ -2231,7 +2175,7 @@ window.showAllReviews = async function() {
         document.getElementById('last30Days').textContent = recentReviews.length;
         
         // Renderizar lista de avaliações
-        reviewsListEl.innerHTML = reviews.map(review => {
+        reviewsListEl.innerHTML = avaliacoesAtivas.map(review => {
             const notaInt = Math.floor(review.nota);
             const estrelas = Array(5).fill(0).map((_, i) => 
                 `<span class="rating-star ${i < notaInt ? '' : 'empty'}">
@@ -2356,7 +2300,6 @@ function formatTimeAgo(date) {
 setInterval(() => {
     if (document.visibilityState === 'visible') {
         loadNotifications();
-        loadReviewsForStats();
     }
 }, 30000);
 </script>
