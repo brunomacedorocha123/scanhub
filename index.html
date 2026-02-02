@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-      :root {
+     :root {
     --primary-color: #44689a;
     --secondary-color: #33c47;
     --light-color: #e8ecef;
@@ -54,13 +54,13 @@ body {
     display: flex;
     align-items: center;
     position: relative;
-    margin-right: 50px;
-    transform: scale(6);
+    margin-right: 25px;
+    transform: scale(2); /* REDUZIDO PARA 2 */
     transform-origin: left center;
 }
 
 .navbar-brand img {
-    height: 60px;
+    height: 35px; /* REDUZIDO PARA 35px */
     width: auto;
     transition: all 0.3s ease;
     object-fit: contain;
@@ -160,7 +160,7 @@ body {
     align-items: center;
     position: relative;
     overflow: hidden;
-    padding: 140px 0 80px; /* Aumentado para compensar navbar fixed */
+    padding: 140px 0 80px;
     margin-top: 0;
 }
 
@@ -177,7 +177,6 @@ body {
     line-height: 1.2;
 }
 
-/* TEXTO JUSTIFICADO NO HERO */
 .hero p {
     font-size: 1.3rem;
     color: #555;
@@ -224,7 +223,6 @@ body {
     margin-bottom: 15px;
 }
 
-/* TEXTO JUSTIFICADO NA DESCRIÇÃO DA SEÇÃO */
 .section-title p {
     font-size: 1.2rem;
     color: #666;
@@ -279,7 +277,6 @@ body {
     margin-bottom: 15px;
 }
 
-/* TEXTO JUSTIFICADO NOS CARDS DE SERVIÇO */
 .service-card p {
     color: #666;
     margin-bottom: 0;
@@ -327,7 +324,6 @@ body {
     margin-bottom: 15px;
 }
 
-/* TEXTO JUSTIFICADO NOS CARDS DE FEATURES */
 .feature-box p {
     color: #666;
     font-size: 1rem;
@@ -347,7 +343,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* TEXTO JUSTIFICADO NO FOOTER */
 .footer p {
     text-align: justify;
     text-justify: inter-word;
@@ -370,14 +365,9 @@ body {
     margin-top: 10px;
 }
 
-/* =========================================== */
-/* RESPONSIVE - CORREÇÕES PARA MOBILE */
-/* =========================================== */
-
 @media (max-width: 991px) {
-    /* HERO SECTION */
     .hero {
-        padding: 120px 0 60px; /* Ajustado para navbar mobile */
+        padding: 120px 0 60px;
         text-align: center;
     }
     
@@ -404,7 +394,6 @@ body {
         align-items: center;
     }
     
-    /* NAVBAR MOBILE - CORREÇÕES */
     .navbar {
         padding: 10px 0 !important;
         background: rgba(255, 255, 255, 0.98) !important;
@@ -412,16 +401,16 @@ body {
     }
     
     .navbar-brand {
-        transform: scale(5.5);
+        transform: scale(1.8); /* AJUSTADO PARA RESPONSIVO */
     }
     
     .navbar-brand img {
-        height: 50px;
+        height: 32px; /* AJUSTADO PARA RESPONSIVO */
     }
     
     .navbar-collapse {
         position: fixed;
-        top: 70px; /* Altura do navbar mobile */
+        top: 65px;
         left: 0;
         right: 0;
         background: rgba(255, 255, 255, 0.98);
@@ -431,7 +420,7 @@ body {
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 0 0 15px 15px;
-        max-height: calc(100vh - 70px);
+        max-height: calc(100vh - 65px);
         overflow-y: auto;
         z-index: 999;
     }
@@ -465,7 +454,6 @@ body {
         display: none;
     }
     
-    /* BOTÕES NO MOBILE MENU */
     .navbar-nav .btn-custom,
     .navbar-nav .btn-outline-custom {
         width: 100%;
@@ -476,12 +464,10 @@ body {
         padding: 12px 20px;
     }
     
-    /* CONTEÚDO PRINCIPAL */
     .services, .features {
         padding: 80px 0;
     }
     
-    /* NO MOBILE: TÍTULOS CENTRALIZADOS, TEXTO JUSTIFICADO */
     .section-title h2 {
         text-align: center;
     }
@@ -533,22 +519,21 @@ body {
         height: 120px;
     }
     
+    .navbar-brand {
+        transform: scale(1.6); /* AJUSTADO PARA RESPONSIVO */
+    }
+    
     .navbar-brand img {
-        height: 45px;
+        height: 30px; /* AJUSTADO PARA RESPONSIVO */
     }
     
     .services, .features {
         padding: 70px 0 90px;
     }
     
-    /* NAVBAR PARA TABLETS PEQUENOS */
     .navbar-collapse {
-        top: 65px;
+        top: 62px;
         padding: 20px;
-    }
-    
-    .navbar-brand {
-        transform: scale(5);
     }
 }
 
@@ -567,11 +552,11 @@ body {
     }
     
     .navbar-brand {
-        transform: scale(4.5);
+        transform: scale(1.4); /* AJUSTADO PARA RESPONSIVO */
     }
     
     .navbar-brand img {
-        height: 40px;
+        height: 28px; /* AJUSTADO PARA RESPONSIVO */
     }
     
     .hero-buttons {
@@ -590,7 +575,6 @@ body {
         padding: 60px 0 80px;
     }
     
-    /* NAVBAR PARA CELULARES */
     .navbar-collapse {
         top: 60px;
         padding: 15px;
@@ -601,7 +585,6 @@ body {
         font-size: 0.95rem;
     }
     
-   
     .hero p,
     .service-card p,
     .feature-box p,
@@ -610,7 +593,6 @@ body {
         text-justify: auto;
     }
 }
-
 
 .loader {
     position: fixed;
@@ -645,7 +627,6 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* SCROLLBAR PERSONALIZADA */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -663,10 +644,9 @@ body {
     background: #3a5a7a;
 }
 
-/* CORREÇÃO PARA SCROLL SMOOTH */
 html {
     scroll-behavior: smooth;
-    scroll-padding-top: 80px; /* Compensa navbar fixed */
+    scroll-padding-top: 80px;
 }
     </style>
 </head>
