@@ -22,8 +22,11 @@
             --dark: #2c3e50;
             --gray: #6c757d;
             --gray-light: #e8ecef;
+            --purple: #6c5ce7;
+            --purple-light: rgba(108, 92, 231, 0.1);
             --gradient-primary: linear-gradient(135deg, #44689a 0%, #365a8a 100%);
             --gradient-secondary: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            --gradient-purple: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
             --shadow: 0 4px 20px rgba(0,0,0,0.08);
             --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
             --radius: 16px;
@@ -250,6 +253,29 @@
         .btn-avaliar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+            color: white;
+        }
+
+        .btn-orcamento-modal {
+            background: var(--gradient-purple);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
+        }
+
+        .btn-orcamento-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
             color: white;
         }
 
@@ -495,6 +521,7 @@
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
             border: 1px solid var(--gray-light);
+            cursor: pointer;
         }
 
         .catalogo-card:hover {
@@ -651,6 +678,20 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.8rem;
+        }
+
+        /* Modal Orçamento */
+        .modal-orcamento .modal-header {
+            background: var(--gradient-purple);
+            color: white;
+            border: none;
+            padding: 20px 30px;
+        }
+
+        .modal-orcamento .modal-content {
+            border-radius: 20px;
+            overflow: hidden;
+            border: none;
         }
 
         /* Empty States */
@@ -880,6 +921,10 @@
             border-left-color: #e74c3c;
         }
 
+        .toast-custom.info {
+            border-left-color: var(--purple);
+        }
+
         @keyframes slideUp {
             from { transform: translateY(100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -920,7 +965,7 @@
                 width: 100%;
             }
 
-            .btn-whatsapp, .btn-avaliar {
+            .btn-whatsapp, .btn-avaliar, .btn-orcamento-modal {
                 width: 100%;
             }
 
@@ -974,6 +1019,18 @@
             height: 1px;
             background: var(--gray-light);
             margin: 16px 0;
+        }
+
+        /* Formulário Orçamento */
+        .form-control:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.25);
+        }
+
+        .alert-info {
+            background-color: var(--purple-light);
+            border-color: var(--purple);
+            color: var(--dark);
         }
     </style>
 </head>
@@ -1052,6 +1109,10 @@
                             <button class="btn-avaliar" onclick="openReviewModal()">
                                 <i class="fas fa-star"></i>
                                 <span>Avaliar</span>
+                            </button>
+                            <button class="btn-orcamento-modal" onclick="abrirModalOrcamento()">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Pedir Orçamento</span>
                             </button>
                         </div>
                     </div>
@@ -1324,13 +1385,85 @@
         </div>
     </div>
 
+    <!-- Modal de Pedido de Orçamento -->
+    <div class="modal fade modal-orcamento" id="orcamentoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Solicitar Orçamento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h6 class="mb-2" id="modalProNameOrcamento">Nome do Profissional</h6>
+                        <p class="text-muted small mb-0">Preencha os dados para solicitar um orçamento</p>
+                    </div>
+
+                    <form id="formOrcamento">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Seu Nome *</label>
+                            <input type="text" class="form-control" id="inputNome" required 
+                                   placeholder="Digite seu nome completo">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Telefone *</label>
+                            <input type="tel" class="form-control" id="inputTelefone" required 
+                                   placeholder="(11) 99999-9999">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control" id="inputEmail" 
+                                   placeholder="seu@email.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cidade *</label>
+                            <input type="text" class="form-control" id="inputCidade" required 
+                                   placeholder="Sua cidade">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">O que você precisa? *</label>
+                            <textarea class="form-control" id="inputDescricao" required 
+                                      placeholder="Descreva detalhadamente o serviço ou produto que você precisa..."
+                                      rows="4" maxlength="1000"></textarea>
+                            <small class="text-muted d-block mt-1">Máximo 1000 caracteres</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Data preferencial</label>
+                            <input type="date" class="form-control" id="inputData">
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>O profissional receberá sua solicitação e entrará em contato para fechar o orçamento.</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnEnviarOrcamento" onclick="enviarPedidoOrcamento()">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Enviar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-        <script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { 
@@ -1343,7 +1476,8 @@
         getDocs, 
         addDoc, 
         serverTimestamp,
-        updateDoc 
+        updateDoc,
+        increment 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1369,11 +1503,13 @@
     let catalogoCompleto = [];
     let reviewModal = null;
     let detalhesModal = null;
+    let orcamentoModal = null;
 
     // Inicialização
     document.addEventListener('DOMContentLoaded', () => {
         reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
         detalhesModal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+        orcamentoModal = new bootstrap.Modal(document.getElementById('orcamentoModal'));
         
         // Capturar ID da URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -1414,9 +1550,45 @@
                 window.location.href = 'login.html?redirect=' + encodeURIComponent(currentUrl);
             }
         });
+
+        // Máscara de telefone
+        document.getElementById('inputTelefone')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d*)/, '($1');
+            }
+            
+            e.target.value = value;
+        });
+
+        // Contador de caracteres para avaliação
+        document.getElementById('reviewComment').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = `${this.value.length}/500`;
+        });
+
+        // Atualizar texto das estrelas no modal
+        document.querySelectorAll('input[name="rating"]').forEach(star => {
+            star.addEventListener('change', function() {
+                const labels = {
+                    '1': 'Péssimo',
+                    '2': 'Ruim', 
+                    '3': 'Regular',
+                    '4': 'Bom',
+                    '5': 'Excelente'
+                };
+                document.getElementById('ratingText').textContent = labels[this.value];
+            });
+        });
     });
 
-    // Carregar perfil do profissional - CORRIGIDO para aceitar tipoUsuario "cliente" desde que tenha perfil profissional
+    // Carregar perfil do profissional
     async function loadProfile() {
         const docRef = doc(db, "usuarios", professionalId);
         const docSnap = await getDoc(docRef);
@@ -1427,13 +1599,12 @@
 
         const data = docSnap.data();
         
-        // CORREÇÃO: Verifica apenas se existe o objeto profissional e está completo
-        // Não verifica mais o campo tipoUsuario (pode ser "cliente" mas ter perfil profissional ativo)
+        // Verifica se existe o objeto profissional e está completo
         if (!data.profissional || !data.profissional.perfilCompleto) {
             throw new Error('Este usuário não possui um perfil profissional completo');
         }
         
-        // Verificar se está ativo (status ou assinatura)
+        // Verificar se está ativo
         const estaAtivo = data.status === 'ativo' || 
                           data.assinatura_ativa === true || 
                           data.status_assinatura === 'ativa';
@@ -1448,6 +1619,7 @@
         // Preencher dados básicos
         document.getElementById('profileName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
         document.getElementById('modalProName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
+        document.getElementById('modalProNameOrcamento').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
         document.getElementById('profileSpecialty').textContent = formatSpecialty(prof.especialidadePrincipal) || 'Serviços Profissionais';
         
         const location = [];
@@ -1520,10 +1692,9 @@
         }
     }
 
-    // Carregar avaliações - CORRIGIDO: removido orderBy para não exigir índice composto
+    // Carregar avaliações
     async function loadReviews() {
         try {
-            // Query simplificada sem orderBy (ordenação feita no JavaScript)
             const q = query(
                 collection(db, "avaliacoes"),
                 where("profissionalId", "==", professionalId),
@@ -1540,7 +1711,7 @@
                 if (review.nota) totalRating += review.nota;
             });
 
-            // Ordenar manualmente por data (mais recente primeiro) - CORREÇÃO DO ÍNDICE
+            // Ordenar manualmente por data
             reviews.sort((a, b) => {
                 const dateA = a.data?.seconds || a.data?.toMillis?.() || 0;
                 const dateB = b.data?.seconds || b.data?.toMillis?.() || 0;
@@ -1556,7 +1727,6 @@
             
         } catch (error) {
             console.error("Erro ao carregar avaliações:", error);
-            // Se falhar, apenas mostra sem avaliações mas não quebra a página
             updateRatingDisplay(0, 0);
             reviews = [];
             renderReviews();
@@ -1793,25 +1963,6 @@
         reviewModal.show();
     };
 
-    // Contador de caracteres
-    document.getElementById('reviewComment').addEventListener('input', function() {
-        document.getElementById('charCount').textContent = `${this.value.length}/500`;
-    });
-
-    // Atualizar texto das estrelas no modal
-    document.querySelectorAll('input[name="rating"]').forEach(star => {
-        star.addEventListener('change', function() {
-            const labels = {
-                '1': 'Péssimo',
-                '2': 'Ruim', 
-                '3': 'Regular',
-                '4': 'Bom',
-                '5': 'Excelente'
-            };
-            document.getElementById('ratingText').textContent = labels[this.value];
-        });
-    });
-
     // Enviar avaliação
     window.submitReview = async function() {
         const rating = document.querySelector('input[name="rating"]:checked')?.value;
@@ -2010,7 +2161,7 @@
         }
     };
 
-    // Solicitar orçamento
+    // Solicitar orçamento via WhatsApp
     window.solicitarOrcamentoItem = function(itemId, tipo) {
         const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
         if (!item || !professionalData) return;
@@ -2024,8 +2175,9 @@
         const num = whatsapp.replace(/\D/g, '');
         const message = `Olá! Encontrei você no ScanHub e gostaria de solicitar um orçamento para:\n\n` +
                       `*${item.nome}*\n` +
-                      `Preço: R$ ${item.precoVenda?.toFixed(2) || 'A combinar'}\n\n` +
-                      `Poderia me passar mais informações?`;
+                      `Preço: R$ ${item.precoVenda?.toFixed(2) || 'A combinar'}\n` +
+                      `${item.descricao ? `Descrição: ${item.descricao.substring(0, 100)}...\n` : ''}` +
+                      `\nPoderia me passar mais informações?`;
         
         const url = `https://wa.me/55${num}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
@@ -2046,6 +2198,149 @@
         
         const url = `https://wa.me/55${num}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
+    };
+
+    // Abrir modal de orçamento
+    window.abrirModalOrcamento = function() {
+        const user = auth.currentUser;
+        
+        if (!user) {
+            showToast('Para solicitar orçamento, você precisa estar logado.', 'error');
+            return;
+        }
+        
+        // Preencher automaticamente os dados do usuário se disponíveis
+        if (user.displayName) {
+            document.getElementById('inputNome').value = user.displayName;
+        }
+        
+        // Preencher email se disponível
+        if (user.email) {
+            document.getElementById('inputEmail').value = user.email;
+        }
+        
+        // Resetar outros campos
+        document.getElementById('inputTelefone').value = '';
+        document.getElementById('inputCidade').value = '';
+        document.getElementById('inputDescricao').value = '';
+        document.getElementById('inputData').value = '';
+        
+        // Definir data mínima como hoje
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('inputData').min = hoje;
+        
+        orcamentoModal.show();
+    };
+
+    // Enviar pedido de orçamento
+    window.enviarPedidoOrcamento = async function() {
+        const nome = document.getElementById('inputNome').value.trim();
+        const telefone = document.getElementById('inputTelefone').value.trim();
+        const email = document.getElementById('inputEmail').value.trim();
+        const cidade = document.getElementById('inputCidade').value.trim();
+        const descricao = document.getElementById('inputDescricao').value.trim();
+        const dataPreferencial = document.getElementById('inputData').value;
+        
+        // Validação básica
+        if (!nome || !telefone || !cidade || !descricao) {
+            showToast('Preencha todos os campos obrigatórios (*)', 'error');
+            return;
+        }
+        
+        // Validar telefone (pelo menos 10 dígitos)
+        const telefoneLimpo = telefone.replace(/\D/g, '');
+        if (telefoneLimpo.length < 10) {
+            showToast('Digite um telefone válido com DDD', 'error');
+            return;
+        }
+        
+        const btn = document.getElementById('btnEnviarOrcamento');
+        const originalText = btn.innerHTML;
+        
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            
+            const user = auth.currentUser;
+            
+            // Salvar pedido no Firestore na coleção "solicitacoes" (conforme suas regras)
+            const pedidoData = {
+                clienteId: user.uid,
+                clienteNome: nome,
+                clienteTelefone: telefone,
+                clienteEmail: email || null,
+                clienteCidade: cidade,
+                profissionalId: professionalId,
+                profissionalNome: professionalData?.profissional?.nomeProfissional || professionalData?.apelido || 'Profissional',
+                descricao: descricao,
+                dataPreferencial: dataPreferencial || null,
+                status: 'pendente',
+                dataSolicitacao: serverTimestamp(),
+                visualizado: false,
+                respondido: false,
+                tipo: 'orcamento',
+                origem: 'perfil_publico'
+            };
+            
+            // 1. Salvar no Firestore (coleção solicitacoes conforme suas regras)
+            const pedidoRef = await addDoc(collection(db, "solicitacoes"), pedidoData);
+            
+            // 2. Criar notificação para o profissional
+            const notificacaoData = {
+                tipo: 'orcamento_solicitado',
+                titulo: '📋 Novo pedido de orçamento!',
+                mensagem: `${nome} solicitou um orçamento`,
+                userId: professionalId,
+                pedidoId: pedidoRef.id,
+                lida: false,
+                data: serverTimestamp(),
+                metadata: {
+                    clienteNome: nome,
+                    clienteTelefone: telefone,
+                    descricaoResumo: descricao.substring(0, 100) + (descricao.length > 100 ? '...' : '')
+                }
+            };
+            
+            await addDoc(collection(db, "notificacoes"), notificacaoData);
+            
+            // 3. Atualizar contador de notificações do profissional
+            await updateDoc(doc(db, "usuarios", professionalId), {
+                "notificacoesPendentes": increment(1),
+                ultimaAtualizacao: new Date().toISOString()
+            });
+            
+            // 4. Fechar modal e mostrar sucesso
+            orcamentoModal.hide();
+            showToast('Pedido enviado com sucesso! O profissional receberá sua solicitação.', 'success');
+            
+            // 5. Opcional: Enviar também por WhatsApp se o profissional tiver cadastrado
+            const whatsappProf = professionalData.profissional?.whatsapp;
+            if (whatsappProf) {
+                const mensagemWhatsApp = `*📋 NOVO PEDIDO DE ORÇAMENTO - ScanHub*\n\n` +
+                                       `👤 *Cliente:* ${nome}\n` +
+                                       `📞 *Telefone:* ${telefone}\n` +
+                                       `🏙️ *Cidade:* ${cidade}\n` +
+                                       `📝 *Descrição:* ${descricao.substring(0, 150)}${descricao.length > 150 ? '...' : ''}\n\n` +
+                                       `📍 *Acesse o ScanHub para ver detalhes completos e responder.*`;
+                
+                const num = whatsappProf.replace(/\D/g, '');
+                const urlWhatsApp = `https://wa.me/55${num}?text=${encodeURIComponent(mensagemWhatsApp)}`;
+                
+                // Perguntar se quer abrir WhatsApp
+                setTimeout(() => {
+                    if (confirm('Deseja também enviar uma mensagem direta por WhatsApp?')) {
+                        window.open(urlWhatsApp, '_blank');
+                    }
+                }, 1500);
+            }
+            
+        } catch (error) {
+            console.error('Erro ao enviar pedido:', error);
+            showToast('Erro ao enviar pedido. Tente novamente.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     };
 
     // Switch tabs
@@ -2077,8 +2372,13 @@
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = `toast-custom ${type}`;
+        
+        const icon = type === 'success' ? 'fa-check-circle text-success' : 
+                    type === 'error' ? 'fa-exclamation-circle text-danger' : 
+                    'fa-info-circle text-info';
+        
         toast.innerHTML = `
-            <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger'} fa-lg"></i>
+            <i class="fas ${icon} fa-lg"></i>
             <span class="fw-medium">${message}</span>
         `;
         container.appendChild(toast);
@@ -2089,6 +2389,6 @@
         document.getElementById('loadingScreen').style.display = 'none';
         document.getElementById('errorScreen').style.display = 'flex';
     }
-</script>
+    </script>
 </body>
 </html>
