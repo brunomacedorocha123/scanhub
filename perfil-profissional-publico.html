@@ -1464,931 +1464,1107 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        getDoc, 
-        collection, 
-        query, 
-        where, 
-        getDocs, 
-        addDoc, 
-        serverTimestamp,
-        updateDoc,
-        increment 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    doc, 
+    getDoc, 
+    collection, 
+    query, 
+    where, 
+    getDocs, 
+    addDoc, 
+    serverTimestamp,
+    updateDoc,
+    increment 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.appspot.com",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
+const firebaseConfig = {
+    apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+    authDomain: "scanhub-ed512.firebaseapp.com",
+    projectId: "scanhub-ed512",
+    storageBucket: "scanhub-ed512.appspot.com",
+    messagingSenderId: "1083305018831",
+    appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-    // Variáveis globais
-    let professionalId = null;
-    let professionalData = null;
-    let currentUser = null;
-    let reviews = [];
-    let servicos = [];
-    let produtos = [];
-    let catalogoCompleto = [];
-    let reviewModal = null;
-    let detalhesModal = null;
-    let orcamentoModal = null;
+// Variáveis globais
+let professionalId = null;
+let professionalData = null;
+let currentUser = null;
+let currentUserData = null;
+let reviews = [];
+let servicos = [];
+let produtos = [];
+let catalogoCompleto = [];
+let reviewModal = null;
+let detalhesModal = null;
+let orcamentoModal = null;
 
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', () => {
-        reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
-        detalhesModal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
-        orcamentoModal = new bootstrap.Modal(document.getElementById('orcamentoModal'));
-        
-        // Capturar ID da URL
-        const urlParams = new URLSearchParams(window.location.search);
-        professionalId = urlParams.get('id');
-        
-        if (!professionalId) {
-            showError();
-            return;
-        }
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+    detalhesModal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+    orcamentoModal = new bootstrap.Modal(document.getElementById('orcamentoModal'));
+    
+    // Capturar ID da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    professionalId = urlParams.get('id');
+    
+    if (!professionalId) {
+        showError();
+        return;
+    }
 
-        // Aguarda estado de autenticação - usuário já deve estar logado
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // Usuário autenticado (cliente ou profissional)
-                currentUser = user;
+    // Aguarda estado de autenticação
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // Usuário autenticado
+            currentUser = user;
+            
+            try {
+                // Carregar dados do usuário logado
+                await loadCurrentUserData();
+                await loadProfile();
+                await loadReviews();
+                await loadCatalogo();
+                initializeCatalogoFilters();
                 
-                try {
-                    await loadProfile();
-                    await loadReviews();
-                    await loadCatalogo();
-                    initializeCatalogoFilters();
-                    
-                    // Mostrar conteúdo
-                    document.getElementById('loadingScreen').classList.add('hidden');
-                    setTimeout(() => {
-                        document.getElementById('loadingScreen').style.display = 'none';
-                        document.getElementById('navbar').style.display = 'block';
-                        document.getElementById('mainContent').style.display = 'block';
-                    }, 300);
-                    
-                } catch (error) {
-                    console.error('Erro ao carregar perfil:', error);
-                    showError();
-                }
-            } else {
-                // Não está logado - redireciona para login com redirect de volta
-                const currentUrl = window.location.href;
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(currentUrl);
+                // Mostrar conteúdo
+                document.getElementById('loadingScreen').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('navbar').style.display = 'block';
+                    document.getElementById('mainContent').style.display = 'block';
+                }, 300);
+                
+            } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
+                showError();
             }
-        });
-
-        // Máscara de telefone
-        document.getElementById('inputTelefone')?.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            
-            if (value.length > 10) {
-                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
-            } else if (value.length > 6) {
-                value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-            } else if (value.length > 2) {
-                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-            } else if (value.length > 0) {
-                value = value.replace(/^(\d*)/, '($1');
-            }
-            
-            e.target.value = value;
-        });
-
-        // Contador de caracteres para avaliação
-        document.getElementById('reviewComment').addEventListener('input', function() {
-            document.getElementById('charCount').textContent = `${this.value.length}/500`;
-        });
-
-        // Atualizar texto das estrelas no modal
-        document.querySelectorAll('input[name="rating"]').forEach(star => {
-            star.addEventListener('change', function() {
-                const labels = {
-                    '1': 'Péssimo',
-                    '2': 'Ruim', 
-                    '3': 'Regular',
-                    '4': 'Bom',
-                    '5': 'Excelente'
-                };
-                document.getElementById('ratingText').textContent = labels[this.value];
-            });
-        });
+        } else {
+            // Não está logado - redireciona para login
+            const currentUrl = window.location.href;
+            window.location.href = 'login.html?redirect=' + encodeURIComponent(currentUrl);
+        }
     });
 
-    // Carregar perfil do profissional
-    async function loadProfile() {
-        const docRef = doc(db, "usuarios", professionalId);
-        const docSnap = await getDoc(docRef);
+    // Máscara de telefone
+    document.getElementById('inputTelefone')?.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
         
-        if (!docSnap.exists()) {
-            throw new Error('Profissional não encontrado');
-        }
-
-        const data = docSnap.data();
-        
-        // Verifica se existe o objeto profissional e está completo
-        if (!data.profissional || !data.profissional.perfilCompleto) {
-            throw new Error('Este usuário não possui um perfil profissional completo');
+        if (value.length > 10) {
+            value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+        } else if (value.length > 6) {
+            value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+        } else if (value.length > 2) {
+            value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+        } else if (value.length > 0) {
+            value = value.replace(/^(\d*)/, '($1');
         }
         
-        // Verificar se está ativo
-        const estaAtivo = data.status === 'ativo' || 
-                          data.assinatura_ativa === true || 
-                          data.status_assinatura === 'ativa';
-        
-        if (!estaAtivo) {
-            throw new Error('Este perfil profissional não está ativo');
-        }
+        e.target.value = value;
+    });
 
-        professionalData = data;
-        const prof = data.profissional || {};
+    // Contador de caracteres para avaliação
+    document.getElementById('reviewComment').addEventListener('input', function() {
+        document.getElementById('charCount').textContent = `${this.value.length}/500`;
+    });
 
-        // Preencher dados básicos
-        document.getElementById('profileName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
-        document.getElementById('modalProName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
-        document.getElementById('modalProNameOrcamento').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
-        document.getElementById('profileSpecialty').textContent = formatSpecialty(prof.especialidadePrincipal) || 'Serviços Profissionais';
-        
-        const location = [];
-        if (prof.cidadeBase) location.push(prof.cidadeBase);
-        if (prof.estadoBase) location.push(prof.estadoBase);
-        document.getElementById('profileLocation').textContent = location.length > 0 ? location.join(' - ') : 'Localização não informada';
-        
-        // Avatar
-        const avatarUrl = prof.fotoPerfilProfissional || data.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nomeProfissional || 'P')}&background=44689a&color=fff&size=256`;
-        document.getElementById('profileAvatar').src = avatarUrl;
-        
-        // WhatsApp
-        if (prof.whatsapp) {
-            const num = prof.whatsapp.replace(/\D/g, '');
-            document.getElementById('btnWhatsApp').href = `https://wa.me/55${num}?text=Olá! Encontrei você no ScanHub e gostaria de conversar sobre seus serviços.`;
-        } else {
-            document.getElementById('btnWhatsApp').style.display = 'none';
-        }
-
-        // Sobre
-        document.getElementById('aboutText').textContent = prof.descricao || prof.slogan || 'Este profissional ainda não adicionou uma descrição detalhada.';
-        
-        // Experiência
-        const expMap = {
-            '1': 'Menos de 1 ano',
-            '1-3': '1 a 3 anos',
-            '3-5': '3 a 5 anos',
-            '5-10': '5 a 10 anos',
-            '10+': 'Mais de 10 anos'
-        };
-        
-        const expContainer = document.getElementById('experienceBadges');
-        expContainer.innerHTML = '';
-        if (prof.anosExperiencia) {
-            expContainer.innerHTML = `<span class="info-badge"><i class="fas fa-calendar-alt"></i>${expMap[prof.anosExperiencia]}</span>`;
-        }
-        if (prof.atendeDomicilio) {
-            expContainer.innerHTML += `<span class="info-badge"><i class="fas fa-home"></i>Atende em Domicílio</span>`;
-        }
-        if (prof.atendeOnline) {
-            expContainer.innerHTML += `<span class="info-badge"><i class="fas fa-laptop"></i>Atendimento Online</span>`;
-        }
-
-        // Pagamento
-        const payContainer = document.getElementById('paymentBadges');
-        if (prof.formasPagamento && prof.formasPagamento.length > 0) {
-            payContainer.innerHTML = prof.formasPagamento.map(p => `<span class="info-badge"><i class="fas fa-check"></i>${p}</span>`).join('');
-        } else {
-            payContainer.innerHTML = '<span class="text-muted-custom">Não informado</span>';
-        }
-
-        // Garantia
-        if (prof.garantiaDias && prof.garantiaDias > 0) {
-            document.getElementById('warrantyText').textContent = `Este profissional oferece ${prof.garantiaDias} dias de garantia em seus serviços.`;
-        }
-
-        // Portfólio
-        const gallery = document.getElementById('portfolioGallery');
-        if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
-            gallery.innerHTML = prof.portfolioFotos.map(foto => `
-                <div class="col-6 col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <img src="${foto}" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 12px;" alt="Portfólio">
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('emptyPortfolio').style.display = 'none';
-        } else {
-            document.getElementById('emptyPortfolio').style.display = 'block';
-        }
-    }
-
-    // Carregar avaliações
-    async function loadReviews() {
-        try {
-            const q = query(
-                collection(db, "avaliacoes"),
-                where("profissionalId", "==", professionalId),
-                where("status", "==", "ativo")
-            );
-            
-            const snapshot = await getDocs(q);
-            reviews = [];
-            let totalRating = 0;
-            
-            snapshot.forEach(doc => {
-                const review = { id: doc.id, ...doc.data() };
-                reviews.push(review);
-                if (review.nota) totalRating += review.nota;
-            });
-
-            // Ordenar manualmente por data
-            reviews.sort((a, b) => {
-                const dateA = a.data?.seconds || a.data?.toMillis?.() || 0;
-                const dateB = b.data?.seconds || b.data?.toMillis?.() || 0;
-                return dateB - dateA;
-            });
-
-            // Calcular média
-            const average = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
-            
-            // Atualizar UI
-            updateRatingDisplay(average, reviews.length);
-            renderReviews();
-            
-        } catch (error) {
-            console.error("Erro ao carregar avaliações:", error);
-            updateRatingDisplay(0, 0);
-            reviews = [];
-            renderReviews();
-        }
-    }
-
-    // Atualizar display de rating
-    function updateRatingDisplay(average, count) {
-        const stars = generateStars(average);
-        
-        document.getElementById('ratingNumber').textContent = average;
-        document.getElementById('starsDisplay').innerHTML = stars;
-        document.getElementById('ratingCount').textContent = `(${count} avaliações)`;
-        
-        document.getElementById('bigRating').textContent = average;
-        document.getElementById('bigStars').innerHTML = stars;
-        document.getElementById('totalReviewsText').textContent = `baseado em ${count} avaliações`;
-    }
-
-    // Gerar estrelas HTML
-    function generateStars(rating) {
-        const fullStars = Math.floor(rating);
-        const hasHalf = rating % 1 >= 0.5;
-        let html = '';
-        
-        for (let i = 1; i <= 5; i++) {
-            if (i <= fullStars) {
-                html += '<i class="fas fa-star"></i>';
-            } else if (i === fullStars + 1 && hasHalf) {
-                html += '<i class="fas fa-star-half-alt"></i>';
-            } else {
-                html += '<i class="far fa-star" style="color: #ddd;"></i>';
-            }
-        }
-        return html;
-    }
-
-    // Renderizar lista de avaliações
-    function renderReviews() {
-        const container = document.getElementById('reviewsList');
-        
-        if (reviews.length === 0) {
-            container.innerHTML = '';
-            document.getElementById('emptyReviews').style.display = 'block';
-            return;
-        }
-        
-        document.getElementById('emptyReviews').style.display = 'none';
-        
-        container.innerHTML = reviews.map(review => {
-            const date = review.data ? new Date(review.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Data não disponível';
-            const name = review.anonimo ? 'Cliente Anônimo' : (review.clienteNome || 'Cliente');
-            const initial = name.charAt(0).toUpperCase();
-            
-            return `
-                <div class="review-card">
-                    <div class="review-header">
-                        <div class="reviewer-info">
-                            <div class="reviewer-avatar">${initial}</div>
-                            <div>
-                                <div class="reviewer-name">${name}</div>
-                                <div class="review-date">${date}</div>
-                            </div>
-                        </div>
-                        <div class="review-stars">
-                            ${generateStars(review.nota)}
-                        </div>
-                    </div>
-                    ${review.comentario ? `<div class="review-comment">${review.comentario}</div>` : ''}
-                    ${review.resposta ? `
-                        <div class="mt-3 p-3 bg-light rounded">
-                            <small class="text-muted d-block mb-1"><i class="fas fa-reply"></i> Resposta do profissional:</small>
-                            <p class="mb-0">${review.resposta}</p>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
-    }
-
-    // Carregar catálogo
-    async function loadCatalogo() {
-        try {
-            // Carregar serviços
-            const qServicos = query(
-                collection(db, "servicos"),
-                where("profissionalId", "==", professionalId),
-                where("status", "==", "ativo")
-            );
-            const servicosSnapshot = await getDocs(qServicos);
-            servicos = [];
-            servicosSnapshot.forEach(doc => {
-                servicos.push({
-                    id: doc.id,
-                    tipo: 'servico',
-                    ...doc.data()
-                });
-            });
-
-            // Carregar produtos
-            const qProdutos = query(
-                collection(db, "produtos"),
-                where("profissionalId", "==", professionalId),
-                where("status", "==", "ativo")
-            );
-            const produtosSnapshot = await getDocs(qProdutos);
-            produtos = [];
-            produtosSnapshot.forEach(doc => {
-                produtos.push({
-                    id: doc.id,
-                    tipo: 'produto',
-                    ...doc.data()
-                });
-            });
-
-            catalogoCompleto = [...servicos, ...produtos];
-            renderCatalogo();
-
-        } catch (error) {
-            console.error('Erro ao carregar catálogo:', error);
-        }
-    }
-
-    // Inicializar filtros do catálogo
-    function initializeCatalogoFilters() {
-        const filterTipo = document.getElementById('filterTipoCatalogo');
-        const searchInput = document.getElementById('searchCatalogo');
-        
-        if (filterTipo) {
-            filterTipo.addEventListener('change', renderCatalogo);
-        }
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', renderCatalogo);
-        }
-    }
-
-    // Renderizar catálogo
-    function renderCatalogo() {
-        const container = document.getElementById('catalogoGrid');
-        const emptyState = document.getElementById('emptyCatalogo');
-        const filterTipo = document.getElementById('filterTipoCatalogo')?.value || 'todos';
-        const searchTerm = document.getElementById('searchCatalogo')?.value.toLowerCase() || '';
-        
-        // Filtrar itens
-        let itensFiltrados = catalogoCompleto.filter(item => {
-            // Filtrar por tipo
-            if (filterTipo !== 'todos' && item.tipo !== filterTipo) {
-                return false;
-            }
-            
-            // Filtrar por busca
-            if (searchTerm) {
-                const searchFields = [
-                    item.nome || '',
-                    item.descricao || '',
-                    item.categoria || '',
-                    ...(item.tags || [])
-                ].map(f => f.toLowerCase());
-                
-                return searchFields.some(field => field.includes(searchTerm));
-            }
-            
-            return true;
+    // Atualizar texto das estrelas no modal
+    document.querySelectorAll('input[name="rating"]').forEach(star => {
+        star.addEventListener('change', function() {
+            const labels = {
+                '1': 'Péssimo',
+                '2': 'Ruim', 
+                '3': 'Regular',
+                '4': 'Bom',
+                '5': 'Excelente'
+            };
+            document.getElementById('ratingText').textContent = labels[this.value];
         });
+    });
+});
+
+// ======================
+// FUNÇÕES PRINCIPAIS
+// ======================
+
+// Carregar dados do usuário logado
+async function loadCurrentUserData() {
+    try {
+        const userRef = doc(db, "usuarios", currentUser.uid);
+        const userSnap = await getDoc(userRef);
         
-        if (itensFiltrados.length === 0) {
-            container.innerHTML = '';
-            if (emptyState) emptyState.style.display = 'block';
-            return;
+        if (userSnap.exists()) {
+            currentUserData = userSnap.data();
+        } else {
+            currentUserData = {
+                apelido: currentUser.displayName || 'Usuário',
+                celular: '',
+                email: currentUser.email || '',
+                cidade: ''
+            };
         }
-        
-        if (emptyState) emptyState.style.display = 'none';
-        
-        container.innerHTML = itensFiltrados.map(item => {
-            const isServico = item.tipo === 'servico';
-            const imagem = item.imagens && item.imagens.length > 0 
-                ? item.imagens[0] 
-                : `https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome || (isServico ? 'Serviço' : 'Produto'))}`;
-            
-            const precoFormatado = new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(item.precoVenda || 0);
-            
-            const infoExtra = isServico 
-                ? `<div class="catalogo-info">
-                        <span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>
-                        <span><i class="fas fa-map-marker-alt"></i> ${item.tipoServico || 'Presencial'}</span>
-                   </div>`
-                : `<div class="catalogo-info">
-                        <span><i class="fas fa-box"></i> ${item.estoqueAtual || 0} un</span>
-                        <span><i class="fas fa-tag"></i> ${item.marca || '--'}</span>
-                   </div>`;
-            
-            return `
-                <div class="catalogo-card" onclick="abrirDetalhesItem('${item.id}', '${item.tipo}')">
-                    <div class="catalogo-image">
-                        <img src="${imagem}" alt="${item.nome}">
-                        <span class="catalogo-badge ${isServico ? 'badge-servico' : 'badge-produto'}">
-                            ${isServico ? '<i class="fas fa-tools"></i> Serviço' : '<i class="fas fa-box"></i> Produto'}
-                        </span>
-                    </div>
-                    <div class="catalogo-content">
-                        <h5 class="catalogo-title">${item.nome || 'Sem nome'}</h5>
-                        <p class="catalogo-desc">${item.descricao?.substring(0, 100) || 'Sem descrição'}...</p>
-                        ${infoExtra}
-                        <div class="catalogo-price">${precoFormatado}</div>
-                        <button class="btn-orcamento" onclick="event.stopPropagation(); solicitarOrcamentoItem('${item.id}', '${item.tipo}')">
-                            <i class="fab fa-whatsapp"></i> Solicitar Orçamento
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
+    } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        currentUserData = {
+            apelido: currentUser.displayName || 'Usuário',
+            celular: '',
+            email: currentUser.email || '',
+            cidade: ''
+        };
+    }
+}
+
+// Carregar perfil do profissional
+async function loadProfile() {
+    const docRef = doc(db, "usuarios", professionalId);
+    const docSnap = await getDoc(docRef);
+    
+    if (!docSnap.exists()) {
+        throw new Error('Profissional não encontrado');
     }
 
-    // Abrir modal de avaliação
-    window.openReviewModal = function() {
-        // Verificar se usuário está logado
-        const user = auth.currentUser;
-        if (!user) {
-            showToast('Para avaliar, você precisa estar logado.', 'error');
-            return;
-        }
-        
-        // Resetar modal
-        document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
-        document.getElementById('reviewComment').value = '';
-        document.getElementById('anonymousCheck').checked = false;
-        document.getElementById('charCount').textContent = '0/500';
-        document.getElementById('ratingText').textContent = 'Toque nas estrelas para avaliar';
-        
-        reviewModal.show();
-    };
+    const data = docSnap.data();
+    
+    // Verifica se existe o objeto profissional e está completo
+    if (!data.profissional || !data.profissional.perfilCompleto) {
+        throw new Error('Este usuário não possui um perfil profissional completo');
+    }
+    
+    // Verificar se está ativo
+    const estaAtivo = data.status === 'ativo' || 
+                      data.assinatura_ativa === true || 
+                      data.status_assinatura === 'ativa';
+    
+    if (!estaAtivo) {
+        throw new Error('Este perfil profissional não está ativo');
+    }
 
-    // Enviar avaliação
-    window.submitReview = async function() {
-        const rating = document.querySelector('input[name="rating"]:checked')?.value;
-        const comment = document.getElementById('reviewComment').value.trim();
-        const anonymous = document.getElementById('anonymousCheck').checked;
+    professionalData = data;
+    const prof = data.profissional || {};
+
+    // Preencher dados básicos
+    document.getElementById('profileName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
+    document.getElementById('modalProName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
+    document.getElementById('modalProNameOrcamento').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
+    document.getElementById('profileSpecialty').textContent = formatSpecialty(prof.especialidadePrincipal) || 'Serviços Profissionais';
+    
+    const location = [];
+    if (prof.cidadeBase) location.push(prof.cidadeBase);
+    if (prof.estadoBase) location.push(prof.estadoBase);
+    document.getElementById('profileLocation').textContent = location.length > 0 ? location.join(' - ') : 'Localização não informada';
+    
+    // Avatar
+    const avatarUrl = prof.fotoPerfilProfissional || data.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.nomeProfissional || 'P')}&background=44689a&color=fff&size=256`;
+    document.getElementById('profileAvatar').src = avatarUrl;
+    
+    // WhatsApp
+    if (prof.whatsapp) {
+        const num = prof.whatsapp.replace(/\D/g, '');
+        document.getElementById('btnWhatsApp').href = `https://wa.me/55${num}?text=Olá! Encontrei você no ScanHub e gostaria de conversar sobre seus serviços.`;
+    } else {
+        document.getElementById('btnWhatsApp').style.display = 'none';
+    }
+
+    // Sobre
+    document.getElementById('aboutText').textContent = prof.descricao || prof.slogan || 'Este profissional ainda não adicionou uma descrição detalhada.';
+    
+    // Experiência
+    const expMap = {
+        '1': 'Menos de 1 ano',
+        '1-3': '1 a 3 anos',
+        '3-5': '3 a 5 anos',
+        '5-10': '5 a 10 anos',
+        '10+': 'Mais de 10 anos'
+    };
+    
+    const expContainer = document.getElementById('experienceBadges');
+    expContainer.innerHTML = '';
+    if (prof.anosExperiencia) {
+        expContainer.innerHTML = `<span class="info-badge"><i class="fas fa-calendar-alt"></i>${expMap[prof.anosExperiencia]}</span>`;
+    }
+    if (prof.atendeDomicilio) {
+        expContainer.innerHTML += `<span class="info-badge"><i class="fas fa-home"></i>Atende em Domicílio</span>`;
+    }
+    if (prof.atendeOnline) {
+        expContainer.innerHTML += `<span class="info-badge"><i class="fas fa-laptop"></i>Atendimento Online</span>`;
+    }
+
+    // Pagamento
+    const payContainer = document.getElementById('paymentBadges');
+    if (prof.formasPagamento && prof.formasPagamento.length > 0) {
+        payContainer.innerHTML = prof.formasPagamento.map(p => `<span class="info-badge"><i class="fas fa-check"></i>${p}</span>`).join('');
+    } else {
+        payContainer.innerHTML = '<span class="text-muted-custom">Não informado</span>';
+    }
+
+    // Garantia
+    if (prof.garantiaDias && prof.garantiaDias > 0) {
+        document.getElementById('warrantyText').textContent = `Este profissional oferece ${prof.garantiaDias} dias de garantia em seus serviços.`;
+    }
+
+    // Portfólio
+    const gallery = document.getElementById('portfolioGallery');
+    if (prof.portfolioFotos && prof.portfolioFotos.length > 0) {
+        gallery.innerHTML = prof.portfolioFotos.map(foto => `
+            <div class="col-6 col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <img src="${foto}" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 12px;" alt="Portfólio">
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('emptyPortfolio').style.display = 'none';
+    } else {
+        document.getElementById('emptyPortfolio').style.display = 'block';
+    }
+}
+
+// Carregar avaliações
+async function loadReviews() {
+    try {
+        const q = query(
+            collection(db, "avaliacoes"),
+            where("profissionalId", "==", professionalId),
+            where("status", "==", "ativo")
+        );
         
-        if (!rating) {
-            showToast('Por favor, selecione uma nota de 1 a 5 estrelas', 'error');
-            return;
+        const snapshot = await getDocs(q);
+        reviews = [];
+        let totalRating = 0;
+        
+        snapshot.forEach(doc => {
+            const review = { id: doc.id, ...doc.data() };
+            reviews.push(review);
+            if (review.nota) totalRating += review.nota;
+        });
+
+        // Ordenar manualmente por data
+        reviews.sort((a, b) => {
+            const dateA = a.data?.seconds || a.data?.toMillis?.() || 0;
+            const dateB = b.data?.seconds || b.data?.toMillis?.() || 0;
+            return dateB - dateA;
+        });
+
+        // Calcular média
+        const average = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
+        
+        // Atualizar UI
+        updateRatingDisplay(average, reviews.length);
+        renderReviews();
+        
+    } catch (error) {
+        console.error("Erro ao carregar avaliações:", error);
+        updateRatingDisplay(0, 0);
+        reviews = [];
+        renderReviews();
+    }
+}
+
+// Carregar catálogo
+async function loadCatalogo() {
+    try {
+        // Carregar serviços
+        const qServicos = query(
+            collection(db, "servicos"),
+            where("profissionalId", "==", professionalId),
+            where("status", "==", "ativo")
+        );
+        const servicosSnapshot = await getDocs(qServicos);
+        servicos = [];
+        servicosSnapshot.forEach(doc => {
+            servicos.push({
+                id: doc.id,
+                tipo: 'servico',
+                ...doc.data()
+            });
+        });
+
+        // Carregar produtos
+        const qProdutos = query(
+            collection(db, "produtos"),
+            where("profissionalId", "==", professionalId),
+            where("status", "==", "ativo")
+        );
+        const produtosSnapshot = await getDocs(qProdutos);
+        produtos = [];
+        produtosSnapshot.forEach(doc => {
+            produtos.push({
+                id: doc.id,
+                tipo: 'produto',
+                ...doc.data()
+            });
+        });
+
+        catalogoCompleto = [...servicos, ...produtos];
+        renderCatalogo();
+
+    } catch (error) {
+        console.error('Erro ao carregar catálogo:', error);
+    }
+}
+
+// ======================
+// FUNÇÕES DE INTERFACE
+// ======================
+
+// Atualizar display de rating
+function updateRatingDisplay(average, count) {
+    const stars = generateStars(average);
+    
+    document.getElementById('ratingNumber').textContent = average;
+    document.getElementById('starsDisplay').innerHTML = stars;
+    document.getElementById('ratingCount').textContent = `(${count} avaliações)`;
+    
+    document.getElementById('bigRating').textContent = average;
+    document.getElementById('bigStars').innerHTML = stars;
+    document.getElementById('totalReviewsText').textContent = `baseado em ${count} avaliações`;
+}
+
+// Gerar estrelas HTML
+function generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalf = rating % 1 >= 0.5;
+    let html = '';
+    
+    for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars) {
+            html += '<i class="fas fa-star"></i>';
+        } else if (i === fullStars + 1 && hasHalf) {
+            html += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            html += '<i class="far fa-star" style="color: #ddd;"></i>';
+        }
+    }
+    return html;
+}
+
+// Renderizar lista de avaliações
+function renderReviews() {
+    const container = document.getElementById('reviewsList');
+    
+    if (reviews.length === 0) {
+        container.innerHTML = '';
+        document.getElementById('emptyReviews').style.display = 'block';
+        return;
+    }
+    
+    document.getElementById('emptyReviews').style.display = 'none';
+    
+    container.innerHTML = reviews.map(review => {
+        const date = review.data ? new Date(review.data.seconds * 1000).toLocaleDateString('pt-BR') : 'Data não disponível';
+        const name = review.anonimo ? 'Cliente Anônimo' : (review.clienteNome || 'Cliente');
+        const initial = name.charAt(0).toUpperCase();
+        
+        return `
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <div class="reviewer-avatar">${initial}</div>
+                        <div>
+                            <div class="reviewer-name">${name}</div>
+                            <div class="review-date">${date}</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">
+                        ${generateStars(review.nota)}
+                    </div>
+                </div>
+                ${review.comentario ? `<div class="review-comment">${review.comentario}</div>` : ''}
+                ${review.resposta ? `
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted d-block mb-1"><i class="fas fa-reply"></i> Resposta do profissional:</small>
+                        <p class="mb-0">${review.resposta}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// Inicializar filtros do catálogo
+function initializeCatalogoFilters() {
+    const filterTipo = document.getElementById('filterTipoCatalogo');
+    const searchInput = document.getElementById('searchCatalogo');
+    
+    if (filterTipo) {
+        filterTipo.addEventListener('change', renderCatalogo);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', renderCatalogo);
+    }
+}
+
+// Renderizar catálogo
+function renderCatalogo() {
+    const container = document.getElementById('catalogoGrid');
+    const emptyState = document.getElementById('emptyCatalogo');
+    const filterTipo = document.getElementById('filterTipoCatalogo')?.value || 'todos';
+    const searchTerm = document.getElementById('searchCatalogo')?.value.toLowerCase() || '';
+    
+    // Filtrar itens
+    let itensFiltrados = catalogoCompleto.filter(item => {
+        // Filtrar por tipo
+        if (filterTipo !== 'todos' && item.tipo !== filterTipo) {
+            return false;
         }
         
-        const btn = document.getElementById('btnSubmitReview');
+        // Filtrar por busca
+        if (searchTerm) {
+            const searchFields = [
+                item.nome || '',
+                item.descricao || '',
+                item.categoria || '',
+                ...(item.tags || [])
+            ].map(f => f.toLowerCase());
+            
+            return searchFields.some(field => field.includes(searchTerm));
+        }
+        
+        return true;
+    });
+    
+    if (itensFiltrados.length === 0) {
+        container.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+        return;
+    }
+    
+    if (emptyState) emptyState.style.display = 'none';
+    
+    container.innerHTML = itensFiltrados.map(item => {
+        const isServico = item.tipo === 'servico';
+        const imagem = item.imagens && item.imagens.length > 0 
+            ? item.imagens[0] 
+            : `https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome || (isServico ? 'Serviço' : 'Produto'))}`;
+        
+        const precoFormatado = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(item.precoVenda || 0);
+        
+        const infoExtra = isServico 
+            ? `<div class="catalogo-info">
+                    <span><i class="fas fa-clock"></i> ${item.duracao || '--'}</span>
+                    <span><i class="fas fa-map-marker-alt"></i> ${item.tipoServico || 'Presencial'}</span>
+               </div>`
+            : `<div class="catalogo-info">
+                    <span><i class="fas fa-box"></i> ${item.estoqueAtual || 0} un</span>
+                    <span><i class="fas fa-tag"></i> ${item.marca || '--'}</span>
+               </div>`;
+        
+        return `
+            <div class="catalogo-card" onclick="abrirDetalhesItem('${item.id}', '${item.tipo}')">
+                <div class="catalogo-image">
+                    <img src="${imagem}" alt="${item.nome}">
+                    <span class="catalogo-badge ${isServico ? 'badge-servico' : 'badge-produto'}">
+                        ${isServico ? '<i class="fas fa-tools"></i> Serviço' : '<i class="fas fa-box"></i> Produto'}
+                    </span>
+                </div>
+                <div class="catalogo-content">
+                    <h5 class="catalogo-title">${item.nome || 'Sem nome'}</h5>
+                    <p class="catalogo-desc">${item.descricao?.substring(0, 100) || 'Sem descrição'}...</p>
+                    ${infoExtra}
+                    <div class="catalogo-price">${precoFormatado}</div>
+                    <button class="btn-orcamento" onclick="event.stopPropagation(); solicitarOrcamentoItem('${item.id}', '${item.tipo}')">
+                        <i class="fab fa-whatsapp"></i> Solicitar Orçamento
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ======================
+// FUNÇÕES DE MODAL
+// ======================
+
+// Abrir modal de avaliação
+window.openReviewModal = function() {
+    // Verificar se usuário está logado
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('Para avaliar, você precisa estar logado.', 'error');
+        return;
+    }
+    
+    // Resetar modal
+    document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+    document.getElementById('reviewComment').value = '';
+    document.getElementById('anonymousCheck').checked = false;
+    document.getElementById('charCount').textContent = '0/500';
+    document.getElementById('ratingText').textContent = 'Toque nas estrelas para avaliar';
+    
+    reviewModal.show();
+};
+
+// Enviar avaliação
+window.submitReview = async function() {
+    const rating = document.querySelector('input[name="rating"]:checked')?.value;
+    const comment = document.getElementById('reviewComment').value.trim();
+    const anonymous = document.getElementById('anonymousCheck').checked;
+    
+    if (!rating) {
+        showToast('Por favor, selecione uma nota de 1 a 5 estrelas', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('btnSubmitReview');
+    const originalText = btn.innerHTML;
+    
+    try {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
         
-        try {
-            const user = auth.currentUser;
-            
-            if (!user) {
-                throw new Error('Usuário não autenticado');
-            }
-            
-            // Verificar se já avaliou
-            const avaliacoesQuery = query(
-                collection(db, "avaliacoes"),
-                where("profissionalId", "==", professionalId),
-                where("clienteId", "==", user.uid)
-            );
-            
-            const avaliacoesSnapshot = await getDocs(avaliacoesQuery);
-            
-            if (!avaliacoesSnapshot.empty) {
-                throw new Error('Você já avaliou este profissional');
-            }
-            
-            // Criar avaliação
-            const avaliacaoData = {
-                profissionalId: professionalId,
-                profissionalNome: professionalData?.profissional?.nomeProfissional || professionalData?.apelido || 'Profissional',
-                clienteId: user.uid,
-                clienteNome: anonymous ? null : (user.displayName || 'Cliente'),
-                clienteAvatar: anonymous ? null : (user.photoURL || null),
-                nota: parseInt(rating),
-                comentario: comment || null,
-                anonimo: anonymous,
-                resposta: null,
-                dataResposta: null,
-                status: "ativo",
-                data: serverTimestamp()
-            };
-            
-            // Salvar no Firestore
-            const docRef = await addDoc(collection(db, "avaliacoes"), avaliacaoData);
-            
-            // Atualizar contagem no perfil do profissional
-            const newTotal = reviews.length + 1;
-            const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
-            const newAverage = ((currentSum + parseInt(rating)) / newTotal).toFixed(1);
-            
-            await updateDoc(doc(db, "usuarios", professionalId), {
-                "profissional.mediaAvaliacoes": parseFloat(newAverage),
-                "profissional.totalAvaliacoes": newTotal,
-                ultimaAtualizacao: new Date().toISOString()
-            });
-            
-            // Atualizar localmente
-            avaliacaoData.id = docRef.id;
-            reviews.unshift(avaliacaoData);
-            
-            // Fechar modal e atualizar UI
-            reviewModal.hide();
-            showToast('Avaliação enviada com sucesso!', 'success');
-            
-            // Atualizar display
-            updateRatingDisplay(newAverage, newTotal);
-            renderReviews();
-            
-        } catch (error) {
-            showToast(error.message || 'Erro ao enviar avaliação. Tente novamente.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Avaliação';
-        }
-    };
-
-    // Abrir detalhes do item
-    window.abrirDetalhesItem = async function(itemId, tipo) {
-        try {
-            const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
-            if (!item) return;
-            
-            // Preencher modal
-            document.getElementById('modalItemTitle').textContent = item.nome;
-            document.getElementById('itemNome').textContent = item.nome;
-            document.getElementById('itemCategoria').textContent = item.categoria || 'Sem categoria';
-            document.getElementById('itemDescricao').textContent = item.descricao || 'Sem descrição';
-            
-            // Preço
-            const precoFormatado = new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(item.precoVenda || 0);
-            document.getElementById('itemPreco').textContent = precoFormatado;
-            
-            // Tipo
-            const isServico = item.tipo === 'servico';
-            document.getElementById('itemTipoBadge').textContent = isServico ? 'Serviço' : 'Produto';
-            document.getElementById('itemTipoBadge').className = `badge ${isServico ? 'bg-primary' : 'bg-success'}`;
-            
-            // Tags
-            const tagsContainer = document.getElementById('itemTags');
-            tagsContainer.innerHTML = '';
-            if (item.tags && item.tags.length > 0) {
-                item.tags.forEach(tag => {
-                    const tagElement = document.createElement('span');
-                    tagElement.className = 'item-tag';
-                    tagElement.textContent = tag;
-                    tagsContainer.appendChild(tagElement);
-                });
-            }
-            
-            // Galeria
-            const galleryContainer = document.getElementById('itemGallery');
-            galleryContainer.innerHTML = '';
-            if (item.imagens && item.imagens.length > 0) {
-                item.imagens.forEach((img, index) => {
-                    const imgElement = document.createElement('img');
-                    imgElement.src = img;
-                    imgElement.alt = `${item.nome} - Foto ${index + 1}`;
-                    galleryContainer.appendChild(imgElement);
-                });
-            } else {
-                galleryContainer.innerHTML = `
-                    <img src="https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome)}" 
-                         alt="${item.nome}">
-                `;
-            }
-            
-            // Informações extras
-            const infoExtraContainer = document.getElementById('itemInfoExtra');
-            infoExtraContainer.innerHTML = '';
-            
-            if (isServico) {
-                infoExtraContainer.innerHTML = `
-                    <div class="row">
-                        <div class="col-6">
-                            <small class="text-muted d-block">Duração</small>
-                            <span><i class="fas fa-clock"></i> ${item.duracao || 'Não informada'}</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted d-block">Tipo</small>
-                            <span><i class="fas fa-map-marker-alt"></i> ${item.tipoServico || 'Presencial'}</span>
-                        </div>
-                    </div>
-                    ${item.garantiaDias ? `
-                        <div class="mt-3">
-                            <small class="text-muted d-block">Garantia</small>
-                            <span><i class="fas fa-shield-alt"></i> ${item.garantiaDias} dias</span>
-                        </div>
-                    ` : ''}
-                `;
-            } else {
-                infoExtraContainer.innerHTML = `
-                    <div class="row">
-                        ${item.marca ? `
-                            <div class="col-6">
-                                <small class="text-muted d-block">Marca</small>
-                                <span><i class="fas fa-tag"></i> ${item.marca}</span>
-                            </div>
-                        ` : ''}
-                        ${item.estoqueAtual !== undefined ? `
-                            <div class="col-6">
-                                <small class="text-muted d-block">Estoque</small>
-                                <span><i class="fas fa-box"></i> ${item.estoqueAtual} unidades</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    ${item.garantiaDias ? `
-                        <div class="mt-3">
-                            <small class="text-muted d-block">Garantia</small>
-                            <span><i class="fas fa-shield-alt"></i> ${item.garantiaDias} dias</span>
-                        </div>
-                    ` : ''}
-                `;
-            }
-            
-            // Configurar botão de orçamento
-            const btnOrcamento = document.getElementById('btnSolicitarOrcamento');
-            btnOrcamento.onclick = () => solicitarOrcamentoItem(itemId, tipo);
-            
-            // Mostrar modal
-            detalhesModal.show();
-            
-        } catch (error) {
-            showToast('Erro ao carregar detalhes do item', 'error');
-        }
-    };
-
-    // Solicitar orçamento via WhatsApp
-    window.solicitarOrcamentoItem = function(itemId, tipo) {
-        const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
-        if (!item || !professionalData) return;
-        
-        const whatsapp = professionalData.profissional?.whatsapp;
-        if (!whatsapp) {
-            showToast('Este profissional não possui WhatsApp cadastrado', 'error');
-            return;
-        }
-        
-        const num = whatsapp.replace(/\D/g, '');
-        const message = `Olá! Encontrei você no ScanHub e gostaria de solicitar um orçamento para:\n\n` +
-                      `*${item.nome}*\n` +
-                      `Preço: R$ ${item.precoVenda?.toFixed(2) || 'A combinar'}\n` +
-                      `${item.descricao ? `Descrição: ${item.descricao.substring(0, 100)}...\n` : ''}` +
-                      `\nPoderia me passar mais informações?`;
-        
-        const url = `https://wa.me/55${num}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
-    };
-
-    window.solicitarOrcamento = function() {
-        if (!professionalData) return;
-        
-        const whatsapp = professionalData.profissional?.whatsapp;
-        if (!whatsapp) {
-            showToast('Este profissional não possui WhatsApp cadastrado', 'error');
-            return;
-        }
-        
-        const num = whatsapp.replace(/\D/g, '');
-        const message = `Olá! Encontrei você no ScanHub e gostaria de solicitar um orçamento.\n\n` +
-                      `Poderia me passar mais informações sobre seus serviços?`;
-        
-        const url = `https://wa.me/55${num}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
-    };
-
-    // Abrir modal de orçamento
-    window.abrirModalOrcamento = function() {
         const user = auth.currentUser;
         
         if (!user) {
-            showToast('Para solicitar orçamento, você precisa estar logado.', 'error');
-            return;
+            throw new Error('Usuário não autenticado');
         }
         
-        // Preencher automaticamente os dados do usuário se disponíveis
-        if (user.displayName) {
-            document.getElementById('inputNome').value = user.displayName;
+        // Verificar se já avaliou
+        const avaliacoesQuery = query(
+            collection(db, "avaliacoes"),
+            where("profissionalId", "==", professionalId),
+            where("clienteId", "==", user.uid)
+        );
+        
+        const avaliacoesSnapshot = await getDocs(avaliacoesQuery);
+        
+        if (!avaliacoesSnapshot.empty) {
+            throw new Error('Você já avaliou este profissional');
         }
         
-        // Preencher email se disponível
-        if (user.email) {
-            document.getElementById('inputEmail').value = user.email;
-        }
-        
-        // Resetar outros campos
-        document.getElementById('inputTelefone').value = '';
-        document.getElementById('inputCidade').value = '';
-        document.getElementById('inputDescricao').value = '';
-        document.getElementById('inputData').value = '';
-        
-        // Definir data mínima como hoje
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('inputData').min = hoje;
-        
-        orcamentoModal.show();
-    };
-
-    // Enviar pedido de orçamento
-    window.enviarPedidoOrcamento = async function() {
-        const nome = document.getElementById('inputNome').value.trim();
-        const telefone = document.getElementById('inputTelefone').value.trim();
-        const email = document.getElementById('inputEmail').value.trim();
-        const cidade = document.getElementById('inputCidade').value.trim();
-        const descricao = document.getElementById('inputDescricao').value.trim();
-        const dataPreferencial = document.getElementById('inputData').value;
-        
-        // Validação básica
-        if (!nome || !telefone || !cidade || !descricao) {
-            showToast('Preencha todos os campos obrigatórios (*)', 'error');
-            return;
-        }
-        
-        // Validar telefone (pelo menos 10 dígitos)
-        const telefoneLimpo = telefone.replace(/\D/g, '');
-        if (telefoneLimpo.length < 10) {
-            showToast('Digite um telefone válido com DDD', 'error');
-            return;
-        }
-        
-        const btn = document.getElementById('btnEnviarOrcamento');
-        const originalText = btn.innerHTML;
-        
-        try {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
-            
-            const user = auth.currentUser;
-            
-            // Salvar pedido no Firestore na coleção "solicitacoes" (conforme suas regras)
-            const pedidoData = {
-                clienteId: user.uid,
-                clienteNome: nome,
-                clienteTelefone: telefone,
-                clienteEmail: email || null,
-                clienteCidade: cidade,
-                profissionalId: professionalId,
-                profissionalNome: professionalData?.profissional?.nomeProfissional || professionalData?.apelido || 'Profissional',
-                descricao: descricao,
-                dataPreferencial: dataPreferencial || null,
-                status: 'pendente',
-                dataSolicitacao: serverTimestamp(),
-                visualizado: false,
-                respondido: false,
-                tipo: 'orcamento',
-                origem: 'perfil_publico'
-            };
-            
-            // 1. Salvar no Firestore (coleção solicitacoes conforme suas regras)
-            const pedidoRef = await addDoc(collection(db, "solicitacoes"), pedidoData);
-            
-            // 2. Criar notificação para o profissional
-            const notificacaoData = {
-                tipo: 'orcamento_solicitado',
-                titulo: '📋 Novo pedido de orçamento!',
-                mensagem: `${nome} solicitou um orçamento`,
-                userId: professionalId,
-                pedidoId: pedidoRef.id,
-                lida: false,
-                data: serverTimestamp(),
-                metadata: {
-                    clienteNome: nome,
-                    clienteTelefone: telefone,
-                    descricaoResumo: descricao.substring(0, 100) + (descricao.length > 100 ? '...' : '')
-                }
-            };
-            
-            await addDoc(collection(db, "notificacoes"), notificacaoData);
-            
-            // 3. Atualizar contador de notificações do profissional
-            await updateDoc(doc(db, "usuarios", professionalId), {
-                "notificacoesPendentes": increment(1),
-                ultimaAtualizacao: new Date().toISOString()
-            });
-            
-            // 4. Fechar modal e mostrar sucesso
-            orcamentoModal.hide();
-            showToast('Pedido enviado com sucesso! O profissional receberá sua solicitação.', 'success');
-            
-            // 5. Opcional: Enviar também por WhatsApp se o profissional tiver cadastrado
-            const whatsappProf = professionalData.profissional?.whatsapp;
-            if (whatsappProf) {
-                const mensagemWhatsApp = `*📋 NOVO PEDIDO DE ORÇAMENTO - ScanHub*\n\n` +
-                                       `👤 *Cliente:* ${nome}\n` +
-                                       `📞 *Telefone:* ${telefone}\n` +
-                                       `🏙️ *Cidade:* ${cidade}\n` +
-                                       `📝 *Descrição:* ${descricao.substring(0, 150)}${descricao.length > 150 ? '...' : ''}\n\n` +
-                                       `📍 *Acesse o ScanHub para ver detalhes completos e responder.*`;
-                
-                const num = whatsappProf.replace(/\D/g, '');
-                const urlWhatsApp = `https://wa.me/55${num}?text=${encodeURIComponent(mensagemWhatsApp)}`;
-                
-                // Perguntar se quer abrir WhatsApp
-                setTimeout(() => {
-                    if (confirm('Deseja também enviar uma mensagem direta por WhatsApp?')) {
-                        window.open(urlWhatsApp, '_blank');
-                    }
-                }, 1500);
-            }
-            
-        } catch (error) {
-            console.error('Erro ao enviar pedido:', error);
-            showToast('Erro ao enviar pedido. Tente novamente.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    };
-
-    // Switch tabs
-    window.switchTab = function(tabName) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
-        
-        event.target.classList.add('active');
-        document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
-    };
-
-    // Utilitários
-    function formatSpecialty(esp) {
-        if (!esp) return 'Profissional';
-        const map = {
-            'eletrica': 'Eletricista',
-            'hidraulica': 'Encanador',
-            'massoterapia': 'Massoterapia',
-            'tecnico_celular': 'Técnico de Celular',
-            'manicure': 'Manicure e Pedicure',
-            'pintura': 'Pintor',
-            'ar_condicionado': 'Ar Condicionado',
-            'programador': 'Programador/Desenvolvedor'
+        // Criar avaliação
+        const avaliacaoData = {
+            profissionalId: professionalId,
+            profissionalNome: professionalData?.profissional?.nomeProfissional || professionalData?.apelido || 'Profissional',
+            clienteId: user.uid,
+            clienteNome: anonymous ? null : (currentUserData?.apelido || user.displayName || 'Cliente'),
+            clienteAvatar: anonymous ? null : (currentUserData?.fotoPerfil || user.photoURL || null),
+            nota: parseInt(rating),
+            comentario: comment || null,
+            anonimo: anonymous,
+            resposta: null,
+            dataResposta: null,
+            status: "ativo",
+            data: serverTimestamp()
         };
-        return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
-    }
-
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast-custom ${type}`;
         
-        const icon = type === 'success' ? 'fa-check-circle text-success' : 
-                    type === 'error' ? 'fa-exclamation-circle text-danger' : 
-                    'fa-info-circle text-info';
+        // Salvar no Firestore
+        const docRef = await addDoc(collection(db, "avaliacoes"), avaliacaoData);
         
-        toast.innerHTML = `
-            <i class="fas ${icon} fa-lg"></i>
-            <span class="fw-medium">${message}</span>
-        `;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        // ✅ CRIAR NOTIFICAÇÃO PARA O PROFISSIONAL
+        await criarNotificacaoAvaliacao(
+            professionalId,
+            parseInt(rating),
+            comment,
+            anonymous ? null : (currentUserData?.apelido || user.displayName || 'Cliente'),
+            user.uid,
+            anonymous
+        );
+        
+        // Atualizar contagem no perfil do profissional
+        const newTotal = reviews.length + 1;
+        const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
+        const newAverage = ((currentSum + parseInt(rating)) / newTotal).toFixed(1);
+        
+        await updateDoc(doc(db, "usuarios", professionalId), {
+            "profissional.mediaAvaliacoes": parseFloat(newAverage),
+            "profissional.totalAvaliacoes": newTotal,
+            ultimaAtualizacao: new Date().toISOString()
+        });
+        
+        // Atualizar localmente
+        avaliacaoData.id = docRef.id;
+        reviews.unshift(avaliacaoData);
+        
+        // Fechar modal e atualizar UI
+        reviewModal.hide();
+        showToast('Avaliação enviada com sucesso! O profissional será notificado.', 'success');
+        
+        // Atualizar display
+        updateRatingDisplay(newAverage, newTotal);
+        renderReviews();
+        
+    } catch (error) {
+        showToast(error.message || 'Erro ao enviar avaliação. Tente novamente.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
+};
 
-    function showError() {
-        document.getElementById('loadingScreen').style.display = 'none';
-        document.getElementById('errorScreen').style.display = 'flex';
+// Abrir detalhes do item
+window.abrirDetalhesItem = async function(itemId, tipo) {
+    try {
+        const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
+        if (!item) return;
+        
+        // Preencher modal
+        document.getElementById('modalItemTitle').textContent = item.nome;
+        document.getElementById('itemNome').textContent = item.nome;
+        document.getElementById('itemCategoria').textContent = item.categoria || 'Sem categoria';
+        document.getElementById('itemDescricao').textContent = item.descricao || 'Sem descrição';
+        
+        // Preço
+        const precoFormatado = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(item.precoVenda || 0);
+        document.getElementById('itemPreco').textContent = precoFormatado;
+        
+        // Tipo
+        const isServico = item.tipo === 'servico';
+        document.getElementById('itemTipoBadge').textContent = isServico ? 'Serviço' : 'Produto';
+        document.getElementById('itemTipoBadge').className = `badge ${isServico ? 'bg-primary' : 'bg-success'}`;
+        
+        // Tags
+        const tagsContainer = document.getElementById('itemTags');
+        tagsContainer.innerHTML = '';
+        if (item.tags && item.tags.length > 0) {
+            item.tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'item-tag';
+                tagElement.textContent = tag;
+                tagsContainer.appendChild(tagElement);
+            });
+        }
+        
+        // Galeria
+        const galleryContainer = document.getElementById('itemGallery');
+        galleryContainer.innerHTML = '';
+        if (item.imagens && item.imagens.length > 0) {
+            item.imagens.forEach((img, index) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = img;
+                imgElement.alt = `${item.nome} - Foto ${index + 1}`;
+                galleryContainer.appendChild(imgElement);
+            });
+        } else {
+            galleryContainer.innerHTML = `
+                <img src="https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome)}" 
+                     alt="${item.nome}">
+            `;
+        }
+        
+        // Informações extras
+        const infoExtraContainer = document.getElementById('itemInfoExtra');
+        infoExtraContainer.innerHTML = '';
+        
+        if (isServico) {
+            infoExtraContainer.innerHTML = `
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Duração</small>
+                        <span><i class="fas fa-clock"></i> ${item.duracao || 'Não informada'}</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Tipo</small>
+                        <span><i class="fas fa-map-marker-alt"></i> ${item.tipoServico || 'Presencial'}</span>
+                    </div>
+                </div>
+                ${item.garantiaDias ? `
+                    <div class="mt-3">
+                        <small class="text-muted d-block">Garantia</small>
+                        <span><i class="fas fa-shield-alt"></i> ${item.garantiaDias} dias</span>
+                    </div>
+                ` : ''}
+            `;
+        } else {
+            infoExtraContainer.innerHTML = `
+                <div class="row">
+                    ${item.marca ? `
+                        <div class="col-6">
+                            <small class="text-muted d-block">Marca</small>
+                            <span><i class="fas fa-tag"></i> ${item.marca}</span>
+                        </div>
+                    ` : ''}
+                    ${item.estoqueAtual !== undefined ? `
+                        <div class="col-6">
+                            <small class="text-muted d-block">Estoque</small>
+                            <span><i class="fas fa-box"></i> ${item.estoqueAtual} unidades</span>
+                        </div>
+                    ` : ''}
+                </div>
+                ${item.garantiaDias ? `
+                    <div class="mt-3">
+                        <small class="text-muted d-block">Garantia</small>
+                        <span><i class="fas fa-shield-alt"></i> ${item.garantiaDias} dias</span>
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        // Configurar botão de orçamento
+        const btnOrcamento = document.getElementById('btnSolicitarOrcamento');
+        btnOrcamento.onclick = () => solicitarOrcamentoItem(itemId, tipo);
+        
+        // Mostrar modal
+        detalhesModal.show();
+        
+    } catch (error) {
+        showToast('Erro ao carregar detalhes do item', 'error');
     }
-    </script>
+};
+
+// Abrir modal de orçamento
+window.abrirModalOrcamento = async function() {
+    const user = auth.currentUser;
+    
+    if (!user) {
+        showToast('Para solicitar orçamento, você precisa estar logado.', 'error');
+        window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+        return;
+    }
+    
+    // ✅ VERIFICAR: Cliente não pode pedir orçamento para si mesmo
+    if (user.uid === professionalId) {
+        showToast('Você não pode solicitar orçamento para si mesmo.', 'error');
+        return;
+    }
+    
+    // ✅ PREENCHER DADOS AUTOMATICAMENTE DO USUÁRIO LOGADO
+    document.getElementById('inputNome').value = currentUserData?.apelido || user.displayName || '';
+    document.getElementById('inputTelefone').value = currentUserData?.celular || currentUserData?.telefone || '';
+    document.getElementById('inputEmail').value = user.email || currentUserData?.email || '';
+    document.getElementById('inputCidade').value = currentUserData?.cidade || currentUserData?.cidadeBase || '';
+    
+    // Tornar campos apenas leitura (não editáveis pelo usuário)
+    document.getElementById('inputNome').readOnly = true;
+    document.getElementById('inputTelefone').readOnly = true;
+    document.getElementById('inputEmail').readOnly = true;
+    document.getElementById('inputCidade').readOnly = true;
+    
+    // Resetar outros campos
+    document.getElementById('inputDescricao').value = '';
+    document.getElementById('inputData').value = '';
+    
+    // Definir data mínima como hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('inputData').min = hoje;
+    
+    orcamentoModal.show();
+};
+
+// Enviar pedido de orçamento
+window.enviarPedidoOrcamento = async function() {
+    const nome = document.getElementById('inputNome').value.trim();
+    const telefone = document.getElementById('inputTelefone').value.trim();
+    const email = document.getElementById('inputEmail').value.trim();
+    const cidade = document.getElementById('inputCidade').value.trim();
+    const descricao = document.getElementById('inputDescricao').value.trim();
+    const dataPreferencial = document.getElementById('inputData').value;
+    
+    // Validação básica
+    if (!nome || !telefone || !cidade || !descricao) {
+        showToast('Preencha todos os campos obrigatórios (*)', 'error');
+        return;
+    }
+    
+    // Validar telefone (pelo menos 10 dígitos)
+    const telefoneLimpo = telefone.replace(/\D/g, '');
+    if (telefoneLimpo.length < 10) {
+        showToast('Digite um telefone válido com DDD', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('btnEnviarOrcamento');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        
+        const user = auth.currentUser;
+        
+        // ✅ VERIFICAR: Não pode enviar para si mesmo
+        if (user.uid === professionalId) {
+            throw new Error('Você não pode solicitar orçamento para si mesmo.');
+        }
+        
+        // Salvar pedido no Firestore na coleção "solicitacoes"
+        const pedidoData = {
+            clienteId: user.uid,
+            clienteNome: nome,
+            clienteTelefone: telefone,
+            clienteEmail: email || null,
+            clienteCidade: cidade,
+            profissionalId: professionalId,
+            profissionalNome: professionalData?.profissional?.nomeProfissional || professionalData?.apelido || 'Profissional',
+            descricao: descricao,
+            dataPreferencial: dataPreferencial || null,
+            status: 'pendente',
+            dataSolicitacao: serverTimestamp(),
+            visualizado: false,
+            respondido: false,
+            tipo: 'orcamento',
+            origem: 'perfil_publico',
+            dadosAutoPreenchidos: true // ✅ Marcar que os dados vieram do cadastro
+        };
+        
+        // 1. Salvar no Firestore (coleção solicitacoes conforme suas regras)
+        const pedidoRef = await addDoc(collection(db, "solicitacoes"), pedidoData);
+        
+        // 2. ✅ CRIAR NOTIFICAÇÃO PARA O PROFISSIONAL
+        await criarNotificacaoOrcamento(
+            professionalId,
+            user.uid,
+            nome,
+            telefone,
+            cidade,
+            descricao,
+            pedidoRef.id
+        );
+        
+        // 3. Atualizar contador de notificações do profissional
+        await updateDoc(doc(db, "usuarios", professionalId), {
+            "notificacoesPendentes": increment(1),
+            ultimaAtualizacao: new Date().toISOString()
+        });
+        
+        // 4. Fechar modal e mostrar sucesso
+        orcamentoModal.hide();
+        showToast('✅ Pedido enviado com sucesso! O profissional receberá uma notificação.', 'success');
+        
+        // 5. Opcional: Enviar também por WhatsApp se o profissional tiver cadastrado
+        const whatsappProf = professionalData.profissional?.whatsapp;
+        if (whatsappProf) {
+            const mensagemWhatsApp = `*📋 NOVO PEDIDO DE ORÇAMENTO - ScanHub*\n\n` +
+                                   `👤 *Cliente:* ${nome}\n` +
+                                   `📞 *Telefone:* ${telefone}\n` +
+                                   `🏙️ *Cidade:* ${cidade}\n` +
+                                   `📝 *Descrição:* ${descricao.substring(0, 150)}${descricao.length > 150 ? '...' : ''}\n\n` +
+                                   `📍 *Acesse o ScanHub para ver detalhes completos e responder.*`;
+            
+            const num = whatsappProf.replace(/\D/g, '');
+            const urlWhatsApp = `https://wa.me/55${num}?text=${encodeURIComponent(mensagemWhatsApp)}`;
+            
+            // Perguntar se quer abrir WhatsApp
+            setTimeout(() => {
+                if (confirm('Deseja também enviar uma mensagem direta por WhatsApp?')) {
+                    window.open(urlWhatsApp, '_blank');
+                }
+            }, 1500);
+        }
+        
+    } catch (error) {
+        console.error('Erro ao enviar pedido:', error);
+        showToast('Erro ao enviar pedido: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+};
+
+// ======================
+// FUNÇÕES DE NOTIFICAÇÃO
+// ======================
+
+// ✅ CRIAR NOTIFICAÇÃO DE ORÇAMENTO
+async function criarNotificacaoOrcamento(profissionalId, clienteId, clienteNome, telefone, cidade, descricao, pedidoId) {
+    try {
+        if (!profissionalId || !clienteId) {
+            console.error('IDs não fornecidos para criar notificação');
+            return false;
+        }
+        
+        // Criar notificação
+        await addDoc(collection(db, "notificacoes"), {
+            profissionalId: profissionalId,
+            clienteId: clienteId,
+            clienteNome: clienteNome,
+            tipo: "orcamento",
+            titulo: "📋 Novo pedido de orçamento!",
+            descricao: `${clienteNome} solicitou um orçamento: "${descricao.substring(0, 80)}${descricao.length > 80 ? '...' : ''}"`,
+            lida: false,
+            arquivada: false,
+            urgente: false,
+            data: serverTimestamp(),
+            metadata: {
+                clienteNome: clienteNome,
+                telefone: telefone,
+                cidade: cidade,
+                descricao: descricao,
+                pedidoId: pedidoId
+            },
+            tags: ["orcamento", "pedido", "cliente", "urgente"]
+        });
+        
+        console.log(`✅ Notificação de orçamento criada para profissional ${profissionalId}`);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro ao criar notificação de orçamento:', error);
+        return false;
+    }
+}
+
+// ✅ CRIAR NOTIFICAÇÃO DE AVALIAÇÃO
+async function criarNotificacaoAvaliacao(profissionalId, nota, comentario, clienteNome, clienteId, anonimo) {
+    try {
+        if (!profissionalId || !clienteId) {
+            console.error('IDs não fornecidos para criar notificação');
+            return false;
+        }
+        
+        const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
+        
+        // Criar notificação
+        await addDoc(collection(db, "notificacoes"), {
+            profissionalId: profissionalId,
+            clienteId: clienteId,
+            clienteNome: nomeExibido,
+            tipo: "review",
+            titulo: "⭐ Nova avaliação recebida!",
+            descricao: `${nomeExibido} avaliou você com ${nota} estrelas${comentario ? `: "${comentario.substring(0, 80)}${comentario.length > 80 ? '...' : ''}"` : ''}`,
+            lida: false,
+            arquivada: false,
+            urgente: false,
+            data: serverTimestamp(),
+            metadata: {
+                clienteNome: nomeExibido,
+                nota: nota,
+                comentario: comentario || '',
+                anonimo: anonimo
+            },
+            tags: ["avaliacao", "review", "cliente"]
+        });
+        
+        console.log(`✅ Notificação de avaliação criada para profissional ${profissionalId}`);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro ao criar notificação de avaliação:', error);
+        return false;
+    }
+}
+
+// ======================
+// FUNÇÕES AUXILIARES
+// ======================
+
+// Solicitar orçamento via WhatsApp
+window.solicitarOrcamentoItem = function(itemId, tipo) {
+    const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
+    if (!item || !professionalData) return;
+    
+    const whatsapp = professionalData.profissional?.whatsapp;
+    if (!whatsapp) {
+        showToast('Este profissional não possui WhatsApp cadastrado', 'error');
+        return;
+    }
+    
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('Para solicitar orçamento, você precisa estar logado.', 'error');
+        window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+        return;
+    }
+    
+    // Verificar se não é o próprio profissional
+    if (user.uid === professionalId) {
+        showToast('Você não pode solicitar orçamento para si mesmo.', 'error');
+        return;
+    }
+    
+    const num = whatsapp.replace(/\D/g, '');
+    const message = `Olá! Encontrei você no ScanHub e gostaria de solicitar um orçamento para:\n\n` +
+                  `*${item.nome}*\n` +
+                  `Preço: R$ ${item.precoVenda?.toFixed(2) || 'A combinar'}\n` +
+                  `${item.descricao ? `Descrição: ${item.descricao.substring(0, 100)}...\n` : ''}` +
+                  `\nPoderia me passar mais informações?\n\n` +
+                  `Meu nome: ${currentUserData?.apelido || ''}\n` +
+                  `Telefone: ${currentUserData?.celular || ''}`;
+    
+    const url = `https://wa.me/55${num}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+};
+
+window.solicitarOrcamento = function() {
+    if (!professionalData) return;
+    
+    const whatsapp = professionalData.profissional?.whatsapp;
+    if (!whatsapp) {
+        showToast('Este profissional não possui WhatsApp cadastrado', 'error');
+        return;
+    }
+    
+    const user = auth.currentUser;
+    if (!user) {
+        showToast('Para conversar, você precisa estar logado.', 'error');
+        window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+        return;
+    }
+    
+    // Verificar se não é o próprio profissional
+    if (user.uid === professionalId) {
+        showToast('Você não pode conversar consigo mesmo.', 'error');
+        return;
+    }
+    
+    const num = whatsapp.replace(/\D/g, '');
+    const message = `Olá! Encontrei você no ScanHub e gostaria de conversar sobre seus serviços.\n\n` +
+                  `Meu nome: ${currentUserData?.apelido || ''}\n` +
+                  `Telefone: ${currentUserData?.celular || ''}`;
+    
+    const url = `https://wa.me/55${num}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+};
+
+// Switch tabs
+window.switchTab = function(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+};
+
+// Utilitários
+function formatSpecialty(esp) {
+    if (!esp) return 'Profissional';
+    const map = {
+        'eletrica': 'Eletricista',
+        'hidraulica': 'Encanador',
+        'massoterapia': 'Massoterapia',
+        'tecnico_celular': 'Técnico de Celular',
+        'manicure': 'Manicure e Pedicure',
+        'pintura': 'Pintor',
+        'ar_condicionado': 'Ar Condicionado',
+        'programador': 'Programador/Desenvolvedor'
+    };
+    return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast-custom ${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle text-success' : 
+                type === 'error' ? 'fa-exclamation-circle text-danger' : 
+                'fa-info-circle text-info';
+    
+    toast.innerHTML = `
+        <i class="fas ${icon} fa-lg"></i>
+        <span class="fw-medium">${message}</span>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function showError() {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display = 'flex';
+}
+</script>
 </body>
 </html>
