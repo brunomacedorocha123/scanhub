@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-   :root {
+  :root {
     --primary-color: #44689a;
     --secondary-color: #33c47;
     --light-color: #e8ecef;
@@ -37,7 +37,7 @@ body {
     overflow-x: hidden;
 }
 
-/* NAVBAR FIXED - LOGO ENORME */
+/* NAVBAR FIXED - LOGO GRANDE */
 .navbar {
     background: rgba(255, 255, 255, 0.98) !important;
     backdrop-filter: blur(10px);
@@ -53,17 +53,17 @@ body {
     align-items: center;
 }
 
-/* LOGO ENORME - SCALE 5! */
+/* LOGO GRANDE - SCALE 3 */
 .navbar-brand {
     display: flex;
     align-items: center;
     position: relative;
     margin-right: 0;
-    transform: scale(5) !important; /* ESCALA 5 - ENORME! */
+    transform: scale(3) !important; /* ESCALA 3 - BOM TAMANHO */
     transform-origin: left center;
     height: 80px;
-    margin-top: -15px;
-    margin-bottom: -15px;
+    margin-top: -10px;
+    margin-bottom: -10px;
     margin-left: 10px;
     z-index: 1001;
 }
@@ -78,7 +78,7 @@ body {
 /* MENU À DIREITA */
 .navbar-collapse {
     justify-content: flex-end !important;
-    margin-left: 100px; /* Espaço para a logo enorme */
+    margin-left: 60px; /* Espaço para a logo */
 }
 
 .navbar-toggler {
@@ -386,13 +386,13 @@ body {
 /* ========== RESPONSIVO ========== */
 @media (max-width: 991px) {
     .navbar-brand {
-        transform: scale(4) !important; /* Ainda grande no tablet */
-        margin-top: -12px;
-        margin-bottom: -12px;
+        transform: scale(2.5) !important; /* Reduzido proporcionalmente */
+        margin-top: -8px;
+        margin-bottom: -8px;
     }
     
     .navbar-collapse {
-        margin-left: 80px;
+        margin-left: 50px;
     }
     
     .hero {
@@ -511,7 +511,7 @@ body {
 
 @media (max-width: 768px) {
     .navbar-brand {
-        transform: scale(3.5) !important; /* Ainda grande */
+        transform: scale(2) !important;
     }
     
     .navbar-brand img {
@@ -555,9 +555,9 @@ body {
 
 @media (max-width: 576px) {
     .navbar-brand {
-        transform: scale(3) !important; /* Ainda grande no celular */
-        margin-top: -10px;
-        margin-bottom: -10px;
+        transform: scale(1.5) !important;
+        margin-top: -5px;
+        margin-bottom: -5px;
     }
     
     .navbar-brand img {
