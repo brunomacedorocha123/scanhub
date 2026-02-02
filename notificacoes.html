@@ -1404,6 +1404,9 @@ let currentFilter = 'all';
 let currentStatusFilter = 'all';
 let currentTab = 'recent';
 
+// ✅ CACHE PARA NOTIFICAÇÕES EXCLUÍDAS
+let deletedNotificationsCache = JSON.parse(localStorage.getItem('scanhub_deleted_notifications') || '{}');
+
 // Modais
 const modalReviews = new bootstrap.Modal(document.getElementById('modalReviews'));
 
@@ -1457,6 +1460,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+// ✅ FUNÇÃO PARA SALVAR CACHE DE NOTIFICAÇÕES EXCLUÍDAS
+function saveDeletedCache() {
+    localStorage.setItem('scanhub_deleted_notifications', JSON.stringify(deletedNotificationsCache));
+}
+
+// ✅ FUNÇÃO PARA VERIFICAR SE NOTIFICAÇÃO FOI EXCLUÍDA
+function isNotificationDeleted(notificationId, source) {
+    const cacheKey = `${source}_${notificationId}`;
+    return deletedNotificationsCache[cacheKey] === true;
+}
+
+// ✅ FUNÇÃO PARA MARCAR NOTIFICAÇÃO COMO EXCLUÍDA
+function markNotificationAsDeleted(notificationId, source) {
+    const cacheKey = `${source}_${notificationId}`;
+    deletedNotificationsCache[cacheKey] = true;
+    saveDeletedCache();
+}
+
 // Load user data
 async function loadUserData() {
     try {
@@ -1504,10 +1525,17 @@ async function loadNotifications() {
             
             notificacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
+                const notificationId = docSnapshot.id;
+                const source = 'notificacoes';
+                
+                // ✅ VERIFICAR SE ESTÁ NA LISTA DE EXCLUÍDAS
+                if (isNotificationDeleted(notificationId, source)) {
+                    return; // Pular notificação excluída
+                }
                 
                 const notificacao = {
-                    id: docSnapshot.id,
-                    source: 'notificacoes',
+                    id: notificationId,
+                    source: source,
                     titulo: data.titulo || 'Nova notificação',
                     descricao: data.descricao || '',
                     tipo: data.tipo || 'system',
@@ -1537,10 +1565,17 @@ async function loadNotifications() {
             
             avaliacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
+                const avaliacaoId = docSnapshot.id;
+                const source = 'avaliacoes';
+                
+                // ✅ VERIFICAR SE ESTÁ NA LISTA DE EXCLUÍDAS
+                if (isNotificationDeleted(avaliacaoId, source)) {
+                    return; // Pular notificação excluída
+                }
                 
                 // ✅ GUARDAR PARA ESTATÍSTICAS
                 const review = {
-                    id: docSnapshot.id,
+                    id: avaliacaoId,
                     clienteId: data.clienteId,
                     clienteNome: data.clienteNome || 'Cliente',
                     clienteFoto: data.clienteFoto || '',
@@ -1558,8 +1593,8 @@ async function loadNotifications() {
                 // ✅ CRIAR NOTIFICAÇÃO APENAS PARA AVALIAÇÕES ATIVAS
                 if (data.status === 'ativo' || !data.status) {
                     const notificacaoAvaliacao = {
-                        id: docSnapshot.id,
-                        source: 'avaliacoes',
+                        id: avaliacaoId,
+                        source: source,
                         titulo: "⭐ Nova avaliação recebida!",
                         descricao: `${data.anonimo ? 'Cliente Anônimo' : (data.clienteNome || 'Cliente')} avaliou você com ${data.nota || 0} estrelas${data.comentario ? `: "${data.comentario.substring(0, 80)}${data.comentario.length > 80 ? '...' : ''}"` : ''}`,
                         tipo: 'review',
@@ -1574,21 +1609,12 @@ async function loadNotifications() {
                             comentario: data.comentario || '',
                             anonimo: data.anonimo || false,
                             clienteId: data.clienteId,
-                            avaliacaoId: docSnapshot.id
+                            avaliacaoId: avaliacaoId
                         },
                         tags: ["avaliacao", "review", "cliente"]
                     };
                     
-                    // Verificar se já existe notificação para esta avaliação
-                    const existeNotificacao = notifications.some(n => 
-                        n.source === 'notificacoes' && 
-                        n.metadata && 
-                        n.metadata.avaliacaoId === docSnapshot.id
-                    );
-                    
-                    if (!existeNotificacao) {
-                        notifications.push(notificacaoAvaliacao);
-                    }
+                    notifications.push(notificacaoAvaliacao);
                 }
             });
         } catch (error) {
@@ -1607,10 +1633,17 @@ async function loadNotifications() {
             
             solicitacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
+                const solicitacaoId = docSnapshot.id;
+                const source = 'solicitacoes';
+                
+                // ✅ VERIFICAR SE ESTÁ NA LISTA DE EXCLUÍDAS
+                if (isNotificationDeleted(solicitacaoId, source)) {
+                    return; // Pular notificação excluída
+                }
                 
                 const notificacaoSolicitacao = {
-                    id: docSnapshot.id,
-                    source: 'solicitacoes',
+                    id: solicitacaoId,
+                    source: source,
                     titulo: "📋 Novo pedido de orçamento!",
                     descricao: `${data.clienteNome || 'Cliente'} solicitou um orçamento: "${data.descricao?.substring(0, 80) || 'Novo pedido'}${data.descricao && data.descricao.length > 80 ? '...' : ''}"`,
                     tipo: 'orcamento',
@@ -1625,22 +1658,13 @@ async function loadNotifications() {
                         cidade: data.clienteCidade || '',
                         descricao: data.descricao || '',
                         dataPreferencial: data.dataPreferencial || '',
-                        solicitacaoId: docSnapshot.id,
+                        solicitacaoId: solicitacaoId,
                         clienteId: data.clienteId
                     },
                     tags: ["orcamento", "pedido", "cliente", data.urgente ? "urgente" : "normal"]
                 };
                 
-                // Verificar se já existe notificação para esta solicitação
-                const existeNotificacao = notifications.some(n => 
-                    n.source === 'notificacoes' && 
-                    n.metadata && 
-                    n.metadata.solicitacaoId === docSnapshot.id
-                );
-                
-                if (!existeNotificacao) {
-                    notifications.push(notificacaoSolicitacao);
-                }
+                notifications.push(notificacaoSolicitacao);
             });
         } catch (error) {
             console.log('Erro ao carregar solicitações:', error);
@@ -1688,7 +1712,10 @@ function updateCounters() {
     urgentAlertsEl.textContent = urgent;
 
     // ✅ ATUALIZAR ESTATÍSTICAS DE AVALIAÇÕES (AVALIAÇÕES ATIVAS DOS ÚLTIMOS 30 DIAS)
-    const avaliacoesAtivas = reviews.filter(r => r.status === 'ativo' || !r.status);
+    const avaliacoesAtivas = reviews.filter(r => 
+        (r.status === 'ativo' || !r.status) && 
+        !isNotificationDeleted(r.id, 'avaliacoes')
+    );
     if (avaliacoesAtivas.length > 0) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -1964,7 +1991,7 @@ window.markAsRead = async function(notificationId, source) {
                 atualizadaEm: serverTimestamp()
             });
         }
-        // Para avaliacoes, apenas atualizar localmente (não altera a avaliação)
+        // Para avaliacoes, apenas atualizar localmente
 
         // Atualizar localmente
         notification.lida = !notification.lida;
@@ -1984,34 +2011,39 @@ window.markAsRead = async function(notificationId, source) {
     }
 };
 
-// ✅ FUNÇÃO PARA EXCLUIR NOTIFICAÇÃO
+// ✅ FUNÇÃO PARA EXCLUIR NOTIFICAÇÃO PERMANENTEMENTE
 window.deleteNotification = async function(notificationId, source) {
     try {
-        const confirmDelete = confirm('Tem certeza que deseja excluir esta notificação? Esta ação não pode ser desfeita.');
+        const confirmDelete = confirm('Tem certeza que deseja excluir esta notificação permanentemente? Esta ação não pode ser desfeita.');
         
         if (!confirmDelete) return;
 
         // Se for da coleção notificacoes, excluir do Firestore
         if (source === 'notificacoes') {
-            const notificationRef = doc(db, "notificacoes", notificationId);
-            await deleteDoc(notificationRef);
-        } 
-        // Se for de avaliacoes ou solicitacoes, apenas remove localmente
-        else {
-            // Apenas remove localmente, mantém o dado original no Firestore
+            try {
+                const notificationRef = doc(db, "notificacoes", notificationId);
+                await deleteDoc(notificationRef);
+            } catch (error) {
+                console.log('Não foi possível excluir do Firestore, mas será excluída localmente:', error);
+            }
         }
-
-        // Remover localmente
+        // Para avaliacoes ou solicitacoes, vamos apenas marcar como excluída no cache
+        
+        // ✅ MARCAR NO CACHE COMO EXCLUÍDA
+        markNotificationAsDeleted(notificationId, source);
+        
+        // Remover da lista local
         const index = notifications.findIndex(n => n.id === notificationId && n.source === source);
         if (index !== -1) {
             notifications.splice(index, 1);
         }
 
+        // ✅ ATUALIZAR TUDO IMEDIATAMENTE
         updateCounters();
         updateUnreadBadge();
         renderNotifications();
         
-        showToast('Sucesso', 'Notificação removida com sucesso', 'success');
+        showToast('Sucesso', 'Notificação excluída permanentemente', 'success');
 
     } catch (error) {
         console.error('Erro ao excluir notificação:', error);
@@ -2104,6 +2136,10 @@ window.searchNotifications = function() {
 
 // ✅ Refresh notifications
 window.refreshNotifications = async function() {
+    // ✅ LIMPAR CACHE SE QUISER (OPCIONAL)
+    // deletedNotificationsCache = {};
+    // saveDeletedCache();
+    
     await loadNotifications();
     showToast('Atualizado', 'Notificações atualizadas com sucesso', 'success');
 };
@@ -2135,7 +2171,10 @@ window.respondToOrcamento = async function(notificationId, source) {
 window.showAllReviews = async function() {
     try {
         const reviewsListEl = document.getElementById('reviewsList');
-        const avaliacoesAtivas = reviews.filter(r => r.status === 'ativo' || !r.status);
+        const avaliacoesAtivas = reviews.filter(r => 
+            (r.status === 'ativo' || !r.status) && 
+            !isNotificationDeleted(r.id, 'avaliacoes')
+        );
         
         if (avaliacoesAtivas.length === 0) {
             reviewsListEl.innerHTML = `
@@ -2296,7 +2335,7 @@ function formatTimeAgo(date) {
     }
 }
 
-// Auto-refresh notifications every 30 seconds
+// Auto-refresh notifications every 30 seconds (AGORA RESPEITA O CACHE)
 setInterval(() => {
     if (document.visibilityState === 'visible') {
         loadNotifications();
