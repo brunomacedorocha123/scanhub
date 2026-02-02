@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-     :root {
+    :root {
     --primary-color: #44689a;
     --secondary-color: #33c47;
     --light-color: #e8ecef;
@@ -54,16 +54,18 @@ body {
     display: flex;
     align-items: center;
     position: relative;
-    margin-right: 25px;
-    transform: scale(2); /* REDUZIDO PARA 2 */
+    margin-right: 20px;
+    /* REMOVIDO O TRANSFORM: SCALE */
+    /* transform: scale(2); */
     transform-origin: left center;
 }
 
 .navbar-brand img {
-    height: 35px; /* REDUZIDO PARA 35px */
+    height: 50px; /* TAMANHO NORMAL */
     width: auto;
     transition: all 0.3s ease;
     object-fit: contain;
+    max-width: 180px; /* LIMITE MÁXIMO DE LARGURA */
 }
 
 .navbar-toggler {
@@ -400,17 +402,14 @@ body {
         backdrop-filter: blur(10px);
     }
     
-    .navbar-brand {
-        transform: scale(1.8); /* AJUSTADO PARA RESPONSIVO */
-    }
-    
     .navbar-brand img {
-        height: 32px; /* AJUSTADO PARA RESPONSIVO */
+        height: 45px; /* REDUZIDO PARA TABLET */
+        max-width: 160px;
     }
     
     .navbar-collapse {
         position: fixed;
-        top: 65px;
+        top: 70px;
         left: 0;
         right: 0;
         background: rgba(255, 255, 255, 0.98);
@@ -420,7 +419,7 @@ body {
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 0 0 15px 15px;
-        max-height: calc(100vh - 65px);
+        max-height: calc(100vh - 70px);
         overflow-y: auto;
         z-index: 999;
     }
@@ -519,12 +518,9 @@ body {
         height: 120px;
     }
     
-    .navbar-brand {
-        transform: scale(1.6); /* AJUSTADO PARA RESPONSIVO */
-    }
-    
     .navbar-brand img {
-        height: 30px; /* AJUSTADO PARA RESPONSIVO */
+        height: 40px; /* REDUZIDO PARA TABLET PEQUENO */
+        max-width: 140px;
     }
     
     .services, .features {
@@ -532,7 +528,7 @@ body {
     }
     
     .navbar-collapse {
-        top: 62px;
+        top: 65px;
         padding: 20px;
     }
 }
@@ -551,12 +547,9 @@ body {
         height: 250px;
     }
     
-    .navbar-brand {
-        transform: scale(1.4); /* AJUSTADO PARA RESPONSIVO */
-    }
-    
     .navbar-brand img {
-        height: 28px; /* AJUSTADO PARA RESPONSIVO */
+        height: 35px; /* REDUZIDO PARA MOBILE */
+        max-width: 120px;
     }
     
     .hero-buttons {
