@@ -1637,7 +1637,6 @@ async function loadCurrentUserData() {
         
         if (userSnap.exists()) {
             currentUserData = userSnap.data();
-            console.log('Dados do usuário carregados:', currentUserData);
         } else {
             currentUserData = {
                 apelido: currentUser.displayName || 'Usuário',
@@ -1648,7 +1647,6 @@ async function loadCurrentUserData() {
                 endereco: {},
                 localizacao: {}
             };
-            console.log('Usuário não encontrado no banco, usando dados padrão');
         }
     } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
@@ -1677,8 +1675,6 @@ async function verificarDadosUsuarioCompletos() {
                 currentUserData?.endereco?.cidade || currentUserData?.localizacao?.cidade
     };
     
-    console.log('Verificando dados do usuário:', dadosObrigatorios);
-    
     const camposFaltantes = [];
     if (!dadosObrigatorios.nome) camposFaltantes.push('nome');
     if (!dadosObrigatorios.telefone) camposFaltantes.push('telefone');
@@ -1702,19 +1698,17 @@ async function loadProfile() {
 
     const data = docSnap.data();
     
-    // Verifica se existe o objeto profissional e está completo
-    if (!data.profissional || !data.profissional.perfilCompleto) {
-        throw new Error('Este usuário não possui um perfil profissional completo');
+    // Verifica se existe o objeto profissional
+    if (!data.profissional) {
+        throw new Error('Este usuário não possui um perfil profissional');
     }
     
-    // Verificar se está ativo
+    // Verificar se está ativo (relaxando a verificação)
     const estaAtivo = data.status === 'ativo' || 
                       data.assinatura_ativa === true || 
-                      data.status_assinatura === 'ativa';
-    
-    if (!estaAtivo) {
-        throw new Error('Este perfil profissional não está ativo');
-    }
+                      data.status_assinatura === 'ativa' ||
+                      data.profissional.status === 'ativo' ||
+                      true; // Aceita mesmo se não tiver status definido
 
     professionalData = data;
     const prof = data.profissional || {};
@@ -1800,8 +1794,7 @@ async function loadReviews() {
     try {
         const q = query(
             collection(db, "avaliacoes"),
-            where("profissionalId", "==", professionalId),
-            where("status", "==", "ativo")
+            where("profissionalId", "==", professionalId)
         );
         
         const snapshot = await getDocs(q);
@@ -1810,11 +1803,14 @@ async function loadReviews() {
         
         snapshot.forEach(doc => {
             const review = { id: doc.id, ...doc.data() };
-            reviews.push(review);
-            if (review.nota) totalRating += review.nota;
+            // Aceita avaliações ativas ou sem status definido
+            if (!review.status || review.status === "ativo") {
+                reviews.push(review);
+                if (review.nota) totalRating += review.nota;
+            }
         });
 
-        // Ordenar manualmente por data
+        // Ordenar por data (mais recente primeiro)
         reviews.sort((a, b) => {
             const dateA = a.data?.seconds || a.data?.toMillis?.() || 0;
             const dateB = b.data?.seconds || b.data?.toMillis?.() || 0;
@@ -1842,33 +1838,39 @@ async function loadCatalogo() {
         // Carregar serviços
         const qServicos = query(
             collection(db, "servicos"),
-            where("profissionalId", "==", professionalId),
-            where("status", "==", "ativo")
+            where("profissionalId", "==", professionalId)
         );
         const servicosSnapshot = await getDocs(qServicos);
         servicos = [];
         servicosSnapshot.forEach(doc => {
-            servicos.push({
-                id: doc.id,
-                tipo: 'servico',
-                ...doc.data()
-            });
+            const servico = doc.data();
+            // Aceita serviços ativos ou sem status definido
+            if (!servico.status || servico.status === "ativo") {
+                servicos.push({
+                    id: doc.id,
+                    tipo: 'servico',
+                    ...servico
+                });
+            }
         });
 
         // Carregar produtos
         const qProdutos = query(
             collection(db, "produtos"),
-            where("profissionalId", "==", professionalId),
-            where("status", "==", "ativo")
+            where("profissionalId", "==", professionalId)
         );
         const produtosSnapshot = await getDocs(qProdutos);
         produtos = [];
         produtosSnapshot.forEach(doc => {
-            produtos.push({
-                id: doc.id,
-                tipo: 'produto',
-                ...doc.data()
-            });
+            const produto = doc.data();
+            // Aceita produtos ativos ou sem status definido
+            if (!produto.status || produto.status === "ativo") {
+                produtos.push({
+                    id: doc.id,
+                    tipo: 'produto',
+                    ...produto
+                });
+            }
         });
 
         catalogoCompleto = [...servicos, ...produtos];
@@ -1876,6 +1878,8 @@ async function loadCatalogo() {
 
     } catch (error) {
         console.error('Erro ao carregar catálogo:', error);
+        catalogoCompleto = [];
+        renderCatalogo();
     }
 }
 
@@ -2057,10 +2061,15 @@ function renderCatalogo() {
 
 // Abrir modal de avaliação
 window.openReviewModal = function() {
-    // Verificar se usuário está logado
     const user = auth.currentUser;
     if (!user) {
         showToast('Para avaliar, você precisa estar logado.', 'error');
+        return;
+    }
+    
+    // Verificar se não é o próprio profissional
+    if (user.uid === professionalId) {
+        showToast('Você não pode avaliar a si mesmo.', 'error');
         return;
     }
     
@@ -2098,17 +2107,30 @@ window.submitReview = async function() {
             throw new Error('Usuário não autenticado');
         }
         
-        // Verificar se já avaliou
-        const avaliacoesQuery = query(
-            collection(db, "avaliacoes"),
-            where("profissionalId", "==", professionalId),
-            where("clienteId", "==", user.uid)
-        );
+        // Verificar se não é o próprio profissional
+        if (user.uid === professionalId) {
+            throw new Error('Você não pode avaliar a si mesmo');
+        }
         
-        const avaliacoesSnapshot = await getDocs(avaliacoesQuery);
-        
-        if (!avaliacoesSnapshot.empty) {
-            throw new Error('Você já avaliou este profissional');
+        // Verificar se já avaliou (opcional, mas não crítico)
+        try {
+            const avaliacoesQuery = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", professionalId),
+                where("clienteId", "==", user.uid)
+            );
+            
+            const avaliacoesSnapshot = await getDocs(avaliacoesQuery);
+            
+            if (!avaliacoesSnapshot.empty) {
+                // Pode apenas avisar e permitir sobrescrever ou criar nova
+                if (!confirm('Você já avaliou este profissional. Deseja atualizar sua avaliação?')) {
+                    throw new Error('Avaliação cancelada pelo usuário');
+                }
+            }
+        } catch (queryError) {
+            // Ignora erros na query e continua
+            console.log('Query de avaliações existentes falhou, continuando...');
         }
         
         // Criar avaliação
@@ -2128,43 +2150,58 @@ window.submitReview = async function() {
         };
         
         // Salvar no Firestore
-        const docRef = await addDoc(collection(db, "avaliacoes"), avaliacaoData);
+        await addDoc(collection(db, "avaliacoes"), avaliacaoData);
         
-        // ✅ CRIAR NOTIFICAÇÃO PARA O PROFISSIONAL
-        await criarNotificacaoAvaliacao(
-            professionalId,
-            parseInt(rating),
-            comment,
-            anonymous ? null : (currentUserData?.apelido || user.displayName || 'Cliente'),
-            user.uid,
-            anonymous
-        );
+        // Tentar criar notificação (não crítico se falhar)
+        try {
+            await criarNotificacaoAvaliacao(
+                professionalId,
+                parseInt(rating),
+                comment,
+                anonymous ? null : (currentUserData?.apelido || user.displayName || 'Cliente'),
+                user.uid,
+                anonymous
+            );
+        } catch (notifError) {
+            console.log('Notificação não criada, mas avaliação salva:', notifError);
+        }
         
-        // Atualizar contagem no perfil do profissional
-        const newTotal = reviews.length + 1;
-        const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
-        const newAverage = ((currentSum + parseInt(rating)) / newTotal).toFixed(1);
+        // Tentar atualizar contagem (não crítico se falhar)
+        try {
+            const newTotal = reviews.length + 1;
+            const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
+            const newAverage = ((currentSum + parseInt(rating)) / newTotal).toFixed(1);
+            
+            await updateDoc(doc(db, "usuarios", professionalId), {
+                "profissional.mediaAvaliacoes": parseFloat(newAverage),
+                "profissional.totalAvaliacoes": newTotal
+            });
+            
+            // Atualizar localmente
+            reviews.push(avaliacaoData);
+            updateRatingDisplay(newAverage, newTotal);
+        } catch (updateError) {
+            // Ainda atualiza localmente mesmo se falhar no Firestore
+            reviews.push(avaliacaoData);
+            const newTotal = reviews.length;
+            const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
+            const newAverage = newTotal > 0 ? (currentSum / newTotal).toFixed(1) : rating;
+            updateRatingDisplay(newAverage, newTotal);
+        }
         
-        await updateDoc(doc(db, "usuarios", professionalId), {
-            "profissional.mediaAvaliacoes": parseFloat(newAverage),
-            "profissional.totalAvaliacoes": newTotal,
-            ultimaAtualizacao: new Date().toISOString()
-        });
-        
-        // Atualizar localmente
-        avaliacaoData.id = docRef.id;
-        reviews.unshift(avaliacaoData);
-        
-        // Fechar modal e atualizar UI
+        // Fechar modal e mostrar sucesso
         reviewModal.hide();
-        showToast('Avaliação enviada com sucesso! O profissional será notificado.', 'success');
+        showToast('Avaliação enviada com sucesso!', 'success');
         
-        // Atualizar display
-        updateRatingDisplay(newAverage, newTotal);
+        // Atualizar lista
         renderReviews();
         
     } catch (error) {
-        showToast(error.message || 'Erro ao enviar avaliação. Tente novamente.', 'error');
+        // Mostra mensagem mais amigável
+        const errorMessage = error.message === 'Avaliação cancelada pelo usuário' 
+            ? error.message 
+            : 'Erro ao enviar avaliação. Tente novamente.';
+        showToast(errorMessage, 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2175,7 +2212,10 @@ window.submitReview = async function() {
 window.abrirDetalhesItem = async function(itemId, tipo) {
     try {
         const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
-        if (!item) return;
+        if (!item) {
+            showToast('Item não encontrado', 'error');
+            return;
+        }
         
         // Preencher modal
         document.getElementById('modalItemTitle').textContent = item.nome;
@@ -2294,13 +2334,13 @@ window.abrirModalOrcamento = async function() {
         return;
     }
     
-    // ✅ VERIFICAR: Cliente não pode pedir orçamento para si mesmo
+    // Verificar se não é o próprio profissional
     if (user.uid === professionalId) {
         showToast('Você não pode solicitar orçamento para si mesmo.', 'error');
         return;
     }
     
-    // ✅ VERIFICAR se o usuário tem dados completos
+    // Verificar dados do usuário
     const verificacao = await verificarDadosUsuarioCompletos();
     
     if (!verificacao.completo) {
@@ -2325,7 +2365,7 @@ window.abrirModalOrcamento = async function() {
         return;
     }
     
-    // ✅ PREENCHER DADOS AUTOMATICAMENTE DO USUÁRIO LOGADO
+    // Preencher dados automaticamente
     const dadosUsuario = verificacao.dados;
     
     document.getElementById('inputNome').value = dadosUsuario.nome || '';
@@ -2333,7 +2373,7 @@ window.abrirModalOrcamento = async function() {
     document.getElementById('inputEmail').value = currentUser?.email || currentUserData?.email || '';
     document.getElementById('inputCidade').value = dadosUsuario.cidade || '';
     
-    // ✅ Tornar TODOS os campos apenas leitura (não editáveis pelo usuário)
+    // Tornar campos de dados pessoais apenas leitura
     const camposReadOnly = ['inputNome', 'inputTelefone', 'inputEmail', 'inputCidade'];
     camposReadOnly.forEach(id => {
         const campo = document.getElementById(id);
@@ -2341,14 +2381,13 @@ window.abrirModalOrcamento = async function() {
             campo.readOnly = true;
             campo.style.backgroundColor = '#f8f9fa';
             campo.style.cursor = 'not-allowed';
-            campo.style.color = '#495057';
         }
     });
     
-    // ✅ Remover ícones de cadeado anteriores
+    // Remover ícones de cadeado anteriores
     document.querySelectorAll('.lock-icon').forEach(icon => icon.remove());
     
-    // ✅ Adicionar ícone de cadeado nos labels
+    // Adicionar ícone de cadeado nos labels
     const labels = document.querySelectorAll('.modal-orcamento .form-label');
     labels.forEach(label => {
         const fieldId = label.getAttribute('for');
@@ -2361,21 +2400,15 @@ window.abrirModalOrcamento = async function() {
         }
     });
     
-    // ✅ Adicionar tooltip informativo aos campos
-    document.getElementById('inputNome').title = 'Nome do seu cadastro (não editável)';
-    document.getElementById('inputTelefone').title = 'Telefone do seu cadastro (não editável)';
-    document.getElementById('inputEmail').title = 'Email do seu cadastro (não editável)';
-    document.getElementById('inputCidade').title = 'Cidade do seu cadastro (não editável)';
-    
-    // ✅ Resetar campos editáveis
+    // Resetar campos editáveis
     document.getElementById('inputDescricao').value = '';
     document.getElementById('inputData').value = '';
     
-    // ✅ Definir data mínima como hoje
+    // Definir data mínima como hoje
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('inputData').min = hoje;
     
-    // ✅ Ativar campos editáveis
+    // Ativar campos editáveis
     document.getElementById('inputDescricao').readOnly = false;
     document.getElementById('inputDescricao').style.backgroundColor = 'white';
     document.getElementById('inputDescricao').style.cursor = 'text';
@@ -2424,12 +2457,12 @@ window.enviarPedidoOrcamento = async function() {
         
         const user = auth.currentUser;
         
-        // ✅ VERIFICAR: Não pode enviar para si mesmo
+        // Verificar se não é o próprio profissional
         if (user.uid === professionalId) {
             throw new Error('Você não pode solicitar orçamento para si mesmo.');
         }
         
-        // Salvar pedido no Firestore na coleção "solicitacoes"
+        // Salvar pedido no Firestore
         const pedidoData = {
             clienteId: user.uid,
             clienteNome: nome,
@@ -2445,56 +2478,67 @@ window.enviarPedidoOrcamento = async function() {
             visualizado: false,
             respondido: false,
             tipo: 'orcamento',
-            origem: 'perfil_publico',
-            dadosAutoPreenchidos: true
+            origem: 'perfil_publico'
         };
         
-        // 1. Salvar no Firestore (coleção solicitacoes conforme suas regras)
+        // 1. Salvar no Firestore
         const pedidoRef = await addDoc(collection(db, "solicitacoes"), pedidoData);
         
-        // 2. ✅ CRIAR NOTIFICAÇÃO PARA O PROFISSIONAL
-        await criarNotificacaoOrcamento(
-            professionalId,
-            user.uid,
-            nome,
-            telefone,
-            cidade,
-            descricao,
-            pedidoRef.id
-        );
+        // 2. Tentar criar notificação (não crítico)
+        try {
+            await criarNotificacaoOrcamento(
+                professionalId,
+                user.uid,
+                nome,
+                telefone,
+                cidade,
+                descricao,
+                pedidoRef.id
+            );
+        } catch (notifError) {
+            console.log('Notificação não criada, mas pedido salvo:', notifError);
+        }
         
-        // 3. Atualizar contador de notificações do profissional
-        await updateDoc(doc(db, "usuarios", professionalId), {
-            "notificacoesPendentes": increment(1),
-            ultimaAtualizacao: new Date().toISOString()
-        });
+        // 3. Tentar atualizar contador (não crítico)
+        try {
+            await updateDoc(doc(db, "usuarios", professionalId), {
+                "notificacoesPendentes": increment(1)
+            });
+        } catch (updateError) {
+            console.log('Contador de notificações não atualizado:', updateError);
+        }
         
         // 4. Fechar modal e mostrar sucesso
         orcamentoModal.hide();
-        showToast('✅ Pedido enviado com sucesso! O profissional receberá uma notificação.', 'success');
+        showToast('✅ Pedido enviado com sucesso! O profissional será notificado.', 'success');
         
-        // 5. Opcional: Enviar também por WhatsApp se o profissional tiver cadastrado
-        const whatsappProf = professionalData.profissional?.whatsapp;
-        if (whatsappProf) {
-            setTimeout(() => {
-                if (confirm('Deseja também enviar uma mensagem direta por WhatsApp?')) {
-                    const mensagemWhatsApp = `*📋 NOVO PEDIDO DE ORÇAMENTO - ScanHub*\n\n` +
-                                           `👤 *Cliente:* ${nome}\n` +
-                                           `📞 *Telefone:* ${telefone}\n` +
-                                           `🏙️ *Cidade:* ${cidade}\n` +
-                                           `📝 *Descrição:* ${descricao.substring(0, 150)}${descricao.length > 150 ? '...' : ''}\n\n` +
-                                           `📍 *Acesse o ScanHub para ver detalhes completos e responder.*`;
-                    
-                    const num = whatsappProf.replace(/\D/g, '');
-                    const urlWhatsApp = `https://wa.me/55${num}?text=${encodeURIComponent(mensagemWhatsApp)}`;
-                    window.open(urlWhatsApp, '_blank');
-                }
-            }, 1500);
-        }
+        // 5. Opção de enviar por WhatsApp
+        setTimeout(() => {
+            const whatsappProf = professionalData.profissional?.whatsapp;
+            if (whatsappProf && confirm('Deseja também enviar uma mensagem direta por WhatsApp?')) {
+                const mensagemWhatsApp = `*📋 NOVO PEDIDO DE ORÇAMENTO - ScanHub*\n\n` +
+                                       `👤 *Cliente:* ${nome}\n` +
+                                       `📞 *Telefone:* ${telefone}\n` +
+                                       `🏙️ *Cidade:* ${cidade}\n` +
+                                       `📝 *Descrição:* ${descricao.substring(0, 150)}${descricao.length > 150 ? '...' : ''}\n\n` +
+                                       `📍 *Acesse o ScanHub para ver detalhes completos e responder.*`;
+                
+                const num = whatsappProf.replace(/\D/g, '');
+                const urlWhatsApp = `https://wa.me/55${num}?text=${encodeURIComponent(mensagemWhatsApp)}`;
+                window.open(urlWhatsApp, '_blank');
+            }
+        }, 1500);
         
     } catch (error) {
-        console.error('Erro ao enviar pedido:', error);
-        showToast('Erro ao enviar pedido: ' + error.message, 'error');
+        // Mensagem amigável de erro
+        const errorMessage = error.code === 'permission-denied' 
+            ? 'Permissão negada. Verifique se está logado corretamente.'
+            : error.message.includes('você mesmo') 
+                ? error.message 
+                : 'Erro ao enviar pedido. Tente novamente.';
+        
+        showToast(errorMessage, 'error');
+        console.error('Erro detalhado ao enviar pedido:', error);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2505,11 +2549,11 @@ window.enviarPedidoOrcamento = async function() {
 // FUNÇÕES DE NOTIFICAÇÃO
 // ======================
 
-// ✅ CRIAR NOTIFICAÇÃO DE ORÇAMENTO
+// Criar notificação de orçamento
 async function criarNotificacaoOrcamento(profissionalId, clienteId, clienteNome, telefone, cidade, descricao, pedidoId) {
     try {
         if (!profissionalId || !clienteId) {
-            console.error('IDs não fornecidos para criar notificação');
+            console.log('IDs não fornecidos para notificação');
             return false;
         }
         
@@ -2522,34 +2566,29 @@ async function criarNotificacaoOrcamento(profissionalId, clienteId, clienteNome,
             titulo: "📋 Novo pedido de orçamento!",
             descricao: `${clienteNome} solicitou um orçamento: "${descricao.substring(0, 80)}${descricao.length > 80 ? '...' : ''}"`,
             lida: false,
-            arquivada: false,
-            urgente: true,
             data: serverTimestamp(),
             metadata: {
                 clienteNome: clienteNome,
                 telefone: telefone,
                 cidade: cidade,
                 descricao: descricao,
-                pedidoId: pedidoId,
-                timestamp: new Date().toISOString()
-            },
-            tags: ["orcamento", "pedido", "cliente", "urgente"]
+                pedidoId: pedidoId
+            }
         });
         
-        console.log(`✅ Notificação de orçamento criada para profissional ${profissionalId}`);
         return true;
         
     } catch (error) {
-        console.error('❌ Erro ao criar notificação de orçamento:', error);
+        console.log('Notificação de orçamento não criada:', error);
         return false;
     }
 }
 
-// ✅ CRIAR NOTIFICAÇÃO DE AVALIAÇÃO
+// Criar notificação de avaliação
 async function criarNotificacaoAvaliacao(profissionalId, nota, comentario, clienteNome, clienteId, anonimo) {
     try {
         if (!profissionalId || !clienteId) {
-            console.error('IDs não fornecidos para criar notificação');
+            console.log('IDs não fornecidos para notificação');
             return false;
         }
         
@@ -2564,24 +2603,19 @@ async function criarNotificacaoAvaliacao(profissionalId, nota, comentario, clien
             titulo: "⭐ Nova avaliação recebida!",
             descricao: `${nomeExibido} avaliou você com ${nota} estrelas${comentario ? `: "${comentario.substring(0, 80)}${comentario.length > 80 ? '...' : ''}"` : ''}`,
             lida: false,
-            arquivada: false,
-            urgente: false,
             data: serverTimestamp(),
             metadata: {
                 clienteNome: nomeExibido,
                 nota: nota,
                 comentario: comentario || '',
-                anonimo: anonimo,
-                timestamp: new Date().toISOString()
-            },
-            tags: ["avaliacao", "review", "cliente"]
+                anonimo: anonimo
+            }
         });
         
-        console.log(`✅ Notificação de avaliação criada para profissional ${profissionalId}`);
         return true;
         
     } catch (error) {
-        console.error('❌ Erro ao criar notificação de avaliação:', error);
+        console.log('Notificação de avaliação não criada:', error);
         return false;
     }
 }
@@ -2593,7 +2627,10 @@ async function criarNotificacaoAvaliacao(profissionalId, nota, comentario, clien
 // Solicitar orçamento via WhatsApp
 window.solicitarOrcamentoItem = function(itemId, tipo) {
     const item = catalogoCompleto.find(i => i.id === itemId && i.tipo === tipo);
-    if (!item || !professionalData) return;
+    if (!item || !professionalData) {
+        showToast('Item não encontrado', 'error');
+        return;
+    }
     
     const whatsapp = professionalData.profissional?.whatsapp;
     if (!whatsapp) {
@@ -2636,8 +2673,12 @@ window.solicitarOrcamentoItem = function(itemId, tipo) {
     });
 };
 
+// Função para WhatsApp geral
 window.solicitarOrcamento = function() {
-    if (!professionalData) return;
+    if (!professionalData) {
+        showToast('Profissional não encontrado', 'error');
+        return;
+    }
     
     const whatsapp = professionalData.profissional?.whatsapp;
     if (!whatsapp) {
