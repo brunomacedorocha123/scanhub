@@ -1343,8 +1343,7 @@
         getDocs, 
         addDoc, 
         serverTimestamp,
-        updateDoc,
-        orderBy 
+        updateDoc 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1417,7 +1416,7 @@
         });
     });
 
-    // Carregar perfil do profissional
+    // Carregar perfil do profissional - CORRIGIDO para aceitar tipoUsuario "cliente" desde que tenha perfil profissional
     async function loadProfile() {
         const docRef = doc(db, "usuarios", professionalId);
         const docSnap = await getDoc(docRef);
@@ -1428,12 +1427,13 @@
 
         const data = docSnap.data();
         
-        // Verificar se tem perfil profissional completo
-        if (!data.profissional?.perfilCompleto) {
+        // CORREÇÃO: Verifica apenas se existe o objeto profissional e está completo
+        // Não verifica mais o campo tipoUsuario (pode ser "cliente" mas ter perfil profissional ativo)
+        if (!data.profissional || !data.profissional.perfilCompleto) {
             throw new Error('Este usuário não possui um perfil profissional completo');
         }
         
-        // Verificar se está ativo
+        // Verificar se está ativo (status ou assinatura)
         const estaAtivo = data.status === 'ativo' || 
                           data.assinatura_ativa === true || 
                           data.status_assinatura === 'ativa';
@@ -1445,7 +1445,7 @@
         professionalData = data;
         const prof = data.profissional || {};
 
-        // Preencher dados
+        // Preencher dados básicos
         document.getElementById('profileName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
         document.getElementById('modalProName').textContent = prof.nomeProfissional || data.apelido || 'Profissional';
         document.getElementById('profileSpecialty').textContent = formatSpecialty(prof.especialidadePrincipal) || 'Serviços Profissionais';
@@ -1520,31 +1520,47 @@
         }
     }
 
-    // Carregar avaliações
+    // Carregar avaliações - CORRIGIDO: removido orderBy para não exigir índice composto
     async function loadReviews() {
-        const q = query(
-            collection(db, "avaliacoes"),
-            where("profissionalId", "==", professionalId),
-            where("status", "==", "ativo"),
-            orderBy("data", "desc")
-        );
-        
-        const snapshot = await getDocs(q);
-        reviews = [];
-        let totalRating = 0;
-        
-        snapshot.forEach(doc => {
-            const review = { id: doc.id, ...doc.data() };
-            reviews.push(review);
-            if (review.nota) totalRating += review.nota;
-        });
+        try {
+            // Query simplificada sem orderBy (ordenação feita no JavaScript)
+            const q = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", professionalId),
+                where("status", "==", "ativo")
+            );
+            
+            const snapshot = await getDocs(q);
+            reviews = [];
+            let totalRating = 0;
+            
+            snapshot.forEach(doc => {
+                const review = { id: doc.id, ...doc.data() };
+                reviews.push(review);
+                if (review.nota) totalRating += review.nota;
+            });
 
-        // Calcular média
-        const average = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
-        
-        // Atualizar UI
-        updateRatingDisplay(average, reviews.length);
-        renderReviews();
+            // Ordenar manualmente por data (mais recente primeiro) - CORREÇÃO DO ÍNDICE
+            reviews.sort((a, b) => {
+                const dateA = a.data?.seconds || a.data?.toMillis?.() || 0;
+                const dateB = b.data?.seconds || b.data?.toMillis?.() || 0;
+                return dateB - dateA;
+            });
+
+            // Calcular média
+            const average = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
+            
+            // Atualizar UI
+            updateRatingDisplay(average, reviews.length);
+            renderReviews();
+            
+        } catch (error) {
+            console.error("Erro ao carregar avaliações:", error);
+            // Se falhar, apenas mostra sem avaliações mas não quebra a página
+            updateRatingDisplay(0, 0);
+            reviews = [];
+            renderReviews();
+        }
     }
 
     // Atualizar display de rating
@@ -2051,7 +2067,8 @@
             'tecnico_celular': 'Técnico de Celular',
             'manicure': 'Manicure e Pedicure',
             'pintura': 'Pintor',
-            'ar_condicionado': 'Ar Condicionado'
+            'ar_condicionado': 'Ar Condicionado',
+            'programador': 'Programador/Desenvolvedor'
         };
         return map[esp] || esp.charAt(0).toUpperCase() + esp.slice(1);
     }
