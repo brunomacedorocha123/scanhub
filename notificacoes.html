@@ -1358,142 +1358,157 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import {
-        getAuth,
-        onAuthStateChanged,
-        signOut
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import {
-        getFirestore,
-        collection,
-        query,
-        where,
-        getDocs,
-        updateDoc,
-        doc,
-        serverTimestamp,
-        getDoc,
-        deleteDoc,
-        orderBy
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs,
+    updateDoc,
+    doc,
+    serverTimestamp,
+    getDoc,
+    deleteDoc,
+    orderBy,
+    addDoc,
+    Timestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.appspot.com",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+    authDomain: "scanhub-ed512.firebaseapp.com",
+    projectId: "scanhub-ed512",
+    storageBucket: "scanhub-ed512.appspot.com",
+    messagingSenderId: "1083305018831",
+    appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    let currentUser = null;
-    let userData = null;
-    let notifications = [];
-    let reviews = [];
-    let currentFilter = 'all';
-    let currentStatusFilter = 'all';
-    let currentTab = 'recent';
+// State
+let currentUser = null;
+let userData = null;
+let notifications = [];
+let reviews = [];
+let currentFilter = 'all';
+let currentStatusFilter = 'all';
+let currentTab = 'recent';
 
-    const modalReviews = new bootstrap.Modal(document.getElementById('modalReviews'));
-    const userAvatar = document.getElementById('userAvatar');
-    const userName = document.getElementById('userName');
-    const userId = document.getElementById('userId');
-    const unreadBadge = document.getElementById('unreadBadge');
-    const loadingState = document.getElementById('loadingState');
-    const emptyState = document.getElementById('emptyState');
-    const notificationList = document.getElementById('notificationList');
-    const searchInput = document.getElementById('searchInput');
-    const toastContainer = document.getElementById('toastContainer');
-    const btnLogout = document.getElementById('btnLogout');
+// Modais
+const modalReviews = new bootstrap.Modal(document.getElementById('modalReviews'));
 
-    // Stats Elements
-    const totalNotificationsEl = document.getElementById('totalNotifications');
-    const pendingOrcamentoEl = document.getElementById('pendingOrcamento');
-    const newReviewsEl = document.getElementById('newReviews');
-    const urgentAlertsEl = document.getElementById('urgentAlerts');
+// DOM Elements
+const userAvatar = document.getElementById('userAvatar');
+const userName = document.getElementById('userName');
+const userId = document.getElementById('userId');
+const unreadBadge = document.getElementById('unreadBadge');
+const loadingState = document.getElementById('loadingState');
+const emptyState = document.getElementById('emptyState');
+const notificationList = document.getElementById('notificationList');
+const searchInput = document.getElementById('searchInput');
+const toastContainer = document.getElementById('toastContainer');
+const btnLogout = document.getElementById('btnLogout');
 
-    // Counter Elements
-    const countAllEl = document.getElementById('countAll');
-    const countOrcamentoEl = document.getElementById('countOrcamento');
-    const countReviewEl = document.getElementById('countReview');
-    const countMessageEl = document.getElementById('countMessage');
-    const countSystemEl = document.getElementById('countSystem');
-    const countUnreadEl = document.getElementById('countUnread');
-    const countReadEl = document.getElementById('countRead');
-    const countStatusAllEl = document.getElementById('countStatusAll');
+// Stats Elements
+const totalNotificationsEl = document.getElementById('totalNotifications');
+const pendingOrcamentoEl = document.getElementById('pendingOrcamento');
+const newReviewsEl = document.getElementById('newReviews');
+const urgentAlertsEl = document.getElementById('urgentAlerts');
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', async () => {
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                await loadUserData();
-                await loadNotifications();
-                await loadReviews();
-                
-                btnLogout.addEventListener('click', async () => {
-                    try {
-                        await signOut(auth);
-                        window.location.href = 'login.html';
-                    } catch (error) {
-                        showToast('Erro', 'Não foi possível sair da conta');
-                    }
-                });
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-    });
+// Counter Elements
+const countAllEl = document.getElementById('countAll');
+const countOrcamentoEl = document.getElementById('countOrcamento');
+const countReviewEl = document.getElementById('countReview');
+const countMessageEl = document.getElementById('countMessage');
+const countSystemEl = document.getElementById('countSystem');
+const countUnreadEl = document.getElementById('countUnread');
+const countReadEl = document.getElementById('countRead');
+const countStatusAllEl = document.getElementById('countStatusAll');
 
-    // Load user data
-    async function loadUserData() {
-        try {
-            const userRef = doc(db, "usuarios", currentUser.uid);
-            const userSnap = await getDoc(userRef);
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            await loadUserData();
+            await loadNotifications();
+            await loadReviewsForStats(); // Carregar avaliações para estatísticas
             
-            if (userSnap.exists()) {
-                userData = userSnap.data();
-                
-                if (userData.apelido) {
-                    userName.textContent = userData.apelido;
-                    userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
+            btnLogout.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    showToast('Erro', 'Não foi possível sair da conta', 'error');
                 }
-                
-                if (userData.idScanHub) {
-                    userId.textContent = userData.idScanHub;
-                } else {
-                    userId.textContent = currentUser.uid.substring(0, 8);
-                }
-            }
-        } catch (error) {
-            showToast('Erro', 'Não foi possível carregar dados do usuário');
+            });
+        } else {
+            window.location.href = 'login.html';
         }
+    });
+});
+
+// Load user data
+async function loadUserData() {
+    try {
+        const userRef = doc(db, "usuarios", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+            userData = userSnap.data();
+            
+            if (userData.apelido) {
+                userName.textContent = userData.apelido;
+                userAvatar.textContent = userData.apelido.charAt(0).toUpperCase();
+                userAvatar.title = userData.apelido;
+            }
+            
+            if (userData.idScanHub) {
+                userId.textContent = userData.idScanHub;
+            } else {
+                userId.textContent = currentUser.uid.substring(0, 8);
+            }
+        }
+    } catch (error) {
+        showToast('Erro', 'Não foi possível carregar dados do usuário', 'error');
     }
+}
 
-    // Load notifications from Firestore
-    async function loadNotifications() {
+// ✅ FUNÇÃO PRINCIPAL PARA CARREGAR NOTIFICAÇÕES
+async function loadNotifications() {
+    try {
+        loadingState.style.display = 'block';
+        emptyState.style.display = 'none';
+        notificationList.style.display = 'none';
+
+        notifications = []; // Reset array
+
+        // ✅ 1. CARREGAR NOTIFICAÇÕES DA COLEÇÃO notificacoes
         try {
-            loadingState.style.display = 'block';
-            emptyState.style.display = 'none';
-            notificationList.style.display = 'none';
-
-            const q = query(
+            const qNotificacoes = query(
                 collection(db, "notificacoes"),
-                where("profissionalId", "==", currentUser.uid)
+                where("profissionalId", "==", currentUser.uid),
+                orderBy("data", "desc")
             );
 
-            const querySnapshot = await getDocs(q);
-            notifications = [];
+            const notificacoesSnapshot = await getDocs(qNotificacoes);
             
-            querySnapshot.forEach((docSnapshot) => {
+            notificacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
-                notifications.push({
+                
+                const notificacao = {
                     id: docSnapshot.id,
+                    source: 'notificacoes', // Marcar a origem
                     titulo: data.titulo || 'Nova notificação',
                     descricao: data.descricao || '',
                     tipo: data.tipo || 'system',
@@ -1504,609 +1519,846 @@
                     data: data.data?.toDate() || new Date(),
                     metadata: data.metadata || {},
                     tags: data.tags || []
-                });
+                };
+                
+                notifications.push(notificacao);
             });
-
-            notifications.sort((a, b) => b.data - a.data);
-            updateCounters();
-            renderNotifications();
-            updateUnreadBadge();
-            
-            loadingState.style.display = 'none';
-            
-            if (notifications.length === 0) {
-                emptyState.style.display = 'block';
-            } else {
-                notificationList.style.display = 'flex';
-            }
-
         } catch (error) {
-            loadingState.style.display = 'none';
-            emptyState.style.display = 'block';
-            showToast('Erro', 'Não foi possível carregar as notificações');
+            console.log('Erro ao carregar notificações diretas:', error);
         }
-    }
 
-    // Load reviews from Firestore
-    async function loadReviews() {
+        // ✅ 2. CARREGAR AVALIAÇÕES DA COLEÇÃO avaliacoes E CONVERTER EM NOTIFICAÇÕES
         try {
-            const q = query(
+            const qAvaliacoes = query(
                 collection(db, "avaliacoes"),
                 where("profissionalId", "==", currentUser.uid),
-                where("status", "==", "aprovado"),
+                where("status", "==", "ativo"),
                 orderBy("data", "desc")
             );
 
-            const querySnapshot = await getDocs(q);
-            reviews = [];
+            const avaliacoesSnapshot = await getDocs(qAvaliacoes);
             
-            querySnapshot.forEach((docSnapshot) => {
+            avaliacoesSnapshot.forEach((docSnapshot) => {
                 const data = docSnapshot.data();
-                reviews.push({
+                
+                // Criar uma notificação a partir da avaliação
+                const notificacaoAvaliacao = {
                     id: docSnapshot.id,
-                    clienteId: data.clienteId,
-                    clienteNome: data.clienteNome || 'Cliente',
-                    clienteFoto: data.clienteFoto || '',
-                    nota: data.nota || 0,
-                    comentario: data.comentario || '',
-                    anonimo: data.anonimo || false,
+                    source: 'avaliacoes', // Marcar a origem
+                    titulo: "⭐ Nova avaliação recebida!",
+                    descricao: `${data.anonimo ? 'Cliente Anônimo' : (data.clienteNome || 'Cliente')} avaliou você com ${data.nota || 0} estrelas${data.comentario ? `: "${data.comentario.substring(0, 80)}${data.comentario.length > 80 ? '...' : ''}"` : ''}`,
+                    tipo: 'review',
+                    lida: false, // Avaliações são sempre consideradas "não lidas" inicialmente
+                    arquivada: false,
+                    urgente: false,
+                    profissionalId: data.profissionalId,
                     data: data.data?.toDate() || new Date(),
-                    resposta: data.resposta || null,
-                    dataResposta: data.dataResposta?.toDate() || null
-                });
+                    metadata: {
+                        clienteNome: data.anonimo ? 'Anônimo' : (data.clienteNome || 'Cliente'),
+                        nota: data.nota || 0,
+                        comentario: data.comentario || '',
+                        anonimo: data.anonimo || false,
+                        clienteId: data.clienteId,
+                        avaliacaoId: docSnapshot.id
+                    },
+                    tags: ["avaliacao", "review", "cliente"]
+                };
+                
+                // Verificar se já existe notificação para esta avaliação
+                const existeNotificacao = notifications.some(n => 
+                    n.source === 'notificacoes' && 
+                    n.metadata && 
+                    n.metadata.avaliacaoId === docSnapshot.id
+                );
+                
+                if (!existeNotificacao) {
+                    notifications.push(notificacaoAvaliacao);
+                }
             });
-
-            updateReviewStats();
-        } catch (error) {}
-    }
-
-    // Update review statistics
-    function updateReviewStats() {
-        const total = reviews.length;
-        if (total === 0) {
-            newReviewsEl.textContent = '0';
-            return;
+        } catch (error) {
+            console.log('Erro ao carregar avaliações:', error);
         }
 
+        // ✅ 3. CARREGAR SOLICITAÇÕES DE ORÇAMENTO E CONVERTER EM NOTIFICAÇÕES
+        try {
+            const qSolicitacoes = query(
+                collection(db, "solicitacoes"),
+                where("profissionalId", "==", currentUser.uid),
+                where("status", "==", "pendente"),
+                orderBy("dataSolicitacao", "desc")
+            );
+
+            const solicitacoesSnapshot = await getDocs(qSolicitacoes);
+            
+            solicitacoesSnapshot.forEach((docSnapshot) => {
+                const data = docSnapshot.data();
+                
+                // Criar uma notificação a partir da solicitação
+                const notificacaoSolicitacao = {
+                    id: docSnapshot.id,
+                    source: 'solicitacoes', // Marcar a origem
+                    titulo: "📋 Novo pedido de orçamento!",
+                    descricao: `${data.clienteNome || 'Cliente'} solicitou um orçamento: "${data.descricao?.substring(0, 80) || 'Novo pedido'}${data.descricao && data.descricao.length > 80 ? '...' : ''}"`,
+                    tipo: 'orcamento',
+                    lida: data.visualizado !== undefined ? data.visualizado : false,
+                    arquivada: false,
+                    urgente: data.urgente || false,
+                    profissionalId: data.profissionalId,
+                    data: data.dataSolicitacao?.toDate() || new Date(),
+                    metadata: {
+                        clienteNome: data.clienteNome || 'Cliente',
+                        telefone: data.clienteTelefone || '',
+                        cidade: data.clienteCidade || '',
+                        descricao: data.descricao || '',
+                        dataPreferencial: data.dataPreferencial || '',
+                        solicitacaoId: docSnapshot.id,
+                        clienteId: data.clienteId
+                    },
+                    tags: ["orcamento", "pedido", "cliente", data.urgente ? "urgente" : "normal"]
+                };
+                
+                // Verificar se já existe notificação para esta solicitação
+                const existeNotificacao = notifications.some(n => 
+                    n.source === 'notificacoes' && 
+                    n.metadata && 
+                    n.metadata.solicitacaoId === docSnapshot.id
+                );
+                
+                if (!existeNotificacao) {
+                    notifications.push(notificacaoSolicitacao);
+                }
+            });
+        } catch (error) {
+            console.log('Erro ao carregar solicitações:', error);
+        }
+
+        // Ordenar todas as notificações por data (mais recente primeiro)
+        notifications.sort((a, b) => b.data - a.data);
+        
+        // Atualizar contadores
+        updateCounters();
+        renderNotifications();
+        updateUnreadBadge();
+        
+        loadingState.style.display = 'none';
+        
+        if (notifications.length === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            notificationList.style.display = 'flex';
+        }
+
+    } catch (error) {
+        loadingState.style.display = 'none';
+        emptyState.style.display = 'block';
+        console.error('Erro ao carregar notificações:', error);
+        showToast('Erro', 'Não foi possível carregar as notificações', 'error');
+    }
+}
+
+// Carregar avaliações para estatísticas
+async function loadReviewsForStats() {
+    try {
+        const q = query(
+            collection(db, "avaliacoes"),
+            where("profissionalId", "==", currentUser.uid),
+            where("status", "==", "ativo")
+        );
+
+        const querySnapshot = await getDocs(q);
+        reviews = [];
+        
+        querySnapshot.forEach((docSnapshot) => {
+            const data = docSnapshot.data();
+            
+            const review = {
+                id: docSnapshot.id,
+                clienteId: data.clienteId,
+                clienteNome: data.clienteNome || 'Cliente',
+                clienteFoto: data.clienteFoto || '',
+                nota: data.nota || 0,
+                comentario: data.comentario || '',
+                anonimo: data.anonimo || false,
+                data: data.data?.toDate() || new Date(),
+                resposta: data.resposta || null,
+                dataResposta: data.dataResposta?.toDate() || null
+            };
+            
+            reviews.push(review);
+        });
+
+        // Atualizar estatísticas de avaliações
+        updateReviewStats();
+
+    } catch (error) {
+        console.log('Nenhuma avaliação encontrada ou erro:', error);
+    }
+}
+
+// Update review statistics
+function updateReviewStats() {
+    const total = reviews.length;
+    if (total === 0) {
+        newReviewsEl.textContent = '0';
+        return;
+    }
+
+    // Contar avaliações dos últimos 30 dias
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
+
+    // Calcular média
+    const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
+    const average = totalStars / total;
+
+    // Contar por nota
+    const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
+
+    newReviewsEl.textContent = recentReviews.length;
+}
+
+// Render notifications based on filters
+function renderNotifications() {
+    const filteredNotifications = notifications.filter(notification => {
+        if (currentFilter !== 'all' && notification.tipo !== currentFilter) {
+            return false;
+        }
+        
+        if (currentStatusFilter === 'unread' && notification.lida) {
+            return false;
+        }
+        if (currentStatusFilter === 'read' && !notification.lida) {
+            return false;
+        }
+        
+        if (currentTab === 'important' && !notification.urgente) {
+            return false;
+        }
+        if (currentTab === 'archived' && notification.arquivada) {
+            return false;
+        }
+        if (currentTab !== 'archived' && notification.arquivada) {
+            return false;
+        }
+        
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+            const searchableText = (
+                (notification.titulo || '') + ' ' +
+                (notification.descricao || '') + ' ' +
+                (notification.metadata?.clienteNome || '') + ' ' +
+                (notification.metadata?.servico || '')
+            ).toLowerCase();
+            
+            if (!searchableText.includes(searchTerm)) {
+                return false;
+            }
+        }
+        
+        return true;
+    });
+
+    notificationList.innerHTML = '';
+
+    if (filteredNotifications.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-state';
+        emptyMessage.innerHTML = `
+            <i class="far fa-bell"></i>
+            <h4>Nenhuma notificação encontrada</h4>
+            <p>Tente alterar os filtros ou faça uma nova busca.</p>
+        `;
+        notificationList.appendChild(emptyMessage);
+        return;
+    }
+
+    filteredNotifications.forEach(notification => {
+        const card = createNotificationCard(notification);
+        notificationList.appendChild(card);
+    });
+}
+
+// Create notification card HTML
+function createNotificationCard(notification) {
+    const div = document.createElement('div');
+    
+    const classes = ['notification-card'];
+    if (!notification.lida) classes.push('unread');
+    if (notification.urgente) classes.push('urgent');
+    
+    let typeIcon = 'fas fa-info-circle';
+    let typeClass = 'type-system';
+    
+    switch (notification.tipo) {
+        case 'orcamento':
+            typeIcon = 'fas fa-file-invoice-dollar';
+            typeClass = 'type-orcamento';
+            break;
+        case 'review':
+            typeIcon = 'fas fa-star';
+            typeClass = 'type-review';
+            break;
+        case 'message':
+            typeIcon = 'fas fa-comment';
+            typeClass = 'type-message';
+            break;
+        case 'alert':
+            typeIcon = 'fas fa-exclamation-triangle';
+            typeClass = 'type-alert';
+            break;
+    }
+
+    const timeAgo = formatTimeAgo(notification.data);
+    
+    div.className = classes.join(' ');
+    div.innerHTML = `
+        <div class="notification-type ${typeClass}">
+            <i class="${typeIcon}"></i>
+        </div>
+        
+        <div class="notification-content">
+            <div class="notification-header">
+                <div class="notification-title">
+                    ${notification.titulo}
+                    ${!notification.lida ? '<span class="badge-new">Nova</span>' : ''}
+                </div>
+                <div class="notification-time">
+                    <i class="fas fa-clock"></i> ${timeAgo}
+                </div>
+            </div>
+            
+            <div class="notification-description">
+                ${notification.descricao}
+            </div>
+            
+            ${notification.metadata && Object.keys(notification.metadata).length > 0 ? `
+                <div class="notification-meta">
+                    ${notification.metadata.clienteNome ? `
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>${notification.metadata.clienteNome}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${notification.metadata.servico ? `
+                        <div class="meta-item">
+                            <i class="fas fa-tools"></i>
+                            <span>${notification.metadata.servico}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${notification.metadata.telefone ? `
+                        <div class="meta-item">
+                            <i class="fas fa-phone"></i>
+                            <span>${notification.metadata.telefone}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${notification.metadata.cidade ? `
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${notification.metadata.cidade}</span>
+                        </div>
+                    ` : ''}
+                    
+                    ${notification.metadata.nota ? `
+                        <div class="meta-item">
+                            <div class="rating-stars">
+                                ${getStarsHTML(notification.metadata.nota)}
+                                <span class="rating-number">${notification.metadata.nota.toFixed(1)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            ` : ''}
+            
+            ${notification.tags && notification.tags.length > 0 ? `
+                <div class="notification-tags">
+                    ${notification.tags.map(tag => `
+                        <span class="tag">
+                            <i class="fas fa-tag"></i>
+                            ${tag}
+                        </span>
+                    `).join('')}
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="notification-actions">
+            ${notification.tipo === 'orcamento' ? `
+                <button class="btn-action btn-primary" onclick="respondToOrcamento('${notification.id}', '${notification.source}')">
+                    <i class="fas fa-reply"></i> Responder
+                </button>
+            ` : ''}
+            
+            ${notification.metadata?.telefone ? `
+                <button class="btn-action btn-whatsapp" onclick="openWhatsApp('${notification.metadata.telefone}')">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            ` : ''}
+            
+            ${notification.tipo === 'review' ? `
+                <button class="btn-action btn-view-reviews" onclick="showAllReviews()">
+                    <i class="fas fa-star"></i> Ver Avaliações
+                </button>
+            ` : ''}
+            
+            <button class="btn-mark-read" onclick="markAsRead('${notification.id}', '${notification.source}')">
+                ${notification.lida ?
+                    '<i class="fas fa-envelope"></i> Marcar como não lida' :
+                    '<i class="fas fa-check"></i> Marcar como lida'
+                }
+            </button>
+            
+            <button class="btn-mark-read btn-delete" onclick="deleteNotification('${notification.id}', '${notification.source}')" title="Excluir notificação">
+                <i class="fas fa-trash-alt"></i> Excluir
+            </button>
+        </div>
+    `;
+    
+    return div;
+}
+
+// Helper function to get stars HTML
+function getStarsHTML(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    let starsHTML = '';
+    
+    for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars) {
+            starsHTML += '<span class="rating-star"><i class="fas fa-star"></i></span>';
+        } else if (i === fullStars + 1 && hasHalfStar) {
+            starsHTML += '<span class="rating-star"><i class="fas fa-star-half-alt"></i></span>';
+        } else {
+            starsHTML += '<span class="rating-star empty"><i class="far fa-star"></i></span>';
+        }
+    }
+    
+    return starsHTML;
+}
+
+// Update counters
+function updateCounters() {
+    const total = notifications.length;
+    const unread = notifications.filter(n => !n.lida).length;
+    const read = notifications.filter(n => n.lida).length;
+    const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
+    const review = notifications.filter(n => n.tipo === 'review').length;
+    const message = notifications.filter(n => n.tipo === 'message').length;
+    const system = notifications.filter(n => n.tipo === 'system').length;
+    const urgent = notifications.filter(n => n.urgente).length;
+
+    totalNotificationsEl.textContent = total;
+    pendingOrcamentoEl.textContent = orcamento;
+    urgentAlertsEl.textContent = urgent;
+
+    // Atualizar estatísticas de avaliações
+    if (reviews.length > 0) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-
         newReviewsEl.textContent = recentReviews.length;
+    } else {
+        newReviewsEl.textContent = '0';
     }
 
-    // Render notifications based on filters
-    function renderNotifications() {
-        const filteredNotifications = notifications.filter(notification => {
-            if (currentFilter !== 'all' && notification.tipo !== currentFilter) {
-                return false;
-            }
-            
-            if (currentStatusFilter === 'unread' && notification.lida) {
-                return false;
-            }
-            if (currentStatusFilter === 'read' && !notification.lida) {
-                return false;
-            }
-            
-            if (currentTab === 'important' && !notification.urgente) {
-                return false;
-            }
-            if (currentTab === 'archived' && notification.arquivada) {
-                return false;
-            }
-            if (currentTab !== 'archived' && notification.arquivada) {
-                return false;
-            }
-            
-            const searchTerm = searchInput.value.toLowerCase();
-            if (searchTerm) {
-                const searchableText = (
-                    (notification.titulo || '') + ' ' +
-                    (notification.descricao || '') + ' ' +
-                    (notification.metadata?.clienteNome || '') + ' ' +
-                    (notification.metadata?.servico || '')
-                ).toLowerCase();
-                
-                if (!searchableText.includes(searchTerm)) {
-                    return false;
-                }
-            }
-            
-            return true;
-        });
+    countAllEl.textContent = total;
+    countOrcamentoEl.textContent = orcamento;
+    countReviewEl.textContent = review;
+    countMessageEl.textContent = message;
+    countSystemEl.textContent = system;
+    countUnreadEl.textContent = unread;
+    countReadEl.textContent = read;
+    countStatusAllEl.textContent = total;
+}
 
-        notificationList.innerHTML = '';
-
-        if (filteredNotifications.length === 0) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.className = 'empty-state';
-            emptyMessage.innerHTML = `
-                <i class="far fa-bell"></i>
-                <h4>Nenhuma notificação encontrada</h4>
-                <p>Tente alterar os filtros ou faça uma nova busca.</p>
-            `;
-            notificationList.appendChild(emptyMessage);
-            return;
-        }
-
-        filteredNotifications.forEach(notification => {
-            const card = createNotificationCard(notification);
-            notificationList.appendChild(card);
-        });
+// Update unread badge
+function updateUnreadBadge() {
+    const unreadCount = notifications.filter(n => !n.lida).length;
+    unreadBadge.textContent = unreadCount;
+    
+    if (unreadCount === 0) {
+        unreadBadge.style.display = 'none';
+    } else {
+        unreadBadge.style.display = 'flex';
     }
+}
 
-    // Create notification card HTML
-    function createNotificationCard(notification) {
-        const div = document.createElement('div');
-        
-        const classes = ['notification-card'];
-        if (!notification.lida) classes.push('unread');
-        if (notification.urgente) classes.push('urgent');
-        
-        let typeIcon = 'fas fa-info-circle';
-        let typeClass = 'type-system';
-        
-        switch (notification.tipo) {
-            case 'orcamento':
-                typeIcon = 'fas fa-file-invoice-dollar';
-                typeClass = 'type-orcamento';
-                break;
-            case 'review':
-                typeIcon = 'fas fa-star';
-                typeClass = 'type-review';
-                break;
-            case 'message':
-                typeIcon = 'fas fa-comment';
-                typeClass = 'type-message';
-                break;
-            case 'alert':
-                typeIcon = 'fas fa-exclamation-triangle';
-                typeClass = 'type-alert';
-                break;
-        }
+// ✅ FUNÇÃO PARA MARCAR COMO LIDA/NÃO LIDA (AGORA FUNCIONA COM TODAS AS FONTES)
+window.markAsRead = async function(notificationId, source) {
+    try {
+        const notification = notifications.find(n => n.id === notificationId && n.source === source);
+        if (!notification) return;
 
-        const timeAgo = formatTimeAgo(notification.data);
-        
-        div.className = classes.join(' ');
-        div.innerHTML = `
-            <div class="notification-type ${typeClass}">
-                <i class="${typeIcon}"></i>
-            </div>
-            
-            <div class="notification-content">
-                <div class="notification-header">
-                    <div class="notification-title">
-                        ${notification.titulo}
-                        ${!notification.lida ? '<span class="badge-new">Nova</span>' : ''}
-                    </div>
-                    <div class="notification-time">
-                        <i class="fas fa-clock"></i> ${timeAgo}
-                    </div>
-                </div>
-                
-                <div class="notification-description">
-                    ${notification.descricao}
-                </div>
-                
-                ${notification.metadata && Object.keys(notification.metadata).length > 0 ? `
-                    <div class="notification-meta">
-                        ${notification.metadata.clienteNome ? `
-                            <div class="meta-item">
-                                <i class="fas fa-user"></i>
-                                <span>${notification.metadata.clienteNome}</span>
-                            </div>
-                        ` : ''}
-                        
-                        ${notification.metadata.servico ? `
-                            <div class="meta-item">
-                                <i class="fas fa-tools"></i>
-                                <span>${notification.metadata.servico}</span>
-                            </div>
-                        ` : ''}
-                        
-                        ${notification.metadata.telefone ? `
-                            <div class="meta-item">
-                                <i class="fas fa-phone"></i>
-                                <span>${notification.metadata.telefone}</span>
-                            </div>
-                        ` : ''}
-                        
-                        ${notification.metadata.cidade ? `
-                            <div class="meta-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${notification.metadata.cidade}</span>
-                            </div>
-                        ` : ''}
-                        
-                        ${notification.metadata.nota ? `
-                            <div class="meta-item">
-                                <div class="rating-stars">
-                                    ${getStarsHTML(notification.metadata.nota)}
-                                    <span class="rating-number">${notification.metadata.nota.toFixed(1)}</span>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                ` : ''}
-                
-                ${notification.tags && notification.tags.length > 0 ? `
-                    <div class="notification-tags">
-                        ${notification.tags.map(tag => `
-                            <span class="tag">
-                                <i class="fas fa-tag"></i>
-                                ${tag}
-                            </span>
-                        `).join('')}
-                    </div>
-                ` : ''}
-            </div>
-            
-            <div class="notification-actions">
-                ${notification.tipo === 'orcamento' ? `
-                    <button class="btn-action btn-primary" onclick="respondToOrcamento('${notification.id}')">
-                        <i class="fas fa-reply"></i> Responder
-                    </button>
-                ` : ''}
-                
-                ${notification.metadata?.telefone ? `
-                    <button class="btn-action btn-whatsapp" onclick="openWhatsApp('${notification.metadata.telefone}')">
-                        <i class="fab fa-whatsapp"></i> WhatsApp
-                    </button>
-                ` : ''}
-                
-                ${notification.tipo === 'review' ? `
-                    <button class="btn-action btn-view-reviews" onclick="showAllReviews()">
-                        <i class="fas fa-star"></i> Ver Avaliações
-                    </button>
-                ` : ''}
-                
-                <button class="btn-mark-read" onclick="markAsRead('${notification.id}')">
-                    ${notification.lida ?
-                        '<i class="fas fa-envelope"></i> Marcar como não lida' :
-                        '<i class="fas fa-check"></i> Marcar como lida'
-                    }
-                </button>
-                
-                <button class="btn-mark-read btn-delete" onclick="deleteNotification('${notification.id}')">
-                    <i class="fas fa-trash-alt"></i> Excluir
-                </button>
-            </div>
-        `;
-        
-        return div;
-    }
-
-    // Helper function to get stars HTML
-    function getStarsHTML(rating) {
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 >= 0.5;
-        let starsHTML = '';
-        
-        for (let i = 1; i <= 5; i++) {
-            if (i <= fullStars) {
-                starsHTML += '<span class="rating-star"><i class="fas fa-star"></i></span>';
-            } else if (i === fullStars + 1 && hasHalfStar) {
-                starsHTML += '<span class="rating-star"><i class="fas fa-star-half-alt"></i></span>';
-            } else {
-                starsHTML += '<span class="rating-star empty"><i class="far fa-star"></i></span>';
-            }
-        }
-        
-        return starsHTML;
-    }
-
-    // Update counters
-    function updateCounters() {
-        const total = notifications.length;
-        const unread = notifications.filter(n => !n.lida).length;
-        const read = notifications.filter(n => n.lida).length;
-        const orcamento = notifications.filter(n => n.tipo === 'orcamento').length;
-        const review = notifications.filter(n => n.tipo === 'review').length;
-        const message = notifications.filter(n => n.tipo === 'message').length;
-        const system = notifications.filter(n => n.tipo === 'system').length;
-        const urgent = notifications.filter(n => n.urgente).length;
-
-        totalNotificationsEl.textContent = total;
-        pendingOrcamentoEl.textContent = orcamento;
-        urgentAlertsEl.textContent = urgent;
-
-        if (reviews.length > 0) {
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-            newReviewsEl.textContent = recentReviews.length;
-        } else {
-            newReviewsEl.textContent = '0';
-        }
-
-        countAllEl.textContent = total;
-        countOrcamentoEl.textContent = orcamento;
-        countReviewEl.textContent = review;
-        countMessageEl.textContent = message;
-        countSystemEl.textContent = system;
-        countUnreadEl.textContent = unread;
-        countReadEl.textContent = read;
-        countStatusAllEl.textContent = total;
-    }
-
-    // Update unread badge
-    function updateUnreadBadge() {
-        const unreadCount = notifications.filter(n => !n.lida).length;
-        unreadBadge.textContent = unreadCount;
-        unreadBadge.style.display = unreadCount === 0 ? 'none' : 'flex';
-    }
-
-    // Funções globais
-    window.markAsRead = async function(notificationId) {
-        try {
-            const notification = notifications.find(n => n.id === notificationId);
-            if (!notification) return;
-
+        // Se for da coleção notificacoes, atualizar no Firestore
+        if (source === 'notificacoes') {
             const notificationRef = doc(db, "notificacoes", notificationId);
             await updateDoc(notificationRef, {
                 lida: !notification.lida,
                 atualizadaEm: serverTimestamp()
             });
-
-            notification.lida = !notification.lida;
-            updateCounters();
-            updateUnreadBadge();
-            renderNotifications();
-            
-            showToast('Sucesso', notification.lida ? 'Notificação marcada como lida' : 'Notificação marcada como não lida');
-
-        } catch (error) {
-            showToast('Erro', 'Não foi possível atualizar a notificação');
+        } 
+        // Se for de avaliacoes, atualizar como visualizado localmente apenas
+        else if (source === 'avaliacoes') {
+            // Não atualiza no Firestore, apenas localmente
+            // Poderia adicionar um campo "visualizado" na avaliação se necessário
         }
-    };
+        // Se for de solicitacoes, atualizar no Firestore
+        else if (source === 'solicitacoes') {
+            const solicitacaoRef = doc(db, "solicitacoes", notificationId);
+            await updateDoc(solicitacaoRef, {
+                visualizado: !notification.lida,
+                atualizadaEm: serverTimestamp()
+            });
+        }
 
-    window.deleteNotification = async function(notificationId) {
-        try {
-            const confirmDelete = confirm('Tem certeza que deseja excluir esta notificação?');
-            if (!confirmDelete) return;
+        // Atualizar localmente
+        notification.lida = !notification.lida;
+        
+        updateCounters();
+        updateUnreadBadge();
+        renderNotifications();
+        
+        showToast('Sucesso',
+            notification.lida ? 'Notificação marcada como lida' : 'Notificação marcada como não lida',
+            'success'
+        );
 
+    } catch (error) {
+        console.error('Erro ao marcar como lida:', error);
+        showToast('Erro', 'Não foi possível atualizar a notificação', 'error');
+    }
+};
+
+// ✅ FUNÇÃO PARA EXCLUIR NOTIFICAÇÃO
+window.deleteNotification = async function(notificationId, source) {
+    try {
+        const confirmDelete = confirm('Tem certeza que deseja excluir esta notificação? Esta ação não pode ser desfeita.');
+        
+        if (!confirmDelete) return;
+
+        // Se for da coleção notificacoes, excluir do Firestore
+        if (source === 'notificacoes') {
             const notificationRef = doc(db, "notificacoes", notificationId);
             await deleteDoc(notificationRef);
-
-            const index = notifications.findIndex(n => n.id === notificationId);
-            if (index !== -1) {
-                notifications.splice(index, 1);
-            }
-
-            updateCounters();
-            updateUnreadBadge();
-            renderNotifications();
-            showToast('Sucesso', 'Notificação excluída com sucesso');
-
-        } catch (error) {
-            showToast('Erro', 'Não foi possível excluir a notificação');
+        } 
+        // Se for de avaliacoes, não excluir do Firestore (mantém a avaliação)
+        else if (source === 'avaliacoes') {
+            // Apenas remove localmente, mantém a avaliação no sistema
         }
-    };
+        // Se for de solicitacoes, não excluir do Firestore (mantém o histórico)
+        else if (source === 'solicitacoes') {
+            // Apenas remove localmente, mantém a solicitação no sistema
+        }
 
-    window.markAllAsRead = async function() {
-        try {
-            const unreadNotifications = notifications.filter(n => !n.lida);
-            if (unreadNotifications.length === 0) {
-                showToast('Informação', 'Todas as notificações já estão lidas');
-                return;
-            }
-            
-            for (const notification of unreadNotifications) {
+        // Remover localmente
+        const index = notifications.findIndex(n => n.id === notificationId && n.source === source);
+        if (index !== -1) {
+            notifications.splice(index, 1);
+        }
+
+        updateCounters();
+        updateUnreadBadge();
+        renderNotifications();
+        
+        showToast('Sucesso', 'Notificação removida com sucesso', 'success');
+
+    } catch (error) {
+        console.error('Erro ao excluir notificação:', error);
+        showToast('Erro', 'Não foi possível excluir a notificação', 'error');
+    }
+};
+
+// Mark all as read
+window.markAllAsRead = async function() {
+    try {
+        const unreadNotifications = notifications.filter(n => !n.lida);
+        
+        if (unreadNotifications.length === 0) {
+            showToast('Informação', 'Todas as notificações já estão lidas', 'info');
+            return;
+        }
+        
+        for (const notification of unreadNotifications) {
+            // Se for da coleção notificacoes, atualizar no Firestore
+            if (notification.source === 'notificacoes') {
                 const notificationRef = doc(db, "notificacoes", notification.id);
                 await updateDoc(notificationRef, {
                     lida: true,
                     atualizadaEm: serverTimestamp()
                 });
-                notification.lida = true;
             }
-
-            updateCounters();
-            updateUnreadBadge();
-            renderNotifications();
-            showToast('Sucesso', 'Todas as notificações foram marcadas como lidas');
-
-        } catch (error) {
-            showToast('Erro', 'Não foi possível marcar todas como lidas');
+            // Se for de solicitacoes, atualizar no Firestore
+            else if (notification.source === 'solicitacoes') {
+                const solicitacaoRef = doc(db, "solicitacoes", notification.id);
+                await updateDoc(solicitacaoRef, {
+                    visualizado: true,
+                    atualizadaEm: serverTimestamp()
+                });
+            }
+            // Para avaliacoes, apenas atualizar localmente
+            
+            notification.lida = true;
         }
-    };
 
-    window.filterByType = function(type, element) {
-        document.querySelectorAll('.filter-group:first-child .filter-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        element.classList.add('active');
-        currentFilter = type;
+        updateCounters();
+        updateUnreadBadge();
         renderNotifications();
-    };
+        
+        showToast('Sucesso', 'Todas as notificações foram marcadas como lidas', 'success');
 
-    window.filterByStatus = function(status, element) {
-        const parent = element.closest('.filter-group');
-        parent.querySelectorAll('.filter-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        element.classList.add('active');
-        currentStatusFilter = status;
-        renderNotifications();
-    };
+    } catch (error) {
+        console.error('Erro ao marcar todas como lidas:', error);
+        showToast('Erro', 'Não foi possível marcar todas como lidas', 'error');
+    }
+};
 
-    window.switchTab = function(tab, element) {
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        element.classList.add('active');
-        currentTab = tab;
-        renderNotifications();
-    };
+// Filter by type
+window.filterByType = function(type, element) {
+    document.querySelectorAll('.filter-group:first-child .filter-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    element.classList.add('active');
+    
+    currentFilter = type;
+    renderNotifications();
+};
 
-    window.searchNotifications = function() {
-        renderNotifications();
-    };
+// Filter by status
+window.filterByStatus = function(status, element) {
+    const parent = element.closest('.filter-group');
+    parent.querySelectorAll('.filter-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    element.classList.add('active');
+    
+    currentStatusFilter = status;
+    renderNotifications();
+};
 
-    window.refreshNotifications = async function() {
-        await loadNotifications();
-        await loadReviews();
-        showToast('Atualizado', 'Notificações atualizadas com sucesso');
-    };
+// Switch tab
+window.switchTab = function(tab, element) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    element.classList.add('active');
+    
+    currentTab = tab;
+    renderNotifications();
+};
 
-    window.openWhatsApp = function(phone) {
-        const cleanPhone = phone.replace(/\D/g, '');
-        const message = "Olá! Vi sua mensagem no ScanHub e gostaria de conversar sobre o serviço.";
+// Search notifications
+window.searchNotifications = function() {
+    renderNotifications();
+};
+
+// ✅ Refresh notifications
+window.refreshNotifications = async function() {
+    await loadNotifications();
+    await loadReviewsForStats();
+    showToast('Atualizado', 'Notificações atualizadas com sucesso', 'success');
+};
+
+// Open WhatsApp
+window.openWhatsApp = function(phone) {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const message = "Olá! Vi sua mensagem no ScanHub e gostaria de conversar sobre o serviço.";
+    window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+};
+
+// ✅ Respond to orcamento (agora sabe a fonte)
+window.respondToOrcamento = async function(notificationId, source) {
+    // Buscar a notificação original
+    const notification = notifications.find(n => n.id === notificationId && n.source === source);
+    
+    if (notification && notification.metadata?.telefone) {
+        const cleanPhone = notification.metadata.telefone.replace(/\D/g, '');
+        const message = `Olá ${notification.metadata.clienteNome}! Vi seu pedido de orçamento no ScanHub sobre: ${notification.metadata.descricao?.substring(0, 50) || 'seu serviço'}... Vamos conversar?`;
         window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
-    };
+    } else {
+        showToast('Informação',
+            'Para responder ao orçamento, acesse a página de pedidos ou entre em contato pelo WhatsApp',
+            'info'
+        );
+    }
+};
 
-    window.respondToOrcamento = async function(notificationId) {
-        showToast('Informação', 'Para responder ao orçamento, acesse a página de pedidos ou entre em contato pelo WhatsApp');
-    };
-
-    window.showAllReviews = async function() {
-        try {
-            const reviewsListEl = document.getElementById('reviewsList');
-            const reviewStatsEl = document.getElementById('reviewStats');
+// ✅ Show all reviews
+window.showAllReviews = async function() {
+    try {
+        const reviewsListEl = document.getElementById('reviewsList');
+        const reviewStatsEl = document.getElementById('reviewStats');
+        
+        // Se já carregamos as avaliações, usar elas
+        if (reviews.length === 0) {
+            reviewsListEl.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                    <h4>Nenhuma avaliação ainda</h4>
+                    <p class="text-muted">Você ainda não recebeu avaliações dos clientes.</p>
+                </div>
+            `;
             
-            const total = reviews.length;
-            if (total === 0) {
-                reviewsListEl.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
-                        <h4>Nenhuma avaliação ainda</h4>
-                        <p class="text-muted">Você ainda não recebeu avaliações dos clientes.</p>
-                    </div>
-                `;
-                
-                document.getElementById('totalReviewsCount').textContent = '0';
-                document.getElementById('averageRating').textContent = '0.0';
-                document.getElementById('fiveStarCount').textContent = '0';
-                document.getElementById('last30Days').textContent = '0';
-                
-                modalReviews.show();
-                return;
-            }
-            
-            const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
-            const average = (totalStars / total).toFixed(1);
-            
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
-            
-            const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
-            
-            document.getElementById('totalReviewsCount').textContent = total;
-            document.getElementById('averageRating').textContent = average;
-            document.getElementById('fiveStarCount').textContent = fiveStars;
-            document.getElementById('last30Days').textContent = recentReviews.length;
-            
-            reviewsListEl.innerHTML = reviews.map(review => {
-                const notaInt = Math.floor(review.nota);
-                const estrelas = Array(5).fill(0).map((_, i) => 
-                    `<span class="rating-star ${i < notaInt ? '' : 'empty'}">
-                        <i class="${i < notaInt ? 'fas' : 'far'} fa-star"></i>
-                    </span>`
-                ).join('');
-                
-                const dataFormatada = new Intl.DateTimeFormat('pt-BR').format(review.data);
-                const nomeExibido = review.anonimo ? 'Anônimo' : review.clienteNome;
-                const avatar = review.anonimo ? 
-                    'https://ui-avatars.com/api/?name=Cliente&background=6c757d&color=fff' : 
-                    (review.clienteFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeExibido)}&background=44689a&color=fff`);
-                
-                let respostaHTML = '';
-                if (review.resposta) {
-                    const dataResposta = review.dataResposta ? new Intl.DateTimeFormat('pt-BR').format(review.dataResposta) : '';
-                    respostaHTML = `
-                        <div class="review-response">
-                            <span class="response-label">
-                                <i class="fas fa-reply me-1"></i> Sua resposta
-                                ${dataResposta ? ` • ${dataResposta}` : ''}
-                            </span>
-                            <p class="mb-0">${review.resposta}</p>
-                        </div>
-                    `;
-                }
-                
-                return `
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <img src="${avatar}" alt="${nomeExibido}" class="reviewer-avatar">
-                                <div>
-                                    <div class="reviewer-name">${nomeExibido}</div>
-                                    <div class="review-date">${dataFormatada}</div>
-                                </div>
-                            </div>
-                            <div class="rating-stars">
-                                ${estrelas}
-                                <span class="rating-number">${review.nota.toFixed(1)}</span>
-                            </div>
-                        </div>
-                        <div class="review-content">
-                            ${review.comentario || 'Sem comentário.'}
-                        </div>
-                        ${respostaHTML}
-                    </div>
-                `;
-            }).join('');
+            // Atualizar stats
+            document.getElementById('totalReviewsCount').textContent = '0';
+            document.getElementById('averageRating').textContent = '0.0';
+            document.getElementById('fiveStarCount').textContent = '0';
+            document.getElementById('last30Days').textContent = '0';
             
             modalReviews.show();
+            return;
+        }
+        
+        // Calcular estatísticas
+        const total = reviews.length;
+        const totalStars = reviews.reduce((sum, r) => sum + r.nota, 0);
+        const average = (totalStars / total).toFixed(1);
+        
+        // Contar avaliações dos últimos 30 dias
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const recentReviews = reviews.filter(r => r.data >= thirtyDaysAgo);
+        
+        // Contar por nota
+        const fiveStars = reviews.filter(r => Math.floor(r.nota) === 5).length;
+        
+        // Atualizar stats
+        document.getElementById('totalReviewsCount').textContent = total;
+        document.getElementById('averageRating').textContent = average;
+        document.getElementById('fiveStarCount').textContent = fiveStars;
+        document.getElementById('last30Days').textContent = recentReviews.length;
+        
+        // Renderizar lista de avaliações
+        reviewsListEl.innerHTML = reviews.map(review => {
+            const notaInt = Math.floor(review.nota);
+            const estrelas = Array(5).fill(0).map((_, i) => 
+                `<span class="rating-star ${i < notaInt ? '' : 'empty'}">
+                    <i class="${i < notaInt ? 'fas' : 'far'} fa-star"></i>
+                </span>`
+            ).join('');
             
-        } catch (error) {
-            showToast('Erro', 'Não foi possível carregar as avaliações');
-        }
-    };
-
-    // Helper function to format time ago
-    function formatTimeAgo(date) {
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / (1000 * 60));
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const dataFormatada = formatDate(review.data);
+            const nomeExibido = review.anonimo ? 'Anônimo' : review.clienteNome;
+            const avatar = review.anonimo ? 
+                'https://ui-avatars.com/api/?name=Cliente&background=6c757d&color=fff' : 
+                (review.clienteFoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nomeExibido)}&background=44689a&color=fff`);
+            
+            let respostaHTML = '';
+            if (review.resposta) {
+                const dataResposta = review.dataResposta ? formatDate(review.dataResposta) : '';
+                respostaHTML = `
+                    <div class="review-response">
+                        <span class="response-label">
+                            <i class="fas fa-reply me-1"></i> Sua resposta
+                            ${dataResposta ? ` • ${dataResposta}` : ''}
+                        </span>
+                        <p class="mb-0">${review.resposta}</p>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <img src="${avatar}" alt="${nomeExibido}" class="reviewer-avatar">
+                            <div>
+                                <div class="reviewer-name">${nomeExibido}</div>
+                                <div class="review-date">${dataFormatada}</div>
+                            </div>
+                        </div>
+                        <div class="rating-stars">
+                            ${estrelas}
+                            <span class="rating-number">${review.nota.toFixed(1)}</span>
+                        </div>
+                    </div>
+                    <div class="review-content">
+                        ${review.comentario || 'Sem comentário.'}
+                    </div>
+                    ${respostaHTML}
+                </div>
+            `;
+        }).join('');
         
-        if (diffMins < 1) {
-            return 'Agora mesmo';
-        } else if (diffMins < 60) {
-            return `Há ${diffMins} min`;
-        } else if (diffHours < 24) {
-            return `Há ${diffHours} h`;
-        } else if (diffDays === 1) {
-            return 'Ontem';
-        } else if (diffDays < 7) {
-            return `Há ${diffDays} dias`;
-        } else {
-            return new Intl.DateTimeFormat('pt-BR').format(date);
-        }
-    }
-
-    // Show toast notification
-    function showToast(title, message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast toast-success';
-        toast.innerHTML = `
-            <div class="toast-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="toast-content">
-                <h5>${title}</h5>
-                <p>${message}</p>
-            </div>
-        `;
+        modalReviews.show();
         
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 10);
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+    } catch (error) {
+        console.error('Erro ao carregar avaliações:', error);
+        showToast('Erro', 'Não foi possível carregar as avaliações', 'error');
     }
+};
 
-    // Auto-refresh notifications every 30 seconds
-    setInterval(() => {
-        if (document.visibilityState === 'visible') {
-            loadNotifications();
-            loadReviews();
-        }
-    }, 30000);
+// Helper function to format date
+function formatDate(date) {
+    return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(date);
+}
+
+// Show toast notification
+function showToast(title, message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    const icon = type === 'success' ? 'check-circle' :
+          type === 'error' ? 'exclamation-triangle' : 'info-circle';
+    
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="fas fa-${icon}"></i>
+        </div>
+        <div class="toast-content">
+            <h5>${title}</h5>
+            <p>${message}</p>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Format time ago
+function formatTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMins < 1) {
+        return 'Agora mesmo';
+    } else if (diffMins < 60) {
+        return `Há ${diffMins} min`;
+    } else if (diffHours < 24) {
+        return `Há ${diffHours} h`;
+    } else if (diffDays === 1) {
+        return 'Ontem';
+    } else if (diffDays < 7) {
+        return `Há ${diffDays} dias`;
+    } else {
+        return date.toLocaleDateString('pt-BR');
+    }
+}
+
+// Auto-refresh notifications every 30 seconds
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        loadNotifications();
+        loadReviewsForStats();
+    }
+}, 30000);
 </script>
 </body>
 </html>
