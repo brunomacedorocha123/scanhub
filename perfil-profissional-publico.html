@@ -1815,7 +1815,7 @@ async function loadReviews() {
     }
 }
 
-// FUNÇÃO CORRIGIDA - Carregar catálogo com tratamento de erro detalhado
+// FUNÇÃO ATUALIZADA - Carregar catálogo com filtro de status ativo
 async function loadCatalogo() {
     try {
         const container = document.getElementById('catalogoGrid');
@@ -1826,129 +1826,58 @@ async function loadCatalogo() {
             container.innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Carregando catálogo...</p></div>';
         }
         
-        // Buscar serviços SEM filtros de status primeiro (para debug)
-        let servicosSnapshot;
+        catalogoCompleto = [];
+        
+        // Buscar serviços ATIVOS do profissional
         try {
             const qServicos = query(
                 collection(db, "servicos"),
-                where("profissionalId", "==", professionalId)
+                where("profissionalId", "==", professionalId),
+                where("status", "==", "ativo")
             );
-            servicosSnapshot = await getDocs(qServicos);
-        } catch (queryError) {
-            console.error('Erro na query de serviços:', queryError);
-            // Tentar busca alternativa sem índice
-            const qServicosSimples = query(collection(db, "servicos"));
-            const snapshotTemp = await getDocs(qServicosSimples);
-            servicosSnapshot = {
-                forEach: (callback) => {
-                    snapshotTemp.forEach(doc => {
-                        const data = doc.data();
-                        if (data.profissionalId === professionalId) {
-                            callback(doc);
-                        }
-                    });
-                },
-                size: Array.from(snapshotTemp.docs).filter(d => d.data().profissionalId === professionalId).length
-            };
+            
+            const servicosSnapshot = await getDocs(qServicos);
+            
+            servicosSnapshot.forEach(doc => {
+                const servico = doc.data();
+                catalogoCompleto.push({
+                    id: doc.id,
+                    tipo: 'servico',
+                    ...servico
+                });
+            });
+        } catch (servicosError) {
+            console.log('Erro ao buscar serviços:', servicosError);
         }
         
-        servicos = [];
-        servicosSnapshot.forEach(doc => {
-            const servico = doc.data();
-            servicos.push({
-                id: doc.id,
-                tipo: 'servico',
-                ...servico
-            });
-        });
-
-        // Buscar produtos SEM filtros de status primeiro (para debug)
-        let produtosSnapshot;
+        // Buscar produtos ATIVOS do profissional
         try {
             const qProdutos = query(
                 collection(db, "produtos"),
-                where("profissionalId", "==", professionalId)
+                where("profissionalId", "==", professionalId),
+                where("status", "==", "ativo")
             );
-            produtosSnapshot = await getDocs(qProdutos);
-        } catch (queryError) {
-            console.error('Erro na query de produtos:', queryError);
-            // Tentar busca alternativa sem índice
-            const qProdutosSimples = query(collection(db, "produtos"));
-            const snapshotTemp = await getDocs(qProdutosSimples);
-            produtosSnapshot = {
-                forEach: (callback) => {
-                    snapshotTemp.forEach(doc => {
-                        const data = doc.data();
-                        if (data.profissionalId === professionalId) {
-                            callback(doc);
-                        }
-                    });
-                },
-                size: Array.from(snapshotTemp.docs).filter(d => d.data().profissionalId === professionalId).length
-            };
-        }
-        
-        produtos = [];
-        produtosSnapshot.forEach(doc => {
-            const produto = doc.data();
-            produtos.push({
-                id: doc.id,
-                tipo: 'produto',
-                ...produto
-            });
-        });
-
-        catalogoCompleto = [...servicos, ...produtos];
-        
-        // Se não encontrou nada, tentar busca direta sem where
-        if (catalogoCompleto.length === 0) {
-            await tentarBuscaDireta();
-        }
-        
-        renderCatalogo();
-
-    } catch (error) {
-        console.error('Erro crítico ao carregar catálogo:', error);
-        catalogoCompleto = [];
-        renderCatalogo();
-    }
-}
-
-// Busca alternativa sem índice composto
-async function tentarBuscaDireta() {
-    try {
-        // Tentar getDocs sem where para serviços
-        const servicosRef = collection(db, "servicos");
-        const allServicos = await getDocs(servicosRef);
-        allServicos.forEach(doc => {
-            const data = doc.data();
-            if (data.profissionalId === professionalId) {
-                servicos.push({
-                    id: doc.id,
-                    tipo: 'servico',
-                    ...data
-                });
-            }
-        });
-        
-        // Tentar getDocs sem where para produtos
-        const produtosRef = collection(db, "produtos");
-        const allProdutos = await getDocs(produtosRef);
-        allProdutos.forEach(doc => {
-            const data = doc.data();
-            if (data.profissionalId === professionalId) {
-                produtos.push({
+            
+            const produtosSnapshot = await getDocs(qProdutos);
+            
+            produtosSnapshot.forEach(doc => {
+                const produto = doc.data();
+                catalogoCompleto.push({
                     id: doc.id,
                     tipo: 'produto',
-                    ...data
+                    ...produto
                 });
-            }
-        });
+            });
+        } catch (produtosError) {
+            console.log('Erro ao buscar produtos:', produtosError);
+        }
         
-        catalogoCompleto = [...servicos, ...produtos];
-        
+        renderCatalogo();
+
     } catch (error) {
-        console.error('Erro na busca direta:', error);
+        console.error('Erro ao carregar catálogo:', error);
+        catalogoCompleto = [];
+        renderCatalogo();
     }
 }
 
@@ -2073,7 +2002,6 @@ function renderCatalogo() {
                 <i class="fas fa-store"></i>
                 <h4>Catálogo vazio</h4>
                 <p>Este profissional ainda não adicionou serviços ou produtos ao catálogo.</p>
-                ${catalogoCompleto.length > 0 ? '<p class="text-muted"><small>Itens encontrados mas filtrados: ' + catalogoCompleto.length + '</small></p>' : ''}
             `;
         }
         return;
