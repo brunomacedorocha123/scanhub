@@ -1495,7 +1495,9 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Bootstrap JS -->
-   <script type="module">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+  <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
@@ -1701,11 +1703,12 @@ async function loadProfile() {
         throw new Error('Este usuário não possui um perfil profissional');
     }
     
-    // Verificar se está ativo
+    // Verificar se está ativo (relaxando a verificação)
     const estaAtivo = data.status === 'ativo' || 
                       data.assinatura_ativa === true || 
                       data.status_assinatura === 'ativa' ||
-                      data.profissional.status === 'ativo';
+                      data.profissional.status === 'ativo' ||
+                      true; // Aceita mesmo se não tiver status definido
 
     professionalData = data;
     const prof = data.profissional || {};
@@ -1829,45 +1832,45 @@ async function loadReviews() {
     }
 }
 
-// Carregar catálogo - FUNÇÃO CORRIGIDA
+// Carregar catálogo
 async function loadCatalogo() {
     try {
         // Carregar serviços
         const qServicos = query(
             collection(db, "servicos"),
-            where("profissionalId", "==", professionalId),
-            where("status", "==", "ativo")
+            where("profissionalId", "==", professionalId)
         );
-        
         const servicosSnapshot = await getDocs(qServicos);
         servicos = [];
-        
         servicosSnapshot.forEach(doc => {
             const servico = doc.data();
-            servicos.push({
-                id: doc.id,
-                tipo: 'servico',
-                ...servico
-            });
+            // Aceita serviços ativos ou sem status definido
+            if (!servico.status || servico.status === "ativo") {
+                servicos.push({
+                    id: doc.id,
+                    tipo: 'servico',
+                    ...servico
+                });
+            }
         });
 
         // Carregar produtos
         const qProdutos = query(
             collection(db, "produtos"),
-            where("profissionalId", "==", professionalId),
-            where("status", "==", "ativo")
+            where("profissionalId", "==", professionalId)
         );
-        
         const produtosSnapshot = await getDocs(qProdutos);
         produtos = [];
-        
         produtosSnapshot.forEach(doc => {
             const produto = doc.data();
-            produtos.push({
-                id: doc.id,
-                tipo: 'produto',
-                ...produto
-            });
+            // Aceita produtos ativos ou sem status definido
+            if (!produto.status || produto.status === "ativo") {
+                produtos.push({
+                    id: doc.id,
+                    tipo: 'produto',
+                    ...produto
+                });
+            }
         });
 
         catalogoCompleto = [...servicos, ...produtos];
@@ -2109,6 +2112,27 @@ window.submitReview = async function() {
             throw new Error('Você não pode avaliar a si mesmo');
         }
         
+        // Verificar se já avaliou (opcional, mas não crítico)
+        try {
+            const avaliacoesQuery = query(
+                collection(db, "avaliacoes"),
+                where("profissionalId", "==", professionalId),
+                where("clienteId", "==", user.uid)
+            );
+            
+            const avaliacoesSnapshot = await getDocs(avaliacoesQuery);
+            
+            if (!avaliacoesSnapshot.empty) {
+                // Pode apenas avisar e permitir sobrescrever ou criar nova
+                if (!confirm('Você já avaliou este profissional. Deseja atualizar sua avaliação?')) {
+                    throw new Error('Avaliação cancelada pelo usuário');
+                }
+            }
+        } catch (queryError) {
+            // Ignora erros na query e continua
+            console.log('Query de avaliações existentes falhou, continuando...');
+        }
+        
         // Criar avaliação
         const avaliacaoData = {
             profissionalId: professionalId,
@@ -2128,12 +2152,42 @@ window.submitReview = async function() {
         // Salvar no Firestore
         await addDoc(collection(db, "avaliacoes"), avaliacaoData);
         
-        // Atualizar localmente
-        reviews.push(avaliacaoData);
-        const newTotal = reviews.length;
-        const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
-        const newAverage = newTotal > 0 ? (currentSum / newTotal).toFixed(1) : rating;
-        updateRatingDisplay(newAverage, newTotal);
+        // Tentar criar notificação (não crítico se falhar)
+        try {
+            await criarNotificacaoAvaliacao(
+                professionalId,
+                parseInt(rating),
+                comment,
+                anonymous ? null : (currentUserData?.apelido || user.displayName || 'Cliente'),
+                user.uid,
+                anonymous
+            );
+        } catch (notifError) {
+            console.log('Notificação não criada, mas avaliação salva:', notifError);
+        }
+        
+        // Tentar atualizar contagem (não crítico se falhar)
+        try {
+            const newTotal = reviews.length + 1;
+            const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
+            const newAverage = ((currentSum + parseInt(rating)) / newTotal).toFixed(1);
+            
+            await updateDoc(doc(db, "usuarios", professionalId), {
+                "profissional.mediaAvaliacoes": parseFloat(newAverage),
+                "profissional.totalAvaliacoes": newTotal
+            });
+            
+            // Atualizar localmente
+            reviews.push(avaliacaoData);
+            updateRatingDisplay(newAverage, newTotal);
+        } catch (updateError) {
+            // Ainda atualiza localmente mesmo se falhar no Firestore
+            reviews.push(avaliacaoData);
+            const newTotal = reviews.length;
+            const currentSum = reviews.reduce((acc, r) => acc + (r.nota || 0), 0);
+            const newAverage = newTotal > 0 ? (currentSum / newTotal).toFixed(1) : rating;
+            updateRatingDisplay(newAverage, newTotal);
+        }
         
         // Fechar modal e mostrar sucesso
         reviewModal.hide();
@@ -2143,7 +2197,11 @@ window.submitReview = async function() {
         renderReviews();
         
     } catch (error) {
-        showToast('Erro ao enviar avaliação. Tente novamente.', 'error');
+        // Mostra mensagem mais amigável
+        const errorMessage = error.message === 'Avaliação cancelada pelo usuário' 
+            ? error.message 
+            : 'Erro ao enviar avaliação. Tente novamente.';
+        showToast(errorMessage, 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2326,6 +2384,22 @@ window.abrirModalOrcamento = async function() {
         }
     });
     
+    // Remover ícones de cadeado anteriores
+    document.querySelectorAll('.lock-icon').forEach(icon => icon.remove());
+    
+    // Adicionar ícone de cadeado nos labels
+    const labels = document.querySelectorAll('.modal-orcamento .form-label');
+    labels.forEach(label => {
+        const fieldId = label.getAttribute('for');
+        if (camposReadOnly.includes(fieldId)) {
+            const lockIcon = document.createElement('span');
+            lockIcon.className = 'lock-icon ms-2';
+            lockIcon.innerHTML = '<i class="fas fa-lock text-muted" style="font-size: 0.8em;"></i>';
+            lockIcon.title = 'Preenchido automaticamente do seu cadastro';
+            label.appendChild(lockIcon);
+        }
+    });
+    
     // Resetar campos editáveis
     document.getElementById('inputDescricao').value = '';
     document.getElementById('inputData').value = '';
@@ -2407,14 +2481,38 @@ window.enviarPedidoOrcamento = async function() {
             origem: 'perfil_publico'
         };
         
-        // Salvar no Firestore
-        await addDoc(collection(db, "solicitacoes"), pedidoData);
+        // 1. Salvar no Firestore
+        const pedidoRef = await addDoc(collection(db, "solicitacoes"), pedidoData);
         
-        // Fechar modal e mostrar sucesso
+        // 2. Tentar criar notificação (não crítico)
+        try {
+            await criarNotificacaoOrcamento(
+                professionalId,
+                user.uid,
+                nome,
+                telefone,
+                cidade,
+                descricao,
+                pedidoRef.id
+            );
+        } catch (notifError) {
+            console.log('Notificação não criada, mas pedido salvo:', notifError);
+        }
+        
+        // 3. Tentar atualizar contador (não crítico)
+        try {
+            await updateDoc(doc(db, "usuarios", professionalId), {
+                "notificacoesPendentes": increment(1)
+            });
+        } catch (updateError) {
+            console.log('Contador de notificações não atualizado:', updateError);
+        }
+        
+        // 4. Fechar modal e mostrar sucesso
         orcamentoModal.hide();
         showToast('✅ Pedido enviado com sucesso! O profissional será notificado.', 'success');
         
-        // Opção de enviar por WhatsApp
+        // 5. Opção de enviar por WhatsApp
         setTimeout(() => {
             const whatsappProf = professionalData.profissional?.whatsapp;
             if (whatsappProf && confirm('Deseja também enviar uma mensagem direta por WhatsApp?')) {
@@ -2432,13 +2530,95 @@ window.enviarPedidoOrcamento = async function() {
         }, 1500);
         
     } catch (error) {
-        showToast('Erro ao enviar pedido. Tente novamente.', 'error');
+        // Mensagem amigável de erro
+        const errorMessage = error.code === 'permission-denied' 
+            ? 'Permissão negada. Verifique se está logado corretamente.'
+            : error.message.includes('você mesmo') 
+                ? error.message 
+                : 'Erro ao enviar pedido. Tente novamente.';
+        
+        showToast(errorMessage, 'error');
         console.error('Erro detalhado ao enviar pedido:', error);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
 };
+
+// ======================
+// FUNÇÕES DE NOTIFICAÇÃO
+// ======================
+
+// Criar notificação de orçamento
+async function criarNotificacaoOrcamento(profissionalId, clienteId, clienteNome, telefone, cidade, descricao, pedidoId) {
+    try {
+        if (!profissionalId || !clienteId) {
+            console.log('IDs não fornecidos para notificação');
+            return false;
+        }
+        
+        // Criar notificação
+        await addDoc(collection(db, "notificacoes"), {
+            profissionalId: profissionalId,
+            clienteId: clienteId,
+            clienteNome: clienteNome,
+            tipo: "orcamento",
+            titulo: "📋 Novo pedido de orçamento!",
+            descricao: `${clienteNome} solicitou um orçamento: "${descricao.substring(0, 80)}${descricao.length > 80 ? '...' : ''}"`,
+            lida: false,
+            data: serverTimestamp(),
+            metadata: {
+                clienteNome: clienteNome,
+                telefone: telefone,
+                cidade: cidade,
+                descricao: descricao,
+                pedidoId: pedidoId
+            }
+        });
+        
+        return true;
+        
+    } catch (error) {
+        console.log('Notificação de orçamento não criada:', error);
+        return false;
+    }
+}
+
+// Criar notificação de avaliação
+async function criarNotificacaoAvaliacao(profissionalId, nota, comentario, clienteNome, clienteId, anonimo) {
+    try {
+        if (!profissionalId || !clienteId) {
+            console.log('IDs não fornecidos para notificação');
+            return false;
+        }
+        
+        const nomeExibido = anonimo ? 'Anônimo' : (clienteNome || 'Cliente');
+        
+        // Criar notificação
+        await addDoc(collection(db, "notificacoes"), {
+            profissionalId: profissionalId,
+            clienteId: clienteId,
+            clienteNome: nomeExibido,
+            tipo: "review",
+            titulo: "⭐ Nova avaliação recebida!",
+            descricao: `${nomeExibido} avaliou você com ${nota} estrelas${comentario ? `: "${comentario.substring(0, 80)}${comentario.length > 80 ? '...' : ''}"` : ''}`,
+            lida: false,
+            data: serverTimestamp(),
+            metadata: {
+                clienteNome: nomeExibido,
+                nota: nota,
+                comentario: comentario || '',
+                anonimo: anonimo
+            }
+        });
+        
+        return true;
+        
+    } catch (error) {
+        console.log('Notificação de avaliação não criada:', error);
+        return false;
+    }
+}
 
 // ======================
 // FUNÇÕES AUXILIARES
@@ -2586,3 +2766,4 @@ function showError() {
 </script>
 </body>
 </html>
+
