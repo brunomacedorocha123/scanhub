@@ -1235,7 +1235,7 @@
     let currentUser = null;
     let userData = null;
     let clientes = [];
-    let planoLimite = 50;
+    let planoLimite = 5; // ✅ ALTERADO: Default agora é 5 (FREE)
     let tags = ['VIP', 'Recorrente', 'Novo', 'Potencial'];
     let segmentosSalvos = [];
 
@@ -1291,15 +1291,15 @@
                 planoLimite = 999999;
                 limiteClientes.textContent = 'Ilimitado';
             } else if (plano.includes('free')) {
-                planoLimite = 3;
-                limiteClientes.textContent = '3';
+                planoLimite = 5; // ✅ ALTERADO: de 3 para 5
+                limiteClientes.textContent = '5';
             } else {
-                planoLimite = 50;
-                limiteClientes.textContent = '50';
+                planoLimite = 5; // ✅ ALTERADO: de 50 para 5 (plano desconhecido = FREE)
+                limiteClientes.textContent = '5';
             }
         } else {
-            planoLimite = 50;
-            limiteClientes.textContent = '50';
+            planoLimite = 5; // ✅ ALTERADO: de 50 para 5 (sem plano = FREE)
+            limiteClientes.textContent = '5';
         }
     }
 
@@ -1327,7 +1327,7 @@
             
             atualizarTabelaClientes();
             atualizarEstatisticas();
-            verificarLimiteClientes(); // Função ATUALIZADA
+            verificarLimiteClientes();
         } catch (error) {
             // Silencioso
         }
@@ -1708,7 +1708,7 @@
     // Novo cliente
     btnNovoCliente.addEventListener('click', () => {
         if (clientes.length >= planoLimite && planoLimite !== 999999) {
-            const planoNome = userData?.plano_assinatura || 'seu plano atual';
+            const planoNome = userData?.plano_assinatura || 'FREE';
             alert(`❌ LIMITE ATINGIDO!\n\nPlano: ${planoNome.toUpperCase()}\nLimite: ${planoLimite} clientes\nAtuais: ${clientes.length}\n\nFaça upgrade do plano para adicionar mais clientes.`);
             return;
         }
