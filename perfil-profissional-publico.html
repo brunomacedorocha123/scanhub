@@ -1832,20 +1832,22 @@ async function loadReviews() {
     }
 }
 
-// Carregar catálogo
+// Carregar catálogo - CORRIGIDO
 async function loadCatalogo() {
     try {
-        // Carregar serviços
+        // Carregar serviços ATIVOS
         const qServicos = query(
             collection(db, "servicos"),
             where("profissionalId", "==", professionalId)
         );
+        
         const servicosSnapshot = await getDocs(qServicos);
         servicos = [];
+        
         servicosSnapshot.forEach(doc => {
             const servico = doc.data();
-            // Aceita serviços ativos ou sem status definido
-            if (!servico.status || servico.status === "ativo") {
+            // Mostrar apenas serviços com status "ativo"
+            if (servico.status === "ativo") {
                 servicos.push({
                     id: doc.id,
                     tipo: 'servico',
@@ -1854,17 +1856,19 @@ async function loadCatalogo() {
             }
         });
 
-        // Carregar produtos
+        // Carregar produtos ATIVOS
         const qProdutos = query(
             collection(db, "produtos"),
             where("profissionalId", "==", professionalId)
         );
+        
         const produtosSnapshot = await getDocs(qProdutos);
         produtos = [];
+        
         produtosSnapshot.forEach(doc => {
             const produto = doc.data();
-            // Aceita produtos ativos ou sem status definido
-            if (!produto.status || produto.status === "ativo") {
+            // Mostrar apenas produtos com status "ativo"
+            if (produto.status === "ativo") {
                 produtos.push({
                     id: doc.id,
                     tipo: 'produto',
