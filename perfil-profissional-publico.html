@@ -1511,7 +1511,8 @@ import {
     addDoc, 
     serverTimestamp,
     updateDoc,
-    increment 
+    increment,
+    enableIndexedDbPersistence
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1527,6 +1528,13 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Habilitar persistência offline
+try {
+    await enableIndexedDbPersistence(db);
+} catch (err) {
+    console.log('Persistência não habilitada:', err.code);
+}
+
 let professionalId = null;
 let professionalData = null;
 let currentUser = null;
@@ -1539,7 +1547,23 @@ let reviewModal = null;
 let detalhesModal = null;
 let orcamentoModal = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+// Aguardar DOM completamente carregado
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+
+function initApp() {
+    // Verificar elementos críticos
+    const catalogoGrid = document.getElementById('catalogoGrid');
+    const emptyCatalogo = document.getElementById('emptyCatalogo');
+    
+    if (!catalogoGrid) {
+        console.error('ERRO CRÍTICO: Elemento catalogoGrid não encontrado no DOM');
+        return;
+    }
+    
     reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
     detalhesModal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
     orcamentoModal = new bootstrap.Modal(document.getElementById('orcamentoModal'));
@@ -1612,7 +1636,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ratingText').textContent = labels[this.value];
         });
     });
-});
+}
 
 async function loadCurrentUserData() {
     try {
@@ -1791,13 +1815,43 @@ async function loadReviews() {
     }
 }
 
+// FUNÇÃO CORRIGIDA - Carregar catálogo com tratamento de erro detalhado
 async function loadCatalogo() {
     try {
-        const qServicos = query(
-            collection(db, "servicos"),
-            where("profissionalId", "==", professionalId)
-        );
-        const servicosSnapshot = await getDocs(qServicos);
+        const container = document.getElementById('catalogoGrid');
+        const emptyState = document.getElementById('emptyCatalogo');
+        
+        // Mostrar loading no catálogo
+        if (container) {
+            container.innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><p class="mt-2">Carregando catálogo...</p></div>';
+        }
+        
+        // Buscar serviços SEM filtros de status primeiro (para debug)
+        let servicosSnapshot;
+        try {
+            const qServicos = query(
+                collection(db, "servicos"),
+                where("profissionalId", "==", professionalId)
+            );
+            servicosSnapshot = await getDocs(qServicos);
+        } catch (queryError) {
+            console.error('Erro na query de serviços:', queryError);
+            // Tentar busca alternativa sem índice
+            const qServicosSimples = query(collection(db, "servicos"));
+            const snapshotTemp = await getDocs(qServicosSimples);
+            servicosSnapshot = {
+                forEach: (callback) => {
+                    snapshotTemp.forEach(doc => {
+                        const data = doc.data();
+                        if (data.profissionalId === professionalId) {
+                            callback(doc);
+                        }
+                    });
+                },
+                size: Array.from(snapshotTemp.docs).filter(d => d.data().profissionalId === professionalId).length
+            };
+        }
+        
         servicos = [];
         servicosSnapshot.forEach(doc => {
             const servico = doc.data();
@@ -1808,11 +1862,32 @@ async function loadCatalogo() {
             });
         });
 
-        const qProdutos = query(
-            collection(db, "produtos"),
-            where("profissionalId", "==", professionalId)
-        );
-        const produtosSnapshot = await getDocs(qProdutos);
+        // Buscar produtos SEM filtros de status primeiro (para debug)
+        let produtosSnapshot;
+        try {
+            const qProdutos = query(
+                collection(db, "produtos"),
+                where("profissionalId", "==", professionalId)
+            );
+            produtosSnapshot = await getDocs(qProdutos);
+        } catch (queryError) {
+            console.error('Erro na query de produtos:', queryError);
+            // Tentar busca alternativa sem índice
+            const qProdutosSimples = query(collection(db, "produtos"));
+            const snapshotTemp = await getDocs(qProdutosSimples);
+            produtosSnapshot = {
+                forEach: (callback) => {
+                    snapshotTemp.forEach(doc => {
+                        const data = doc.data();
+                        if (data.profissionalId === professionalId) {
+                            callback(doc);
+                        }
+                    });
+                },
+                size: Array.from(snapshotTemp.docs).filter(d => d.data().profissionalId === professionalId).length
+            };
+        }
+        
         produtos = [];
         produtosSnapshot.forEach(doc => {
             const produto = doc.data();
@@ -1824,11 +1899,56 @@ async function loadCatalogo() {
         });
 
         catalogoCompleto = [...servicos, ...produtos];
+        
+        // Se não encontrou nada, tentar busca direta sem where
+        if (catalogoCompleto.length === 0) {
+            await tentarBuscaDireta();
+        }
+        
         renderCatalogo();
 
     } catch (error) {
+        console.error('Erro crítico ao carregar catálogo:', error);
         catalogoCompleto = [];
         renderCatalogo();
+    }
+}
+
+// Busca alternativa sem índice composto
+async function tentarBuscaDireta() {
+    try {
+        // Tentar getDocs sem where para serviços
+        const servicosRef = collection(db, "servicos");
+        const allServicos = await getDocs(servicosRef);
+        allServicos.forEach(doc => {
+            const data = doc.data();
+            if (data.profissionalId === professionalId) {
+                servicos.push({
+                    id: doc.id,
+                    tipo: 'servico',
+                    ...data
+                });
+            }
+        });
+        
+        // Tentar getDocs sem where para produtos
+        const produtosRef = collection(db, "produtos");
+        const allProdutos = await getDocs(produtosRef);
+        allProdutos.forEach(doc => {
+            const data = doc.data();
+            if (data.profissionalId === professionalId) {
+                produtos.push({
+                    id: doc.id,
+                    tipo: 'produto',
+                    ...data
+                });
+            }
+        });
+        
+        catalogoCompleto = [...servicos, ...produtos];
+        
+    } catch (error) {
+        console.error('Erro na busca direta:', error);
     }
 }
 
@@ -1947,7 +2067,15 @@ function renderCatalogo() {
     });
     
     if (itensFiltrados.length === 0) {
-        if (emptyState) emptyState.style.display = 'block';
+        if (emptyState) {
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = `
+                <i class="fas fa-store"></i>
+                <h4>Catálogo vazio</h4>
+                <p>Este profissional ainda não adicionou serviços ou produtos ao catálogo.</p>
+                ${catalogoCompleto.length > 0 ? '<p class="text-muted"><small>Itens encontrados mas filtrados: ' + catalogoCompleto.length + '</small></p>' : ''}
+            `;
+        }
         return;
     }
     
@@ -2158,8 +2286,8 @@ window.abrirDetalhesItem = async function(itemId, tipo) {
             return;
         }
         
-        document.getElementById('modalItemTitle').textContent = item.nome;
-        document.getElementById('itemNome').textContent = item.nome;
+        document.getElementById('modalItemTitle').textContent = item.nome || 'Item';
+        document.getElementById('itemNome').textContent = item.nome || 'Item';
         document.getElementById('itemCategoria').textContent = item.categoria || 'Sem categoria';
         document.getElementById('itemDescricao').textContent = item.descricao || 'Sem descrição';
         
@@ -2190,13 +2318,13 @@ window.abrirDetalhesItem = async function(itemId, tipo) {
             item.imagens.forEach((img, index) => {
                 const imgElement = document.createElement('img');
                 imgElement.src = img;
-                imgElement.alt = `${item.nome} - Foto ${index + 1}`;
+                imgElement.alt = `${item.nome || 'Item'} - Foto ${index + 1}`;
                 galleryContainer.appendChild(imgElement);
             });
         } else {
             galleryContainer.innerHTML = `
-                <img src="https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome)}" 
-                     alt="${item.nome}">
+                <img src="https://via.placeholder.com/400x300?text=${encodeURIComponent(item.nome || 'Item')}" 
+                     alt="${item.nome || 'Item'}">
             `;
         }
         
