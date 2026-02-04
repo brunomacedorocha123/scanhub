@@ -1006,7 +1006,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
    <script type="module">
-    // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
         getAuth, 
@@ -1015,15 +1014,13 @@
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
     import { 
         getFirestore, 
-        doc, 
-        getDoc,
         collection,
         getDocs,
         query,
-        where
+        where,
+        orderBy
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
         authDomain: "scanhub-ed512.firebaseapp.com",
@@ -1033,127 +1030,124 @@
         appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Variáveis globais
     let currentUser = null;
     let pedidos = [];
     let profissionaisMap = new Map();
     let statusFiltro = 'todos';
 
-    // Elementos DOM
     const loader = document.getElementById('loader');
     const userName = document.getElementById('userName');
     const userAvatar = document.getElementById('userAvatar');
     const btnLogout = document.getElementById('btnLogout');
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
-    
-    // Elementos de estatísticas
     const totalPedidos = document.getElementById('totalPedidos');
     const pedidosAndamento = document.getElementById('pedidosAndamento');
     const pedidosConcluidos = document.getElementById('pedidosConcluidos');
     const valorPendente = document.getElementById('valorPendente');
-    
-    // Elementos de filtro
     const searchPedidos = document.getElementById('searchPedidos');
     const filterProfissional = document.getElementById('filterProfissional');
     const filterMes = document.getElementById('filterMes');
-    
-    // Elementos da tabela e cards
     const pedidosTable = document.getElementById('pedidosTable');
     const cardsContainer = document.getElementById('cardsContainer');
     const emptyState = document.getElementById('emptyState');
-    
-    // Elementos das abas
     const tabButtons = document.querySelectorAll('.tab-btn');
     const badgeTodos = document.getElementById('badgeTodos');
     const badgePendentes = document.getElementById('badgePendentes');
     const badgeAndamento = document.getElementById('badgeAndamento');
     const badgeConcluidos = document.getElementById('badgeConcluidos');
 
-    // Monitorar autenticação
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             try {
-                // Carregar dados do usuário
-                const userRef = doc(db, "usuarios", user.uid);
-                const userDoc = await getDoc(userRef);
-                
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    atualizarInterfaceUsuario(userData);
-                    
-                    // Carregar pedidos
-                    await carregarPedidos();
-                    
-                    // Esconder loader
-                    setTimeout(() => {
-                        loader.classList.add('hide');
-                    }, 500);
+                if (user.email) {
+                    userName.textContent = `Olá, ${user.email.split('@')[0]}`;
+                    userAvatar.textContent = user.email.charAt(0).toUpperCase();
                 } else {
-                    // Se não tem perfil, só carrega pedidos
                     userName.textContent = `Olá, Cliente`;
                     userAvatar.textContent = 'C';
-                    await carregarPedidos();
-                    loader.classList.add('hide');
                 }
+                
+                await carregarPedidos();
+                
+                setTimeout(() => {
+                    if (loader) loader.classList.add('hide');
+                }, 500);
             } catch (error) {
-                loader.classList.add('hide');
-                emptyState.style.display = 'block';
+                if (loader) loader.classList.add('hide');
+                if (emptyState) emptyState.style.display = 'block';
             }
         } else {
             window.location.href = 'login.html';
         }
     });
 
-    // Atualizar interface do usuário
-    function atualizarInterfaceUsuario(data) {
-        if (data.apelido) {
-            userName.textContent = `Olá, ${data.apelido}`;
-            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-        }
-    }
-
-    // FUNÇÃO CORRIGIDA: Buscar pedidos pelo EMAIL do cliente
+    // FUNÇÃO PRINCIPAL: Carregar pedidos do cliente
     async function carregarPedidos() {
         try {
-            // Verificar se o usuário tem email
-            if (!currentUser || !currentUser.email) {
+            if (!currentUser || !currentUser.uid) {
                 mostrarEmptyState();
                 return;
             }
 
-            // BUSCAR PEDIDOS pelo campo "clienteEmail" que já existe no pedido
-            const q = query(
-                collection(db, "pedidos"),
-                where("clienteEmail", "==", currentUser.email)
-            );
-            
-            const querySnapshot = await getDocs(q);
-            
             // Limpar arrays
             pedidos = [];
             profissionaisMap.clear();
-            filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
+            if (filterProfissional) {
+                filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
+            }
             
-            // Processar pedidos encontrados
-            querySnapshot.forEach((doc) => {
-                const pedidoData = doc.data();
-                pedidos.push({
-                    id: doc.id,
-                    ...pedidoData,
-                    // Garantir campos essenciais
-                    statusPedido: pedidoData.statusPedido || pedidoData.statusServico || 'pendente',
-                    dataPedido: pedidoData.dataPedido || pedidoData.criadoEm || new Date().toISOString()
+            // TENTATIVA 1: Buscar pelo clienteUserId (campo salvo no pedido)
+            let encontrouPedidos = false;
+            
+            const qUserId = query(
+                collection(db, "pedidos"),
+                where("clienteUserId", "==", currentUser.uid)
+            );
+            
+            const userIdSnapshot = await getDocs(qUserId);
+            
+            if (!userIdSnapshot.empty) {
+                userIdSnapshot.forEach((doc) => {
+                    const pedidoData = doc.data();
+                    pedidos.push({
+                        id: doc.id,
+                        ...pedidoData
+                    });
+                    encontrouPedidos = true;
                 });
-            });
+            }
             
-            // Verificar se encontrou pedidos
+            // TENTATIVA 2: Se não encontrou, buscar pelo email do cliente
+            if (!encontrouPedidos && currentUser.email) {
+                const qEmail = query(
+                    collection(db, "pedidos"),
+                    where("clienteEmail", "==", currentUser.email)
+                );
+                
+                const emailSnapshot = await getDocs(qEmail);
+                
+                if (!emailSnapshot.empty) {
+                    emailSnapshot.forEach((doc) => {
+                        const pedidoData = doc.data();
+                        // Evitar duplicados
+                        if (!pedidos.find(p => p.id === doc.id)) {
+                            pedidos.push({
+                                id: doc.id,
+                                ...pedidoData
+                            });
+                            encontrouPedidos = true;
+                        }
+                    });
+                }
+            }
+            
+            // Se não encontrou nenhum pedido
             if (pedidos.length === 0) {
                 mostrarEmptyState();
                 return;
@@ -1164,8 +1158,8 @@
             
             // Ordenar pedidos por data (mais recente primeiro)
             pedidos.sort((a, b) => {
-                const dataA = new Date(a.dataPedido).getTime();
-                const dataB = new Date(b.dataPedido).getTime();
+                const dataA = a.dataPedido ? new Date(a.dataPedido).getTime() : 0;
+                const dataB = b.dataPedido ? new Date(b.dataPedido).getTime() : 0;
                 return dataB - dataA;
             });
             
@@ -1182,47 +1176,42 @@
     // Carregar profissionais dos pedidos
     async function carregarProfissionais() {
         try {
-            // Extrair IDs únicos dos profissionais dos pedidos
-            const profissionalIds = [];
-            pedidos.forEach(pedido => {
-                if (pedido.profissionalId && !profissionalIds.includes(pedido.profissionalId)) {
-                    profissionalIds.push(pedido.profissionalId);
-                }
-            });
+            const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
             
-            // Buscar dados de cada profissional
             for (const profId of profissionalIds) {
                 try {
-                    const profRef = doc(db, "usuarios", profId);
-                    const profDoc = await getDoc(profRef);
-                    
-                    if (profDoc.exists()) {
-                        const profData = profDoc.data();
-                        profissionaisMap.set(profId, profData);
+                    // Para simplificar, usamos os dados já salvos no pedido
+                    const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
+                    if (pedidoComProf && pedidoComProf.profissionalNome) {
+                        profissionaisMap.set(profId, {
+                            apelido: pedidoComProf.profissionalNome,
+                            nomeCompleto: pedidoComProf.profissionalNome,
+                            telefone: ''
+                        });
                         
                         // Adicionar ao filtro de profissionais
-                        const option = document.createElement('option');
-                        option.value = profId;
-                        option.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
-                        filterProfissional.appendChild(option);
+                        if (filterProfissional) {
+                            const option = document.createElement('option');
+                            option.value = profId;
+                            option.textContent = pedidoComProf.profissionalNome;
+                            filterProfissional.appendChild(option);
+                        }
                     }
                 } catch (error) {
-                    // Continua se não conseguir carregar um profissional
                     continue;
                 }
             }
         } catch (error) {
-            // Continua sem as informações dos profissionais
+            // Continua sem as informações detalhadas
         }
     }
 
-    // Atualizar estatísticas
     function atualizarEstatisticas() {
         if (pedidos.length === 0) {
-            totalPedidos.textContent = '0';
-            pedidosAndamento.textContent = '0';
-            pedidosConcluidos.textContent = '0';
-            valorPendente.textContent = 'R$ 0';
+            if (totalPedidos) totalPedidos.textContent = '0';
+            if (pedidosAndamento) pedidosAndamento.textContent = '0';
+            if (pedidosConcluidos) pedidosConcluidos.textContent = '0';
+            if (valorPendente) valorPendente.textContent = 'R$ 0';
             return;
         }
         
@@ -1242,30 +1231,36 @@
             }
         });
         
-        totalPedidos.textContent = total;
-        pedidosAndamento.textContent = emAndamento;
-        pedidosConcluidos.textContent = concluidos;
-        valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
+        if (totalPedidos) totalPedidos.textContent = total;
+        if (pedidosAndamento) pedidosAndamento.textContent = emAndamento;
+        if (pedidosConcluidos) pedidosConcluidos.textContent = concluidos;
+        if (valorPendente) valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
     }
 
-    // Atualizar contadores das abas
     function atualizarContadoresAbas() {
+        if (pedidos.length === 0) {
+            if (badgeTodos) badgeTodos.textContent = '0';
+            if (badgePendentes) badgePendentes.textContent = '0';
+            if (badgeAndamento) badgeAndamento.textContent = '0';
+            if (badgeConcluidos) badgeConcluidos.textContent = '0';
+            return;
+        }
+        
         const total = pedidos.length;
         const pendentes = pedidos.filter(p => p.statusPedido === 'pendente').length;
         const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
         const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
         
-        badgeTodos.textContent = total;
-        badgePendentes.textContent = pendentes;
-        badgeAndamento.textContent = emAndamento;
-        badgeConcluidos.textContent = concluidos;
+        if (badgeTodos) badgeTodos.textContent = total;
+        if (badgePendentes) badgePendentes.textContent = pendentes;
+        if (badgeAndamento) badgeAndamento.textContent = emAndamento;
+        if (badgeConcluidos) badgeConcluidos.textContent = concluidos;
     }
 
-    // Atualizar tabela e cards
     function atualizarTabelaECards() {
-        const searchTerm = searchPedidos.value.toLowerCase();
-        const profissionalFilter = filterProfissional.value;
-        const mesFilter = filterMes.value;
+        const searchTerm = searchPedidos ? searchPedidos.value.toLowerCase() : '';
+        const profissionalFilter = filterProfissional ? filterProfissional.value : '';
+        const mesFilter = filterMes ? filterMes.value : '';
         
         // Filtrar pedidos
         let pedidosFiltrados = pedidos;
@@ -1279,7 +1274,7 @@
         if (searchTerm) {
             pedidosFiltrados = pedidosFiltrados.filter(pedido => {
                 const profData = profissionaisMap.get(pedido.profissionalId);
-                const profNome = profData?.apelido || profData?.nomeCompleto || '';
+                const profNome = profData?.apelido || profData?.nomeCompleto || pedido.profissionalNome || '';
                 
                 return profNome.toLowerCase().includes(searchTerm) ||
                        (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
@@ -1308,8 +1303,8 @@
         }
         
         // Limpar tabela e cards
-        pedidosTable.innerHTML = '';
-        cardsContainer.innerHTML = '';
+        if (pedidosTable) pedidosTable.innerHTML = '';
+        if (cardsContainer) cardsContainer.innerHTML = '';
         
         if (pedidosFiltrados.length === 0) {
             mostrarEmptyState();
@@ -1317,23 +1312,28 @@
         }
         
         // Esconder empty state
-        emptyState.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
         
         // Preencher tabela (desktop)
-        pedidosFiltrados.forEach(pedido => {
-            adicionarLinhaTabela(pedido);
-        });
+        if (pedidosTable) {
+            pedidosFiltrados.forEach(pedido => {
+                adicionarLinhaTabela(pedido);
+            });
+        }
         
         // Preencher cards (mobile)
-        pedidosFiltrados.forEach(pedido => {
-            adicionarCard(pedido);
-        });
+        if (cardsContainer) {
+            pedidosFiltrados.forEach(pedido => {
+                adicionarCard(pedido);
+            });
+        }
     }
 
-    // Adicionar linha na tabela
     function adicionarLinhaTabela(pedido) {
+        if (!pedidosTable) return;
+        
         const profData = profissionaisMap.get(pedido.profissionalId);
-        const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
+        const profNome = profData?.apelido || profData?.nomeCompleto || pedido.profissionalNome || 'Profissional';
         
         // Resumo dos itens
         let itensText = '';
@@ -1374,11 +1374,11 @@
         pedidosTable.appendChild(row);
     }
 
-    // Adicionar card (mobile)
     function adicionarCard(pedido) {
+        if (!cardsContainer) return;
+        
         const profData = profissionaisMap.get(pedido.profissionalId);
-        const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
-        const profTelefone = profData?.telefone || '';
+        const profNome = profData?.apelido || profData?.nomeCompleto || pedido.profissionalNome || 'Profissional';
         
         // Resumo dos itens
         let itensText = '';
@@ -1399,7 +1399,6 @@
                 <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
                 <div>
                     <strong>${profNome}</strong>
-                    ${profTelefone ? `<div class="text-muted">${profTelefone}</div>` : ''}
                 </div>
             </div>
             
@@ -1426,11 +1425,6 @@
                 <button class="btn-acao btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
                     <i class="fas fa-eye"></i> Detalhes
                 </button>
-                ${profTelefone ? `
-                <button class="btn-acao btn-contato" onclick="abrirWhatsAppContato('${profTelefone}', '${pedido.numeroPedido}')">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
-                </button>
-                ` : ''}
                 <button class="btn-acao btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
                     <i class="fas fa-file-pdf"></i> PDF
                 </button>
@@ -1440,25 +1434,24 @@
         cardsContainer.appendChild(card);
     }
 
-    // Mostrar empty state
     function mostrarEmptyState() {
-        emptyState.style.display = 'block';
-        pedidosTable.innerHTML = '';
-        cardsContainer.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+        if (pedidosTable) pedidosTable.innerHTML = '';
+        if (cardsContainer) cardsContainer.innerHTML = '';
         
         // Atualizar estatísticas para zero
-        totalPedidos.textContent = '0';
-        pedidosAndamento.textContent = '0';
-        pedidosConcluidos.textContent = '0';
-        valorPendente.textContent = 'R$ 0';
+        if (totalPedidos) totalPedidos.textContent = '0';
+        if (pedidosAndamento) pedidosAndamento.textContent = '0';
+        if (pedidosConcluidos) pedidosConcluidos.textContent = '0';
+        if (valorPendente) valorPendente.textContent = 'R$ 0';
         
-        badgeTodos.textContent = '0';
-        badgePendentes.textContent = '0';
-        badgeAndamento.textContent = '0';
-        badgeConcluidos.textContent = '0';
+        if (badgeTodos) badgeTodos.textContent = '0';
+        if (badgePendentes) badgePendentes.textContent = '0';
+        if (badgeAndamento) badgeAndamento.textContent = '0';
+        if (badgeConcluidos) badgeConcluidos.textContent = '0';
         
         // Esconder loader
-        loader.classList.add('hide');
+        if (loader) loader.classList.add('hide');
     }
 
     // Funções globais para os botões
@@ -1478,12 +1471,6 @@
         janelaPDF.document.write(htmlContent);
         janelaPDF.document.close();
         janelaPDF.print();
-    };
-
-    window.abrirWhatsAppContato = function(telefone, numeroPedido) {
-        const mensagem = `Olá! Gostaria de falar sobre o pedido ${numeroPedido || ''} no ScanHub.`;
-        const url = `https://wa.me/55${telefone.replace(/\D/g, '')}?text=${encodeURIComponent(mensagem)}`;
-        window.open(url, '_blank');
     };
 
     // Funções auxiliares
@@ -1537,8 +1524,6 @@
                     body { font-family: Arial, sans-serif; margin: 20px; }
                     .header { text-align: center; margin-bottom: 30px; }
                     .info { margin-bottom: 20px; }
-                    .table { width: 100%; border-collapse: collapse; }
-                    .table th, .table td { border: 1px solid #ddd; padding: 8px; }
                 </style>
             </head>
             <body>
@@ -1551,6 +1536,7 @@
                     <p><strong>Data:</strong> ${formatarData(pedido.dataPedido)}</p>
                     <p><strong>Status:</strong> ${pedido.statusPedido}</p>
                     <p><strong>Valor Total:</strong> R$ ${(pedido.valorTotal || 0).toFixed(2)}</p>
+                    <p><strong>Profissional:</strong> ${pedido.profissionalNome || 'Profissional'}</p>
                 </div>
                 <p>Documento gerado pelo ScanHub - ${new Date().toLocaleDateString('pt-BR')}</p>
             </body>
@@ -1561,47 +1547,67 @@
     // Inicializar event listeners
     function inicializarEventListeners() {
         // Abas
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                statusFiltro = this.getAttribute('data-status');
-                atualizarTabelaECards();
+        if (tabButtons.length > 0) {
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    statusFiltro = this.getAttribute('data-status');
+                    atualizarTabelaECards();
+                });
             });
-        });
+        }
         
         // Filtros
-        searchPedidos.addEventListener('input', atualizarTabelaECards);
-        filterProfissional.addEventListener('change', atualizarTabelaECards);
-        filterMes.addEventListener('change', atualizarTabelaECards);
+        if (searchPedidos) {
+            searchPedidos.addEventListener('input', atualizarTabelaECards);
+        }
+        
+        if (filterProfissional) {
+            filterProfissional.addEventListener('change', atualizarTabelaECards);
+        }
+        
+        if (filterMes) {
+            filterMes.addEventListener('change', atualizarTabelaECards);
+        }
         
         // Menu mobile
-        menuToggle.addEventListener('click', () => {
-            dashboardMenu.classList.toggle('show');
-            const icon = menuToggle.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        });
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                if (dashboardMenu) dashboardMenu.classList.toggle('show');
+                const icon = menuToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-bars');
+                    icon.classList.toggle('fa-times');
+                }
+            });
+        }
         
         // Fechar menu ao clicar fora
         document.addEventListener('click', (e) => {
-            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                dashboardMenu.classList.remove('show');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
+            if (dashboardMenu && menuToggle) {
+                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                    dashboardMenu.classList.remove('show');
+                    const icon = menuToggle.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                }
             }
         });
         
         // Logout
-        btnLogout.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch {
-                alert('Erro ao sair. Tente novamente.');
-            }
-        });
+        if (btnLogout) {
+            btnLogout.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch {
+                    alert('Erro ao sair. Tente novamente.');
+                }
+            });
+        }
     }
 
     // Inicializar quando o DOM estiver pronto
