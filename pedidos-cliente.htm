@@ -1038,7 +1038,6 @@
         appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -1047,7 +1046,7 @@
     // VARIÁVEIS GLOBAIS
     // ============================================
     let currentUser = null;
-    let userData = null;  // ← NOVO: dados do usuário do Firestore
+    let userData = null;
     let pedidos = [];
     let profissionaisMap = new Map();
     let statusFiltro = 'todos';
@@ -1063,30 +1062,25 @@
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
     
-    // Estatísticas
     const totalPedidos = document.getElementById('totalPedidos');
     const pedidosAndamento = document.getElementById('pedidosAndamento');
     const pedidosConcluidos = document.getElementById('pedidosConcluidos');
     const valorPendente = document.getElementById('valorPendente');
     
-    // Abas e badges
     const tabButtons = document.querySelectorAll('.tab-btn');
     const badgeTodos = document.getElementById('badgeTodos');
     const badgePendentes = document.getElementById('badgePendentes');
     const badgeAndamento = document.getElementById('badgeAndamento');
     const badgeConcluidos = document.getElementById('badgeConcluidos');
     
-    // Filtros
     const searchPedidos = document.getElementById('searchPedidos');
     const filterProfissional = document.getElementById('filterProfissional');
     const filterMes = document.getElementById('filterMes');
     
-    // Tabela e Cards
     const pedidosTable = document.getElementById('pedidosTable');
     const cardsContainer = document.getElementById('cardsContainer');
     const emptyState = document.getElementById('emptyState');
     
-    // Modal
     const modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhes'));
     const modalTitle = document.getElementById('modalTitle');
     const detalhesNumero = document.getElementById('detalhesNumero');
@@ -1106,31 +1100,21 @@
     const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
     const detalhesObservacoes = document.getElementById('detalhesObservacoes');
     const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
-    const btnGerarPDF = document.getElementById('btnGerarPDF');
 
     // ============================================
-    // INICIALIZAÇÃO DO SISTEMA
+    // INICIALIZAÇÃO
     // ============================================
-
-    // Monitorar autenticação
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             try {
-                // 1. Carregar dados do usuário (incluindo apelido)
                 await carregarDadosUsuario();
-                
-                // 2. Atualizar interface com apelido
                 atualizarInterfaceUsuario();
-                
-                // 3. Carregar pedidos do cliente
                 await carregarPedidos();
                 
-                // 4. Esconder loader
                 setTimeout(() => {
                     if (loader) loader.classList.add('hide');
                 }, 500);
-                
             } catch (error) {
                 console.error("Erro na inicialização:", error);
                 if (loader) loader.classList.add('hide');
@@ -1142,21 +1126,15 @@
     });
 
     // ============================================
-    // FUNÇÃO NOVA: CARREGAR DADOS DO USUÁRIO
+    // FUNÇÕES PRINCIPAIS
     // ============================================
     async function carregarDadosUsuario() {
         if (!currentUser) return;
-        
         try {
             const userRef = doc(db, "usuarios", currentUser.uid);
             const userDoc = await getDoc(userRef);
-            
             if (userDoc.exists()) {
                 userData = userDoc.data();
-                console.log("Dados do usuário carregados:", userData.apelido);
-            } else {
-                console.log("Documento do usuário não encontrado");
-                userData = {};
             }
         } catch (error) {
             console.error("Erro ao carregar dados do usuário:", error);
@@ -1164,13 +1142,8 @@
         }
     }
 
-    // ============================================
-    // FUNÇÃO CORRIGIDA: ATUALIZAR INTERFACE
-    // ============================================
     function atualizarInterfaceUsuario() {
         let apelido = '';
-        
-        // Prioridade: apelido > nomeCompleto > email
         if (userData && userData.apelido) {
             apelido = userData.apelido;
         } else if (userData && userData.nomeCompleto) {
@@ -1185,9 +1158,6 @@
         if (userAvatar) userAvatar.textContent = apelido.charAt(0).toUpperCase();
     }
 
-    // ============================================
-    // FUNÇÃO CORRIGIDA: CARREGAR PEDIDOS
-    // ============================================
     async function carregarPedidos() {
         try {
             if (!currentUser || !currentUser.uid) {
@@ -1195,16 +1165,13 @@
                 return;
             }
 
-            // Limpar arrays
             pedidos = [];
             profissionaisMap.clear();
             
-            console.log("Buscando pedidos para o cliente UID:", currentUser.uid);
-            
-            // CORREÇÃO PRINCIPAL: Buscar por clienteId (não clienteUserId)
+            // QUERY COM ÍNDICE - AGORA FUNCIONA!
             const q = query(
                 collection(db, "pedidos"),
-                where("clienteId", "==", currentUser.uid),  // ← CORRETO!
+                where("clienteId", "==", currentUser.uid),
                 orderBy("dataPedido", "desc")
             );
             
@@ -1217,11 +1184,8 @@
                 });
             });
             
-            console.log(`Encontrados ${pedidos.length} pedidos pelo clienteId`);
-            
-            // Fallback: se não encontrou, tenta por email
+            // Fallback por email se não achou nada
             if (pedidos.length === 0 && currentUser.email) {
-                console.log("Tentando buscar por email...");
                 const qEmail = query(
                     collection(db, "pedidos"),
                     where("clienteEmail", "==", currentUser.email),
@@ -1230,7 +1194,6 @@
                 
                 const emailSnapshot = await getDocs(qEmail);
                 emailSnapshot.forEach((doc) => {
-                    // Evitar duplicados
                     if (!pedidos.find(p => p.id === doc.id)) {
                         pedidos.push({
                             id: doc.id,
@@ -1238,20 +1201,14 @@
                         });
                     }
                 });
-                
-                console.log(`Encontrados ${pedidos.length} pedidos pelo email`);
             }
             
             if (pedidos.length === 0) {
-                console.log("Nenhum pedido encontrado para este cliente");
                 mostrarEmptyState();
                 return;
             }
             
-            // Carregar informações dos profissionais
             await carregarProfissionais();
-            
-            // Atualizar interface
             atualizarEstatisticas();
             atualizarContadoresAbas();
             atualizarFiltroProfissionais();
@@ -1263,14 +1220,9 @@
         }
     }
 
-    // ============================================
-    // FUNÇÕES AUXILIARES (MANTIDAS)
-    // ============================================
-
     async function carregarProfissionais() {
         try {
             const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
-            
             for (const profId of profissionalIds) {
                 if (!profissionaisMap.has(profId)) {
                     const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
@@ -1291,7 +1243,6 @@
 
     function atualizarFiltroProfissionais() {
         if (!filterProfissional) return;
-        
         filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
         
         const profissionaisUnicos = new Map();
@@ -1432,7 +1383,6 @@
 
     function adicionarLinhaTabela(pedido) {
         if (!pedidosTable) return;
-        
         const profNome = pedido.profissionalNome || 'Profissional';
         
         let itensText = '';
@@ -1471,13 +1421,11 @@
                 </div>
             </td>
         `;
-        
         pedidosTable.appendChild(row);
     }
 
     function adicionarCard(pedido) {
         if (!cardsContainer) return;
-        
         const profNome = pedido.profissionalNome || 'Profissional';
         
         let itensText = '';
@@ -1495,14 +1443,10 @@
                 <div class="pedido-numero">${pedido.numeroPedido || pedido.id.substring(0, 8)}</div>
                 <div>${getStatusBadge(pedido.statusPedido)}</div>
             </div>
-            
             <div class="pedido-profissional">
                 <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
-                <div>
-                    <strong>${profNome}</strong>
-                </div>
+                <div><strong>${profNome}</strong></div>
             </div>
-            
             <div class="pedido-info">
                 <div class="info-item">
                     <span class="info-label">Serviço/Produto</span>
@@ -1521,7 +1465,6 @@
                     <span class="info-value">${getPagamentoTexto(pedido.statusPagamento)}</span>
                 </div>
             </div>
-            
             <div class="pedido-acoes">
                 <button class="btn-acao btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
                     <i class="fas fa-eye"></i> Detalhes
@@ -1531,7 +1474,6 @@
                 </button>
             </div>
         `;
-        
         cardsContainer.appendChild(card);
     }
 
@@ -1556,14 +1498,12 @@
     // ============================================
     // FUNÇÕES GLOBAIS
     // ============================================
-
     window.verDetalhesPedido = function(pedidoId) {
         const pedido = pedidos.find(p => p.id === pedidoId);
         if (!pedido) {
             alert('Pedido não encontrado!');
             return;
         }
-        
         pedidoSelecionado = pedido;
         preencherModalDetalhes(pedido);
         modalDetalhes.show();
@@ -1575,32 +1515,22 @@
             alert('Pedido não encontrado!');
             return;
         }
-        
         gerarPDF(pedido);
     };
 
     window.abrirWhatsApp = function() {
         if (!pedidoSelecionado) return;
-        
         const profNome = pedidoSelecionado.profissionalNome || 'Profissional';
         const mensagem = `Olá ${profNome}, estou entrando em contato sobre o pedido ${pedidoSelecionado.numeroPedido || pedidoSelecionado.id.substring(0, 8)}`;
-        
         const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
         window.open(url, '_blank');
     };
 
-    window.gerarPDF = function() {
-        if (!pedidoSelecionado) return;
-        gerarPDF(pedidoSelecionado);
-    };
-
     // ============================================
-    // FUNÇÕES DO MODAL E PDF
+    // MODAL E PDF
     // ============================================
-
     function preencherModalDetalhes(pedido) {
         if (!pedido) return;
-        
         const profNome = pedido.profissionalNome || 'Profissional';
         const profEmail = pedido.profissionalEmail || '';
         const profTelefone = pedido.profissionalTelefone || '';
@@ -1628,21 +1558,14 @@
         detalhesItens.innerHTML = '';
         if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
             detalhesTituloItens.textContent = `Itens do Pedido (${pedido.itens.length})`;
-            
             pedido.itens.forEach((item, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'servico-item';
                 itemDiv.innerHTML = `
-                    <div class="servico-header">
-                        <h6 class="mb-0">${index + 1}. ${item.nome || 'Item'}</h6>
-                    </div>
+                    <div class="servico-header"><h6 class="mb-0">${index + 1}. ${item.nome || 'Item'}</h6></div>
                     <div class="row mt-2">
-                        <div class="col-6">
-                            <small>Quantidade: ${item.quantidade || 1}</small>
-                        </div>
-                        <div class="col-6 text-end">
-                            <small>Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small>
-                        </div>
+                        <div class="col-6"><small>Quantidade: ${item.quantidade || 1}</small></div>
+                        <div class="col-6 text-end"><small>Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small></div>
                     </div>
                     ${item.descricao ? `<p class="mt-2 mb-0"><small>${item.descricao}</small></p>` : ''}
                 `;
@@ -1652,12 +1575,7 @@
             detalhesTituloItens.textContent = 'Item do Pedido';
             const itemDiv = document.createElement('div');
             itemDiv.className = 'servico-item';
-            itemDiv.innerHTML = `
-                <div class="servico-header">
-                    <h6 class="mb-0">${pedido.nomeServico || 'Serviço/Produto'}</h6>
-                </div>
-                <p class="mt-2 mb-0"><small>Descrição não disponível</small></p>
-            `;
+            itemDiv.innerHTML = `<div class="servico-header"><h6 class="mb-0">${pedido.nomeServico || 'Serviço/Produto'}</h6></div><p class="mt-2 mb-0"><small>Descrição não disponível</small></p>`;
             detalhesItens.appendChild(itemDiv);
         }
         
@@ -1686,7 +1604,6 @@
             const pageWidth = doc.internal.pageSize.width;
             let y = 20;
             
-            // Cabeçalho
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.text('RECIBO DO PEDIDO', pageWidth/2, y, { align: 'center' });
@@ -1698,12 +1615,10 @@
             doc.text(`Data: ${formatarData(pedido.dataPedido)}`, pageWidth - 20, y, { align: 'right' });
             y += 15;
             
-            // Cliente
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('CLIENTE:', 20, y);
             y += 7;
-            
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             doc.text(`${pedido.clienteNome || 'Cliente'}`, 20, y);
@@ -1711,12 +1626,10 @@
             if (pedido.clienteTelefone) doc.text(`Telefone: ${pedido.clienteTelefone}`, 20, y + 10);
             y += 25;
             
-            // Profissional
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('PROFISSIONAL:', 20, y);
             y += 7;
-            
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             doc.text(`${pedido.profissionalNome || 'Profissional'}`, 20, y);
@@ -1724,18 +1637,15 @@
             if (pedido.profissionalTelefone) doc.text(`Telefone: ${pedido.profissionalTelefone}`, 20, y + 10);
             y += 25;
             
-            // Status
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('STATUS:', 20, y);
             y += 7;
-            
             doc.setFontSize(10);
             doc.text(`Pedido: ${getStatusTexto(pedido.statusPedido)}`, 20, y);
             doc.text(`Pagamento: ${getStatusTexto(pedido.statusPagamento)}`, 20, y + 5);
             y += 20;
             
-            // Itens
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('ITENS:', 20, y);
@@ -1747,7 +1657,6 @@
                         doc.addPage();
                         y = 20;
                     }
-                    
                     doc.setFontSize(10);
                     doc.setFont('helvetica', 'normal');
                     doc.text(`${index + 1}. ${item.nome || 'Item'}`, 20, y);
@@ -1756,7 +1665,6 @@
                 });
             }
             
-            // Totais
             y += 10;
             doc.setLineWidth(0.5);
             doc.line(pageWidth - 100, y, pageWidth - 20, y);
@@ -1765,7 +1673,6 @@
             doc.setFont('helvetica', 'bold');
             doc.text('TOTAIS:', pageWidth - 100, y);
             y += 8;
-            
             doc.setFont('helvetica', 'normal');
             doc.text('Subtotal:', pageWidth - 100, y);
             doc.text(`R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
@@ -1787,7 +1694,6 @@
             doc.text('VALOR TOTAL:', pageWidth - 100, y);
             doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
             
-            // Rodapé
             y = 270;
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
@@ -1795,7 +1701,6 @@
             doc.text(new Date().toLocaleDateString('pt-BR'), pageWidth/2, y + 5, { align: 'center' });
             
             doc.save(`Pedido-${pedido.numeroPedido || pedido.id.substring(0, 8)}.pdf`);
-            
         } catch (error) {
             console.error("Erro ao gerar PDF:", error);
             alert('Erro ao gerar PDF. Tente novamente.');
@@ -1803,9 +1708,8 @@
     }
 
     // ============================================
-    // FUNÇÕES UTILITÁRIAS
+    // UTILITÁRIAS
     // ============================================
-
     function getStatusBadge(status) {
         const badges = {
             'pendente': '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i> Pendente</span>',
@@ -1862,11 +1766,9 @@
     }
 
     // ============================================
-    // INICIALIZAÇÃO DE EVENT LISTENERS
+    // EVENT LISTENERS
     // ============================================
-
     function inicializarEventListeners() {
-        // Abas
         if (tabButtons.length > 0) {
             tabButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1878,20 +1780,10 @@
             });
         }
         
-        // Filtros
-        if (searchPedidos) {
-            searchPedidos.addEventListener('input', atualizarTabelaECards);
-        }
+        if (searchPedidos) searchPedidos.addEventListener('input', atualizarTabelaECards);
+        if (filterProfissional) filterProfissional.addEventListener('change', atualizarTabelaECards);
+        if (filterMes) filterMes.addEventListener('change', atualizarTabelaECards);
         
-        if (filterProfissional) {
-            filterProfissional.addEventListener('change', atualizarTabelaECards);
-        }
-        
-        if (filterMes) {
-            filterMes.addEventListener('change', atualizarTabelaECards);
-        }
-        
-        // Menu mobile
         if (menuToggle) {
             menuToggle.addEventListener('click', () => {
                 if (dashboardMenu) dashboardMenu.classList.toggle('show');
@@ -1903,7 +1795,6 @@
             });
         }
         
-        // Fechar menu ao clicar fora
         document.addEventListener('click', (e) => {
             if (dashboardMenu && menuToggle) {
                 if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
@@ -1917,7 +1808,6 @@
             }
         });
         
-        // Logout
         if (btnLogout) {
             btnLogout.addEventListener('click', async () => {
                 try {
@@ -1929,30 +1819,14 @@
             });
         }
         
-        // Botões do modal
         if (btnContatoWhatsApp) {
             btnContatoWhatsApp.addEventListener('click', abrirWhatsApp);
         }
         
-        if (btnGerarPDF) {
-            btnGerarPDF.addEventListener('click', () => {
-                if (pedidoSelecionado) {
-                    gerarPDF(pedidoSelecionado);
-                }
-            });
-        }
-        
-        // Recarregar ao voltar para a página
         window.addEventListener('focus', () => {
-            if (currentUser) {
-                carregarPedidos();
-            }
+            if (currentUser) carregarPedidos();
         });
     }
-
-    // ============================================
-    // INICIALIZAÇÃO DO SISTEMA
-    // ============================================
 
     document.addEventListener('DOMContentLoaded', () => {
         inicializarEventListeners();
