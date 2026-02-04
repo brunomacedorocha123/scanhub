@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #44689a;
+            --secondary-color: #33c47;
+            --light-color: #e8ecef;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, #44689a 0%, #33c47 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            padding-top: 80px;
+        }
+
+        /* Logo Grande */
+        .navbar-brand-dashboard {
+            display: flex;
+            align-items: center;
+            transform: scale(2.5);
+            transform-origin: left center;
+            margin-right: 40px;
+        }
+
+        .navbar-brand-dashboard img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Navbar Dashboard */
+        .navbar-dashboard {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* Menu Principal */
+        .dashboard-menu {
+            list-style: none;
+            display: flex;
+            gap: 5px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-menu li {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dashboard-menu a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            background: transparent;
+            text-align: center;
+        }
+
+        .dashboard-menu a:hover,
+        .dashboard-menu a.active {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-menu i {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .dashboard-menu span {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        /* User Info */
+        .user-info-mobile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(68, 104, 154, 0.3);
+        }
+
+        .welcome-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        /* Stats Cards */
+        .stats-pedidos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        /* Tabs */
+        .pedidos-tabs-container {
+            display: flex;
+            gap: 5px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid #e8ecef;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .tab-btn:hover {
+            background: rgba(68, 104, 154, 0.1);
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 8px rgba(68, 104, 154, 0.3);
+        }
+
+        .tab-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .tab-btn:not(.active) .tab-badge {
+            background: #e8ecef;
+            color: #666;
+        }
+
+        /* Search and Filter */
+        .search-filter-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-left: 45px;
+            border-radius: 10px;
+            border: 2px solid #e8ecef;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        /* Tabela de Pedidos */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table thead th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e8ecef;
+            font-weight: 600;
+            color: var(--dark-color);
+            padding: 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-color: #e8ecef;
+        }
+
+        /* Badges de Status */
+        .badge-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+        }
+
+        .status-andamento {
+            background: rgba(52, 152, 219, 0.1);
+            color: #2980b9;
+        }
+
+        .status-concluido {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+        }
+
+        .status-cancelado {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+        }
+
+        .status-a_receber {
+            background: rgba(155, 89, 182, 0.1);
+            color: #8e44ad;
+        }
+
+        .status-pago {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+        }
+
+        .status-parcial {
+            background: rgba(230, 126, 34, 0.1);
+            color: #d35400;
+        }
+
+        .status-atrasado {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+        }
+
+        /* Card de Pedido Mobile */
+        .pedido-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .pedido-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .pedido-numero {
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 1.1rem;
+        }
+
+        .pedido-profissional {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .profissional-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .pedido-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .pedido-acoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-acao {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-detalhes {
+            background: #f8f9fa;
+            color: var(--dark-color);
+            border: 1px solid #e8ecef;
+        }
+
+        .btn-contato {
+            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
+            color: white;
+        }
+
+        .btn-pdf {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 20px 30px;
+            border: none;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .servico-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e8ecef;
+        }
+
+        .totais-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .total-final {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            border-top: 2px solid #dee2e6;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        /* Responsivo */
+        @media (max-width: 1200px) {
+            .navbar-brand-dashboard {
+                transform: scale(2);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.8);
+            }
+            
+            .dashboard-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 20px 20px;
+                display: none;
+                z-index: 999;
+            }
+            
+            .dashboard-menu.show {
+                display: flex;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            /* Mostrar cards em mobile, esconder tabela */
+            .table-container {
+                display: none;
+            }
+            
+            .cards-container {
+                display: block;
+            }
+        }
+
+        @media (min-width: 993px) {
+            .cards-container {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.6);
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .pedidos-tabs-container {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+            
+            .pedido-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand-dashboard {
+                transform: scale(1.4);
+            }
+            
+            .tab-btn span {
+                font-size: 0.8rem;
+            }
+            
+            .tab-btn i {
+                display: none;
+            }
+            
+            .pedido-acoes {
+                flex-direction: column;
+            }
+        }
+
+        /* Botão Mobile Menu */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            padding: 5px 10px;
+        }
+
+        /* Loading */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h5 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: #777;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-buscar-profissionais {
+            background: linear-gradient(135deg, #44689a 0%, #5a82c2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-buscar-profissionais:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(68, 104, 154, 0.3);
+            color: white;
+        }
+
+        /* Cards Container */
+        .cards-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar Dashboard -->
+    <nav class="navbar navbar-dashboard">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center w-100">
+                <!-- Logo -->
+                <a class="navbar-brand-dashboard" href="dashboard-cliente.html">
+                    <img src="logoscanhub.png" alt="ScanHub">
+                </a>
+
+                <!-- Botão Menu Mobile -->
+                <button class="mobile-menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- User Info -->
+                <div class="user-info-mobile">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-details d-none d-md-block">
+                        <h5 id="userName">Carregando...</h5>
+                        <small>Cliente</small>
+                    </div>
+                </div>
+
+                <!-- Botão Logout -->
+                <button class="btn btn-outline-danger btn-sm ms-3" id="btnLogout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-md-inline">Sair</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Dashboard -->
+    <div class="container-fluid">
+        <ul class="dashboard-menu" id="dashboardMenu">
+            <li>
+                <a href="dashboard-cliente.html">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="perfil-cliente.html">
+                    <i class="fas fa-user"></i>
+                    <span>Meu Perfil</span>
+                </a>
+            </li>
+            <li>
+                <a href="busca-profissional.html">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar Profissionais</span>
+                </a>
+            </li>
+            <li>
+                <a href="pedidos-cliente.html" class="active">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Meus Pedidos</span>
+                </a>
+            </li>
+            <li>
+                <a href="notificacoes.html">
+                    <i class="fas fa-bell"></i>
+                    <span>Notificações</span>
+                </a>
+            </li>
+            <li>
+                <a href="favoritos.html">
+                    <i class="fas fa-heart"></i>
+                    <span>Favoritos</span>
+                </a>
+            </li>
+            <li>
+                <a href="configuracoes-cliente.html">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Card -->
+        <div class="welcome-card">
+            <h1>Meus Pedidos 📋</h1>
+            <p>Acompanhe todos os pedidos que você solicitou aos profissionais</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-pedidos">
+            <div class="stat-card">
+                <i class="fas fa-clipboard-list"></i>
+                <h3 id="totalPedidos">0</h3>
+                <p>Total de Pedidos</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-spinner"></i>
+                <h3 id="pedidosAndamento">0</h3>
+                <p>Em Andamento</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <h3 id="pedidosConcluidos">0</h3>
+                <p>Concluídos</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3 id="valorPendente">R$ 0</h3>
+                <p>Pendente</p>
+            </div>
+        </div>
+
+        <!-- Header com Abas -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- Abas -->
+            <div class="d-flex align-items-center">
+                <h4 class="mb-0 me-3">Pedidos Recebidos</h4>
+                <div class="pedidos-tabs-container" id="pedidosTabs">
+                    <button class="tab-btn active" data-status="todos">
+                        <i class="fas fa-list"></i>
+                        <span>Todos</span>
+                        <span class="tab-badge" id="badgeTodos">0</span>
+                    </button>
+                    <button class="tab-btn" data-status="pendente">
+                        <i class="fas fa-clock"></i>
+                        <span>Pendentes</span>
+                        <span class="tab-badge" id="badgePendentes">0</span>
+                    </button>
+                    <button class="tab-btn" data-status="andamento">
+                        <i class="fas fa-spinner"></i>
+                        <span>Em Andamento</span>
+                        <span class="tab-badge" id="badgeAndamento">0</span>
+                    </button>
+                    <button class="tab-btn" data-status="concluido">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Concluídos</span>
+                        <span class="tab-badge" id="badgeConcluidos">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filter-container">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="form-control" id="searchPedidos" placeholder="Buscar por profissional, serviço...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="filterProfissional">
+                        <option value="">Todos profissionais</option>
+                        <!-- Profissionais serão carregados aqui -->
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="filterMes">
+                        <option value="">Todos os meses</option>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Pedidos (Desktop) -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nº Pedido</th>
+                            <th>Profissional</th>
+                            <th>Serviço/Produto</th>
+                            <th>Valor Total</th>
+                            <th>Status</th>
+                            <th>Pagamento</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pedidosTable">
+                        <!-- Pedidos serão carregados aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cards de Pedidos (Mobile) -->
+        <div class="cards-container" id="cardsContainer">
+            <!-- Pedidos serão carregados aqui -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-clipboard-list"></i>
+            <h5>Nenhum pedido encontrado</h5>
+            <p>Você ainda não tem pedidos cadastrados. Busque por profissionais e solicite serviços ou produtos.</p>
+            <a href="busca-profissional.html" class="btn-buscar-profissionais">
+                <i class="fas fa-search me-2"></i>Buscar Profissionais
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes do Pedido -->
+    <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Detalhes do Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Informações do Pedido</h6>
+                            <div class="info-pedido">
+                                <div class="mb-2">
+                                    <strong>Número:</strong>
+                                    <span id="detalhesNumero" class="ms-2"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Data:</strong>
+                                    <span id="detalhesData" class="ms-2"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Tipo:</strong>
+                                    <span id="detalhesTipo" class="ms-2"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            <div id="detalhesStatus" class="mb-3"></div>
+                            <div id="detalhesPagamento"></div>
+                        </div>
+                    </div>
+
+                    <!-- Profissional -->
+                    <div class="mb-4">
+                        <h6>Profissional</h6>
+                        <div class="d-flex align-items-center">
+                            <div class="profissional-avatar me-3" id="detalhesProfissionalAvatar">P</div>
+                            <div>
+                                <h6 class="mb-1" id="detalhesProfissionalNome">Profissional</h6>
+                                <p class="mb-0 text-muted" id="detalhesProfissionalContato"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Itens do Pedido -->
+                    <div class="mb-4">
+                        <h6 id="detalhesTituloItens">Itens do Pedido</h6>
+                        <div id="detalhesItens">
+                            <!-- Itens serão carregados aqui -->
+                        </div>
+                    </div>
+
+                    <!-- Totais -->
+                    <div class="totais-container">
+                        <div class="total-line">
+                            <span>Subtotal:</span>
+                            <span id="detalhesSubtotal">R$ 0,00</span>
+                        </div>
+                        <div class="total-line">
+                            <span>Descontos:</span>
+                            <span id="detalhesDescontos">R$ 0,00</span>
+                        </div>
+                        <div class="total-line">
+                            <span>Valor Pago:</span>
+                            <span id="detalhesValorPago">R$ 0,00</span>
+                        </div>
+                        <div class="total-line total-final">
+                            <span>TOTAL:</span>
+                            <span id="detalhesValorTotal">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="mt-4" id="detalhesObservacoesContainer" style="display: none;">
+                        <h6>Observações</h6>
+                        <div class="bg-light p-3 rounded" id="detalhesObservacoes">
+                            <!-- Observações serão carregadas aqui -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="btnContatoWhatsApp" onclick="abrirWhatsApp()">
+                        <i class="fab fa-whatsapp me-2"></i>Contatar no WhatsApp
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnGerarPDF" onclick="gerarPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Gerar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            collection,
+            getDocs,
+            query,
+            where,
+            orderBy,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Variáveis globais
+        let currentUser = null;
+        let pedidos = [];
+        let profissionaisMap = new Map();
+        let statusFiltro = 'todos';
+        let pedidoSelecionado = null;
+
+        // Elementos DOM
+        const loader = document.getElementById('loader');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const btnLogout = document.getElementById('btnLogout');
+        const menuToggle = document.getElementById('menuToggle');
+        const dashboardMenu = document.getElementById('dashboardMenu');
+        
+        // Elementos de estatísticas
+        const totalPedidos = document.getElementById('totalPedidos');
+        const pedidosAndamento = document.getElementById('pedidosAndamento');
+        const pedidosConcluidos = document.getElementById('pedidosConcluidos');
+        const valorPendente = document.getElementById('valorPendente');
+        
+        // Elementos de filtro
+        const searchPedidos = document.getElementById('searchPedidos');
+        const filterProfissional = document.getElementById('filterProfissional');
+        const filterMes = document.getElementById('filterMes');
+        
+        // Elementos da tabela e cards
+        const pedidosTable = document.getElementById('pedidosTable');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const emptyState = document.getElementById('emptyState');
+        
+        // Elementos das abas
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const badgeTodos = document.getElementById('badgeTodos');
+        const badgePendentes = document.getElementById('badgePendentes');
+        const badgeAndamento = document.getElementById('badgeAndamento');
+        const badgeConcluidos = document.getElementById('badgeConcluidos');
+        
+        // Elementos do modal
+        const modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+        const modalTitle = document.getElementById('modalTitle');
+        const detalhesNumero = document.getElementById('detalhesNumero');
+        const detalhesData = document.getElementById('detalhesData');
+        const detalhesTipo = document.getElementById('detalhesTipo');
+        const detalhesStatus = document.getElementById('detalhesStatus');
+        const detalhesPagamento = document.getElementById('detalhesPagamento');
+        const detalhesProfissionalAvatar = document.getElementById('detalhesProfissionalAvatar');
+        const detalhesProfissionalNome = document.getElementById('detalhesProfissionalNome');
+        const detalhesProfissionalContato = document.getElementById('detalhesProfissionalContato');
+        const detalhesTituloItens = document.getElementById('detalhesTituloItens');
+        const detalhesItens = document.getElementById('detalhesItens');
+        const detalhesSubtotal = document.getElementById('detalhesSubtotal');
+        const detalhesDescontos = document.getElementById('detalhesDescontos');
+        const detalhesValorPago = document.getElementById('detalhesValorPago');
+        const detalhesValorTotal = document.getElementById('detalhesValorTotal');
+        const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
+        const detalhesObservacoes = document.getElementById('detalhesObservacoes');
+        const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
+        const btnGerarPDF = document.getElementById('btnGerarPDF');
+
+        // Monitorar autenticação
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    // Carregar dados do usuário
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const userDoc = await getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        atualizarInterfaceUsuario(userData);
+                        
+                        // Carregar pedidos e profissionais
+                        await carregarPedidos();
+                        await carregarProfissionais();
+                        
+                        // Esconder loader
+                        setTimeout(() => {
+                            loader.classList.add('hide');
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    loader.classList.add('hide');
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Atualizar interface do usuário
+        function atualizarInterfaceUsuario(data) {
+            if (data.apelido) {
+                userName.textContent = `Olá, ${data.apelido}`;
+                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+            }
+        }
+
+        // Carregar pedidos do cliente
+        async function carregarPedidos() {
+            try {
+                const q = query(
+                    collection(db, "pedidos"),
+                    where("clienteId", "==", currentUser.uid),
+                    orderBy("criadoEm", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                pedidos = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const pedidoData = doc.data();
+                    pedidos.push({
+                        id: doc.id,
+                        ...pedidoData
+                    });
+                });
+                
+                // Atualizar interface
+                atualizarEstatisticas();
+                atualizarContadoresAbas();
+                atualizarTabelaECards();
+                
+            } catch (error) {
+                // Se não conseguir ordernar por criadoEm, tenta sem order by
+                try {
+                    const q = query(
+                        collection(db, "pedidos"),
+                        where("clienteId", "==", currentUser.uid)
+                    );
+                    
+                    const querySnapshot = await getDocs(q);
+                    pedidos = [];
+                    
+                    querySnapshot.forEach((doc) => {
+                        const pedidoData = doc.data();
+                        pedidos.push({
+                            id: doc.id,
+                            ...pedidoData
+                        });
+                    });
+                    
+                    // Ordenar localmente por dataPedido
+                    pedidos.sort((a, b) => {
+                        return new Date(b.dataPedido || b.criadoEm) - new Date(a.dataPedido || a.criadoEm);
+                    });
+                    
+                    atualizarEstatisticas();
+                    atualizarContadoresAbas();
+                    atualizarTabelaECards();
+                    
+                } catch (error2) {
+                    console.error('Erro ao carregar pedidos:', error2);
+                    mostrarEmptyState();
+                }
+            }
+        }
+
+        // Carregar profissionais dos pedidos
+        async function carregarProfissionais() {
+            try {
+                const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId))];
+                
+                for (const profId of profissionalIds) {
+                    const profRef = doc(db, "usuarios", profId);
+                    const profDoc = await getDoc(profRef);
+                    
+                    if (profDoc.exists()) {
+                        const profData = profDoc.data();
+                        profissionaisMap.set(profId, profData);
+                        
+                        // Adicionar ao filtro de profissionais
+                        const option = document.createElement('option');
+                        option.value = profId;
+                        option.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
+                        filterProfissional.appendChild(option);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar profissionais:', error);
+            }
+        }
+
+        // Atualizar estatísticas
+        function atualizarEstatisticas() {
+            if (pedidos.length === 0) {
+                totalPedidos.textContent = '0';
+                pedidosAndamento.textContent = '0';
+                pedidosConcluidos.textContent = '0';
+                valorPendente.textContent = 'R$ 0';
+                return;
+            }
+            
+            const total = pedidos.length;
+            const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
+            const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
+            
+            let valorPendenteTotal = 0;
+            pedidos.forEach(pedido => {
+                if (pedido.valorPendente && pedido.valorPendente > 0) {
+                    valorPendenteTotal += pedido.valorPendente;
+                }
+            });
+            
+            totalPedidos.textContent = total;
+            pedidosAndamento.textContent = emAndamento;
+            pedidosConcluidos.textContent = concluidos;
+            valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
+        }
+
+        // Atualizar contadores das abas
+        function atualizarContadoresAbas() {
+            const total = pedidos.length;
+            const pendentes = pedidos.filter(p => p.statusPedido === 'pendente').length;
+            const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
+            const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
+            
+            badgeTodos.textContent = total;
+            badgePendentes.textContent = pendentes;
+            badgeAndamento.textContent = emAndamento;
+            badgeConcluidos.textContent = concluidos;
+        }
+
+        // Atualizar tabela e cards
+        function atualizarTabelaECards() {
+            const searchTerm = searchPedidos.value.toLowerCase();
+            const profissionalFilter = filterProfissional.value;
+            const mesFilter = filterMes.value;
+            
+            // Filtrar pedidos
+            let pedidosFiltrados = pedidos;
+            
+            // Filtrar por status
+            if (statusFiltro !== 'todos') {
+                pedidosFiltrados = pedidosFiltrados.filter(p => p.statusPedido === statusFiltro);
+            }
+            
+            // Filtrar por busca
+            if (searchTerm) {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+                    const profData = profissionaisMap.get(pedido.profissionalId);
+                    const profNome = profData?.apelido || profData?.nomeCompleto || '';
+                    
+                    return profNome.toLowerCase().includes(searchTerm) ||
+                           (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
+                           (pedido.itens && Array.isArray(pedido.itens) && 
+                            pedido.itens.some(item => item.nome && item.nome.toLowerCase().includes(searchTerm)));
+                });
+            }
+            
+            // Filtrar por profissional
+            if (profissionalFilter) {
+                pedidosFiltrados = pedidosFiltrados.filter(p => p.profissionalId === profissionalFilter);
+            }
+            
+            // Filtrar por mês
+            if (mesFilter) {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+                    if (!pedido.dataPedido) return false;
+                    const data = new Date(pedido.dataPedido);
+                    const mes = data.getMonth() + 1;
+                    return mes.toString() === mesFilter;
+                });
+            }
+            
+            // Limpar tabela e cards
+            pedidosTable.innerHTML = '';
+            cardsContainer.innerHTML = '';
+            
+            if (pedidosFiltrados.length === 0) {
+                mostrarEmptyState();
+                return;
+            }
+            
+            // Esconder empty state
+            emptyState.style.display = 'none';
+            
+            // Preencher tabela (desktop)
+            pedidosFiltrados.forEach(pedido => {
+                adicionarLinhaTabela(pedido);
+            });
+            
+            // Preencher cards (mobile)
+            pedidosFiltrados.forEach(pedido => {
+                adicionarCard(pedido);
+            });
+        }
+
+        // Adicionar linha na tabela
+        function adicionarLinhaTabela(pedido) {
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
+            
+            // Resumo dos itens
+            let itensText = '';
+            if (Array.isArray(pedido.itens)) {
+                itensText = pedido.itens.slice(0, 2).map(item => 
+                    `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+                if (pedido.itens.length > 2) {
+                    itensText += ` +${pedido.itens.length - 2} itens`;
+                }
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${pedido.numeroPedido || 'PEDIDO'}</strong></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="profissional-avatar me-2">${profNome.charAt(0).toUpperCase()}</div>
+                        <span>${profNome}</span>
+                    </div>
+                </td>
+                <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
+                <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
+                <td>${getStatusBadge(pedido.statusPedido)}</td>
+                <td>${getPagamentoBadge(pedido.statusPagamento)}</td>
+                <td>${formatarData(pedido.dataPedido)}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action-sm btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            pedidosTable.appendChild(row);
+        }
+
+        // Adicionar card (mobile)
+        function adicionarCard(pedido) {
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
+            const profTelefone = profData?.telefone || '';
+            
+            // Resumo dos itens
+            let itensText = '';
+            if (Array.isArray(pedido.itens)) {
+                itensText = pedido.itens.slice(0, 2).map(item => 
+                    `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+            }
+            
+            const card = document.createElement('div');
+            card.className = 'pedido-card';
+            card.innerHTML = `
+                <div class="pedido-header">
+                    <div class="pedido-numero">${pedido.numeroPedido || 'PEDIDO'}</div>
+                    <div>${getStatusBadge(pedido.statusPedido)}</div>
+                </div>
+                
+                <div class="pedido-profissional">
+                    <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
+                    <div>
+                        <strong>${profNome}</strong>
+                        ${profTelefone ? `<div class="text-muted">${profTelefone}</div>` : ''}
+                    </div>
+                </div>
+                
+                <div class="pedido-info">
+                    <div class="info-item">
+                        <span class="info-label">Serviço/Produto</span>
+                        <span class="info-value">${itensText.substring(0, 30)}${itensText.length > 30 ? '...' : ''}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Valor Total</span>
+                        <span class="info-value">R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Data</span>
+                        <span class="info-value">${formatarData(pedido.dataPedido)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Pagamento</span>
+                        <span class="info-value">${getPagamentoTexto(pedido.statusPagamento)}</span>
+                    </div>
+                </div>
+                
+                <div class="pedido-acoes">
+                    <button class="btn-acao btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
+                        <i class="fas fa-eye"></i> Detalhes
+                    </button>
+                    ${profTelefone ? `
+                    <button class="btn-acao btn-contato" onclick="abrirWhatsAppContato('${profTelefone}', '${pedido.numeroPedido}')">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    ` : ''}
+                    <button class="btn-acao btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+            `;
+            
+            cardsContainer.appendChild(card);
+        }
+
+        // Mostrar empty state
+        function mostrarEmptyState() {
+            emptyState.style.display = 'block';
+            pedidosTable.innerHTML = '';
+            cardsContainer.innerHTML = '';
+        }
+
+        // Ver detalhes do pedido
+        window.verDetalhesPedido = function(pedidoId) {
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            if (!pedido) {
+                alert('Pedido não encontrado!');
+                return;
+            }
+            
+            pedidoSelecionado = pedido;
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            
+            // Atualizar informações básicas
+            modalTitle.textContent = `Pedido ${pedido.numeroPedido || ''}`;
+            detalhesNumero.textContent = pedido.numeroPedido || 'N/A';
+            detalhesData.textContent = formatarDataCompleta(pedido.dataPedido);
+            
+            // Tipo do pedido
+            const tipoTexto = pedido.tipoPedido === 'servico' ? 'Serviço' :
+                            pedido.tipoPedido === 'produto' ? 'Produto' :
+                            pedido.tipoPedido === 'misto' ? 'Misto (Serviço + Produto)' : 'Serviço';
+            detalhesTipo.textContent = tipoTexto;
+            
+            // Status
+            detalhesStatus.innerHTML = getStatusBadge(pedido.statusPedido);
+            detalhesPagamento.innerHTML = getPagamentoBadge(pedido.statusPagamento);
+            
+            // Profissional
+            if (profData) {
+                detalhesProfissionalAvatar.textContent = (profData.apelido || profData.nomeCompleto || 'P').charAt(0).toUpperCase();
+                detalhesProfissionalNome.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
+                
+                let contatoInfo = '';
+                if (profData.telefone) contatoInfo += `Tel: ${profData.telefone}`;
+                if (profData.email) {
+                    if (contatoInfo) contatoInfo += ' • ';
+                    contatoInfo += `Email: ${profData.email}`;
+                }
+                detalhesProfissionalContato.textContent = contatoInfo;
+                
+                // Configurar WhatsApp se houver telefone
+                if (profData.telefone) {
+                    btnContatoWhatsApp.style.display = 'block';
+                    btnContatoWhatsApp.onclick = () => abrirWhatsAppContato(profData.telefone, pedido.numeroPedido);
+                } else {
+                    btnContatoWhatsApp.style.display = 'none';
+                }
+            }
+            
+            // Itens
+            detalhesItens.innerHTML = '';
+            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
+                pedido.itens.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'servico-item';
+                    
+                    const tipoItem = item.tipoItem === 'servico' ? 'Serviço' : 'Produto';
+                    const subtotalItem = item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0);
+                    
+                    let camposEspecificos = '';
+                    if (item.tipoItem === 'servico') {
+                        camposEspecificos = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Duração: ${item.duracao || 'Não especificada'}</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Agendamento: ${formatarDataHora(item.agendamento) || 'Não agendado'}</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    itemDiv.innerHTML = `
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>${index + 1}. ${item.nome || 'Item sem nome'}</strong>
+                            <span class="badge ${item.tipoItem === 'servico' ? 'bg-primary' : 'bg-success'}">${tipoItem}</span>
+                        </div>
+                        ${item.descricao ? `<p class="mb-2">${item.descricao}</p>` : ''}
+                        ${camposEspecificos}
+                        <div class="row mt-2">
+                            <div class="col-md-3">
+                                <small class="text-muted">Quantidade: ${item.quantidade || 1}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted">Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted">Desconto: R$ ${(item.desconto || 0).toFixed(2)}</small>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted"><strong>Subtotal: R$ ${subtotalItem.toFixed(2)}</strong></small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    detalhesItens.appendChild(itemDiv);
+                });
+            } else {
+                detalhesItens.innerHTML = '<p class="text-muted">Nenhum item cadastrado</p>';
+            }
+            
+            // Totais
+            detalhesSubtotal.textContent = `R$ ${(pedido.subtotal || 0).toFixed(2)}`;
+            detalhesDescontos.textContent = `R$ ${(pedido.totalDescontos || 0).toFixed(2)}`;
+            detalhesValorPago.textContent = `R$ ${(pedido.valorPago || 0).toFixed(2)}`;
+            detalhesValorTotal.textContent = `R$ ${(pedido.valorTotal || 0).toFixed(2)}`;
+            
+            // Observações
+            if (pedido.observacoes && pedido.observacoes.trim() !== '') {
+                detalhesObservacoesContainer.style.display = 'block';
+                detalhesObservacoes.textContent = pedido.observacoes;
+            } else {
+                detalhesObservacoesContainer.style.display = 'none';
+            }
+            
+            // Configurar botão PDF
+            btnGerarPDF.onclick = () => gerarPDFPedido(pedido.id);
+            
+            modalDetalhes.show();
+        };
+
+        // Gerar PDF do pedido
+        window.gerarPDFPedido = function(pedidoId) {
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            if (!pedido) {
+                alert('Pedido não encontrado!');
+                return;
+            }
+            
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            
+            // Criar uma nova janela para o PDF
+            const janelaPDF = window.open('', '_blank');
+            const dataFormatada = formatarDataCompleta(pedido.dataPedido);
+            const tipoTexto = pedido.tipoPedido === 'servico' ? 'Serviço' :
+                            pedido.tipoPedido === 'produto' ? 'Produto' :
+                            pedido.tipoPedido === 'misto' ? 'Misto (Serviço + Produto)' : 'Serviço';
+            
+            // Conteúdo HTML para o PDF
+            let itensHTML = '';
+            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
+                pedido.itens.forEach((item, index) => {
+                    const tipoItem = item.tipoItem === 'servico' ? 'Serviço' : 'Produto';
+                    const subtotalItem = item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0);
+                    
+                    itensHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.nome || 'Item sem nome'}</td>
+                            <td>${tipoItem}</td>
+                            <td>${item.quantidade || 1}</td>
+                            <td>R$ ${(item.precoUnitario || 0).toFixed(2)}</td>
+                            <td>R$ ${(item.desconto || 0).toFixed(2)}</td>
+                            <td>R$ ${subtotalItem.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Pedido ${pedido.numeroPedido || ''}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            color: #333;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            border-bottom: 2px solid #44689a;
+                            padding-bottom: 20px;
+                        }
+                        .info-section {
+                            margin-bottom: 20px;
+                            padding: 15px;
+                            background: #f8f9fa;
+                            border-radius: 5px;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-bottom: 10px;
+                        }
+                        .info-label {
+                            font-weight: bold;
+                            color: #666;
+                        }
+                        .table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 20px 0;
+                        }
+                        .table th, .table td {
+                            border: 1px solid #ddd;
+                            padding: 10px;
+                            text-align: left;
+                        }
+                        .table th {
+                            background: #44689a;
+                            color: white;
+                        }
+                        .totais {
+                            margin-top: 30px;
+                            text-align: right;
+                        }
+                        .total-final {
+                            font-size: 1.2em;
+                            font-weight: bold;
+                            color: #44689a;
+                            border-top: 2px solid #ddd;
+                            padding-top: 10px;
+                            margin-top: 10px;
+                        }
+                        .status-badge {
+                            display: inline-block;
+                            padding: 5px 10px;
+                            border-radius: 3px;
+                            font-size: 0.9em;
+                            font-weight: bold;
+                        }
+                        .status-pendente { background: #f39c12; color: white; }
+                        .status-andamento { background: #3498db; color: white; }
+                        .status-concluido { background: #27ae60; color: white; }
+                        .status-cancelado { background: #e74c3c; color: white; }
+                        .footer {
+                            margin-top: 50px;
+                            text-align: center;
+                            font-size: 0.8em;
+                            color: #666;
+                            border-top: 1px solid #ddd;
+                            padding-top: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>PEDIDO ${pedido.numeroPedido || ''}</h1>
+                        <h3>ScanHub - Plataforma de Serviços</h3>
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="info-row">
+                            <span class="info-label">Data do Pedido:</span>
+                            <span>${dataFormatada}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Cliente:</span>
+                            <span>${userName.textContent}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Profissional:</span>
+                            <span>${profData?.apelido || profData?.nomeCompleto || 'Profissional'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Tipo:</span>
+                            <span>${tipoTexto}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status:</span>
+                            <span class="status-badge status-${pedido.statusPedido}">
+                                ${getStatusTexto(pedido.statusPedido)}
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status Pagamento:</span>
+                            <span>${getPagamentoTexto(pedido.statusPagamento)}</span>
+                        </div>
+                    </div>
+                    
+                    <h3>Itens do Pedido</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                                <th>Qtd</th>
+                                <th>Unitário</th>
+                                <th>Desconto</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itensHTML || '<tr><td colspan="7" style="text-align: center;">Nenhum item cadastrado</td></tr>'}
+                        </tbody>
+                    </table>
+                    
+                    <div class="totais">
+                        <div class="info-row">
+                            <span class="info-label">Subtotal:</span>
+                            <span>R$ ${(pedido.subtotal || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Descontos:</span>
+                            <span>R$ ${(pedido.totalDescontos || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Valor Pago:</span>
+                            <span>R$ ${(pedido.valorPago || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="info-row total-final">
+                            <span class="info-label">VALOR TOTAL:</span>
+                            <span>R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    ${pedido.observacoes ? `
+                    <div class="info-section">
+                        <h4>Observações</h4>
+                        <p>${pedido.observacoes}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="footer">
+                        <p>Documento gerado automaticamente pelo ScanHub</p>
+                        <p>Data de geração: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            janelaPDF.document.write(htmlContent);
+            janelaPDF.document.close();
+            janelaPDF.print();
+        };
+
+        // Abrir WhatsApp para contato
+        window.abrirWhatsAppContato = function(telefone, numeroPedido) {
+            const mensagem = `Olá! Gostaria de falar sobre o pedido ${numeroPedido || ''} no ScanHub.`;
+            const url = `https://wa.me/55${telefone.replace(/\D/g, '')}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        };
+
+        // Funções auxiliares
+        function getStatusBadge(status) {
+            const badges = {
+                'pendente': '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i> Pendente</span>',
+                'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
+                'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
+                'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
+            };
+            return badges[status] || '<span class="badge-status">Desconhecido</span>';
+        }
+
+        function getPagamentoBadge(status) {
+            const badges = {
+                'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
+                'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
+                'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
+                'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
+            };
+            return badges[status] || '<span class="badge-status">Desconhecido</span>';
+        }
+
+        function getStatusTexto(status) {
+            const textos = {
+                'pendente': 'Pendente',
+                'andamento': 'Em Andamento',
+                'concluido': 'Concluído',
+                'cancelado': 'Cancelado'
+            };
+            return textos[status] || status;
+        }
+
+        function getPagamentoTexto(status) {
+            const textos = {
+                'a_receber': 'A Receber',
+                'pago': 'Pago',
+                'parcial': 'Pago Parcialmente',
+                'atrasado': 'Em Atraso'
+            };
+            return textos[status] || status;
+        }
+
+        function formatarData(dataString) {
+            if (!dataString) return '--/--/----';
+            try {
+                const date = new Date(dataString);
+                if (isNaN(date.getTime())) return '--/--/----';
+                return date.toLocaleDateString('pt-BR');
+            } catch {
+                return '--/--/----';
+            }
+        }
+
+        function formatarDataCompleta(dataString) {
+            if (!dataString) return '--/--/---- --:--';
+            try {
+                const date = new Date(dataString);
+                if (isNaN(date.getTime())) return '--/--/---- --:--';
+                return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            } catch {
+                return '--/--/---- --:--';
+            }
+        }
+
+        function formatarDataHora(dataString) {
+            if (!dataString) return '';
+            try {
+                const date = new Date(dataString);
+                if (isNaN(date.getTime())) return dataString;
+                return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            } catch {
+                return dataString;
+            }
+        }
+
+        // Inicializar event listeners
+        function inicializarEventListeners() {
+            // Abas
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    statusFiltro = this.getAttribute('data-status');
+                    atualizarTabelaECards();
+                });
+            });
+            
+            // Filtros
+            searchPedidos.addEventListener('input', atualizarTabelaECards);
+            filterProfissional.addEventListener('change', atualizarTabelaECards);
+            filterMes.addEventListener('change', atualizarTabelaECards);
+            
+            // Menu mobile
+            menuToggle.addEventListener('click', () => {
+                dashboardMenu.classList.toggle('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+            
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                    dashboardMenu.classList.remove('show');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+            
+            // Logout
+            btnLogout.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                } catch {
+                    alert('Erro ao sair. Tente novamente.');
+                }
+            });
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarEventListeners();
+        });
+
+    </script>
+</body>
+</html>
