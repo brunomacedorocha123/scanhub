@@ -1006,205 +1006,205 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            collection,
-            getDocs,
-            query,
-            where,
-            orderBy,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged,
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        getDocs,
+        query,
+        where,
+        orderBy
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-            authDomain: "scanhub-ed512.firebaseapp.com",
-            projectId: "scanhub-ed512",
-            storageBucket: "scanhub-ed512.firebasestorage.app",
-            messagingSenderId: "1083305018831",
-            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-        };
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+        authDomain: "scanhub-ed512.firebaseapp.com",
+        projectId: "scanhub-ed512",
+        storageBucket: "scanhub-ed512.firebasestorage.app",
+        messagingSenderId: "1083305018831",
+        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Variáveis globais
-        let currentUser = null;
-        let pedidos = [];
-        let profissionaisMap = new Map();
-        let statusFiltro = 'todos';
-        let pedidoSelecionado = null;
+    // Variáveis globais
+    let currentUser = null;
+    let pedidos = [];
+    let profissionaisMap = new Map();
+    let statusFiltro = 'todos';
+    let pedidoSelecionado = null;
 
-        // Elementos DOM
-        const loader = document.getElementById('loader');
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const btnLogout = document.getElementById('btnLogout');
-        const menuToggle = document.getElementById('menuToggle');
-        const dashboardMenu = document.getElementById('dashboardMenu');
-        
-        // Elementos de estatísticas
-        const totalPedidos = document.getElementById('totalPedidos');
-        const pedidosAndamento = document.getElementById('pedidosAndamento');
-        const pedidosConcluidos = document.getElementById('pedidosConcluidos');
-        const valorPendente = document.getElementById('valorPendente');
-        
-        // Elementos de filtro
-        const searchPedidos = document.getElementById('searchPedidos');
-        const filterProfissional = document.getElementById('filterProfissional');
-        const filterMes = document.getElementById('filterMes');
-        
-        // Elementos da tabela e cards
-        const pedidosTable = document.getElementById('pedidosTable');
-        const cardsContainer = document.getElementById('cardsContainer');
-        const emptyState = document.getElementById('emptyState');
-        
-        // Elementos das abas
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const badgeTodos = document.getElementById('badgeTodos');
-        const badgePendentes = document.getElementById('badgePendentes');
-        const badgeAndamento = document.getElementById('badgeAndamento');
-        const badgeConcluidos = document.getElementById('badgeConcluidos');
-        
-        // Elementos do modal
-        const modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhes'));
-        const modalTitle = document.getElementById('modalTitle');
-        const detalhesNumero = document.getElementById('detalhesNumero');
-        const detalhesData = document.getElementById('detalhesData');
-        const detalhesTipo = document.getElementById('detalhesTipo');
-        const detalhesStatus = document.getElementById('detalhesStatus');
-        const detalhesPagamento = document.getElementById('detalhesPagamento');
-        const detalhesProfissionalAvatar = document.getElementById('detalhesProfissionalAvatar');
-        const detalhesProfissionalNome = document.getElementById('detalhesProfissionalNome');
-        const detalhesProfissionalContato = document.getElementById('detalhesProfissionalContato');
-        const detalhesTituloItens = document.getElementById('detalhesTituloItens');
-        const detalhesItens = document.getElementById('detalhesItens');
-        const detalhesSubtotal = document.getElementById('detalhesSubtotal');
-        const detalhesDescontos = document.getElementById('detalhesDescontos');
-        const detalhesValorPago = document.getElementById('detalhesValorPago');
-        const detalhesValorTotal = document.getElementById('detalhesValorTotal');
-        const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
-        const detalhesObservacoes = document.getElementById('detalhesObservacoes');
-        const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
-        const btnGerarPDF = document.getElementById('btnGerarPDF');
+    // Elementos DOM
+    const loader = document.getElementById('loader');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const btnLogout = document.getElementById('btnLogout');
+    const menuToggle = document.getElementById('menuToggle');
+    const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Elementos de estatísticas
+    const totalPedidos = document.getElementById('totalPedidos');
+    const pedidosAndamento = document.getElementById('pedidosAndamento');
+    const pedidosConcluidos = document.getElementById('pedidosConcluidos');
+    const valorPendente = document.getElementById('valorPendente');
+    
+    // Elementos de filtro
+    const searchPedidos = document.getElementById('searchPedidos');
+    const filterProfissional = document.getElementById('filterProfissional');
+    const filterMes = document.getElementById('filterMes');
+    
+    // Elementos da tabela e cards
+    const pedidosTable = document.getElementById('pedidosTable');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Elementos das abas
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const badgeTodos = document.getElementById('badgeTodos');
+    const badgePendentes = document.getElementById('badgePendentes');
+    const badgeAndamento = document.getElementById('badgeAndamento');
+    const badgeConcluidos = document.getElementById('badgeConcluidos');
 
-        // Monitorar autenticação
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    // Carregar dados do usuário
-                    const userRef = doc(db, "usuarios", user.uid);
-                    const userDoc = await getDoc(userRef);
-                    
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        atualizarInterfaceUsuario(userData);
-                        
-                        // Carregar pedidos e profissionais
-                        await carregarPedidos();
-                        await carregarProfissionais();
-                        
-                        // Esconder loader
-                        setTimeout(() => {
-                            loader.classList.add('hide');
-                        }, 500);
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
-                    loader.classList.add('hide');
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        // Atualizar interface do usuário
-        function atualizarInterfaceUsuario(data) {
-            if (data.apelido) {
-                userName.textContent = `Olá, ${data.apelido}`;
-                userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
-            }
-        }
-
-        // Carregar pedidos do cliente
-        async function carregarPedidos() {
+    // Monitorar autenticação
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
             try {
-                const q = query(
-                    collection(db, "pedidos"),
-                    where("clienteId", "==", currentUser.uid),
-                    orderBy("criadoEm", "desc")
-                );
+                // Carregar dados do usuário
+                const userRef = doc(db, "usuarios", user.uid);
+                const userDoc = await getDoc(userRef);
                 
-                const querySnapshot = await getDocs(q);
-                pedidos = [];
-                
-                querySnapshot.forEach((doc) => {
-                    const pedidoData = doc.data();
-                    pedidos.push({
-                        id: doc.id,
-                        ...pedidoData
-                    });
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    atualizarInterfaceUsuario(userData);
+                    
+                    // Carregar pedidos e profissionais
+                    await carregarPedidos();
+                    
+                    // Esconder loader
+                    setTimeout(() => {
+                        loader.classList.add('hide');
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                loader.classList.add('hide');
+                emptyState.style.display = 'block';
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    // Atualizar interface do usuário
+    function atualizarInterfaceUsuario(data) {
+        if (data.apelido) {
+            userName.textContent = `Olá, ${data.apelido}`;
+            userAvatar.textContent = data.apelido.charAt(0).toUpperCase();
+        }
+    }
+
+    // CORREÇÃO: Carregar pedidos do cliente - VERSÃO FUNCIONAL
+    async function carregarPedidos() {
+        try {
+            console.log("🔄 Buscando pedidos para cliente ID:", currentUser.uid);
+            
+            // TENTATIVA 1: Buscar com where simples (sem orderBy primeiro)
+            let q = query(
+                collection(db, "pedidos"),
+                where("clienteId", "==", currentUser.uid)
+            );
+            
+            let querySnapshot = await getDocs(q);
+            console.log("📊 Total de pedidos encontrados:", querySnapshot.size);
+            
+            pedidos = [];
+            
+            querySnapshot.forEach((doc) => {
+                const pedidoData = doc.data();
+                console.log("✅ Pedido encontrado:", {
+                    id: doc.id,
+                    numero: pedidoData.numeroPedido,
+                    clienteId: pedidoData.clienteId,
+                    meuUserId: currentUser.uid,
+                    iguais: pedidoData.clienteId === currentUser.uid
                 });
+                
+                pedidos.push({
+                    id: doc.id,
+                    ...pedidoData
+                });
+            });
+            
+            // Se encontrou pedidos, ordenar localmente por data
+            if (pedidos.length > 0) {
+                pedidos.sort((a, b) => {
+                    const dataA = new Date(a.dataPedido || a.criadoEm || 0);
+                    const dataB = new Date(b.dataPedido || b.criadoEm || 0);
+                    return dataB - dataA; // Mais recente primeiro
+                });
+                
+                console.log("🎯 Pedidos ordenados:", pedidos.length);
+                
+                // Carregar profissionais dos pedidos
+                await carregarProfissionais();
                 
                 // Atualizar interface
                 atualizarEstatisticas();
                 atualizarContadoresAbas();
                 atualizarTabelaECards();
                 
-            } catch (error) {
-                // Se não conseguir ordernar por criadoEm, tenta sem order by
-                try {
-                    const q = query(
-                        collection(db, "pedidos"),
-                        where("clienteId", "==", currentUser.uid)
-                    );
-                    
-                    const querySnapshot = await getDocs(q);
-                    pedidos = [];
-                    
-                    querySnapshot.forEach((doc) => {
-                        const pedidoData = doc.data();
-                        pedidos.push({
-                            id: doc.id,
-                            ...pedidoData
-                        });
-                    });
-                    
-                    // Ordenar localmente por dataPedido
-                    pedidos.sort((a, b) => {
-                        return new Date(b.dataPedido || b.criadoEm) - new Date(a.dataPedido || a.criadoEm);
-                    });
-                    
-                    atualizarEstatisticas();
-                    atualizarContadoresAbas();
-                    atualizarTabelaECards();
-                    
-                } catch (error2) {
-                    console.error('Erro ao carregar pedidos:', error2);
-                    mostrarEmptyState();
-                }
+            } else {
+                console.log("❌ Nenhum pedido encontrado para este cliente");
+                mostrarEmptyState();
             }
-        }
-
-        // Carregar profissionais dos pedidos
-        async function carregarProfissionais() {
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar pedidos:', error);
+            
+            // TENTATIVA 2: Buscar TODOS os pedidos para debug
             try {
-                const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId))];
+                const qAll = query(collection(db, "pedidos"));
+                const allSnapshot = await getDocs(qAll);
+                console.log("🔍 Todos os pedidos na coleção:", allSnapshot.size);
                 
-                for (const profId of profissionalIds) {
+                allSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log("Pedido na coleção:", {
+                        id: doc.id,
+                        numero: data.numeroPedido,
+                        clienteId: data.clienteId,
+                        clienteNome: data.clienteNome,
+                        meuUserId: currentUser.uid
+                    });
+                });
+            } catch (debugError) {
+                console.error("Erro no debug:", debugError);
+            }
+            
+            mostrarEmptyState();
+        }
+    }
+
+    // Carregar profissionais dos pedidos
+    async function carregarProfissionais() {
+        try {
+            const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId))];
+            
+            for (const profId of profissionalIds) {
+                if (profId) {
                     const profRef = doc(db, "usuarios", profId);
                     const profDoc = await getDoc(profRef);
                     
@@ -1219,698 +1219,405 @@
                         filterProfissional.appendChild(option);
                     }
                 }
-                
-            } catch (error) {
-                console.error('Erro ao carregar profissionais:', error);
             }
+            
+        } catch (error) {
+            console.error('Erro ao carregar profissionais:', error);
         }
+    }
 
-        // Atualizar estatísticas
-        function atualizarEstatisticas() {
-            if (pedidos.length === 0) {
-                totalPedidos.textContent = '0';
-                pedidosAndamento.textContent = '0';
-                pedidosConcluidos.textContent = '0';
-                valorPendente.textContent = 'R$ 0';
-                return;
-            }
-            
-            const total = pedidos.length;
-            const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
-            const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
-            
-            let valorPendenteTotal = 0;
-            pedidos.forEach(pedido => {
-                if (pedido.valorPendente && pedido.valorPendente > 0) {
-                    valorPendenteTotal += pedido.valorPendente;
-                }
-            });
-            
-            totalPedidos.textContent = total;
-            pedidosAndamento.textContent = emAndamento;
-            pedidosConcluidos.textContent = concluidos;
-            valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
+    // Atualizar estatísticas
+    function atualizarEstatisticas() {
+        if (pedidos.length === 0) {
+            totalPedidos.textContent = '0';
+            pedidosAndamento.textContent = '0';
+            pedidosConcluidos.textContent = '0';
+            valorPendente.textContent = 'R$ 0';
+            return;
         }
-
-        // Atualizar contadores das abas
-        function atualizarContadoresAbas() {
-            const total = pedidos.length;
-            const pendentes = pedidos.filter(p => p.statusPedido === 'pendente').length;
-            const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
-            const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
-            
-            badgeTodos.textContent = total;
-            badgePendentes.textContent = pendentes;
-            badgeAndamento.textContent = emAndamento;
-            badgeConcluidos.textContent = concluidos;
-        }
-
-        // Atualizar tabela e cards
-        function atualizarTabelaECards() {
-            const searchTerm = searchPedidos.value.toLowerCase();
-            const profissionalFilter = filterProfissional.value;
-            const mesFilter = filterMes.value;
-            
-            // Filtrar pedidos
-            let pedidosFiltrados = pedidos;
-            
-            // Filtrar por status
-            if (statusFiltro !== 'todos') {
-                pedidosFiltrados = pedidosFiltrados.filter(p => p.statusPedido === statusFiltro);
-            }
-            
-            // Filtrar por busca
-            if (searchTerm) {
-                pedidosFiltrados = pedidosFiltrados.filter(pedido => {
-                    const profData = profissionaisMap.get(pedido.profissionalId);
-                    const profNome = profData?.apelido || profData?.nomeCompleto || '';
-                    
-                    return profNome.toLowerCase().includes(searchTerm) ||
-                           (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
-                           (pedido.itens && Array.isArray(pedido.itens) && 
-                            pedido.itens.some(item => item.nome && item.nome.toLowerCase().includes(searchTerm)));
-                });
-            }
-            
-            // Filtrar por profissional
-            if (profissionalFilter) {
-                pedidosFiltrados = pedidosFiltrados.filter(p => p.profissionalId === profissionalFilter);
-            }
-            
-            // Filtrar por mês
-            if (mesFilter) {
-                pedidosFiltrados = pedidosFiltrados.filter(pedido => {
-                    if (!pedido.dataPedido) return false;
-                    const data = new Date(pedido.dataPedido);
-                    const mes = data.getMonth() + 1;
-                    return mes.toString() === mesFilter;
-                });
-            }
-            
-            // Limpar tabela e cards
-            pedidosTable.innerHTML = '';
-            cardsContainer.innerHTML = '';
-            
-            if (pedidosFiltrados.length === 0) {
-                mostrarEmptyState();
-                return;
-            }
-            
-            // Esconder empty state
-            emptyState.style.display = 'none';
-            
-            // Preencher tabela (desktop)
-            pedidosFiltrados.forEach(pedido => {
-                adicionarLinhaTabela(pedido);
-            });
-            
-            // Preencher cards (mobile)
-            pedidosFiltrados.forEach(pedido => {
-                adicionarCard(pedido);
-            });
-        }
-
-        // Adicionar linha na tabela
-        function adicionarLinhaTabela(pedido) {
-            const profData = profissionaisMap.get(pedido.profissionalId);
-            const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
-            
-            // Resumo dos itens
-            let itensText = '';
-            if (Array.isArray(pedido.itens)) {
-                itensText = pedido.itens.slice(0, 2).map(item => 
-                    `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
-                if (pedido.itens.length > 2) {
-                    itensText += ` +${pedido.itens.length - 2} itens`;
+        
+        const total = pedidos.length;
+        const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
+        const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
+        
+        let valorPendenteTotal = 0;
+        pedidos.forEach(pedido => {
+            if (pedido.valorPendente && pedido.valorPendente > 0) {
+                valorPendenteTotal += pedido.valorPendente;
+            } else if (pedido.statusPagamento === 'a_receber' || pedido.statusPagamento === 'parcial' || pedido.statusPagamento === 'atrasado') {
+                const valorPendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
+                if (valorPendente > 0) {
+                    valorPendenteTotal += valorPendente;
                 }
             }
-            
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><strong>${pedido.numeroPedido || 'PEDIDO'}</strong></td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="profissional-avatar me-2">${profNome.charAt(0).toUpperCase()}</div>
-                        <span>${profNome}</span>
-                    </div>
-                </td>
-                <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
-                <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
-                <td>${getStatusBadge(pedido.statusPedido)}</td>
-                <td>${getPagamentoBadge(pedido.statusPagamento)}</td>
-                <td>${formatarData(pedido.dataPedido)}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn-action-sm btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-action-sm btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
-                            <i class="fas fa-file-pdf"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            
-            pedidosTable.appendChild(row);
-        }
-
-        // Adicionar card (mobile)
-        function adicionarCard(pedido) {
-            const profData = profissionaisMap.get(pedido.profissionalId);
-            const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
-            const profTelefone = profData?.telefone || '';
-            
-            // Resumo dos itens
-            let itensText = '';
-            if (Array.isArray(pedido.itens)) {
-                itensText = pedido.itens.slice(0, 2).map(item => 
-                    `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
-            }
-            
-            const card = document.createElement('div');
-            card.className = 'pedido-card';
-            card.innerHTML = `
-                <div class="pedido-header">
-                    <div class="pedido-numero">${pedido.numeroPedido || 'PEDIDO'}</div>
-                    <div>${getStatusBadge(pedido.statusPedido)}</div>
-                </div>
-                
-                <div class="pedido-profissional">
-                    <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
-                    <div>
-                        <strong>${profNome}</strong>
-                        ${profTelefone ? `<div class="text-muted">${profTelefone}</div>` : ''}
-                    </div>
-                </div>
-                
-                <div class="pedido-info">
-                    <div class="info-item">
-                        <span class="info-label">Serviço/Produto</span>
-                        <span class="info-value">${itensText.substring(0, 30)}${itensText.length > 30 ? '...' : ''}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Valor Total</span>
-                        <span class="info-value">R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Data</span>
-                        <span class="info-value">${formatarData(pedido.dataPedido)}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Pagamento</span>
-                        <span class="info-value">${getPagamentoTexto(pedido.statusPagamento)}</span>
-                    </div>
-                </div>
-                
-                <div class="pedido-acoes">
-                    <button class="btn-acao btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
-                        <i class="fas fa-eye"></i> Detalhes
-                    </button>
-                    ${profTelefone ? `
-                    <button class="btn-acao btn-contato" onclick="abrirWhatsAppContato('${profTelefone}', '${pedido.numeroPedido}')">
-                        <i class="fab fa-whatsapp"></i> WhatsApp
-                    </button>
-                    ` : ''}
-                    <button class="btn-acao btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
-                </div>
-            `;
-            
-            cardsContainer.appendChild(card);
-        }
-
-        // Mostrar empty state
-        function mostrarEmptyState() {
-            emptyState.style.display = 'block';
-            pedidosTable.innerHTML = '';
-            cardsContainer.innerHTML = '';
-        }
-
-        // Ver detalhes do pedido
-        window.verDetalhesPedido = function(pedidoId) {
-            const pedido = pedidos.find(p => p.id === pedidoId);
-            if (!pedido) {
-                alert('Pedido não encontrado!');
-                return;
-            }
-            
-            pedidoSelecionado = pedido;
-            const profData = profissionaisMap.get(pedido.profissionalId);
-            
-            // Atualizar informações básicas
-            modalTitle.textContent = `Pedido ${pedido.numeroPedido || ''}`;
-            detalhesNumero.textContent = pedido.numeroPedido || 'N/A';
-            detalhesData.textContent = formatarDataCompleta(pedido.dataPedido);
-            
-            // Tipo do pedido
-            const tipoTexto = pedido.tipoPedido === 'servico' ? 'Serviço' :
-                            pedido.tipoPedido === 'produto' ? 'Produto' :
-                            pedido.tipoPedido === 'misto' ? 'Misto (Serviço + Produto)' : 'Serviço';
-            detalhesTipo.textContent = tipoTexto;
-            
-            // Status
-            detalhesStatus.innerHTML = getStatusBadge(pedido.statusPedido);
-            detalhesPagamento.innerHTML = getPagamentoBadge(pedido.statusPagamento);
-            
-            // Profissional
-            if (profData) {
-                detalhesProfissionalAvatar.textContent = (profData.apelido || profData.nomeCompleto || 'P').charAt(0).toUpperCase();
-                detalhesProfissionalNome.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
-                
-                let contatoInfo = '';
-                if (profData.telefone) contatoInfo += `Tel: ${profData.telefone}`;
-                if (profData.email) {
-                    if (contatoInfo) contatoInfo += ' • ';
-                    contatoInfo += `Email: ${profData.email}`;
-                }
-                detalhesProfissionalContato.textContent = contatoInfo;
-                
-                // Configurar WhatsApp se houver telefone
-                if (profData.telefone) {
-                    btnContatoWhatsApp.style.display = 'block';
-                    btnContatoWhatsApp.onclick = () => abrirWhatsAppContato(profData.telefone, pedido.numeroPedido);
-                } else {
-                    btnContatoWhatsApp.style.display = 'none';
-                }
-            }
-            
-            // Itens
-            detalhesItens.innerHTML = '';
-            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
-                pedido.itens.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'servico-item';
-                    
-                    const tipoItem = item.tipoItem === 'servico' ? 'Serviço' : 'Produto';
-                    const subtotalItem = item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0);
-                    
-                    let camposEspecificos = '';
-                    if (item.tipoItem === 'servico') {
-                        camposEspecificos = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small class="text-muted">Duração: ${item.duracao || 'Não especificada'}</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <small class="text-muted">Agendamento: ${formatarDataHora(item.agendamento) || 'Não agendado'}</small>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    itemDiv.innerHTML = `
-                        <div class="d-flex justify-content-between mb-2">
-                            <strong>${index + 1}. ${item.nome || 'Item sem nome'}</strong>
-                            <span class="badge ${item.tipoItem === 'servico' ? 'bg-primary' : 'bg-success'}">${tipoItem}</span>
-                        </div>
-                        ${item.descricao ? `<p class="mb-2">${item.descricao}</p>` : ''}
-                        ${camposEspecificos}
-                        <div class="row mt-2">
-                            <div class="col-md-3">
-                                <small class="text-muted">Quantidade: ${item.quantidade || 1}</small>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Desconto: R$ ${(item.desconto || 0).toFixed(2)}</small>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted"><strong>Subtotal: R$ ${subtotalItem.toFixed(2)}</strong></small>
-                            </div>
-                        </div>
-                    `;
-                    
-                    detalhesItens.appendChild(itemDiv);
-                });
-            } else {
-                detalhesItens.innerHTML = '<p class="text-muted">Nenhum item cadastrado</p>';
-            }
-            
-            // Totais
-            detalhesSubtotal.textContent = `R$ ${(pedido.subtotal || 0).toFixed(2)}`;
-            detalhesDescontos.textContent = `R$ ${(pedido.totalDescontos || 0).toFixed(2)}`;
-            detalhesValorPago.textContent = `R$ ${(pedido.valorPago || 0).toFixed(2)}`;
-            detalhesValorTotal.textContent = `R$ ${(pedido.valorTotal || 0).toFixed(2)}`;
-            
-            // Observações
-            if (pedido.observacoes && pedido.observacoes.trim() !== '') {
-                detalhesObservacoesContainer.style.display = 'block';
-                detalhesObservacoes.textContent = pedido.observacoes;
-            } else {
-                detalhesObservacoesContainer.style.display = 'none';
-            }
-            
-            // Configurar botão PDF
-            btnGerarPDF.onclick = () => gerarPDFPedido(pedido.id);
-            
-            modalDetalhes.show();
-        };
-
-        // Gerar PDF do pedido
-        window.gerarPDFPedido = function(pedidoId) {
-            const pedido = pedidos.find(p => p.id === pedidoId);
-            if (!pedido) {
-                alert('Pedido não encontrado!');
-                return;
-            }
-            
-            const profData = profissionaisMap.get(pedido.profissionalId);
-            
-            // Criar uma nova janela para o PDF
-            const janelaPDF = window.open('', '_blank');
-            const dataFormatada = formatarDataCompleta(pedido.dataPedido);
-            const tipoTexto = pedido.tipoPedido === 'servico' ? 'Serviço' :
-                            pedido.tipoPedido === 'produto' ? 'Produto' :
-                            pedido.tipoPedido === 'misto' ? 'Misto (Serviço + Produto)' : 'Serviço';
-            
-            // Conteúdo HTML para o PDF
-            let itensHTML = '';
-            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
-                pedido.itens.forEach((item, index) => {
-                    const tipoItem = item.tipoItem === 'servico' ? 'Serviço' : 'Produto';
-                    const subtotalItem = item.subtotal || (item.precoUnitario || 0) * (item.quantidade || 1) - (item.desconto || 0);
-                    
-                    itensHTML += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.nome || 'Item sem nome'}</td>
-                            <td>${tipoItem}</td>
-                            <td>${item.quantidade || 1}</td>
-                            <td>R$ ${(item.precoUnitario || 0).toFixed(2)}</td>
-                            <td>R$ ${(item.desconto || 0).toFixed(2)}</td>
-                            <td>R$ ${subtotalItem.toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-            }
-            
-            const htmlContent = `
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Pedido ${pedido.numeroPedido || ''}</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 20px;
-                            color: #333;
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 30px;
-                            border-bottom: 2px solid #44689a;
-                            padding-bottom: 20px;
-                        }
-                        .info-section {
-                            margin-bottom: 20px;
-                            padding: 15px;
-                            background: #f8f9fa;
-                            border-radius: 5px;
-                        }
-                        .info-row {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-bottom: 10px;
-                        }
-                        .info-label {
-                            font-weight: bold;
-                            color: #666;
-                        }
-                        .table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin: 20px 0;
-                        }
-                        .table th, .table td {
-                            border: 1px solid #ddd;
-                            padding: 10px;
-                            text-align: left;
-                        }
-                        .table th {
-                            background: #44689a;
-                            color: white;
-                        }
-                        .totais {
-                            margin-top: 30px;
-                            text-align: right;
-                        }
-                        .total-final {
-                            font-size: 1.2em;
-                            font-weight: bold;
-                            color: #44689a;
-                            border-top: 2px solid #ddd;
-                            padding-top: 10px;
-                            margin-top: 10px;
-                        }
-                        .status-badge {
-                            display: inline-block;
-                            padding: 5px 10px;
-                            border-radius: 3px;
-                            font-size: 0.9em;
-                            font-weight: bold;
-                        }
-                        .status-pendente { background: #f39c12; color: white; }
-                        .status-andamento { background: #3498db; color: white; }
-                        .status-concluido { background: #27ae60; color: white; }
-                        .status-cancelado { background: #e74c3c; color: white; }
-                        .footer {
-                            margin-top: 50px;
-                            text-align: center;
-                            font-size: 0.8em;
-                            color: #666;
-                            border-top: 1px solid #ddd;
-                            padding-top: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>PEDIDO ${pedido.numeroPedido || ''}</h1>
-                        <h3>ScanHub - Plataforma de Serviços</h3>
-                    </div>
-                    
-                    <div class="info-section">
-                        <div class="info-row">
-                            <span class="info-label">Data do Pedido:</span>
-                            <span>${dataFormatada}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Cliente:</span>
-                            <span>${userName.textContent}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Profissional:</span>
-                            <span>${profData?.apelido || profData?.nomeCompleto || 'Profissional'}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Tipo:</span>
-                            <span>${tipoTexto}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Status:</span>
-                            <span class="status-badge status-${pedido.statusPedido}">
-                                ${getStatusTexto(pedido.statusPedido)}
-                            </span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Status Pagamento:</span>
-                            <span>${getPagamentoTexto(pedido.statusPagamento)}</span>
-                        </div>
-                    </div>
-                    
-                    <h3>Itens do Pedido</h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Descrição</th>
-                                <th>Tipo</th>
-                                <th>Qtd</th>
-                                <th>Unitário</th>
-                                <th>Desconto</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itensHTML || '<tr><td colspan="7" style="text-align: center;">Nenhum item cadastrado</td></tr>'}
-                        </tbody>
-                    </table>
-                    
-                    <div class="totais">
-                        <div class="info-row">
-                            <span class="info-label">Subtotal:</span>
-                            <span>R$ ${(pedido.subtotal || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Descontos:</span>
-                            <span>R$ ${(pedido.totalDescontos || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Valor Pago:</span>
-                            <span>R$ ${(pedido.valorPago || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="info-row total-final">
-                            <span class="info-label">VALOR TOTAL:</span>
-                            <span>R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
-                        </div>
-                    </div>
-                    
-                    ${pedido.observacoes ? `
-                    <div class="info-section">
-                        <h4>Observações</h4>
-                        <p>${pedido.observacoes}</p>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="footer">
-                        <p>Documento gerado automaticamente pelo ScanHub</p>
-                        <p>Data de geração: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
-                    </div>
-                </body>
-                </html>
-            `;
-            
-            janelaPDF.document.write(htmlContent);
-            janelaPDF.document.close();
-            janelaPDF.print();
-        };
-
-        // Abrir WhatsApp para contato
-        window.abrirWhatsAppContato = function(telefone, numeroPedido) {
-            const mensagem = `Olá! Gostaria de falar sobre o pedido ${numeroPedido || ''} no ScanHub.`;
-            const url = `https://wa.me/55${telefone.replace(/\D/g, '')}?text=${encodeURIComponent(mensagem)}`;
-            window.open(url, '_blank');
-        };
-
-        // Funções auxiliares
-        function getStatusBadge(status) {
-            const badges = {
-                'pendente': '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i> Pendente</span>',
-                'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
-                'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
-                'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
-            };
-            return badges[status] || '<span class="badge-status">Desconhecido</span>';
-        }
-
-        function getPagamentoBadge(status) {
-            const badges = {
-                'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
-                'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
-                'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
-                'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
-            };
-            return badges[status] || '<span class="badge-status">Desconhecido</span>';
-        }
-
-        function getStatusTexto(status) {
-            const textos = {
-                'pendente': 'Pendente',
-                'andamento': 'Em Andamento',
-                'concluido': 'Concluído',
-                'cancelado': 'Cancelado'
-            };
-            return textos[status] || status;
-        }
-
-        function getPagamentoTexto(status) {
-            const textos = {
-                'a_receber': 'A Receber',
-                'pago': 'Pago',
-                'parcial': 'Pago Parcialmente',
-                'atrasado': 'Em Atraso'
-            };
-            return textos[status] || status;
-        }
-
-        function formatarData(dataString) {
-            if (!dataString) return '--/--/----';
-            try {
-                const date = new Date(dataString);
-                if (isNaN(date.getTime())) return '--/--/----';
-                return date.toLocaleDateString('pt-BR');
-            } catch {
-                return '--/--/----';
-            }
-        }
-
-        function formatarDataCompleta(dataString) {
-            if (!dataString) return '--/--/---- --:--';
-            try {
-                const date = new Date(dataString);
-                if (isNaN(date.getTime())) return '--/--/---- --:--';
-                return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-            } catch {
-                return '--/--/---- --:--';
-            }
-        }
-
-        function formatarDataHora(dataString) {
-            if (!dataString) return '';
-            try {
-                const date = new Date(dataString);
-                if (isNaN(date.getTime())) return dataString;
-                return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-            } catch {
-                return dataString;
-            }
-        }
-
-        // Inicializar event listeners
-        function inicializarEventListeners() {
-            // Abas
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    statusFiltro = this.getAttribute('data-status');
-                    atualizarTabelaECards();
-                });
-            });
-            
-            // Filtros
-            searchPedidos.addEventListener('input', atualizarTabelaECards);
-            filterProfissional.addEventListener('change', atualizarTabelaECards);
-            filterMes.addEventListener('change', atualizarTabelaECards);
-            
-            // Menu mobile
-            menuToggle.addEventListener('click', () => {
-                dashboardMenu.classList.toggle('show');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-times');
-            });
-            
-            // Fechar menu ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                    dashboardMenu.classList.remove('show');
-                    const icon = menuToggle.querySelector('i');
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                }
-            });
-            
-            // Logout
-            btnLogout.addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    window.location.href = 'login.html';
-                } catch {
-                    alert('Erro ao sair. Tente novamente.');
-                }
-            });
-        }
-
-        // Inicializar quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            inicializarEventListeners();
         });
+        
+        totalPedidos.textContent = total;
+        pedidosAndamento.textContent = emAndamento;
+        pedidosConcluidos.textContent = concluidos;
+        valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
+    }
 
-    </script>
+    // Atualizar contadores das abas
+    function atualizarContadoresAbas() {
+        const total = pedidos.length;
+        const pendentes = pedidos.filter(p => p.statusPedido === 'pendente').length;
+        const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
+        const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
+        
+        badgeTodos.textContent = total;
+        badgePendentes.textContent = pendentes;
+        badgeAndamento.textContent = emAndamento;
+        badgeConcluidos.textContent = concluidos;
+    }
+
+    // Atualizar tabela e cards
+    function atualizarTabelaECards() {
+        const searchTerm = searchPedidos.value.toLowerCase();
+        const profissionalFilter = filterProfissional.value;
+        const mesFilter = filterMes.value;
+        
+        // Filtrar pedidos
+        let pedidosFiltrados = pedidos;
+        
+        // Filtrar por status
+        if (statusFiltro !== 'todos') {
+            pedidosFiltrados = pedidosFiltrados.filter(p => p.statusPedido === statusFiltro);
+        }
+        
+        // Filtrar por busca
+        if (searchTerm) {
+            pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+                const profData = profissionaisMap.get(pedido.profissionalId);
+                const profNome = profData?.apelido || profData?.nomeCompleto || '';
+                
+                return profNome.toLowerCase().includes(searchTerm) ||
+                       (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
+                       (pedido.itens && Array.isArray(pedido.itens) && 
+                        pedido.itens.some(item => item.nome && item.nome.toLowerCase().includes(searchTerm)));
+            });
+        }
+        
+        // Filtrar por profissional
+        if (profissionalFilter) {
+            pedidosFiltrados = pedidosFiltrados.filter(p => p.profissionalId === profissionalFilter);
+        }
+        
+        // Filtrar por mês
+        if (mesFilter) {
+            pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+                if (!pedido.dataPedido) return false;
+                const data = new Date(pedido.dataPedido);
+                const mes = data.getMonth() + 1;
+                return mes.toString() === mesFilter;
+            });
+        }
+        
+        // Limpar tabela e cards
+        pedidosTable.innerHTML = '';
+        cardsContainer.innerHTML = '';
+        
+        if (pedidosFiltrados.length === 0) {
+            mostrarEmptyState();
+            return;
+        }
+        
+        // Esconder empty state
+        emptyState.style.display = 'none';
+        
+        // Preencher tabela (desktop)
+        pedidosFiltrados.forEach(pedido => {
+            adicionarLinhaTabela(pedido);
+        });
+        
+        // Preencher cards (mobile)
+        pedidosFiltrados.forEach(pedido => {
+            adicionarCard(pedido);
+        });
+    }
+
+    // Adicionar linha na tabela
+    function adicionarLinhaTabela(pedido) {
+        const profData = profissionaisMap.get(pedido.profissionalId);
+        const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
+        
+        // Resumo dos itens
+        let itensText = '';
+        if (Array.isArray(pedido.itens)) {
+            itensText = pedido.itens.slice(0, 2).map(item => 
+                `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+            if (pedido.itens.length > 2) {
+                itensText += ` +${pedido.itens.length - 2} itens`;
+            }
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${pedido.numeroPedido || 'PEDIDO'}</strong></td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="profissional-avatar me-2">${profNome.charAt(0).toUpperCase()}</div>
+                    <span>${profNome}</span>
+                </div>
+            </td>
+            <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
+            <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
+            <td>${getStatusBadge(pedido.statusPedido)}</td>
+            <td>${getPagamentoBadge(pedido.statusPagamento)}</td>
+            <td>${formatarData(pedido.dataPedido)}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-action-sm btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action-sm btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        pedidosTable.appendChild(row);
+    }
+
+    // Adicionar card (mobile)
+    function adicionarCard(pedido) {
+        const profData = profissionaisMap.get(pedido.profissionalId);
+        const profNome = profData?.apelido || profData?.nomeCompleto || 'Profissional';
+        const profTelefone = profData?.telefone || '';
+        
+        // Resumo dos itens
+        let itensText = '';
+        if (Array.isArray(pedido.itens)) {
+            itensText = pedido.itens.slice(0, 2).map(item => 
+                `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+        }
+        
+        const card = document.createElement('div');
+        card.className = 'pedido-card';
+        card.innerHTML = `
+            <div class="pedido-header">
+                <div class="pedido-numero">${pedido.numeroPedido || 'PEDIDO'}</div>
+                <div>${getStatusBadge(pedido.statusPedido)}</div>
+            </div>
+            
+            <div class="pedido-profissional">
+                <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
+                <div>
+                    <strong>${profNome}</strong>
+                    ${profTelefone ? `<div class="text-muted">${profTelefone}</div>` : ''}
+                </div>
+            </div>
+            
+            <div class="pedido-info">
+                <div class="info-item">
+                    <span class="info-label">Serviço/Produto</span>
+                    <span class="info-value">${itensText.substring(0, 30)}${itensText.length > 30 ? '...' : ''}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Valor Total</span>
+                    <span class="info-value">R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data</span>
+                    <span class="info-value">${formatarData(pedido.dataPedido)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Pagamento</span>
+                    <span class="info-value">${getPagamentoTexto(pedido.statusPagamento)}</span>
+                </div>
+            </div>
+            
+            <div class="pedido-acoes">
+                <button class="btn-acao btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
+                    <i class="fas fa-eye"></i> Detalhes
+                </button>
+                ${profTelefone ? `
+                <button class="btn-acao btn-contato" onclick="abrirWhatsAppContato('${profTelefone}', '${pedido.numeroPedido}')">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                ` : ''}
+                <button class="btn-acao btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+            </div>
+        `;
+        
+        cardsContainer.appendChild(card);
+    }
+
+    // Mostrar empty state
+    function mostrarEmptyState() {
+        emptyState.style.display = 'block';
+        pedidosTable.innerHTML = '';
+        cardsContainer.innerHTML = '';
+        
+        // Atualizar estatísticas para zero
+        totalPedidos.textContent = '0';
+        pedidosAndamento.textContent = '0';
+        pedidosConcluidos.textContent = '0';
+        valorPendente.textContent = 'R$ 0';
+        
+        badgeTodos.textContent = '0';
+        badgePendentes.textContent = '0';
+        badgeAndamento.textContent = '0';
+        badgeConcluidos.textContent = '0';
+    }
+
+    // Funções globais para os botões
+    window.verDetalhesPedido = function(pedidoId) {
+        // Abre página de detalhes ou modal
+        window.open(`detalhes-pedido.html?id=${pedidoId}`, '_blank');
+    };
+
+    window.gerarPDFPedido = function(pedidoId) {
+        const pedido = pedidos.find(p => p.id === pedidoId);
+        if (!pedido) {
+            alert('Pedido não encontrado!');
+            return;
+        }
+        
+        // Abre nova janela para PDF
+        const janelaPDF = window.open('', '_blank');
+        const htmlContent = criarConteudoPDF(pedido);
+        janelaPDF.document.write(htmlContent);
+        janelaPDF.document.close();
+        janelaPDF.print();
+    };
+
+    window.abrirWhatsAppContato = function(telefone, numeroPedido) {
+        const mensagem = `Olá! Gostaria de falar sobre o pedido ${numeroPedido || ''} no ScanHub.`;
+        const url = `https://wa.me/55${telefone.replace(/\D/g, '')}?text=${encodeURIComponent(mensagem)}`;
+        window.open(url, '_blank');
+    };
+
+    // Funções auxiliares
+    function getStatusBadge(status) {
+        const badges = {
+            'pendente': '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i> Pendente</span>',
+            'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
+            'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
+            'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
+        };
+        return badges[status] || '<span class="badge-status">Desconhecido</span>';
+    }
+
+    function getPagamentoBadge(status) {
+        const badges = {
+            'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
+            'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
+            'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
+            'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
+        };
+        return badges[status] || '<span class="badge-status">Desconhecido</span>';
+    }
+
+    function getPagamentoTexto(status) {
+        const textos = {
+            'a_receber': 'A Receber',
+            'pago': 'Pago',
+            'parcial': 'Pago Parcialmente',
+            'atrasado': 'Em Atraso'
+        };
+        return textos[status] || status;
+    }
+
+    function formatarData(dataString) {
+        if (!dataString) return '--/--/----';
+        try {
+            const date = new Date(dataString);
+            if (isNaN(date.getTime())) return '--/--/----';
+            return date.toLocaleDateString('pt-BR');
+        } catch {
+            return '--/--/----';
+        }
+    }
+
+    function criarConteudoPDF(pedido) {
+        // Conteúdo HTML básico para PDF
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .header { text-align: center; margin-bottom: 30px; }
+                    .info { margin-bottom: 20px; }
+                    .table { width: 100%; border-collapse: collapse; }
+                    .table th, .table td { border: 1px solid #ddd; padding: 8px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>Pedido: ${pedido.numeroPedido || 'PEDIDO'}</h2>
+                    <p>ScanHub - Recibo</p>
+                </div>
+                <div class="info">
+                    <p><strong>Cliente:</strong> ${pedido.clienteNome || 'Cliente'}</p>
+                    <p><strong>Data:</strong> ${formatarData(pedido.dataPedido)}</p>
+                    <p><strong>Status:</strong> ${pedido.statusPedido}</p>
+                    <p><strong>Valor Total:</strong> R$ ${(pedido.valorTotal || 0).toFixed(2)}</p>
+                </div>
+                <p>Documento gerado pelo ScanHub - ${new Date().toLocaleDateString('pt-BR')}</p>
+            </body>
+            </html>
+        `;
+    }
+
+    // Inicializar event listeners
+    function inicializarEventListeners() {
+        // Abas
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                statusFiltro = this.getAttribute('data-status');
+                atualizarTabelaECards();
+            });
+        });
+        
+        // Filtros
+        searchPedidos.addEventListener('input', atualizarTabelaECards);
+        filterProfissional.addEventListener('change', atualizarTabelaECards);
+        filterMes.addEventListener('change', atualizarTabelaECards);
+        
+        // Menu mobile
+        menuToggle.addEventListener('click', () => {
+            dashboardMenu.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+        
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Logout
+        btnLogout.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch {
+                alert('Erro ao sair. Tente novamente.');
+            }
+        });
+        
+        // Recarregar pedidos
+        document.getElementById('btnRecarregar')?.addEventListener('click', carregarPedidos);
+    }
+
+    // Inicializar quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', () => {
+        inicializarEventListeners();
+    });
+
+</script>
 </body>
 </html>
