@@ -39,20 +39,43 @@
             background-color: #f5f7fa;
             color: var(--dark);
             line-height: 1.6;
+            padding-top: 80px; /* Adicionado para espaço da navbar fixa */
         }
 
-        /* Navbar */
+        /* Navbar com Logo Grande - ESTILO DA DASHBOARD */
         .navbar-scanhub {
             background: white;
             box-shadow: var(--shadow);
             padding: 15px 0;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
         }
 
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Logo Grande como na Dashboard */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            transform: scale(2.5);
+            transform-origin: left center;
+            margin-right: 40px;
+        }
+
         .navbar-brand img {
-            height: 50px;
+            height: 60px;
+            width: auto;
+            object-fit: contain;
             transition: transform 0.3s;
         }
 
@@ -60,6 +83,7 @@
             transform: scale(1.05);
         }
 
+        /* Botão Voltar ajustado */
         .btn-voltar {
             border: 2px solid var(--primary);
             color: var(--primary);
@@ -71,6 +95,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            margin-left: auto;
         }
 
         .btn-voltar:hover {
@@ -85,6 +110,7 @@
             padding: 60px 0 80px;
             position: relative;
             overflow: hidden;
+            margin-top: -80px; /* Compensa a altura da navbar fixa */
         }
 
         .hero-busca::before {
@@ -101,6 +127,9 @@
         .hero-content {
             position: relative;
             z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
         .hero-title {
@@ -207,6 +236,9 @@
         /* Results Section */
         .results-section {
             padding: 40px 0 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
         }
 
         .results-header {
@@ -560,8 +592,20 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Responsivo */
-        @media (max-width: 768px) {
+        /* Responsivo para Logo Grande */
+        @media (max-width: 1200px) {
+            .navbar-brand {
+                transform: scale(2);
+                margin-right: 30px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar-brand {
+                transform: scale(1.8);
+                margin-right: 20px;
+            }
+            
             .hero-title {
                 font-size: 1.8rem;
             }
@@ -608,7 +652,30 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .navbar-brand {
+                transform: scale(1.6);
+            }
+            
+            body {
+                padding-top: 70px;
+            }
+            
+            .hero-busca {
+                padding-top: 40px;
+            }
+            
+            .btn-voltar {
+                padding: 6px 18px;
+                font-size: 0.9rem;
+            }
+        }
+
         @media (max-width: 576px) {
+            .navbar-brand {
+                transform: scale(1.4);
+            }
+            
             .pro-name {
                 font-size: 1.1rem;
             }
@@ -631,6 +698,24 @@
             
             .btn-ver-perfil {
                 text-align: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand {
+                transform: scale(1.2);
+            }
+            
+            .navbar-brand img {
+                height: 50px;
+            }
+            
+            .hero-title {
+                font-size: 1.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 0.95rem;
             }
         }
     </style>
@@ -737,7 +822,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-           <script type="module">
+            <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, 
@@ -856,16 +941,53 @@
         try {
             console.log('[DEBUG] Iniciando carregamento...');
             
-            // 🔥 MUDANÇA AQUI: Query única e mais abrangente
-            const q = query(
+            // ESTRATÉGIA: Duas queries separadas para respeitar as regras do Firestore
+            // Firestore não suporta OR, então fazemos duas buscas e unimos os resultados
+            
+            // Query 1: Profissionais com status = "ativo"
+            const q1 = query(
                 collection(db, "usuarios"),
-                where("profissional.perfilCompleto", "==", true)
+                where("profissional.perfilCompleto", "==", true),
+                where("status", "==", "ativo")
             );
             
-            console.log('[DEBUG] Executando query...');
+            // Query 2: Profissionais com status_assinatura = "ativa"
+            const q2 = query(
+                collection(db, "usuarios"),
+                where("profissional.perfilCompleto", "==", true),
+                where("status_assinatura", "==", "ativa")
+            );
             
-            const snapshot = await getDocs(q);
-            console.log(`[DEBUG] Query retornou: ${snapshot.docs.length} documentos`);
+            console.log('[DEBUG] Executando queries...');
+            
+            // Executar em paralelo com tratamento de erro individual
+            const [snap1, snap2] = await Promise.all([
+                getDocs(q1).catch(err => {
+                    console.warn("Erro query 1 (status):", err.message);
+                    return { docs: [] };
+                }),
+                getDocs(q2).catch(err => {
+                    console.warn("Erro query 2 (assinatura):", err.message);
+                    return { docs: [] };
+                })
+            ]);
+            
+            console.log(`[DEBUG] Query1: ${snap1.docs.length} docs, Query2: ${snap2.docs.length} docs`);
+            
+            // Unir resultados em Map para evitar duplicatas
+            const profissionaisMap = new Map();
+            
+            snap1.docs.forEach(doc => {
+                profissionaisMap.set(doc.id, doc);
+            });
+            
+            snap2.docs.forEach(doc => {
+                if (!profissionaisMap.has(doc.id)) {
+                    profissionaisMap.set(doc.id, doc);
+                }
+            });
+            
+            console.log(`[DEBUG] Total únicos: ${profissionaisMap.size}`);
             
             // Carregar avaliações
             await carregarAvaliacoes();
@@ -874,38 +996,33 @@
             todosProfissionais = [];
             cidadesUnicas.clear();
             
-            snapshot.forEach(doc => {
+            profissionaisMap.forEach((doc, id) => {
                 try {
-                    const data = doc.data();
+                    const prof = extrairDadosProfissional(doc);
                     
-                    // VERIFICAÇÃO SIMPLES: Tem perfil profissional completo?
-                    if (data.profissional && data.profissional.perfilCompleto === true) {
-                        const prof = extrairDadosProfissional(doc);
-                        
-                        // Adicionar dados de avaliação
-                        if (avaliacoesCache[doc.id]) {
-                            prof.mediaAvaliacoes = avaliacoesCache[doc.id].media;
-                            prof.totalAvaliacoes = avaliacoesCache[doc.id].quantidade;
-                        }
-                        
-                        todosProfissionais.push(prof);
-                        
-                        // Adicionar cidades ao filtro
-                        if (prof.cidade && prof.cidade !== 'Cidade não informada') {
-                            cidadesUnicas.add(prof.cidade);
-                        }
-                        
-                        if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
-                            prof.cidadesAtendidas.forEach(cidade => {
-                                if (cidade && cidade.trim()) {
-                                    cidadesUnicas.add(cidade.trim());
-                                }
-                            });
-                        }
+                    // Adicionar dados de avaliação
+                    if (avaliacoesCache[id]) {
+                        prof.mediaAvaliacoes = avaliacoesCache[id].media;
+                        prof.totalAvaliacoes = avaliacoesCache[id].quantidade;
+                    }
+                    
+                    todosProfissionais.push(prof);
+                    
+                    // Adicionar cidades ao filtro
+                    if (prof.cidade && prof.cidade !== 'Cidade não informada') {
+                        cidadesUnicas.add(prof.cidade);
+                    }
+                    
+                    if (prof.cidadesAtendidas && Array.isArray(prof.cidadesAtendidas)) {
+                        prof.cidadesAtendidas.forEach(cidade => {
+                            if (cidade && cidade.trim()) {
+                                cidadesUnicas.add(cidade.trim());
+                            }
+                        });
                     }
                     
                 } catch (err) {
-                    console.error("Erro ao processar documento:", doc.id, err);
+                    console.error("Erro ao processar documento:", id, err);
                 }
             });
             
@@ -1039,6 +1156,7 @@
             raioHTML = `<span class="raio-badge"><i class="fas fa-map-marked-alt"></i> ${profissional.raioKm}km</span>`;
         }
 
+        // 🔥 CORREÇÃO AQUI: Removido onclick do card, só o botão direciona
         return `
             <div class="${classesCard}">
                 <div class="card-image-container">
@@ -1075,6 +1193,7 @@
                         <span class="experience-text">
                             <i class="fas fa-briefcase"></i> ${formatarExperiencia(profissional.anosExperiencia)}
                         </span>
+                        <!-- 🔥 AGORA SÓ ESTE BOTÃO DIRECIONA -->
                         <button class="btn-ver-perfil" onclick="window.location.href='perfil-profissional-publico.html?id=${profissional.id}'">
                             Ver Perfil <i class="fas fa-arrow-right"></i>
                         </button>
@@ -1189,6 +1308,6 @@
         carregarProfissionais();
     });
 
-</script>
+    </script>
 </body>
 </html> 
