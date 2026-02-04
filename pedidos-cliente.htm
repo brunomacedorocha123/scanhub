@@ -1099,6 +1099,7 @@
     const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
     const detalhesObservacoes = document.getElementById('detalhesObservacoes');
     const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
+    const btnGerarPDF = document.getElementById('btnGerarPDF');
 
     // ============================================
     // INICIALIZAÇÃO
@@ -1115,7 +1116,6 @@
                     if (loader) loader.classList.add('hide');
                 }, 500);
             } catch (error) {
-                console.error("Erro na inicialização:", error);
                 if (loader) loader.classList.add('hide');
                 mostrarEmptyState();
             }
@@ -1136,7 +1136,6 @@
                 userData = userDoc.data();
             }
         } catch (error) {
-            console.error("Erro ao carregar dados do usuário:", error);
             userData = {};
         }
     }
@@ -1157,9 +1156,6 @@
         if (userAvatar) userAvatar.textContent = apelido.charAt(0).toUpperCase();
     }
 
-    // ============================================
-    // FUNÇÃO CORRIGIDA: SEM ORDERBY (EVITA ÍNDICE)
-    // ============================================
     async function carregarPedidos() {
         try {
             if (!currentUser || !currentUser.uid) {
@@ -1170,7 +1166,6 @@
             pedidos = [];
             profissionaisMap.clear();
             
-            // ESTRATÉGIA 1: Buscar pelo UID do cliente (SEM orderBy - não precisa de índice composto)
             let q = query(
                 collection(db, "pedidos"),
                 where("clienteId", "==", currentUser.uid)
@@ -1185,11 +1180,7 @@
                 });
             });
             
-            console.log(`Encontrados ${pedidos.length} pedidos pelo clienteId`);
-            
-            // ESTRATÉGIA 2: Se não achou, tenta pelo email
             if (pedidos.length === 0 && currentUser.email) {
-                console.log("Tentando buscar por email...");
                 q = query(
                     collection(db, "pedidos"),
                     where("clienteEmail", "==", currentUser.email)
@@ -1204,49 +1195,17 @@
                         });
                     }
                 });
-                console.log(`Encontrados ${pedidos.length} pedidos pelo email`);
-            }
-            
-            // ESTRATÉGIA 3: Último recurso - buscar todos e filtrar localmente
-            if (pedidos.length === 0 && currentUser.email) {
-                console.log("Tentando busca geral...");
-                try {
-                    // Isso só funciona se houver poucos pedidos no sistema
-                    // ou se o admin liberar no futuro
-                    const qAll = query(collection(db, "pedidos"));
-                    const allSnapshot = await getDocs(qAll);
-                    
-                    allSnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        if (data.clienteEmail === currentUser.email || 
-                            data.clienteId === currentUser.uid) {
-                            if (!pedidos.find(p => p.id === doc.id)) {
-                                pedidos.push({
-                                    id: doc.id,
-                                    ...data
-                                });
-                            }
-                        }
-                    });
-                    console.log(`Encontrados ${pedidos.length} pedidos na busca geral`);
-                } catch (e) {
-                    console.log("Busca geral falhou:", e.message);
-                }
             }
             
             if (pedidos.length === 0) {
-                console.log("Nenhum pedido encontrado");
                 mostrarEmptyState();
                 return;
             }
             
-            // ORDENAÇÃO MANUAL (no JavaScript) - mais recente primeiro
             pedidos.sort((a, b) => {
-                // Tentar usar dataPedido (string "2026-02-01")
                 if (a.dataPedido && b.dataPedido) {
                     return new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime();
                 }
-                // Fallback: usar criadoEm (timestamp)
                 const timeA = a.criadoEm?.seconds || a.criadoEm?.toMillis?.() || 0;
                 const timeB = b.criadoEm?.seconds || b.criadoEm?.toMillis?.() || 0;
                 return timeB - timeA;
@@ -1259,7 +1218,6 @@
             atualizarTabelaECards();
             
         } catch (error) {
-            console.error("Erro ao carregar pedidos:", error);
             mostrarEmptyState();
         }
     }
@@ -1281,7 +1239,7 @@
                 }
             }
         } catch (error) {
-            console.error("Erro ao carregar profissionais:", error);
+            // Silencioso
         }
     }
 
@@ -1559,7 +1517,7 @@
             alert('Pedido não encontrado!');
             return;
         }
-        gerarPDF(pedido);
+        gerarPDFCliente(pedido);
     };
 
     window.abrirWhatsApp = function() {
@@ -1636,117 +1594,209 @@
         }
     }
 
-    function gerarPDF(pedido) {
+    // ============================================
+    // PDF CORRIGIDO PARA CLIENTE
+    // ============================================
+    function gerarPDFCliente(pedido) {
         const { jsPDF } = window.jspdf;
         if (!jsPDF) {
-            alert('Biblioteca jsPDF não carregada. Aguarde um momento e tente novamente.');
+            alert('Biblioteca de PDF não carregada. Recarregue a página.');
             return;
         }
         
         try {
             const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.width;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 20;
             let y = 20;
             
-            doc.setFontSize(16);
+            // Cabeçalho
+            doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
-            doc.text('RECIBO DO PEDIDO', pageWidth/2, y, { align: 'center' });
-            y += 10;
+            doc.setTextColor(68, 104, 154);
+            doc.text('COMPROVANTE DE PEDIDO', pageWidth / 2, y, { align: 'center' });
             
+            y += 10;
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Número: ${pedido.numeroPedido || pedido.id.substring(0, 8)}`, 20, y);
-            doc.text(`Data: ${formatarData(pedido.dataPedido)}`, pageWidth - 20, y, { align: 'right' });
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Nº ${pedido.numeroPedido || pedido.id.substring(0, 8)}`, pageWidth / 2, y, { align: 'center' });
+            
             y += 15;
             
+            // Linha divisória
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            // Seção: Dados do Pedido
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('CLIENTE:', 20, y);
-            y += 7;
+            doc.setTextColor(68, 104, 154);
+            doc.text('DADOS DO PEDIDO', margin, y);
+            y += 8;
+            
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text(`${pedido.clienteNome || 'Cliente'}`, 20, y);
-            if (pedido.clienteEmail) doc.text(`E-mail: ${pedido.clienteEmail}`, 20, y + 5);
-            if (pedido.clienteTelefone) doc.text(`Telefone: ${pedido.clienteTelefone}`, 20, y + 10);
-            y += 25;
+            doc.setTextColor(0, 0, 0);
             
+            const dataPedido = pedido.dataPedido ? new Date(pedido.dataPedido).toLocaleDateString('pt-BR') : '--/--/----';
+            
+            doc.text(`Data do Pedido: ${dataPedido}`, margin, y);
+            y += 6;
+            doc.text(`Tipo: ${pedido.tipoPedido === 'servico' ? 'Serviço' : pedido.tipoPedido === 'produto' ? 'Produto' : 'Misto'}`, margin, y);
+            y += 6;
+            doc.text(`Status: ${getStatusTexto(pedido.statusPedido)}`, margin, y);
+            y += 6;
+            doc.text(`Pagamento: ${getPagamentoTexto(pedido.statusPagamento)}`, margin, y);
+            y += 12;
+            
+            // Linha divisória
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            // Seção: Profissional
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('PROFISSIONAL:', 20, y);
-            y += 7;
+            doc.setTextColor(68, 104, 154);
+            doc.text('PROFISSIONAL', margin, y);
+            y += 8;
+            
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text(`${pedido.profissionalNome || 'Profissional'}`, 20, y);
-            if (pedido.profissionalEmail) doc.text(`E-mail: ${pedido.profissionalEmail}`, 20, y + 5);
-            if (pedido.profissionalTelefone) doc.text(`Telefone: ${pedido.profissionalTelefone}`, 20, y + 10);
-            y += 25;
+            doc.setTextColor(0, 0, 0);
+            doc.text(`${pedido.profissionalNome || 'Não informado'}`, margin, y);
+            y += 6;
             
+            if (pedido.profissionalEmail) {
+                doc.text(`E-mail: ${pedido.profissionalEmail}`, margin, y);
+                y += 6;
+            }
+            
+            if (pedido.profissionalTelefone) {
+                doc.text(`Telefone: ${pedido.profissionalTelefone}`, margin, y);
+                y += 6;
+            }
+            
+            y += 6;
+            
+            // Linha divisória
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            // Seção: Itens
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('STATUS:', 20, y);
-            y += 7;
-            doc.setFontSize(10);
-            doc.text(`Pedido: ${getStatusTexto(pedido.statusPedido)}`, 20, y);
-            doc.text(`Pagamento: ${getStatusTexto(pedido.statusPagamento)}`, 20, y + 5);
-            y += 20;
-            
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('ITENS:', 20, y);
+            doc.setTextColor(68, 104, 154);
+            doc.text('ITENS DO PEDIDO', margin, y);
             y += 10;
             
             if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
                 pedido.itens.forEach((item, index) => {
-                    if (y > 240) {
+                    if (y > 250) {
                         doc.addPage();
                         y = 20;
                     }
+                    
+                    // Box do item
+                    doc.setDrawColor(230, 230, 230);
+                    doc.setFillColor(248, 249, 250);
+                    doc.roundedRect(margin, y - 5, pageWidth - (margin * 2), 25, 3, 3, 'FD');
+                    
                     doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`${index + 1}. ${item.nome || 'Item'}`, margin + 5, y + 5);
+                    
                     doc.setFont('helvetica', 'normal');
-                    doc.text(`${index + 1}. ${item.nome || 'Item'}`, 20, y);
-                    doc.text(`Qtd: ${item.quantidade || 1} | Unit: R$ ${(item.precoUnitario || 0).toFixed(2)}`, 20, y + 5);
-                    y += 15;
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    
+                    const qtd = item.quantidade || 1;
+                    const unit = (item.precoUnitario || 0).toFixed(2);
+                    const total = ((item.precoUnitario || 0) * qtd).toFixed(2);
+                    
+                    doc.text(`Qtd: ${qtd}  |  Unit: R$ ${unit}  |  Total: R$ ${total}`, margin + 5, y + 14);
+                    
+                    if (item.descricao) {
+                        const desc = item.descricao.length > 50 ? item.descricao.substring(0, 50) + '...' : item.descricao;
+                        doc.text(desc, margin + 5, y + 20);
+                    }
+                    
+                    y += 32;
                 });
+            } else {
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Nenhum item detalhado', margin, y);
+                y += 10;
             }
+            
+            // Totais
+            if (y > 220) {
+                doc.addPage();
+                y = 20;
+            } else {
+                y += 5;
+            }
+            
+            // Box de totais
+            doc.setDrawColor(68, 104, 154);
+            doc.setFillColor(248, 249, 250);
+            doc.roundedRect(margin, y, pageWidth - (margin * 2), 50, 5, 5, 'FD');
             
             y += 10;
-            doc.setLineWidth(0.5);
-            doc.line(pageWidth - 100, y, pageWidth - 20, y);
-            y += 8;
+            const col1 = margin + 10;
+            const col2 = pageWidth - margin - 10;
             
-            doc.setFont('helvetica', 'bold');
-            doc.text('TOTAIS:', pageWidth - 100, y);
-            y += 8;
+            doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text('Subtotal:', pageWidth - 100, y);
-            doc.text(`R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
-            y += 7;
+            doc.setTextColor(0, 0, 0);
             
+            // Subtotal
+            doc.text('Subtotal:', col1, y);
+            doc.text(`R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`, col2, y, { align: 'right' });
+            y += 10;
+            
+            // Descontos
             if (pedido.totalDescontos > 0) {
-                doc.text('Descontos:', pageWidth - 100, y);
-                doc.text(`R$ ${(pedido.totalDescontos || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
-                y += 7;
+                doc.text('Descontos:', col1, y);
+                doc.setTextColor(200, 0, 0);
+                doc.text(`- R$ ${pedido.totalDescontos.toFixed(2)}`, col2, y, { align: 'right' });
+                doc.setTextColor(0, 0, 0);
+                y += 10;
             }
             
+            // Valor pago
             if (pedido.valorPago > 0) {
-                doc.text('Valor Pago:', pageWidth - 100, y);
-                doc.text(`R$ ${(pedido.valorPago || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
-                y += 7;
+                doc.text('Valor Pago:', col1, y);
+                doc.setTextColor(0, 150, 0);
+                doc.text(`R$ ${pedido.valorPago.toFixed(2)}`, col2, y, { align: 'right' });
+                doc.setTextColor(0, 0, 0);
+                y += 10;
             }
             
+            // Total
+            y += 2;
+            doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('VALOR TOTAL:', pageWidth - 100, y);
-            doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+            doc.text('TOTAL:', col1, y);
+            doc.setTextColor(68, 104, 154);
+            doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, col2, y, { align: 'right' });
             
-            y = 270;
+            // Rodapé
+            y = 280;
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
-            doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
-            doc.text(new Date().toLocaleDateString('pt-BR'), pageWidth/2, y + 5, { align: 'center' });
+            doc.setTextColor(150, 150, 150);
+            doc.text('Documento gerado por ScanHub - scanhub.com.br', pageWidth / 2, y, { align: 'center' });
+            doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`, pageWidth / 2, y + 5, { align: 'center' });
             
-            doc.save(`Pedido-${pedido.numeroPedido || pedido.id.substring(0, 8)}.pdf`);
+            // Salvar
+            const nomeArquivo = `Pedido-${pedido.numeroPedido || pedido.id.substring(0, 8)}.pdf`;
+            doc.save(nomeArquivo);
+            
         } catch (error) {
-            console.error("Erro ao gerar PDF:", error);
             alert('Erro ao gerar PDF. Tente novamente.');
         }
     }
@@ -1865,6 +1915,14 @@
         
         if (btnContatoWhatsApp) {
             btnContatoWhatsApp.addEventListener('click', abrirWhatsApp);
+        }
+        
+        if (btnGerarPDF) {
+            btnGerarPDF.addEventListener('click', () => {
+                if (pedidoSelecionado) {
+                    gerarPDFCliente(pedidoSelecionado);
+                }
+            });
         }
         
         window.addEventListener('focus', () => {
