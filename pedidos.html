@@ -977,6 +977,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
    <script type="module">
+    // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
         getAuth, 
@@ -998,6 +999,7 @@
         serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+    // Firebase Config - USE A SUA CONFIGURAÇÃO ATUAL
     const firebaseConfig = {
         apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
         authDomain: "scanhub-ed512.firebaseapp.com",
@@ -1007,10 +1009,14 @@
         appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // ============================================
+    // VARIÁVEIS GLOBAIS - NÃO ALTERE SEU CÓDIGO
+    // ============================================
     let currentUser = null;
     let userData = null;
     let pedidos = [];
@@ -1020,23 +1026,51 @@
     let tipoAtualPedido = 'todos';
     let modoVisualizacao = false;
 
+    // ============================================
+    // ELEMENTOS DOM - VERIFIQUE SE EXISTEM NO SEU HTML
+    // ============================================
+    
+    // Elementos das abas (novos)
+    const pedidosTabs = document.getElementById('pedidosTabs');
+    const tabButtons = pedidosTabs ? pedidosTabs.querySelectorAll('.tab-btn') : [];
+    const badgeTodos = document.getElementById('badgeTodos');
+    const badgeServicos = document.getElementById('badgeServicos');
+    const badgeProdutos = document.getElementById('badgeProdutos');
+    
+    // Elementos do modal (novos)
+    const seletorTipoPedido = document.getElementById('seletorTipoPedido');
+    const tipoPedidoBtns = document.querySelectorAll('.tipo-pedido-btn');
+    const tipoPedidoInput = document.getElementById('tipoPedido');
+    const tituloItens = document.getElementById('tituloItens');
+    const btnAddItem = document.getElementById('btnAddItem');
+    const itensContainer = document.getElementById('itensContainer');
+    
+    // Elementos existentes (seus)
     const userName = document.getElementById('userName');
     const userAvatar = document.getElementById('userAvatar');
     const userId = document.getElementById('userId');
     const btnLogout = document.getElementById('btnLogout');
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Elementos de estatísticas (seus)
     const totalPedidos = document.getElementById('totalPedidos');
     const pedidosAndamento = document.getElementById('pedidosAndamento');
     const pedidosConcluidos = document.getElementById('pedidosConcluidos');
     const valorAReceber = document.getElementById('valorAReceber');
+    
+    // Elementos de filtro (seus)
     const searchPedidos = document.getElementById('searchPedidos');
     const filterStatusServico = document.getElementById('filterStatusServico');
     const filterStatusPagamento = document.getElementById('filterStatusPagamento');
     const filterMes = document.getElementById('filterMes');
     const filterCliente = document.getElementById('filterCliente');
+    
+    // Tabela (seu)
     const pedidosTable = document.getElementById('pedidosTable');
     const emptyState = document.getElementById('emptyState');
+    
+    // Modal (seu)
     const modalPedido = new bootstrap.Modal(document.getElementById('modalPedido'));
     const formPedido = document.getElementById('formPedido');
     const modalTitle = document.getElementById('modalTitle');
@@ -1054,18 +1088,12 @@
     const btnSalvarPedido = document.getElementById('btnSalvarPedido');
     const labelValorPago = document.getElementById('labelValorPago');
     const helpValorPago = document.getElementById('helpValorPago');
-    const pedidosTabs = document.getElementById('pedidosTabs');
-    const tabButtons = pedidosTabs ? pedidosTabs.querySelectorAll('.tab-btn') : [];
-    const badgeTodos = document.getElementById('badgeTodos');
-    const badgeServicos = document.getElementById('badgeServicos');
-    const badgeProdutos = document.getElementById('badgeProdutos');
-    const seletorTipoPedido = document.getElementById('seletorTipoPedido');
-    const tipoPedidoBtns = document.querySelectorAll('.tipo-pedido-btn');
-    const tipoPedidoInput = document.getElementById('tipoPedido');
-    const tituloItens = document.getElementById('tituloItens');
-    const btnAddItem = document.getElementById('btnAddItem');
-    const itensContainer = document.getElementById('itensContainer');
 
+    // ============================================
+    // INICIALIZAÇÃO DO SISTEMA - MANTENDO SEU CÓDIGO
+    // ============================================
+
+    // Monitorar autenticação - SEU CÓDIGO
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
@@ -1103,6 +1131,10 @@
             userId.textContent = data.idScanHub;
         }
     }
+
+    // ============================================
+    // CARREGAMENTO DE DADOS - SEU CÓDIGO
+    // ============================================
 
     async function carregarDadosIniciais() {
         await carregarClientes();
@@ -1192,6 +1224,10 @@
         });
     }
 
+    // ============================================
+    // SISTEMA DE ABAS - NOVO (ADICIONAL)
+    // ============================================
+
     function inicializarAbas() {
         tabButtons.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1214,6 +1250,10 @@
         badgeProdutos.textContent = produtosCount + mistoCount;
     }
 
+    // ============================================
+    // SELEÇÃO DE TIPO NO MODAL - NOVO (ADICIONAL)
+    // ============================================
+
     function inicializarSeletorTipo() {
         tipoPedidoBtns.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1221,7 +1261,7 @@
                 this.classList.add('active');
                 const novoTipo = this.getAttribute('data-tipo');
                 tipoPedidoInput.value = novoTipo;
-                if (tituloItens) atualizarTituloItens(novoTipo);
+                atualizarTituloItens(novoTipo);
             });
         });
     }
@@ -1238,6 +1278,11 @@
         }
     }
 
+    // ============================================
+    // FUNÇÕES PRINCIPAIS - MANTENDO SUAS FUNÇÕES
+    // ============================================
+
+    // FUNÇÃO 1: VER PEDIDO (MANTIDA)
     window.verPedido = async function(id) {
         const pedido = pedidos.find(p => p.id === id);
         if (!pedido) {
@@ -1251,6 +1296,7 @@
         
         if (seletorTipoPedido) seletorTipoPedido.style.display = 'none';
         
+        // Preencher dados
         clientePedido.value = pedido.clienteId;
         dataPedido.value = pedido.dataPedido;
         statusPedido.value = pedido.statusPedido || pedido.statusServico;
@@ -1261,6 +1307,7 @@
         if (tipoPedidoInput) tipoPedidoInput.value = pedido.tipoPedido || 'servico';
         if (tituloItens) atualizarTituloItens(pedido.tipoPedido || 'servico');
         
+        // Limpar e carregar itens
         itensContainer.innerHTML = '';
         itensNoPedido = [];
         
@@ -1274,6 +1321,7 @@
         
         calcularTotais();
         
+        // Desabilitar tudo
         habilitarFormulario(false);
         if (btnAddItem) btnAddItem.style.display = 'none';
         
@@ -1283,6 +1331,7 @@
         modalPedido.show();
     };
 
+    // FUNÇÃO 2: EDITAR PEDIDO (MANTIDA)
     window.editarPedido = async function(id) {
         const pedido = pedidos.find(p => p.id === id);
         if (!pedido) {
@@ -1296,6 +1345,7 @@
         
         if (seletorTipoPedido) seletorTipoPedido.style.display = 'none';
         
+        // Preencher dados
         clientePedido.value = pedido.clienteId;
         dataPedido.value = pedido.dataPedido;
         statusPedido.value = pedido.statusPedido || pedido.statusServico;
@@ -1306,6 +1356,7 @@
         if (tipoPedidoInput) tipoPedidoInput.value = pedido.tipoPedido || 'servico';
         if (tituloItens) atualizarTituloItens(pedido.tipoPedido || 'servico');
         
+        // Limpar e carregar itens para edição
         itensContainer.innerHTML = '';
         itensNoPedido = [];
         
@@ -1319,6 +1370,7 @@
         
         calcularTotais();
         
+        // Habilitar tudo
         habilitarFormulario(true);
         if (btnAddItem) btnAddItem.style.display = 'block';
         
@@ -1328,6 +1380,7 @@
         modalPedido.show();
     };
 
+    // FUNÇÃO 3: GERAR PDF (RESTAURADA COMPLETA)
     window.gerarReciboDetalhado = async function(id) {
         const pedido = pedidos.find(p => p.id === id);
         if (!pedido) {
@@ -1343,6 +1396,7 @@
             const pageWidth = doc.internal.pageSize.width;
             let y = margin;
             
+            // Cabeçalho
             doc.setFontSize(20);
             doc.setFont('helvetica', 'bold');
             doc.text('ORÇAMENTO/RECIBO DETALHADO', pageWidth/2, y, { align: 'center' });
@@ -1354,10 +1408,12 @@
             doc.text(`Data: ${formatarData(pedido.dataPedido)}`, pageWidth - margin, y, { align: 'right' });
             y += 15;
             
+            // Linha
             doc.setLineWidth(0.5);
             doc.line(margin, y, pageWidth - margin, y);
             y += 15;
             
+            // Profissional
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('PRESTADOR DO SERVIÇO:', margin, y);
@@ -1370,6 +1426,7 @@
             if (userData?.email) doc.text(`E-mail: ${userData.email}`, margin, y + 10);
             y += 25;
             
+            // Cliente
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('CLIENTE:', margin, y);
@@ -1382,6 +1439,7 @@
             if (pedido.clienteTelefone) doc.text(`Telefone: ${pedido.clienteTelefone}`, margin, y + 10);
             y += 25;
             
+            // Tipo do Pedido
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('TIPO DO PEDIDO:', margin, y);
@@ -1393,11 +1451,13 @@
             doc.text(tipoText, margin, y);
             y += 15;
             
+            // Itens
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('DETALHAMENTO DOS ITENS:', margin, y);
             y += 10;
             
+            // Cabeçalho da tabela
             doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.text('Item', margin, y);
@@ -1408,6 +1468,7 @@
             doc.text('Total R$', pageWidth - 30, y, { align: 'right' });
             y += 5;
             
+            // Linha
             doc.setLineWidth(0.3);
             doc.line(margin, y, pageWidth - margin, y);
             y += 8;
@@ -1449,10 +1510,12 @@
                 
                 y += 12;
                 
+                // Linha fina entre itens
                 doc.setLineWidth(0.1);
                 doc.line(margin, y - 2, pageWidth - margin, y - 2);
             });
             
+            // Totais
             if (y > 220) {
                 doc.addPage();
                 y = margin;
@@ -1484,6 +1547,7 @@
             doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
             y += 12;
             
+            // Status
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             doc.text(`Status do Pedido: ${getStatusTexto(pedido.statusPedido || pedido.statusServico)}`, margin, y);
@@ -1515,6 +1579,7 @@
                 });
             }
             
+            // Assinaturas
             if (y > 180) {
                 doc.addPage();
                 y = margin;
@@ -1544,6 +1609,7 @@
         }
     };
 
+    // FUNÇÃO 4: EXCLUIR PEDIDO (MANTIDA)
     window.excluirPedido = async function(id) {
         if (!confirm('Tem certeza que deseja excluir este pedido?\nEsta ação não pode ser desfeita.')) {
             return;
@@ -1559,11 +1625,13 @@
             const pedidoRef = doc(db, "pedidos", id);
             await deleteDoc(pedidoRef);
             
+            // Remover da lista local
             const index = pedidos.findIndex(p => p.id === id);
             if (index !== -1) {
                 pedidos.splice(index, 1);
             }
             
+            // Atualizar interface
             atualizarTabelaPedidos();
             atualizarEstatisticas();
             if (badgeTodos) atualizarContadoresAbas();
@@ -1574,6 +1642,10 @@
             alert('Erro ao excluir pedido. Tente novamente.');
         }
     };
+
+    // ============================================
+    // FUNÇÕES AUXILIARES - MANTENDO SUAS
+    // ============================================
 
     function getStatusTexto(status) {
         const textos = {
@@ -1612,7 +1684,12 @@
         }
     }
 
+    // ============================================
+    // FUNÇÕES DE SUPORTE - SEU CÓDIGO ORIGINAL
+    // ============================================
+
     function adicionarItemVisualizacao(item) {
+        // SUA FUNÇÃO ORIGINAL - NÃO ALTERE
         const itemIndex = itensNoPedido.length;
         const tipoItem = item.tipoItem || (item.duracao ? 'servico' : (item.sku ? 'produto' : 'servico'));
         
@@ -1702,6 +1779,7 @@
     }
 
     function adicionarItemParaEdicao(item) {
+        // SUA FUNÇÃO ORIGINAL - NÃO ALTERE
         const itemIndex = itensNoPedido.length;
         const tipoItem = item.tipoItem || (item.duracao ? 'servico' : (item.sku ? 'produto' : 'servico'));
         
@@ -1819,6 +1897,7 @@
         itensNoPedido[itemIndex] = item;
         itensNoPedido[itemIndex].tipoItem = tipoItem;
         
+        // Configurar eventos
         const inputs = itemDiv.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => atualizarItem(itemIndex));
@@ -1830,6 +1909,10 @@
         
         atualizarSubtotalItem(itemIndex);
     }
+
+        // ============================================
+    // FUNÇÕES DE SUPORTE RESTANTES
+    // ============================================
 
     function formatarDataHora(dataString) {
         if (!dataString) return '';
@@ -1853,18 +1936,21 @@
         const itemDiv = itensContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
         if (!itemDiv) return;
         
+        // Coletar dados comuns
         const nomeInput = itemDiv.querySelector('.item-nome');
         const quantidadeInput = itemDiv.querySelector('.item-quantidade');
         const precoInput = itemDiv.querySelector('.item-preco');
         const descontoInput = itemDiv.querySelector('.item-desconto');
         const descricaoInput = itemDiv.querySelector('.item-descricao');
         
+        // Atualizar dados básicos
         itensNoPedido[index].nome = nomeInput.value;
         itensNoPedido[index].descricao = descricaoInput.value;
         itensNoPedido[index].precoUnitario = parseFloat(precoInput.value) || 0;
         itensNoPedido[index].quantidade = parseFloat(quantidadeInput.value) || 1;
         itensNoPedido[index].desconto = parseFloat(descontoInput.value) || 0;
         
+        // Coletar dados específicos
         const tipoItem = itensNoPedido[index].tipoItem;
         
         if (tipoItem === 'servico') {
@@ -1879,6 +1965,7 @@
             itensNoPedido[index].estoque = estoqueInput ? estoqueInput.value : '';
         }
         
+        // Atualizar subtotal
         const subtotalAtual = atualizarSubtotalItem(index);
         itensNoPedido[index].subtotal = subtotalAtual;
         
@@ -1914,6 +2001,7 @@
         const itemDiv = itensContainer.querySelector(`[data-index="${index}"]`).closest('.servico-item');
         if (itemDiv) itemDiv.remove();
         
+        // Reindexar
         const itensDivs = itensContainer.querySelectorAll('.servico-item');
         itensDivs.forEach((div, newIndex) => {
             div.querySelector('.servico-header h6').textContent = `Item ${newIndex + 1}`;
@@ -1924,6 +2012,7 @@
             });
         });
         
+        // Reconstruir array
         const tempItens = [...itensNoPedido];
         itensNoPedido = [];
         itensDivs.forEach((div, newIndex) => {
@@ -1979,11 +2068,13 @@
             if (el) el.disabled = !habilitar;
         });
         
+        // Habilitar/desabilitar inputs dos itens
         if (itensContainer) {
             itensContainer.querySelectorAll('input, select, textarea').forEach(input => {
                 input.disabled = !habilitar;
             });
             
+            // Mostrar/ocultar botões de remover
             itensContainer.querySelectorAll('.btn-remove-servico').forEach(btn => {
                 btn.style.display = habilitar ? 'block' : 'none';
             });
@@ -1991,6 +2082,7 @@
     }
 
     async function salvarPedido() {
+        // Validação básica
         if (!clientePedido.value) {
             alert('Selecione um cliente.');
             clientePedido.focus();
@@ -2002,6 +2094,7 @@
             return;
         }
         
+        // Validar itens
         for (let i = 0; i < itensNoPedido.length; i++) {
             const item = itensNoPedido[i];
             if (!item.nome || item.nome.trim() === '') {
@@ -2022,6 +2115,7 @@
                 if (itemDiv) itemDiv.querySelector('.item-quantidade').focus();
                 return;
             }
+            // Validação específica para serviços
             if (item.tipoItem === 'servico' && (!item.duracao || item.duracao.trim() === '')) {
                 alert(`Informe a duração estimada para o serviço ${i + 1}.`);
                 const itemDiv = itensContainer.querySelector(`[data-index="${i}"]`).closest('.servico-item');
@@ -2037,6 +2131,7 @@
                 return;
             }
             
+            // Calcular valores
             let subtotalValue = 0;
             let totalDescontosValue = 0;
             let valorTotalValue = 0;
@@ -2051,8 +2146,10 @@
             const valorPagoValue = parseFloat(valorPago.value) || 0;
             const valorPendente = Math.max(0, valorTotalValue - valorPagoValue);
             
+            // Determinar tipo do pedido baseado nos itens
             let tipoFinal = tipoPedidoInput ? tipoPedidoInput.value : 'servico';
             if (tipoFinal === 'misto') {
+                // Verificar se realmente tem ambos os tipos
                 const temServico = itensNoPedido.some(item => item.tipoItem === 'servico');
                 const temProduto = itensNoPedido.some(item => item.tipoItem === 'produto');
                 
@@ -2061,18 +2158,18 @@
                 } else if (temServico && !temProduto) {
                     tipoFinal = 'servico';
                 }
+                // Se tem ambos, mantém 'misto'
             }
             
-            // 🔥 AQUI ESTÁ A CORREÇÃO PARA O CLIENTE VER O PEDIDO:
             const pedidoData = {
+                // Identificação
                 tipoPedido: tipoFinal,
                 
-                // Cliente - campos essenciais para o cliente acessar
+                // Cliente
                 clienteId: clientePedido.value,
                 clienteNome: clienteSelecionado.nome,
                 clienteEmail: clienteSelecionado.email || '',
                 clienteTelefone: clienteSelecionado.telefone || '',
-                clienteUserId: clienteSelecionado.usuarioId || '', // UID do usuário cliente
                 
                 // Itens
                 itens: itensNoPedido,
@@ -2102,6 +2199,7 @@
             };
             
             if (!pedidoId.value) {
+                // Novo pedido
                 pedidoData.numeroPedido = `PED-${String(proximoNumeroPedido).padStart(3, '0')}`;
                 pedidoData.criadoEm = serverTimestamp();
                 
@@ -2112,6 +2210,7 @@
                 
                 alert('Pedido criado com sucesso!');
             } else {
+                // Atualizar pedido existente
                 const pedidoRef = doc(db, "pedidos", pedidoId.value);
                 await updateDoc(pedidoRef, pedidoData);
                 
@@ -2125,6 +2224,7 @@
             
             modalPedido.hide();
             
+            // Atualizar interface
             atualizarTabelaPedidos();
             atualizarEstatisticas();
             if (badgeTodos) atualizarContadoresAbas();
@@ -2141,13 +2241,16 @@
         const mesFilter = filterMes.value;
         const clienteFilter = filterCliente.value;
         
+        // Filtrar por tipo
         let pedidosFiltrados = pedidos;
         if (tipoAtualPedido === 'servicos') {
             pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'servico');
         } else if (tipoAtualPedido === 'produtos') {
+            // Produtos inclui tanto 'produto' puro quanto 'misto'
             pedidosFiltrados = pedidos.filter(p => p.tipoPedido === 'produto' || p.tipoPedido === 'misto');
         }
         
+        // Aplicar filtros adicionais
         pedidosFiltrados = pedidosFiltrados.filter(pedido => {
             const matchSearch = !searchTerm || 
                 (pedido.clienteNome && pedido.clienteNome.toLowerCase().includes(searchTerm)) ||
@@ -2169,6 +2272,7 @@
             return matchSearch && matchStatus && matchStatusPagamento && matchMes && matchCliente;
         });
         
+        // Limpar tabela
         pedidosTable.innerHTML = '';
         
         if (pedidosFiltrados.length === 0) {
@@ -2176,25 +2280,30 @@
             return;
         }
         
+        // Preencher tabela
         pedidosFiltrados.forEach(pedido => {
             const row = document.createElement('tr');
             
+            // Preparar dados
             const tipoPedido = pedido.tipoPedido || 'servico';
             const tipoBadge = getTipoPedidoBadge(tipoPedido);
             const statusBadge = getStatusPedidoBadge(pedido.statusPedido || pedido.statusServico);
             const pagamentoBadge = getStatusPagamentoBadge(pedido.statusPagamento);
             const dataFormatada = formatarData(pedido.dataPedido);
             
+            // Resumo dos itens
             let itensText = '';
             let tiposItens = [];
             
             if (Array.isArray(pedido.itens)) {
+                // Contar tipos de itens
                 const servicosCount = pedido.itens.filter(item => item.tipoItem === 'servico').length;
                 const produtosCount = pedido.itens.filter(item => item.tipoItem === 'produto').length;
                 
                 if (servicosCount > 0) tiposItens.push(`${servicosCount} serviço${servicosCount > 1 ? 's' : ''}`);
                 if (produtosCount > 0) tiposItens.push(`${produtosCount} produto${produtosCount > 1 ? 's' : ''}`);
                 
+                // Primeiros 2 itens
                 itensText = pedido.itens.slice(0, 2).map(s => 
                     `${s.quantidade || 1}x ${s.nome || 'Item'}`).join(', ');
                 if (pedido.itens.length > 2) {
@@ -2296,6 +2405,7 @@
     }
 
     function inicializarEventListeners() {
+        // Botão adicionar item
         if (btnAddItem) {
             btnAddItem.addEventListener('click', () => {
                 const tipo = tipoPedidoInput ? tipoPedidoInput.value : 'servico';
@@ -2303,14 +2413,17 @@
             });
         }
         
+        // Filtros
         searchPedidos.addEventListener('input', atualizarTabelaPedidos);
         filterStatusServico.addEventListener('change', atualizarTabelaPedidos);
         filterStatusPagamento.addEventListener('change', atualizarTabelaPedidos);
         filterMes.addEventListener('change', atualizarTabelaPedidos);
         filterCliente.addEventListener('change', atualizarTabelaPedidos);
         
+        // Status de pagamento
         statusPagamento.addEventListener('change', calcularTotais);
         
+        // Menu mobile
         menuToggle.addEventListener('click', () => {
             dashboardMenu.classList.toggle('show');
             const icon = menuToggle.querySelector('i');
@@ -2318,6 +2431,7 @@
             icon.classList.toggle('fa-times');
         });
         
+        // Fechar menu ao clicar fora
         document.addEventListener('click', (e) => {
             if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
                 dashboardMenu.classList.remove('show');
@@ -2327,6 +2441,7 @@
             }
         });
         
+        // Logout
         btnLogout.addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -2336,6 +2451,7 @@
             }
         });
         
+        // Inicializar data no modal
         document.getElementById('modalPedido').addEventListener('shown.bs.modal', () => {
             if (!dataPedido.value) {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -2344,8 +2460,13 @@
         });
     }
 
+    // ============================================
+    // FUNÇÃO ADICIONAL PARA MISTO
+    // ============================================
+
     function adicionarItemMisto(tipo) {
         if (tipo === 'misto') {
+            // Criar modal de escolha para misto
             const modalHTML = `
                 <div class="modal fade" id="modalEscolhaTipo" tabindex="-1">
                     <div class="modal-dialog modal-dialog-centered">
@@ -2393,6 +2514,7 @@
         }
     }
 
+    // Função global para escolha de tipo
     window.escolherTipoItem = function(tipo) {
         criarItemNovo(tipo);
     };
@@ -2510,6 +2632,7 @@
         
         itensContainer.appendChild(itemDiv);
         
+        // Inicializar objeto do item
         itensNoPedido[itemIndex] = {
             tipoItem: tipoItem,
             nome: '',
@@ -2520,6 +2643,7 @@
             subtotal: 0
         };
         
+        // Adicionar campos específicos
         if (tipoItem === 'servico') {
             itensNoPedido[itemIndex].duracao = '';
             itensNoPedido[itemIndex].agendamento = '';
@@ -2528,6 +2652,7 @@
             itensNoPedido[itemIndex].estoque = '';
         }
         
+        // Configurar eventos
         const inputs = itemDiv.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => atualizarItem(itemIndex));
@@ -2541,37 +2666,49 @@
         calcularTotais();
     }
 
+    // ============================================
+    // FUNÇÃO PARA NOVO PEDIDO (DROPDOWN)
+    // ============================================
+
     window.abrirModalPedido = function(tipo = 'servico') {
         modalTitle.textContent = 'Novo Pedido';
         pedidoId.value = '';
         
+        // Mostrar seletor de tipo
         if (seletorTipoPedido) seletorTipoPedido.style.display = 'block';
         modoVisualizacao = false;
         
+        // Ativar botão do tipo selecionado
         if (tipoPedidoBtns.length > 0) {
             tipoPedidoBtns.forEach(btn => btn.classList.remove('active'));
             const btnAtivo = document.querySelector(`.tipo-pedido-btn[data-tipo="${tipo}"]`);
             if (btnAtivo) btnAtivo.classList.add('active');
         }
         
+        // Definir tipo
         if (tipoPedidoInput) tipoPedidoInput.value = tipo;
         if (tituloItens) atualizarTituloItens(tipo);
         
+        // Resetar formulário
         formPedido.reset();
         
         const hoje = new Date().toISOString().split('T')[0];
         dataPedido.value = hoje;
         
+        // Limpar itens
         itensContainer.innerHTML = '';
         itensNoPedido = [];
         
+        // Adicionar primeiro item (exceto para misto)
         if (tipo !== 'misto') {
             criarItemNovo(tipo);
         }
         
+        // Configurar botão salvar
         btnSalvarPedido.textContent = 'Salvar Pedido';
         btnSalvarPedido.onclick = salvarPedido;
         
+        // Habilitar tudo
         habilitarFormulario(true);
         if (btnAddItem) btnAddItem.style.display = 'block';
         
