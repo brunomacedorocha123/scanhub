@@ -1044,7 +1044,7 @@
     let pedidos = [];
     let profissionaisMap = new Map();
     let statusFiltro = 'todos';
-    let pedidoSelecionado = null;
+    let clienteDocId = null;
 
     // Elementos DOM
     const loader = document.getElementById('loader');
@@ -1099,7 +1099,6 @@
                     }, 500);
                 }
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
                 loader.classList.add('hide');
                 emptyState.style.display = 'block';
             }
@@ -1116,113 +1115,153 @@
         }
     }
 
-    // CORREÇÃO: Carregar pedidos do cliente - VERSÃO FUNCIONAL
+    // FUNÇÃO PRINCIPAL: Carregar pedidos do cliente
     async function carregarPedidos() {
         try {
-            console.log("🔄 Buscando pedidos para cliente ID:", currentUser.uid);
+            pedidos = [];
+            profissionaisMap.clear();
+            filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
             
-            // TENTATIVA 1: Buscar com where simples (sem orderBy primeiro)
-            let q = query(
+            // MÉTODO 1: Primeiro encontrar o documento do cliente
+            if (!clienteDocId) {
+                clienteDocId = await encontrarDocumentoCliente();
+            }
+            
+            if (!clienteDocId) {
+                mostrarEmptyState();
+                return;
+            }
+            
+            // MÉTODO 2: Buscar pedidos usando o ID do documento do cliente
+            const q = query(
                 collection(db, "pedidos"),
-                where("clienteId", "==", currentUser.uid)
+                where("clienteId", "==", clienteDocId)
             );
             
-            let querySnapshot = await getDocs(q);
-            console.log("📊 Total de pedidos encontrados:", querySnapshot.size);
-            
-            pedidos = [];
+            const querySnapshot = await getDocs(q);
             
             querySnapshot.forEach((doc) => {
                 const pedidoData = doc.data();
-                console.log("✅ Pedido encontrado:", {
-                    id: doc.id,
-                    numero: pedidoData.numeroPedido,
-                    clienteId: pedidoData.clienteId,
-                    meuUserId: currentUser.uid,
-                    iguais: pedidoData.clienteId === currentUser.uid
-                });
-                
                 pedidos.push({
                     id: doc.id,
                     ...pedidoData
                 });
             });
             
-            // Se encontrou pedidos, ordenar localmente por data
-            if (pedidos.length > 0) {
-                pedidos.sort((a, b) => {
-                    const dataA = new Date(a.dataPedido || a.criadoEm || 0);
-                    const dataB = new Date(b.dataPedido || b.criadoEm || 0);
-                    return dataB - dataA; // Mais recente primeiro
-                });
-                
-                console.log("🎯 Pedidos ordenados:", pedidos.length);
-                
-                // Carregar profissionais dos pedidos
-                await carregarProfissionais();
-                
-                // Atualizar interface
-                atualizarEstatisticas();
-                atualizarContadoresAbas();
-                atualizarTabelaECards();
-                
-            } else {
-                console.log("❌ Nenhum pedido encontrado para este cliente");
-                mostrarEmptyState();
+            // Se não encontrou pedidos, tenta pelo email como fallback
+            if (pedidos.length === 0 && currentUser.email) {
+                await buscarPedidosPorEmail();
             }
+            
+            // Se ainda não encontrou pedidos
+            if (pedidos.length === 0) {
+                mostrarEmptyState();
+                return;
+            }
+            
+            // Ordenar pedidos por data (mais recente primeiro)
+            pedidos.sort((a, b) => {
+                const dataA = a.dataPedido ? new Date(a.dataPedido).getTime() : 0;
+                const dataB = b.dataPedido ? new Date(b.dataPedido).getTime() : 0;
+                return dataB - dataA;
+            });
+            
+            // Carregar profissionais dos pedidos
+            await carregarProfissionais();
+            
+            // Atualizar interface
+            atualizarEstatisticas();
+            atualizarContadoresAbas();
+            atualizarTabelaECards();
             
         } catch (error) {
-            console.error('❌ Erro ao carregar pedidos:', error);
-            
-            // TENTATIVA 2: Buscar TODOS os pedidos para debug
-            try {
-                const qAll = query(collection(db, "pedidos"));
-                const allSnapshot = await getDocs(qAll);
-                console.log("🔍 Todos os pedidos na coleção:", allSnapshot.size);
+            mostrarEmptyState();
+        }
+    }
+
+    // Encontrar documento do cliente na coleção clientes
+    async function encontrarDocumentoCliente() {
+        try {
+            // Tentar pelo UID do usuário
+            if (currentUser.uid) {
+                const qUid = query(
+                    collection(db, "clientes"),
+                    where("usuarioId", "==", currentUser.uid)
+                );
                 
-                allSnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    console.log("Pedido na coleção:", {
-                        id: doc.id,
-                        numero: data.numeroPedido,
-                        clienteId: data.clienteId,
-                        clienteNome: data.clienteNome,
-                        meuUserId: currentUser.uid
-                    });
-                });
-            } catch (debugError) {
-                console.error("Erro no debug:", debugError);
+                const uidSnapshot = await getDocs(qUid);
+                if (!uidSnapshot.empty) {
+                    return uidSnapshot.docs[0].id;
+                }
             }
             
-            mostrarEmptyState();
+            // Tentar pelo email do usuário
+            if (currentUser.email) {
+                const qEmail = query(
+                    collection(db, "clientes"),
+                    where("email", "==", currentUser.email)
+                );
+                
+                const emailSnapshot = await getDocs(qEmail);
+                if (!emailSnapshot.empty) {
+                    return emailSnapshot.docs[0].id;
+                }
+            }
+            
+            return null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    // Buscar pedidos por email como fallback
+    async function buscarPedidosPorEmail() {
+        try {
+            const qEmail = query(
+                collection(db, "pedidos"),
+                where("clienteEmail", "==", currentUser.email)
+            );
+            
+            const emailSnapshot = await getDocs(qEmail);
+            
+            emailSnapshot.forEach((doc) => {
+                const pedidoData = doc.data();
+                // Verifica se já não existe no array
+                if (!pedidos.find(p => p.id === doc.id)) {
+                    pedidos.push({
+                        id: doc.id,
+                        ...pedidoData
+                    });
+                }
+            });
+        } catch (error) {
+            // Ignora erro, é apenas um fallback
         }
     }
 
     // Carregar profissionais dos pedidos
     async function carregarProfissionais() {
         try {
-            const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId))];
+            const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
             
             for (const profId of profissionalIds) {
-                if (profId) {
-                    const profRef = doc(db, "usuarios", profId);
-                    const profDoc = await getDoc(profRef);
+                const profRef = doc(db, "usuarios", profId);
+                const profDoc = await getDoc(profRef);
+                
+                if (profDoc.exists()) {
+                    const profData = profDoc.data();
+                    profissionaisMap.set(profId, profData);
                     
-                    if (profDoc.exists()) {
-                        const profData = profDoc.data();
-                        profissionaisMap.set(profId, profData);
-                        
-                        // Adicionar ao filtro de profissionais
-                        const option = document.createElement('option');
-                        option.value = profId;
-                        option.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
-                        filterProfissional.appendChild(option);
-                    }
+                    // Adicionar ao filtro de profissionais
+                    const option = document.createElement('option');
+                    option.value = profId;
+                    option.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
+                    filterProfissional.appendChild(option);
                 }
             }
             
         } catch (error) {
-            console.error('Erro ao carregar profissionais:', error);
+            // Continua sem as informações dos profissionais
         }
     }
 
@@ -1466,7 +1505,6 @@
 
     // Funções globais para os botões
     window.verDetalhesPedido = function(pedidoId) {
-        // Abre página de detalhes ou modal
         window.open(`detalhes-pedido.html?id=${pedidoId}`, '_blank');
     };
 
@@ -1477,7 +1515,6 @@
             return;
         }
         
-        // Abre nova janela para PDF
         const janelaPDF = window.open('', '_blank');
         const htmlContent = criarConteudoPDF(pedido);
         janelaPDF.document.write(htmlContent);
@@ -1534,7 +1571,6 @@
     }
 
     function criarConteudoPDF(pedido) {
-        // Conteúdo HTML básico para PDF
         return `
             <!DOCTYPE html>
             <html>
@@ -1608,9 +1644,6 @@
                 alert('Erro ao sair. Tente novamente.');
             }
         });
-        
-        // Recarregar pedidos
-        document.getElementById('btnRecarregar')?.addEventListener('click', carregarPedidos);
     }
 
     // Inicializar quando o DOM estiver pronto
