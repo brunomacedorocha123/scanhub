@@ -1005,7 +1005,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script type="module">
+   <script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
@@ -1020,8 +1020,7 @@
         collection,
         getDocs,
         query,
-        where,
-        orderBy
+        where
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     // Firebase Config
@@ -1044,7 +1043,6 @@
     let pedidos = [];
     let profissionaisMap = new Map();
     let statusFiltro = 'todos';
-    let clienteDocId = null;
 
     // Elementos DOM
     const loader = document.getElementById('loader');
@@ -1090,13 +1088,19 @@
                     const userData = userDoc.data();
                     atualizarInterfaceUsuario(userData);
                     
-                    // Carregar pedidos e profissionais
+                    // Carregar pedidos
                     await carregarPedidos();
                     
                     // Esconder loader
                     setTimeout(() => {
                         loader.classList.add('hide');
                     }, 500);
+                } else {
+                    // Se não tem perfil, só carrega pedidos
+                    userName.textContent = `Olá, Cliente`;
+                    userAvatar.textContent = 'C';
+                    await carregarPedidos();
+                    loader.classList.add('hide');
                 }
             } catch (error) {
                 loader.classList.add('hide');
@@ -1115,59 +1119,55 @@
         }
     }
 
-    // FUNÇÃO PRINCIPAL: Carregar pedidos do cliente
+    // FUNÇÃO CORRIGIDA: Buscar pedidos pelo EMAIL do cliente
     async function carregarPedidos() {
         try {
-            pedidos = [];
-            profissionaisMap.clear();
-            filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
-            
-            // MÉTODO 1: Primeiro encontrar o documento do cliente
-            if (!clienteDocId) {
-                clienteDocId = await encontrarDocumentoCliente();
-            }
-            
-            if (!clienteDocId) {
+            // Verificar se o usuário tem email
+            if (!currentUser || !currentUser.email) {
                 mostrarEmptyState();
                 return;
             }
-            
-            // MÉTODO 2: Buscar pedidos usando o ID do documento do cliente
+
+            // BUSCAR PEDIDOS pelo campo "clienteEmail" que já existe no pedido
             const q = query(
                 collection(db, "pedidos"),
-                where("clienteId", "==", clienteDocId)
+                where("clienteEmail", "==", currentUser.email)
             );
             
             const querySnapshot = await getDocs(q);
             
+            // Limpar arrays
+            pedidos = [];
+            profissionaisMap.clear();
+            filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
+            
+            // Processar pedidos encontrados
             querySnapshot.forEach((doc) => {
                 const pedidoData = doc.data();
                 pedidos.push({
                     id: doc.id,
-                    ...pedidoData
+                    ...pedidoData,
+                    // Garantir campos essenciais
+                    statusPedido: pedidoData.statusPedido || pedidoData.statusServico || 'pendente',
+                    dataPedido: pedidoData.dataPedido || pedidoData.criadoEm || new Date().toISOString()
                 });
             });
             
-            // Se não encontrou pedidos, tenta pelo email como fallback
-            if (pedidos.length === 0 && currentUser.email) {
-                await buscarPedidosPorEmail();
-            }
-            
-            // Se ainda não encontrou pedidos
+            // Verificar se encontrou pedidos
             if (pedidos.length === 0) {
                 mostrarEmptyState();
                 return;
             }
             
+            // Carregar informações dos profissionais
+            await carregarProfissionais();
+            
             // Ordenar pedidos por data (mais recente primeiro)
             pedidos.sort((a, b) => {
-                const dataA = a.dataPedido ? new Date(a.dataPedido).getTime() : 0;
-                const dataB = b.dataPedido ? new Date(b.dataPedido).getTime() : 0;
+                const dataA = new Date(a.dataPedido).getTime();
+                const dataB = new Date(b.dataPedido).getTime();
                 return dataB - dataA;
             });
-            
-            // Carregar profissionais dos pedidos
-            await carregarProfissionais();
             
             // Atualizar interface
             atualizarEstatisticas();
@@ -1179,87 +1179,38 @@
         }
     }
 
-    // Encontrar documento do cliente na coleção clientes
-    async function encontrarDocumentoCliente() {
-        try {
-            // Tentar pelo UID do usuário
-            if (currentUser.uid) {
-                const qUid = query(
-                    collection(db, "clientes"),
-                    where("usuarioId", "==", currentUser.uid)
-                );
-                
-                const uidSnapshot = await getDocs(qUid);
-                if (!uidSnapshot.empty) {
-                    return uidSnapshot.docs[0].id;
-                }
-            }
-            
-            // Tentar pelo email do usuário
-            if (currentUser.email) {
-                const qEmail = query(
-                    collection(db, "clientes"),
-                    where("email", "==", currentUser.email)
-                );
-                
-                const emailSnapshot = await getDocs(qEmail);
-                if (!emailSnapshot.empty) {
-                    return emailSnapshot.docs[0].id;
-                }
-            }
-            
-            return null;
-        } catch (error) {
-            return null;
-        }
-    }
-
-    // Buscar pedidos por email como fallback
-    async function buscarPedidosPorEmail() {
-        try {
-            const qEmail = query(
-                collection(db, "pedidos"),
-                where("clienteEmail", "==", currentUser.email)
-            );
-            
-            const emailSnapshot = await getDocs(qEmail);
-            
-            emailSnapshot.forEach((doc) => {
-                const pedidoData = doc.data();
-                // Verifica se já não existe no array
-                if (!pedidos.find(p => p.id === doc.id)) {
-                    pedidos.push({
-                        id: doc.id,
-                        ...pedidoData
-                    });
-                }
-            });
-        } catch (error) {
-            // Ignora erro, é apenas um fallback
-        }
-    }
-
     // Carregar profissionais dos pedidos
     async function carregarProfissionais() {
         try {
-            const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
+            // Extrair IDs únicos dos profissionais dos pedidos
+            const profissionalIds = [];
+            pedidos.forEach(pedido => {
+                if (pedido.profissionalId && !profissionalIds.includes(pedido.profissionalId)) {
+                    profissionalIds.push(pedido.profissionalId);
+                }
+            });
             
+            // Buscar dados de cada profissional
             for (const profId of profissionalIds) {
-                const profRef = doc(db, "usuarios", profId);
-                const profDoc = await getDoc(profRef);
-                
-                if (profDoc.exists()) {
-                    const profData = profDoc.data();
-                    profissionaisMap.set(profId, profData);
+                try {
+                    const profRef = doc(db, "usuarios", profId);
+                    const profDoc = await getDoc(profRef);
                     
-                    // Adicionar ao filtro de profissionais
-                    const option = document.createElement('option');
-                    option.value = profId;
-                    option.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
-                    filterProfissional.appendChild(option);
+                    if (profDoc.exists()) {
+                        const profData = profDoc.data();
+                        profissionaisMap.set(profId, profData);
+                        
+                        // Adicionar ao filtro de profissionais
+                        const option = document.createElement('option');
+                        option.value = profId;
+                        option.textContent = profData.apelido || profData.nomeCompleto || 'Profissional';
+                        filterProfissional.appendChild(option);
+                    }
+                } catch (error) {
+                    // Continua se não conseguir carregar um profissional
+                    continue;
                 }
             }
-            
         } catch (error) {
             // Continua sem as informações dos profissionais
         }
@@ -1346,9 +1297,13 @@
         if (mesFilter) {
             pedidosFiltrados = pedidosFiltrados.filter(pedido => {
                 if (!pedido.dataPedido) return false;
-                const data = new Date(pedido.dataPedido);
-                const mes = data.getMonth() + 1;
-                return mes.toString() === mesFilter;
+                try {
+                    const data = new Date(pedido.dataPedido);
+                    const mes = data.getMonth() + 1;
+                    return mes.toString() === mesFilter;
+                } catch {
+                    return false;
+                }
             });
         }
         
@@ -1501,6 +1456,9 @@
         badgePendentes.textContent = '0';
         badgeAndamento.textContent = '0';
         badgeConcluidos.textContent = '0';
+        
+        // Esconder loader
+        loader.classList.add('hide');
     }
 
     // Funções globais para os botões
