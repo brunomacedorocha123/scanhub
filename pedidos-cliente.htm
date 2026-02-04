@@ -1006,6 +1006,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
    <script type="module">
+    // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
         getAuth, 
@@ -1021,6 +1022,7 @@
         orderBy
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
         authDomain: "scanhub-ed512.firebaseapp.com",
@@ -1030,64 +1032,120 @@
         appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // ============================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================
     let currentUser = null;
     let pedidos = [];
     let profissionaisMap = new Map();
     let statusFiltro = 'todos';
+    let pedidoSelecionado = null;
 
+    // ============================================
+    // ELEMENTOS DOM
+    // ============================================
     const loader = document.getElementById('loader');
     const userName = document.getElementById('userName');
     const userAvatar = document.getElementById('userAvatar');
     const btnLogout = document.getElementById('btnLogout');
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
+    
+    // Estatísticas
     const totalPedidos = document.getElementById('totalPedidos');
     const pedidosAndamento = document.getElementById('pedidosAndamento');
     const pedidosConcluidos = document.getElementById('pedidosConcluidos');
     const valorPendente = document.getElementById('valorPendente');
-    const searchPedidos = document.getElementById('searchPedidos');
-    const filterProfissional = document.getElementById('filterProfissional');
-    const filterMes = document.getElementById('filterMes');
-    const pedidosTable = document.getElementById('pedidosTable');
-    const cardsContainer = document.getElementById('cardsContainer');
-    const emptyState = document.getElementById('emptyState');
+    
+    // Abas e badges
     const tabButtons = document.querySelectorAll('.tab-btn');
     const badgeTodos = document.getElementById('badgeTodos');
     const badgePendentes = document.getElementById('badgePendentes');
     const badgeAndamento = document.getElementById('badgeAndamento');
     const badgeConcluidos = document.getElementById('badgeConcluidos');
+    
+    // Filtros
+    const searchPedidos = document.getElementById('searchPedidos');
+    const filterProfissional = document.getElementById('filterProfissional');
+    const filterMes = document.getElementById('filterMes');
+    
+    // Tabela e Cards
+    const pedidosTable = document.getElementById('pedidosTable');
+    const cardsContainer = document.getElementById('cardsContainer');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Modal
+    const modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+    const modalTitle = document.getElementById('modalTitle');
+    const detalhesNumero = document.getElementById('detalhesNumero');
+    const detalhesData = document.getElementById('detalhesData');
+    const detalhesTipo = document.getElementById('detalhesTipo');
+    const detalhesStatus = document.getElementById('detalhesStatus');
+    const detalhesPagamento = document.getElementById('detalhesPagamento');
+    const detalhesProfissionalAvatar = document.getElementById('detalhesProfissionalAvatar');
+    const detalhesProfissionalNome = document.getElementById('detalhesProfissionalNome');
+    const detalhesProfissionalContato = document.getElementById('detalhesProfissionalContato');
+    const detalhesTituloItens = document.getElementById('detalhesTituloItens');
+    const detalhesItens = document.getElementById('detalhesItens');
+    const detalhesSubtotal = document.getElementById('detalhesSubtotal');
+    const detalhesDescontos = document.getElementById('detalhesDescontos');
+    const detalhesValorPago = document.getElementById('detalhesValorPago');
+    const detalhesValorTotal = document.getElementById('detalhesValorTotal');
+    const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
+    const detalhesObservacoes = document.getElementById('detalhesObservacoes');
+    const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
+    const btnGerarPDF = document.getElementById('btnGerarPDF');
 
+    // ============================================
+    // INICIALIZAÇÃO DO SISTEMA
+    // ============================================
+
+    // Monitorar autenticação
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             try {
-                if (user.email) {
-                    userName.textContent = `Olá, ${user.email.split('@')[0]}`;
-                    userAvatar.textContent = user.email.charAt(0).toUpperCase();
-                } else {
-                    userName.textContent = `Olá, Cliente`;
-                    userAvatar.textContent = 'C';
-                }
+                // Atualizar interface do usuário
+                atualizarInterfaceUsuario(user);
                 
+                // Carregar pedidos
                 await carregarPedidos();
                 
+                // Esconder loader
                 setTimeout(() => {
                     if (loader) loader.classList.add('hide');
                 }, 500);
+                
             } catch (error) {
+                console.error("Erro na inicialização:", error);
                 if (loader) loader.classList.add('hide');
-                if (emptyState) emptyState.style.display = 'block';
+                mostrarEmptyState();
             }
         } else {
             window.location.href = 'login.html';
         }
     });
 
-    // FUNÇÃO PRINCIPAL: Carregar pedidos do cliente
+    function atualizarInterfaceUsuario(user) {
+        if (user.email) {
+            const nomeUsuario = user.email.split('@')[0];
+            userName.textContent = `Olá, ${nomeUsuario}`;
+            userAvatar.textContent = nomeUsuario.charAt(0).toUpperCase();
+        } else {
+            userName.textContent = `Olá, Cliente`;
+            userAvatar.textContent = 'C';
+        }
+    }
+
+    // ============================================
+    // FUNÇÃO PRINCIPAL: CARREGAR PEDIDOS
+    // ============================================
+
     async function carregarPedidos() {
         try {
             if (!currentUser || !currentUser.uid) {
@@ -1098,60 +1156,106 @@
             // Limpar arrays
             pedidos = [];
             profissionaisMap.clear();
+            
             if (filterProfissional) {
                 filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
             }
             
-            // TENTATIVA 1: Buscar pelo clienteUserId (campo salvo no pedido)
+            console.log("Buscando pedidos para o cliente:", currentUser.uid, currentUser.email);
+            
+            // ESTRATÉGIA DE BUSCA MULTIPLA:
             let encontrouPedidos = false;
             
-            const qUserId = query(
-                collection(db, "pedidos"),
-                where("clienteUserId", "==", currentUser.uid)
-            );
-            
-            const userIdSnapshot = await getDocs(qUserId);
-            
-            if (!userIdSnapshot.empty) {
-                userIdSnapshot.forEach((doc) => {
-                    const pedidoData = doc.data();
-                    pedidos.push({
-                        id: doc.id,
-                        ...pedidoData
-                    });
-                    encontrouPedidos = true;
-                });
-            }
-            
-            // TENTATIVA 2: Se não encontrou, buscar pelo email do cliente
-            if (!encontrouPedidos && currentUser.email) {
-                const qEmail = query(
-                    collection(db, "pedidos"),
-                    where("clienteEmail", "==", currentUser.email)
-                );
-                
-                const emailSnapshot = await getDocs(qEmail);
-                
-                if (!emailSnapshot.empty) {
-                    emailSnapshot.forEach((doc) => {
-                        const pedidoData = doc.data();
-                        // Evitar duplicados
-                        if (!pedidos.find(p => p.id === doc.id)) {
+            // 1. Buscar pelo UID do cliente (clienteUserId)
+            if (currentUser.uid) {
+                try {
+                    const qUid = query(
+                        collection(db, "pedidos"),
+                        where("clienteUserId", "==", currentUser.uid)
+                    );
+                    
+                    const uidSnapshot = await getDocs(qUid);
+                    
+                    if (!uidSnapshot.empty) {
+                        console.log(`Encontrados ${uidSnapshot.size} pedidos pelo UID`);
+                        uidSnapshot.forEach((doc) => {
+                            const pedidoData = doc.data();
                             pedidos.push({
                                 id: doc.id,
                                 ...pedidoData
                             });
-                            encontrouPedidos = true;
+                        });
+                        encontrouPedidos = true;
+                    }
+                } catch (error) {
+                    console.log("Erro ao buscar por UID:", error);
+                }
+            }
+            
+            // 2. Buscar pelo email do cliente
+            if (!encontrouPedidos && currentUser.email) {
+                try {
+                    const qEmail = query(
+                        collection(db, "pedidos"),
+                        where("clienteEmail", "==", currentUser.email)
+                    );
+                    
+                    const emailSnapshot = await getDocs(qEmail);
+                    
+                    if (!emailSnapshot.empty) {
+                        console.log(`Encontrados ${emailSnapshot.size} pedidos pelo email`);
+                        emailSnapshot.forEach((doc) => {
+                            const pedidoData = doc.data();
+                            // Evitar duplicados
+                            if (!pedidos.find(p => p.id === doc.id)) {
+                                pedidos.push({
+                                    id: doc.id,
+                                    ...pedidoData
+                                });
+                            }
+                        });
+                        encontrouPedidos = true;
+                    }
+                } catch (error) {
+                    console.log("Erro ao buscar por email:", error);
+                }
+            }
+            
+            // 3. Último recurso: buscar todos e filtrar localmente pelo email
+            if (!encontrouPedidos && currentUser.email) {
+                try {
+                    const qAll = query(collection(db, "pedidos"));
+                    const allSnapshot = await getDocs(qAll);
+                    
+                    let count = 0;
+                    allSnapshot.forEach((doc) => {
+                        const pedidoData = doc.data();
+                        if (pedidoData.clienteEmail === currentUser.email) {
+                            pedidos.push({
+                                id: doc.id,
+                                ...pedidoData
+                            });
+                            count++;
                         }
                     });
+                    
+                    if (count > 0) {
+                        console.log(`Encontrados ${count} pedidos por busca geral`);
+                        encontrouPedidos = true;
+                    }
+                } catch (error) {
+                    console.log("Erro na busca geral:", error);
                 }
             }
             
             // Se não encontrou nenhum pedido
             if (pedidos.length === 0) {
+                console.log("Nenhum pedido encontrado para este cliente");
                 mostrarEmptyState();
                 return;
             }
+            
+            console.log(`Total de pedidos carregados: ${pedidos.length}`);
             
             // Carregar informações dos profissionais
             await carregarProfissionais();
@@ -1166,44 +1270,74 @@
             // Atualizar interface
             atualizarEstatisticas();
             atualizarContadoresAbas();
+            atualizarFiltroProfissionais();
             atualizarTabelaECards();
             
         } catch (error) {
+            console.error("Erro ao carregar pedidos:", error);
             mostrarEmptyState();
         }
     }
 
-    // Carregar profissionais dos pedidos
+    // ============================================
+    // FUNÇÕES AUXILIARES
+    // ============================================
+
     async function carregarProfissionais() {
         try {
             const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
             
             for (const profId of profissionalIds) {
-                try {
-                    // Para simplificar, usamos os dados já salvos no pedido
-                    const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
-                    if (pedidoComProf && pedidoComProf.profissionalNome) {
-                        profissionaisMap.set(profId, {
-                            apelido: pedidoComProf.profissionalNome,
-                            nomeCompleto: pedidoComProf.profissionalNome,
-                            telefone: ''
-                        });
-                        
-                        // Adicionar ao filtro de profissionais
-                        if (filterProfissional) {
-                            const option = document.createElement('option');
-                            option.value = profId;
-                            option.textContent = pedidoComProf.profissionalNome;
-                            filterProfissional.appendChild(option);
+                if (!profissionaisMap.has(profId)) {
+                    // Buscar informações do profissional
+                    try {
+                        const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
+                        if (pedidoComProf) {
+                            profissionaisMap.set(profId, {
+                                apelido: pedidoComProf.profissionalNome || 'Profissional',
+                                nomeCompleto: pedidoComProf.profissionalNome || 'Profissional',
+                                telefone: pedidoComProf.profissionalTelefone || '',
+                                email: pedidoComProf.profissionalEmail || ''
+                            });
                         }
+                    } catch (error) {
+                        console.log("Erro ao carregar profissional:", profId, error);
                     }
-                } catch (error) {
-                    continue;
                 }
             }
         } catch (error) {
-            // Continua sem as informações detalhadas
+            console.error("Erro ao carregar profissionais:", error);
         }
+    }
+
+    function atualizarFiltroProfissionais() {
+        if (!filterProfissional) return;
+        
+        // Limpar opções existentes (exceto a primeira)
+        filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
+        
+        // Adicionar profissionais únicos
+        const profissionaisUnicos = new Map();
+        pedidos.forEach(pedido => {
+            if (pedido.profissionalId && pedido.profissionalNome) {
+                if (!profissionaisUnicos.has(pedido.profissionalId)) {
+                    profissionaisUnicos.set(pedido.profissionalId, pedido.profissionalNome);
+                }
+            }
+        });
+        
+        // Ordenar por nome
+        const profissionaisOrdenados = [...profissionaisUnicos.entries()].sort((a, b) => 
+            a[1].localeCompare(b[1])
+        );
+        
+        // Adicionar opções
+        profissionaisOrdenados.forEach(([id, nome]) => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = nome;
+            filterProfissional.appendChild(option);
+        });
     }
 
     function atualizarEstatisticas() {
@@ -1273,13 +1407,14 @@
         // Filtrar por busca
         if (searchTerm) {
             pedidosFiltrados = pedidosFiltrados.filter(pedido => {
-                const profData = profissionaisMap.get(pedido.profissionalId);
-                const profNome = profData?.apelido || profData?.nomeCompleto || pedido.profissionalNome || '';
+                const profNome = pedido.profissionalNome || '';
+                const pedidoNumero = pedido.numeroPedido || '';
+                const itensTexto = Array.isArray(pedido.itens) ? 
+                    pedido.itens.map(item => item.nome || '').join(' ') : '';
                 
                 return profNome.toLowerCase().includes(searchTerm) ||
-                       (pedido.numeroPedido && pedido.numeroPedido.toLowerCase().includes(searchTerm)) ||
-                       (pedido.itens && Array.isArray(pedido.itens) && 
-                        pedido.itens.some(item => item.nome && item.nome.toLowerCase().includes(searchTerm)));
+                       pedidoNumero.toLowerCase().includes(searchTerm) ||
+                       itensTexto.toLowerCase().includes(searchTerm);
             });
         }
         
@@ -1332,8 +1467,7 @@
     function adicionarLinhaTabela(pedido) {
         if (!pedidosTable) return;
         
-        const profData = profissionaisMap.get(pedido.profissionalId);
-        const profNome = profData?.apelido || profData?.nomeCompleto || pedido.profissionalNome || 'Profissional';
+        const profNome = pedido.profissionalNome || 'Profissional';
         
         // Resumo dos itens
         let itensText = '';
@@ -1343,11 +1477,13 @@
             if (pedido.itens.length > 2) {
                 itensText += ` +${pedido.itens.length - 2} itens`;
             }
+        } else {
+            itensText = '1x ' + (pedido.nomeServico || 'Serviço');
         }
         
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><strong>${pedido.numeroPedido || 'PEDIDO'}</strong></td>
+            <td><strong>${pedido.numeroPedido || pedido.id.substring(0, 8)}</strong></td>
             <td>
                 <div class="d-flex align-items-center">
                     <div class="profissional-avatar me-2">${profNome.charAt(0).toUpperCase()}</div>
@@ -1377,21 +1513,22 @@
     function adicionarCard(pedido) {
         if (!cardsContainer) return;
         
-        const profData = profissionaisMap.get(pedido.profissionalId);
-        const profNome = profData?.apelido || profData?.nomeCompleto || pedido.profissionalNome || 'Profissional';
+        const profNome = pedido.profissionalNome || 'Profissional';
         
         // Resumo dos itens
         let itensText = '';
         if (Array.isArray(pedido.itens)) {
             itensText = pedido.itens.slice(0, 2).map(item => 
                 `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+        } else {
+            itensText = '1x ' + (pedido.nomeServico || 'Serviço');
         }
         
         const card = document.createElement('div');
         card.className = 'pedido-card';
         card.innerHTML = `
             <div class="pedido-header">
-                <div class="pedido-numero">${pedido.numeroPedido || 'PEDIDO'}</div>
+                <div class="pedido-numero">${pedido.numeroPedido || pedido.id.substring(0, 8)}</div>
                 <div>${getStatusBadge(pedido.statusPedido)}</div>
             </div>
             
@@ -1454,9 +1591,24 @@
         if (loader) loader.classList.add('hide');
     }
 
-    // Funções globais para os botões
+    // ============================================
+    // FUNÇÕES GLOBAIS (chamadas pelos botões)
+    // ============================================
+
     window.verDetalhesPedido = function(pedidoId) {
-        window.open(`detalhes-pedido.html?id=${pedidoId}`, '_blank');
+        const pedido = pedidos.find(p => p.id === pedidoId);
+        if (!pedido) {
+            alert('Pedido não encontrado!');
+            return;
+        }
+        
+        pedidoSelecionado = pedido;
+        
+        // Preencher modal com detalhes
+        preencherModalDetalhes(pedido);
+        
+        // Mostrar modal
+        modalDetalhes.show();
     };
 
     window.gerarPDFPedido = function(pedidoId) {
@@ -1466,14 +1618,239 @@
             return;
         }
         
-        const janelaPDF = window.open('', '_blank');
-        const htmlContent = criarConteudoPDF(pedido);
-        janelaPDF.document.write(htmlContent);
-        janelaPDF.document.close();
-        janelaPDF.print();
+        gerarPDF(pedido);
     };
 
-    // Funções auxiliares
+    window.abrirWhatsApp = function() {
+        if (!pedidoSelecionado) return;
+        
+        const profNome = pedidoSelecionado.profissionalNome || 'Profissional';
+        const mensagem = `Olá ${profNome}, estou entrando em contato sobre o pedido ${pedidoSelecionado.numeroPedido || pedidoSelecionado.id.substring(0, 8)}`;
+        
+        // URL do WhatsApp (substitua pelo telefone real se tiver)
+        const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        window.open(url, '_blank');
+    };
+
+    // ============================================
+    // FUNÇÕES DO MODAL DE DETALHES
+    // ============================================
+
+    function preencherModalDetalhes(pedido) {
+        if (!pedido) return;
+        
+        const profNome = pedido.profissionalNome || 'Profissional';
+        const profEmail = pedido.profissionalEmail || '';
+        const profTelefone = pedido.profissionalTelefone || '';
+        
+        // Título e informações básicas
+        modalTitle.textContent = `Pedido ${pedido.numeroPedido || pedido.id.substring(0, 8)}`;
+        detalhesNumero.textContent = pedido.numeroPedido || pedido.id.substring(0, 8);
+        detalhesData.textContent = formatarData(pedido.dataPedido);
+        detalhesTipo.textContent = pedido.tipoPedido === 'servico' ? 'Serviço' : 
+                                  pedido.tipoPedido === 'produto' ? 'Produto' : 'Misto';
+        
+        // Status
+        detalhesStatus.innerHTML = getStatusBadge(pedido.statusPedido);
+        detalhesPagamento.innerHTML = getPagamentoBadge(pedido.statusPagamento);
+        
+        // Profissional
+        detalhesProfissionalAvatar.textContent = profNome.charAt(0).toUpperCase();
+        detalhesProfissionalNome.textContent = profNome;
+        
+        let contatoTexto = '';
+        if (profEmail) contatoTexto += profEmail;
+        if (profTelefone) {
+            if (contatoTexto) contatoTexto += ' | ';
+            contatoTexto += profTelefone;
+        }
+        detalhesProfissionalContato.textContent = contatoTexto || 'Sem informações de contato';
+        
+        // Itens do pedido
+        detalhesItens.innerHTML = '';
+        if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
+            detalhesTituloItens.textContent = `Itens do Pedido (${pedido.itens.length})`;
+            
+            pedido.itens.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'servico-item';
+                itemDiv.innerHTML = `
+                    <div class="servico-header">
+                        <h6 class="mb-0">${index + 1}. ${item.nome || 'Item'}</h6>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <small>Quantidade: ${item.quantidade || 1}</small>
+                        </div>
+                        <div class="col-6 text-end">
+                            <small>Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small>
+                        </div>
+                    </div>
+                    ${item.descricao ? `<p class="mt-2 mb-0"><small>${item.descricao}</small></p>` : ''}
+                `;
+                detalhesItens.appendChild(itemDiv);
+            });
+        } else {
+            detalhesTituloItens.textContent = 'Item do Pedido';
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'servico-item';
+            itemDiv.innerHTML = `
+                <div class="servico-header">
+                    <h6 class="mb-0">${pedido.nomeServico || 'Serviço/Produto'}</h6>
+                </div>
+                <p class="mt-2 mb-0"><small>Descrição não disponível</small></p>
+            `;
+            detalhesItens.appendChild(itemDiv);
+        }
+        
+        // Totais
+        detalhesSubtotal.textContent = `R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`;
+        detalhesDescontos.textContent = `R$ ${(pedido.totalDescontos || 0).toFixed(2)}`;
+        detalhesValorPago.textContent = `R$ ${(pedido.valorPago || 0).toFixed(2)}`;
+        detalhesValorTotal.textContent = `R$ ${(pedido.valorTotal || 0).toFixed(2)}`;
+        
+        // Observações
+        if (pedido.observacoes) {
+            detalhesObservacoesContainer.style.display = 'block';
+            detalhesObservacoes.textContent = pedido.observacoes;
+        } else {
+            detalhesObservacoesContainer.style.display = 'none';
+        }
+    }
+
+    function gerarPDF(pedido) {
+        const { jsPDF } = window.jspdf;
+        if (!jsPDF) {
+            alert('Biblioteca jsPDF não carregada. Aguarde um momento e tente novamente.');
+            return;
+        }
+        
+        try {
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.width;
+            let y = 20;
+            
+            // Cabeçalho
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RECIBO DO PEDIDO', pageWidth/2, y, { align: 'center' });
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Número: ${pedido.numeroPedido || pedido.id.substring(0, 8)}`, 20, y);
+            doc.text(`Data: ${formatarData(pedido.dataPedido)}`, pageWidth - 20, y, { align: 'right' });
+            y += 15;
+            
+            // Cliente
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CLIENTE:', 20, y);
+            y += 7;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`${pedido.clienteNome || 'Cliente'}`, 20, y);
+            if (pedido.clienteEmail) doc.text(`E-mail: ${pedido.clienteEmail}`, 20, y + 5);
+            if (pedido.clienteTelefone) doc.text(`Telefone: ${pedido.clienteTelefone}`, 20, y + 10);
+            y += 25;
+            
+            // Profissional
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('PROFISSIONAL:', 20, y);
+            y += 7;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`${pedido.profissionalNome || 'Profissional'}`, 20, y);
+            if (pedido.profissionalEmail) doc.text(`E-mail: ${pedido.profissionalEmail}`, 20, y + 5);
+            if (pedido.profissionalTelefone) doc.text(`Telefone: ${pedido.profissionalTelefone}`, 20, y + 10);
+            y += 25;
+            
+            // Status
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('STATUS:', 20, y);
+            y += 7;
+            
+            doc.setFontSize(10);
+            doc.text(`Pedido: ${getStatusTexto(pedido.statusPedido)}`, 20, y);
+            doc.text(`Pagamento: ${getStatusTexto(pedido.statusPagamento)}`, 20, y + 5);
+            y += 20;
+            
+            // Itens
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ITENS:', 20, y);
+            y += 10;
+            
+            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
+                pedido.itens.forEach((item, index) => {
+                    if (y > 240) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`${index + 1}. ${item.nome || 'Item'}`, 20, y);
+                    doc.text(`Qtd: ${item.quantidade || 1} | Unit: R$ ${(item.precoUnitario || 0).toFixed(2)}`, 20, y + 5);
+                    y += 15;
+                });
+            }
+            
+            // Totais
+            y += 10;
+            doc.setLineWidth(0.5);
+            doc.line(pageWidth - 100, y, pageWidth - 20, y);
+            y += 8;
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('TOTAIS:', pageWidth - 100, y);
+            y += 8;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text('Subtotal:', pageWidth - 100, y);
+            doc.text(`R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+            y += 7;
+            
+            if (pedido.totalDescontos > 0) {
+                doc.text('Descontos:', pageWidth - 100, y);
+                doc.text(`R$ ${(pedido.totalDescontos || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+                y += 7;
+            }
+            
+            if (pedido.valorPago > 0) {
+                doc.text('Valor Pago:', pageWidth - 100, y);
+                doc.text(`R$ ${(pedido.valorPago || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+                y += 7;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('VALOR TOTAL:', pageWidth - 100, y);
+            doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, pageWidth - 30, y, { align: 'right' });
+            
+            // Rodapé
+            y = 270;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Documento gerado automaticamente pelo ScanHub', pageWidth/2, y, { align: 'center' });
+            doc.text(new Date().toLocaleDateString('pt-BR'), pageWidth/2, y + 5, { align: 'center' });
+            
+            // Salvar PDF
+            doc.save(`Pedido-${pedido.numeroPedido || pedido.id.substring(0, 8)}.pdf`);
+            
+        } catch (error) {
+            console.error("Erro ao gerar PDF:", error);
+            alert('Erro ao gerar PDF. Tente novamente.');
+        }
+    }
+
+    // ============================================
+    // FUNÇÕES UTILITÁRIAS
+    // ============================================
+
     function getStatusBadge(status) {
         const badges = {
             'pendente': '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i> Pendente</span>',
@@ -1504,6 +1881,20 @@
         return textos[status] || status;
     }
 
+    function getStatusTexto(status) {
+        const textos = {
+            'pendente': 'Pendente',
+            'andamento': 'Em Andamento',
+            'concluido': 'Concluído',
+            'cancelado': 'Cancelado',
+            'a_receber': 'A Receber',
+            'pago': 'Pago',
+            'parcial': 'Pago Parcialmente',
+            'atrasado': 'Em Atraso'
+        };
+        return textos[status] || status;
+    }
+
     function formatarData(dataString) {
         if (!dataString) return '--/--/----';
         try {
@@ -1515,36 +1906,10 @@
         }
     }
 
-    function criarConteudoPDF(pedido) {
-        return `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .header { text-align: center; margin-bottom: 30px; }
-                    .info { margin-bottom: 20px; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h2>Pedido: ${pedido.numeroPedido || 'PEDIDO'}</h2>
-                    <p>ScanHub - Recibo</p>
-                </div>
-                <div class="info">
-                    <p><strong>Cliente:</strong> ${pedido.clienteNome || 'Cliente'}</p>
-                    <p><strong>Data:</strong> ${formatarData(pedido.dataPedido)}</p>
-                    <p><strong>Status:</strong> ${pedido.statusPedido}</p>
-                    <p><strong>Valor Total:</strong> R$ ${(pedido.valorTotal || 0).toFixed(2)}</p>
-                    <p><strong>Profissional:</strong> ${pedido.profissionalNome || 'Profissional'}</p>
-                </div>
-                <p>Documento gerado pelo ScanHub - ${new Date().toLocaleDateString('pt-BR')}</p>
-            </body>
-            </html>
-        `;
-    }
+    // ============================================
+    // INICIALIZAÇÃO DE EVENT LISTENERS
+    // ============================================
 
-    // Inicializar event listeners
     function inicializarEventListeners() {
         // Abas
         if (tabButtons.length > 0) {
@@ -1603,14 +1968,37 @@
                 try {
                     await signOut(auth);
                     window.location.href = 'login.html';
-                } catch {
+                } catch (error) {
                     alert('Erro ao sair. Tente novamente.');
                 }
             });
         }
+        
+        // Botões do modal
+        if (btnContatoWhatsApp) {
+            btnContatoWhatsApp.addEventListener('click', abrirWhatsApp);
+        }
+        
+        if (btnGerarPDF) {
+            btnGerarPDF.addEventListener('click', () => {
+                if (pedidoSelecionado) {
+                    gerarPDF(pedidoSelecionado);
+                }
+            });
+        }
+        
+        // Recarregar ao voltar para a página
+        window.addEventListener('focus', () => {
+            if (currentUser) {
+                carregarPedidos();
+            }
+        });
     }
 
-    // Inicializar quando o DOM estiver pronto
+    // ============================================
+    // INICIALIZAÇÃO DO SISTEMA
+    // ============================================
+
     document.addEventListener('DOMContentLoaded', () => {
         inicializarEventListeners();
     });
