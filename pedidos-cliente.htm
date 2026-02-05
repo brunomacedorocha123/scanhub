@@ -1099,7 +1099,6 @@
     const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
     const detalhesObservacoes = document.getElementById('detalhesObservacoes');
     const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
-    const btnGerarPDF = document.getElementById('btnGerarPDF');
 
     // ============================================
     // INICIALIZAÇÃO
@@ -1414,10 +1413,10 @@
             <td>${formatarData(pedido.dataPedido)}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-action-sm btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
+                    <button class="btn-action-sm btn-detalhes" onclick="window.verDetalhesPedido('${pedido.id}')">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-action-sm btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
+                    <button class="btn-action-sm btn-pdf" onclick="window.gerarPDFPedido('${pedido.id}')">
                         <i class="fas fa-file-pdf"></i>
                     </button>
                 </div>
@@ -1468,10 +1467,10 @@
                 </div>
             </div>
             <div class="pedido-acoes">
-                <button class="btn-acao btn-detalhes" onclick="verDetalhesPedido('${pedido.id}')">
+                <button class="btn-acao btn-detalhes" onclick="window.verDetalhesPedido('${pedido.id}')">
                     <i class="fas fa-eye"></i> Detalhes
                 </button>
-                <button class="btn-acao btn-pdf" onclick="gerarPDFPedido('${pedido.id}')">
+                <button class="btn-acao btn-pdf" onclick="window.gerarPDFPedido('${pedido.id}')">
                     <i class="fas fa-file-pdf"></i> PDF
                 </button>
             </div>
@@ -1498,7 +1497,7 @@
     }
 
     // ============================================
-    // FUNÇÕES GLOBAIS
+    // FUNÇÕES GLOBAIS (window)
     // ============================================
     window.verDetalhesPedido = function(pedidoId) {
         const pedido = pedidos.find(p => p.id === pedidoId);
@@ -1526,6 +1525,14 @@
         const mensagem = `Olá ${profNome}, estou entrando em contato sobre o pedido ${pedidoSelecionado.numeroPedido || pedidoSelecionado.id.substring(0, 8)}`;
         const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
         window.open(url, '_blank');
+    };
+
+    window.gerarPDFModal = function() {
+        if (!pedidoSelecionado) {
+            alert('Nenhum pedido selecionado!');
+            return;
+        }
+        gerarPDFCliente(pedidoSelecionado);
     };
 
     // ============================================
@@ -1917,13 +1924,16 @@
             btnContatoWhatsApp.addEventListener('click', abrirWhatsApp);
         }
         
-        if (btnGerarPDF) {
-            btnGerarPDF.addEventListener('click', () => {
+        // Event listener para o botão de PDF no modal (delegação)
+        document.addEventListener('click', (e) => {
+            if (e.target && (e.target.id === 'btnGerarPDF' || e.target.closest('#btnGerarPDF'))) {
+                e.preventDefault();
+                e.stopPropagation();
                 if (pedidoSelecionado) {
                     gerarPDFCliente(pedidoSelecionado);
                 }
-            });
-        }
+            }
+        });
         
         window.addEventListener('focus', () => {
             if (currentUser) carregarPedidos();
