@@ -14,6 +14,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
         :root {
             --primary-color: #44689a;
@@ -857,7 +860,7 @@
                         <option value="4">Abril</option>
                         <option value="5">Maio</option>
                         <option value="6">Junho</option>
-                        <option value="7">Julho</option>
+                        <option value="7">Julço</option>
                         <option value="8">Agosto</option>
                         <option value="9">Setembro</option>
                         <option value="10">Outubro</option>
@@ -991,10 +994,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary" id="btnContatoWhatsApp" onclick="abrirWhatsApp()">
+                    <button type="button" class="btn btn-primary" id="btnContatoWhatsApp">
                         <i class="fab fa-whatsapp me-2"></i>Contatar no WhatsApp
                     </button>
-                    <button type="button" class="btn btn-danger" id="btnGerarPDF" onclick="gerarPDF()">
+                    <button type="button" class="btn btn-danger" id="btnGerarPDF">
                         <i class="fas fa-file-pdf me-2"></i>Gerar PDF
                     </button>
                 </div>
@@ -1005,945 +1008,978 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
- <script type="module">
-    // ============================================
-    // IMPORTS DO FIREBASE
-    // ============================================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged,
-        signOut 
-    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        getDoc,
-        collection,
-        getDocs,
-        query,
-        where
-    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            collection,
+            getDocs,
+            query,
+            where
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    // ============================================
-    // CONFIGURAÇÃO DO FIREBASE
-    // ============================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.firebasestorage.app",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // ============================================
-    // VARIÁVEIS GLOBAIS
-    // ============================================
-    let currentUser = null;
-    let userData = null;
-    let pedidos = [];
-    let profissionaisMap = new Map();
-    let statusFiltro = 'todos';
-    let pedidoSelecionado = null;
+        let currentUser = null;
+        let userData = null;
+        let pedidos = [];
+        let profissionaisMap = new Map();
+        let statusFiltro = 'todos';
 
-    // ============================================
-    // ELEMENTOS DOM
-    // ============================================
-    const loader = document.getElementById('loader');
-    const userName = document.getElementById('userName');
-    const userAvatar = document.getElementById('userAvatar');
-    const btnLogout = document.getElementById('btnLogout');
-    const menuToggle = document.getElementById('menuToggle');
-    const dashboardMenu = document.getElementById('dashboardMenu');
-    
-    const totalPedidos = document.getElementById('totalPedidos');
-    const pedidosAndamento = document.getElementById('pedidosAndamento');
-    const pedidosConcluidos = document.getElementById('pedidosConcluidos');
-    const valorPendente = document.getElementById('valorPendente');
-    
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const badgeTodos = document.getElementById('badgeTodos');
-    const badgePendentes = document.getElementById('badgePendentes');
-    const badgeAndamento = document.getElementById('badgeAndamento');
-    const badgeConcluidos = document.getElementById('badgeConcluidos');
-    
-    const searchPedidos = document.getElementById('searchPedidos');
-    const filterProfissional = document.getElementById('filterProfissional');
-    const filterMes = document.getElementById('filterMes');
-    
-    const pedidosTable = document.getElementById('pedidosTable');
-    const cardsContainer = document.getElementById('cardsContainer');
-    const emptyState = document.getElementById('emptyState');
-    
-    const modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhes'));
-    const modalTitle = document.getElementById('modalTitle');
-    const detalhesNumero = document.getElementById('detalhesNumero');
-    const detalhesData = document.getElementById('detalhesData');
-    const detalhesTipo = document.getElementById('detalhesTipo');
-    const detalhesStatus = document.getElementById('detalhesStatus');
-    const detalhesPagamento = document.getElementById('detalhesPagamento');
-    const detalhesProfissionalAvatar = document.getElementById('detalhesProfissionalAvatar');
-    const detalhesProfissionalNome = document.getElementById('detalhesProfissionalNome');
-    const detalhesProfissionalContato = document.getElementById('detalhesProfissionalContato');
-    const detalhesTituloItens = document.getElementById('detalhesTituloItens');
-    const detalhesItens = document.getElementById('detalhesItens');
-    const detalhesSubtotal = document.getElementById('detalhesSubtotal');
-    const detalhesDescontos = document.getElementById('detalhesDescontos');
-    const detalhesValorPago = document.getElementById('detalhesValorPago');
-    const detalhesValorTotal = document.getElementById('detalhesValorTotal');
-    const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
-    const detalhesObservacoes = document.getElementById('detalhesObservacoes');
-    const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
-
-    // ============================================
-    // INICIALIZAÇÃO
-    // ============================================
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                await carregarDadosUsuario();
-                atualizarInterfaceUsuario();
-                await carregarPedidos();
-                
-                setTimeout(() => {
-                    if (loader) loader.classList.add('hide');
-                }, 500);
-            } catch (error) {
-                if (loader) loader.classList.add('hide');
-                mostrarEmptyState();
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
-
-    // ============================================
-    // FUNÇÕES PRINCIPAIS
-    // ============================================
-    async function carregarDadosUsuario() {
-        if (!currentUser) return;
-        try {
-            const userRef = doc(db, "usuarios", currentUser.uid);
-            const userDoc = await getDoc(userRef);
-            if (userDoc.exists()) {
-                userData = userDoc.data();
-            }
-        } catch (error) {
-            userData = {};
-        }
-    }
-
-    function atualizarInterfaceUsuario() {
-        let apelido = '';
-        if (userData && userData.apelido) {
-            apelido = userData.apelido;
-        } else if (userData && userData.nomeCompleto) {
-            apelido = userData.nomeCompleto;
-        } else if (currentUser && currentUser.email) {
-            apelido = currentUser.email.split('@')[0];
-        } else {
-            apelido = 'Cliente';
-        }
+        const loader = document.getElementById('loader');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const btnLogout = document.getElementById('btnLogout');
+        const menuToggle = document.getElementById('menuToggle');
+        const dashboardMenu = document.getElementById('dashboardMenu');
         
-        if (userName) userName.textContent = `Olá, ${apelido}`;
-        if (userAvatar) userAvatar.textContent = apelido.charAt(0).toUpperCase();
-    }
+        const totalPedidos = document.getElementById('totalPedidos');
+        const pedidosAndamento = document.getElementById('pedidosAndamento');
+        const pedidosConcluidos = document.getElementById('pedidosConcluidos');
+        const valorPendente = document.getElementById('valorPendente');
+        
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const badgeTodos = document.getElementById('badgeTodos');
+        const badgePendentes = document.getElementById('badgePendentes');
+        const badgeAndamento = document.getElementById('badgeAndamento');
+        const badgeConcluidos = document.getElementById('badgeConcluidos');
+        
+        const searchPedidos = document.getElementById('searchPedidos');
+        const filterProfissional = document.getElementById('filterProfissional');
+        const filterMes = document.getElementById('filterMes');
+        
+        const pedidosTable = document.getElementById('pedidosTable');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const emptyState = document.getElementById('emptyState');
+        
+        const modalDetalhes = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+        const modalTitle = document.getElementById('modalTitle');
+        const detalhesNumero = document.getElementById('detalhesNumero');
+        const detalhesData = document.getElementById('detalhesData');
+        const detalhesTipo = document.getElementById('detalhesTipo');
+        const detalhesStatus = document.getElementById('detalhesStatus');
+        const detalhesPagamento = document.getElementById('detalhesPagamento');
+        const detalhesProfissionalAvatar = document.getElementById('detalhesProfissionalAvatar');
+        const detalhesProfissionalNome = document.getElementById('detalhesProfissionalNome');
+        const detalhesProfissionalContato = document.getElementById('detalhesProfissionalContato');
+        const detalhesTituloItens = document.getElementById('detalhesTituloItens');
+        const detalhesItens = document.getElementById('detalhesItens');
+        const detalhesSubtotal = document.getElementById('detalhesSubtotal');
+        const detalhesDescontos = document.getElementById('detalhesDescontos');
+        const detalhesValorPago = document.getElementById('detalhesValorPago');
+        const detalhesValorTotal = document.getElementById('detalhesValorTotal');
+        const detalhesObservacoesContainer = document.getElementById('detalhesObservacoesContainer');
+        const detalhesObservacoes = document.getElementById('detalhesObservacoes');
+        const btnContatoWhatsApp = document.getElementById('btnContatoWhatsApp');
+        const btnGerarPDF = document.getElementById('btnGerarPDF');
 
-    async function carregarPedidos() {
-        try {
-            if (!currentUser || !currentUser.uid) {
-                mostrarEmptyState();
-                return;
+        let pedidoAtualModal = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    await carregarDadosUsuario();
+                    atualizarInterfaceUsuario();
+                    await carregarPedidos();
+                    
+                    setTimeout(() => {
+                        if (loader) loader.classList.add('hide');
+                    }, 500);
+                } catch (error) {
+                    if (loader) loader.classList.add('hide');
+                    mostrarEmptyState();
+                }
+            } else {
+                window.location.href = 'login.html';
             }
+        });
 
-            pedidos = [];
-            profissionaisMap.clear();
+        async function carregarDadosUsuario() {
+            if (!currentUser) return;
+            try {
+                const userRef = doc(db, "usuarios", currentUser.uid);
+                const userDoc = await getDoc(userRef);
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                }
+            } catch (error) {
+                userData = {};
+            }
+        }
+
+        function atualizarInterfaceUsuario() {
+            let apelido = '';
+            if (userData && userData.apelido) {
+                apelido = userData.apelido;
+            } else if (userData && userData.nomeCompleto) {
+                apelido = userData.nomeCompleto;
+            } else if (currentUser && currentUser.email) {
+                apelido = currentUser.email.split('@')[0];
+            } else {
+                apelido = 'Cliente';
+            }
             
-            let q = query(
-                collection(db, "pedidos"),
-                where("clienteId", "==", currentUser.uid)
-            );
-            
-            let querySnapshot = await getDocs(q);
-            
-            querySnapshot.forEach((doc) => {
-                pedidos.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
-            });
-            
-            if (pedidos.length === 0 && currentUser.email) {
-                q = query(
+            if (userName) userName.textContent = `Olá, ${apelido}`;
+            if (userAvatar) userAvatar.textContent = apelido.charAt(0).toUpperCase();
+        }
+
+        async function carregarPedidos() {
+            try {
+                if (!currentUser || !currentUser.uid) {
+                    mostrarEmptyState();
+                    return;
+                }
+
+                pedidos = [];
+                profissionaisMap.clear();
+                
+                let q = query(
                     collection(db, "pedidos"),
-                    where("clienteEmail", "==", currentUser.email)
+                    where("clienteId", "==", currentUser.uid)
                 );
                 
-                querySnapshot = await getDocs(q);
+                let querySnapshot = await getDocs(q);
+                
                 querySnapshot.forEach((doc) => {
-                    if (!pedidos.find(p => p.id === doc.id)) {
-                        pedidos.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
+                    pedidos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                if (pedidos.length === 0 && currentUser.email) {
+                    q = query(
+                        collection(db, "pedidos"),
+                        where("clienteEmail", "==", currentUser.email)
+                    );
+                    
+                    querySnapshot = await getDocs(q);
+                    querySnapshot.forEach((doc) => {
+                        if (!pedidos.find(p => p.id === doc.id)) {
+                            pedidos.push({
+                                id: doc.id,
+                                ...doc.data()
+                            });
+                        }
+                    });
+                }
+                
+                if (pedidos.length === 0) {
+                    mostrarEmptyState();
+                    return;
+                }
+                
+                pedidos.sort((a, b) => {
+                    if (a.dataPedido && b.dataPedido) {
+                        return new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime();
+                    }
+                    const timeA = a.criadoEm?.seconds || a.criadoEm?.toMillis?.() || 0;
+                    const timeB = b.criadoEm?.seconds || b.criadoEm?.toMillis?.() || 0;
+                    return timeB - timeA;
+                });
+                
+                await carregarProfissionais();
+                atualizarEstatisticas();
+                atualizarContadoresAbas();
+                atualizarFiltroProfissionais();
+                atualizarTabelaECards();
+                
+            } catch (error) {
+                mostrarEmptyState();
+            }
+        }
+
+        async function carregarProfissionais() {
+            try {
+                const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
+                
+                for (const profId of profissionalIds) {
+                    if (!profissionaisMap.has(profId)) {
+                        try {
+                            const userRef = doc(db, "usuarios", profId);
+                            const userDoc = await getDoc(userRef);
+                            
+                            if (userDoc.exists()) {
+                                const userData = userDoc.data();
+                                profissionaisMap.set(profId, {
+                                    apelido: userData.apelido || userData.nomeCompleto || 'Profissional',
+                                    nomeCompleto: userData.nomeCompleto || userData.apelido || 'Profissional',
+                                    telefone: userData.whatsapp || userData.celular || '',
+                                    email: userData.email || '',
+                                    nomeProfissional: userData.nomeProfissional || userData.apelido || 'Profissional'
+                                });
+                            } else {
+                                const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
+                                if (pedidoComProf) {
+                                    profissionaisMap.set(profId, {
+                                        apelido: pedidoComProf.profissionalNome || 'Profissional',
+                                        nomeCompleto: pedidoComProf.profissionalNome || 'Profissional',
+                                        telefone: pedidoComProf.profissionalTelefone || '',
+                                        email: pedidoComProf.profissionalEmail || '',
+                                        nomeProfissional: pedidoComProf.profissionalNome || 'Profissional'
+                                    });
+                                }
+                            }
+                        } catch (error) {
+                            const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
+                            if (pedidoComProf) {
+                                profissionaisMap.set(profId, {
+                                    apelido: pedidoComProf.profissionalNome || 'Profissional',
+                                    nomeCompleto: pedidoComProf.profissionalNome || 'Profissional',
+                                    telefone: pedidoComProf.profissionalTelefone || '',
+                                    email: pedidoComProf.profissionalEmail || '',
+                                    nomeProfissional: pedidoComProf.profissionalNome || 'Profissional'
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Erro ao carregar profissionais:', error);
+            }
+        }
+
+        function atualizarFiltroProfissionais() {
+            if (!filterProfissional) return;
+            filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
+            
+            const profissionaisUnicos = new Map();
+            pedidos.forEach(pedido => {
+                if (pedido.profissionalId) {
+                    const profData = profissionaisMap.get(pedido.profissionalId);
+                    const nome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || 'Profissional';
+                    if (!profissionaisUnicos.has(pedido.profissionalId)) {
+                        profissionaisUnicos.set(pedido.profissionalId, nome);
+                    }
+                }
+            });
+            
+            const profissionaisOrdenados = [...profissionaisUnicos.entries()].sort((a, b) => 
+                a[1].localeCompare(b[1])
+            );
+            
+            profissionaisOrdenados.forEach(([id, nome]) => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = nome;
+                filterProfissional.appendChild(option);
+            });
+        }
+
+        function atualizarEstatisticas() {
+            if (pedidos.length === 0) {
+                if (totalPedidos) totalPedidos.textContent = '0';
+                if (pedidosAndamento) pedidosAndamento.textContent = '0';
+                if (pedidosConcluidos) pedidosConcluidos.textContent = '0';
+                if (valorPendente) valorPendente.textContent = 'R$ 0';
+                return;
+            }
+            
+            const total = pedidos.length;
+            const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
+            const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
+            
+            let valorPendenteTotal = 0;
+            pedidos.forEach(pedido => {
+                if (pedido.valorPendente && pedido.valorPendente > 0) {
+                    valorPendenteTotal += pedido.valorPendente;
+                } else if (pedido.statusPagamento === 'a_receber' || pedido.statusPagamento === 'parcial' || pedido.statusPagamento === 'atrasado') {
+                    const valorPendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
+                    if (valorPendente > 0) {
+                        valorPendenteTotal += valorPendente;
+                    }
+                }
+            });
+            
+            if (totalPedidos) totalPedidos.textContent = total;
+            if (pedidosAndamento) pedidosAndamento.textContent = emAndamento;
+            if (pedidosConcluidos) pedidosConcluidos.textContent = concluidos;
+            if (valorPendente) valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
+        }
+
+        function atualizarContadoresAbas() {
+            if (pedidos.length === 0) {
+                if (badgeTodos) badgeTodos.textContent = '0';
+                if (badgePendentes) badgePendentes.textContent = '0';
+                if (badgeAndamento) badgeAndamento.textContent = '0';
+                if (badgeConcluidos) badgeConcluidos.textContent = '0';
+                return;
+            }
+            
+            const total = pedidos.length;
+            const pendentes = pedidos.filter(p => p.statusPedido === 'pendente').length;
+            const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
+            const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
+            
+            if (badgeTodos) badgeTodos.textContent = total;
+            if (badgePendentes) badgePendentes.textContent = pendentes;
+            if (badgeAndamento) badgeAndamento.textContent = emAndamento;
+            if (badgeConcluidos) badgeConcluidos.textContent = concluidos;
+        }
+
+        function atualizarTabelaECards() {
+            const searchTerm = searchPedidos ? searchPedidos.value.toLowerCase() : '';
+            const profissionalFilter = filterProfissional ? filterProfissional.value : '';
+            const mesFilter = filterMes ? filterMes.value : '';
+            
+            let pedidosFiltrados = pedidos;
+            
+            if (statusFiltro !== 'todos') {
+                pedidosFiltrados = pedidosFiltrados.filter(p => p.statusPedido === statusFiltro);
+            }
+            
+            if (searchTerm) {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+                    const profData = profissionaisMap.get(pedido.profissionalId);
+                    const profNome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || '';
+                    const pedidoNumero = pedido.numeroPedido || '';
+                    const itensTexto = Array.isArray(pedido.itens) ? 
+                        pedido.itens.map(item => item.nome || '').join(' ') : '';
+                    
+                    return profNome.toLowerCase().includes(searchTerm) ||
+                           pedidoNumero.toLowerCase().includes(searchTerm) ||
+                           itensTexto.toLowerCase().includes(searchTerm);
+                });
+            }
+            
+            if (profissionalFilter) {
+                pedidosFiltrados = pedidosFiltrados.filter(p => p.profissionalId === profissionalFilter);
+            }
+            
+            if (mesFilter) {
+                pedidosFiltrados = pedidosFiltrados.filter(pedido => {
+                    if (!pedido.dataPedido) return false;
+                    try {
+                        const data = new Date(pedido.dataPedido);
+                        const mes = data.getMonth() + 1;
+                        return mes.toString() === mesFilter;
+                    } catch {
+                        return false;
                     }
                 });
             }
             
-            if (pedidos.length === 0) {
+            if (pedidosTable) pedidosTable.innerHTML = '';
+            if (cardsContainer) cardsContainer.innerHTML = '';
+            
+            if (pedidosFiltrados.length === 0) {
                 mostrarEmptyState();
                 return;
             }
             
-            pedidos.sort((a, b) => {
-                if (a.dataPedido && b.dataPedido) {
-                    return new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime();
-                }
-                const timeA = a.criadoEm?.seconds || a.criadoEm?.toMillis?.() || 0;
-                const timeB = b.criadoEm?.seconds || b.criadoEm?.toMillis?.() || 0;
-                return timeB - timeA;
-            });
+            if (emptyState) emptyState.style.display = 'none';
             
-            await carregarProfissionais();
-            atualizarEstatisticas();
-            atualizarContadoresAbas();
-            atualizarFiltroProfissionais();
-            atualizarTabelaECards();
+            if (pedidosTable) {
+                pedidosFiltrados.forEach(pedido => {
+                    adicionarLinhaTabela(pedido);
+                });
+            }
             
-        } catch (error) {
-            mostrarEmptyState();
-        }
-    }
-
-    async function carregarProfissionais() {
-        try {
-            const profissionalIds = [...new Set(pedidos.map(p => p.profissionalId).filter(id => id))];
-            for (const profId of profissionalIds) {
-                if (!profissionaisMap.has(profId)) {
-                    const pedidoComProf = pedidos.find(p => p.profissionalId === profId);
-                    if (pedidoComProf) {
-                        profissionaisMap.set(profId, {
-                            apelido: pedidoComProf.profissionalNome || 'Profissional',
-                            nomeCompleto: pedidoComProf.profissionalNome || 'Profissional',
-                            telefone: pedidoComProf.profissionalTelefone || '',
-                            email: pedidoComProf.profissionalEmail || ''
-                        });
-                    }
-                }
+            if (cardsContainer) {
+                pedidosFiltrados.forEach(pedido => {
+                    adicionarCard(pedido);
+                });
             }
-        } catch (error) {
-            // Silencioso
         }
-    }
 
-    function atualizarFiltroProfissionais() {
-        if (!filterProfissional) return;
-        filterProfissional.innerHTML = '<option value="">Todos profissionais</option>';
-        
-        const profissionaisUnicos = new Map();
-        pedidos.forEach(pedido => {
-            if (pedido.profissionalId && pedido.profissionalNome) {
-                if (!profissionaisUnicos.has(pedido.profissionalId)) {
-                    profissionaisUnicos.set(pedido.profissionalId, pedido.profissionalNome);
+        function adicionarLinhaTabela(pedido) {
+            if (!pedidosTable) return;
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            const profNome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || 'Profissional';
+            
+            let itensText = '';
+            if (Array.isArray(pedido.itens)) {
+                itensText = pedido.itens.slice(0, 2).map(item => 
+                    `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+                if (pedido.itens.length > 2) {
+                    itensText += ` +${pedido.itens.length - 2} itens`;
                 }
+            } else {
+                itensText = '1x ' + (pedido.nomeServico || 'Serviço');
             }
-        });
-        
-        const profissionaisOrdenados = [...profissionaisUnicos.entries()].sort((a, b) => 
-            a[1].localeCompare(b[1])
-        );
-        
-        profissionaisOrdenados.forEach(([id, nome]) => {
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = nome;
-            filterProfissional.appendChild(option);
-        });
-    }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${pedido.numeroPedido || pedido.id.substring(0, 8)}</strong></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="profissional-avatar me-2">${profNome.charAt(0).toUpperCase()}</div>
+                        <span>${profNome}</span>
+                    </div>
+                </td>
+                <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
+                <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
+                <td>${getStatusBadge(pedido.statusPedido)}</td>
+                <td>${getPagamentoBadge(pedido.statusPagamento)}</td>
+                <td>${formatarData(pedido.dataPedido)}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-action-sm btn-detalhes" onclick="window.verDetalhesPedido('${pedido.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action-sm btn-pdf" onclick="window.gerarPDFPedido('${pedido.id}')">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            pedidosTable.appendChild(row);
+        }
 
-    function atualizarEstatisticas() {
-        if (pedidos.length === 0) {
+        function adicionarCard(pedido) {
+            if (!cardsContainer) return;
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            const profNome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || 'Profissional';
+            
+            let itensText = '';
+            if (Array.isArray(pedido.itens)) {
+                itensText = pedido.itens.slice(0, 2).map(item => 
+                    `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
+            } else {
+                itensText = '1x ' + (pedido.nomeServico || 'Serviço');
+            }
+            
+            const card = document.createElement('div');
+            card.className = 'pedido-card';
+            card.innerHTML = `
+                <div class="pedido-header">
+                    <div class="pedido-numero">${pedido.numeroPedido || pedido.id.substring(0, 8)}</div>
+                    <div>${getStatusBadge(pedido.statusPedido)}</div>
+                </div>
+                <div class="pedido-profissional">
+                    <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
+                    <div><strong>${profNome}</strong></div>
+                </div>
+                <div class="pedido-info">
+                    <div class="info-item">
+                        <span class="info-label">Serviço/Produto</span>
+                        <span class="info-value">${itensText.substring(0, 30)}${itensText.length > 30 ? '...' : ''}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Valor Total</span>
+                        <span class="info-value">R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Data</span>
+                        <span class="info-value">${formatarData(pedido.dataPedido)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Pagamento</span>
+                        <span class="info-value">${getPagamentoTexto(pedido.statusPagamento)}</span>
+                    </div>
+                </div>
+                <div class="pedido-acoes">
+                    <button class="btn-acao btn-detalhes" onclick="window.verDetalhesPedido('${pedido.id}')">
+                        <i class="fas fa-eye"></i> Detalhes
+                    </button>
+                    <button class="btn-acao btn-pdf" onclick="window.gerarPDFPedido('${pedido.id}')">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+            `;
+            cardsContainer.appendChild(card);
+        }
+
+        function mostrarEmptyState() {
+            if (emptyState) emptyState.style.display = 'block';
+            if (pedidosTable) pedidosTable.innerHTML = '';
+            if (cardsContainer) cardsContainer.innerHTML = '';
+            
             if (totalPedidos) totalPedidos.textContent = '0';
             if (pedidosAndamento) pedidosAndamento.textContent = '0';
             if (pedidosConcluidos) pedidosConcluidos.textContent = '0';
             if (valorPendente) valorPendente.textContent = 'R$ 0';
-            return;
-        }
-        
-        const total = pedidos.length;
-        const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
-        const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
-        
-        let valorPendenteTotal = 0;
-        pedidos.forEach(pedido => {
-            if (pedido.valorPendente && pedido.valorPendente > 0) {
-                valorPendenteTotal += pedido.valorPendente;
-            } else if (pedido.statusPagamento === 'a_receber' || pedido.statusPagamento === 'parcial' || pedido.statusPagamento === 'atrasado') {
-                const valorPendente = (pedido.valorTotal || 0) - (pedido.valorPago || 0);
-                if (valorPendente > 0) {
-                    valorPendenteTotal += valorPendente;
-                }
-            }
-        });
-        
-        if (totalPedidos) totalPedidos.textContent = total;
-        if (pedidosAndamento) pedidosAndamento.textContent = emAndamento;
-        if (pedidosConcluidos) pedidosConcluidos.textContent = concluidos;
-        if (valorPendente) valorPendente.textContent = `R$ ${valorPendenteTotal.toFixed(2)}`;
-    }
-
-    function atualizarContadoresAbas() {
-        if (pedidos.length === 0) {
+            
             if (badgeTodos) badgeTodos.textContent = '0';
             if (badgePendentes) badgePendentes.textContent = '0';
             if (badgeAndamento) badgeAndamento.textContent = '0';
             if (badgeConcluidos) badgeConcluidos.textContent = '0';
-            return;
+            
+            if (loader) loader.classList.add('hide');
         }
-        
-        const total = pedidos.length;
-        const pendentes = pedidos.filter(p => p.statusPedido === 'pendente').length;
-        const emAndamento = pedidos.filter(p => p.statusPedido === 'andamento').length;
-        const concluidos = pedidos.filter(p => p.statusPedido === 'concluido').length;
-        
-        if (badgeTodos) badgeTodos.textContent = total;
-        if (badgePendentes) badgePendentes.textContent = pendentes;
-        if (badgeAndamento) badgeAndamento.textContent = emAndamento;
-        if (badgeConcluidos) badgeConcluidos.textContent = concluidos;
-    }
 
-    function atualizarTabelaECards() {
-        const searchTerm = searchPedidos ? searchPedidos.value.toLowerCase() : '';
-        const profissionalFilter = filterProfissional ? filterProfissional.value : '';
-        const mesFilter = filterMes ? filterMes.value : '';
-        
-        let pedidosFiltrados = pedidos;
-        
-        if (statusFiltro !== 'todos') {
-            pedidosFiltrados = pedidosFiltrados.filter(p => p.statusPedido === statusFiltro);
-        }
-        
-        if (searchTerm) {
-            pedidosFiltrados = pedidosFiltrados.filter(pedido => {
-                const profNome = pedido.profissionalNome || '';
-                const pedidoNumero = pedido.numeroPedido || '';
-                const itensTexto = Array.isArray(pedido.itens) ? 
-                    pedido.itens.map(item => item.nome || '').join(' ') : '';
-                
-                return profNome.toLowerCase().includes(searchTerm) ||
-                       pedidoNumero.toLowerCase().includes(searchTerm) ||
-                       itensTexto.toLowerCase().includes(searchTerm);
-            });
-        }
-        
-        if (profissionalFilter) {
-            pedidosFiltrados = pedidosFiltrados.filter(p => p.profissionalId === profissionalFilter);
-        }
-        
-        if (mesFilter) {
-            pedidosFiltrados = pedidosFiltrados.filter(pedido => {
-                if (!pedido.dataPedido) return false;
-                try {
-                    const data = new Date(pedido.dataPedido);
-                    const mes = data.getMonth() + 1;
-                    return mes.toString() === mesFilter;
-                } catch {
-                    return false;
-                }
-            });
-        }
-        
-        if (pedidosTable) pedidosTable.innerHTML = '';
-        if (cardsContainer) cardsContainer.innerHTML = '';
-        
-        if (pedidosFiltrados.length === 0) {
-            mostrarEmptyState();
-            return;
-        }
-        
-        if (emptyState) emptyState.style.display = 'none';
-        
-        if (pedidosTable) {
-            pedidosFiltrados.forEach(pedido => {
-                adicionarLinhaTabela(pedido);
-            });
-        }
-        
-        if (cardsContainer) {
-            pedidosFiltrados.forEach(pedido => {
-                adicionarCard(pedido);
-            });
-        }
-    }
-
-    function adicionarLinhaTabela(pedido) {
-        if (!pedidosTable) return;
-        const profNome = pedido.profissionalNome || 'Profissional';
-        
-        let itensText = '';
-        if (Array.isArray(pedido.itens)) {
-            itensText = pedido.itens.slice(0, 2).map(item => 
-                `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
-            if (pedido.itens.length > 2) {
-                itensText += ` +${pedido.itens.length - 2} itens`;
+        // ============================================
+        // FUNÇÕES GLOBAIS (window)
+        // ============================================
+        window.verDetalhesPedido = function(pedidoId) {
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            if (!pedido) {
+                alert('Pedido não encontrado!');
+                return;
             }
-        } else {
-            itensText = '1x ' + (pedido.nomeServico || 'Serviço');
+            pedidoAtualModal = pedido;
+            preencherModalDetalhes(pedido);
+            modalDetalhes.show();
+        };
+
+        window.gerarPDFPedido = function(pedidoId) {
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            if (!pedido) {
+                alert('Pedido não encontrado!');
+                return;
+            }
+            gerarPDFCliente(pedido);
+        };
+
+        function abrirWhatsApp(pedido) {
+            if (!pedido) {
+                alert('Pedido não disponível para contato!');
+                return;
+            }
+            
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            const profNome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || 'Profissional';
+            const numeroPedido = pedido.numeroPedido || pedido.id.substring(0, 8);
+            
+            let telefone = profData?.telefone || '';
+            if (!telefone) {
+                alert('Este profissional não possui número de WhatsApp cadastrado.');
+                return;
+            }
+            
+            telefone = telefone.replace(/\D/g, '');
+            
+            const mensagem = `Olá ${profNome}, estou entrando em contato sobre o pedido ${numeroPedido} no ScanHub.`;
+            const url = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
         }
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${pedido.numeroPedido || pedido.id.substring(0, 8)}</strong></td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div class="profissional-avatar me-2">${profNome.charAt(0).toUpperCase()}</div>
-                    <span>${profNome}</span>
-                </div>
-            </td>
-            <td><small>${itensText.substring(0, 50)}${itensText.length > 50 ? '...' : ''}</small></td>
-            <td><strong>R$ ${(pedido.valorTotal || 0).toFixed(2)}</strong></td>
-            <td>${getStatusBadge(pedido.statusPedido)}</td>
-            <td>${getPagamentoBadge(pedido.statusPagamento)}</td>
-            <td>${formatarData(pedido.dataPedido)}</td>
-            <td>
-                <div class="action-buttons">
-                    <button class="btn-action-sm btn-detalhes" onclick="window.verDetalhesPedido('${pedido.id}')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn-action-sm btn-pdf" onclick="window.gerarPDFPedido('${pedido.id}')">
-                        <i class="fas fa-file-pdf"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        pedidosTable.appendChild(row);
-    }
 
-    function adicionarCard(pedido) {
-        if (!cardsContainer) return;
-        const profNome = pedido.profissionalNome || 'Profissional';
-        
-        let itensText = '';
-        if (Array.isArray(pedido.itens)) {
-            itensText = pedido.itens.slice(0, 2).map(item => 
-                `${item.quantidade || 1}x ${item.nome || 'Item'}`).join(', ');
-        } else {
-            itensText = '1x ' + (pedido.nomeServico || 'Serviço');
-        }
-        
-        const card = document.createElement('div');
-        card.className = 'pedido-card';
-        card.innerHTML = `
-            <div class="pedido-header">
-                <div class="pedido-numero">${pedido.numeroPedido || pedido.id.substring(0, 8)}</div>
-                <div>${getStatusBadge(pedido.statusPedido)}</div>
-            </div>
-            <div class="pedido-profissional">
-                <div class="profissional-avatar">${profNome.charAt(0).toUpperCase()}</div>
-                <div><strong>${profNome}</strong></div>
-            </div>
-            <div class="pedido-info">
-                <div class="info-item">
-                    <span class="info-label">Serviço/Produto</span>
-                    <span class="info-value">${itensText.substring(0, 30)}${itensText.length > 30 ? '...' : ''}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Valor Total</span>
-                    <span class="info-value">R$ ${(pedido.valorTotal || 0).toFixed(2)}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Data</span>
-                    <span class="info-value">${formatarData(pedido.dataPedido)}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Pagamento</span>
-                    <span class="info-value">${getPagamentoTexto(pedido.statusPagamento)}</span>
-                </div>
-            </div>
-            <div class="pedido-acoes">
-                <button class="btn-acao btn-detalhes" onclick="window.verDetalhesPedido('${pedido.id}')">
-                    <i class="fas fa-eye"></i> Detalhes
-                </button>
-                <button class="btn-acao btn-pdf" onclick="window.gerarPDFPedido('${pedido.id}')">
-                    <i class="fas fa-file-pdf"></i> PDF
-                </button>
-            </div>
-        `;
-        cardsContainer.appendChild(card);
-    }
-
-    function mostrarEmptyState() {
-        if (emptyState) emptyState.style.display = 'block';
-        if (pedidosTable) pedidosTable.innerHTML = '';
-        if (cardsContainer) cardsContainer.innerHTML = '';
-        
-        if (totalPedidos) totalPedidos.textContent = '0';
-        if (pedidosAndamento) pedidosAndamento.textContent = '0';
-        if (pedidosConcluidos) pedidosConcluidos.textContent = '0';
-        if (valorPendente) valorPendente.textContent = 'R$ 0';
-        
-        if (badgeTodos) badgeTodos.textContent = '0';
-        if (badgePendentes) badgePendentes.textContent = '0';
-        if (badgeAndamento) badgeAndamento.textContent = '0';
-        if (badgeConcluidos) badgeConcluidos.textContent = '0';
-        
-        if (loader) loader.classList.add('hide');
-    }
-
-    // ============================================
-    // FUNÇÕES GLOBAIS (window)
-    // ============================================
-    window.verDetalhesPedido = function(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) {
-            alert('Pedido não encontrado!');
-            return;
-        }
-        pedidoSelecionado = pedido;
-        preencherModalDetalhes(pedido);
-        modalDetalhes.show();
-    };
-
-    window.gerarPDFPedido = function(pedidoId) {
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (!pedido) {
-            alert('Pedido não encontrado!');
-            return;
-        }
-        gerarPDFCliente(pedido);
-    };
-
-    window.abrirWhatsApp = function() {
-        if (!pedidoSelecionado) return;
-        const profNome = pedidoSelecionado.profissionalNome || 'Profissional';
-        const mensagem = `Olá ${profNome}, estou entrando em contato sobre o pedido ${pedidoSelecionado.numeroPedido || pedidoSelecionado.id.substring(0, 8)}`;
-        const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
-        window.open(url, '_blank');
-    };
-
-    window.gerarPDFModal = function() {
-        if (!pedidoSelecionado) {
-            alert('Nenhum pedido selecionado!');
-            return;
-        }
-        gerarPDFCliente(pedidoSelecionado);
-    };
-
-    // ============================================
-    // MODAL E PDF
-    // ============================================
-    function preencherModalDetalhes(pedido) {
-        if (!pedido) return;
-        const profNome = pedido.profissionalNome || 'Profissional';
-        const profEmail = pedido.profissionalEmail || '';
-        const profTelefone = pedido.profissionalTelefone || '';
-        
-        modalTitle.textContent = `Pedido ${pedido.numeroPedido || pedido.id.substring(0, 8)}`;
-        detalhesNumero.textContent = pedido.numeroPedido || pedido.id.substring(0, 8);
-        detalhesData.textContent = formatarData(pedido.dataPedido);
-        detalhesTipo.textContent = pedido.tipoPedido === 'servico' ? 'Serviço' : 
-                                  pedido.tipoPedido === 'produto' ? 'Produto' : 'Misto';
-        
-        detalhesStatus.innerHTML = getStatusBadge(pedido.statusPedido);
-        detalhesPagamento.innerHTML = getPagamentoBadge(pedido.statusPagamento);
-        
-        detalhesProfissionalAvatar.textContent = profNome.charAt(0).toUpperCase();
-        detalhesProfissionalNome.textContent = profNome;
-        
-        let contatoTexto = '';
-        if (profEmail) contatoTexto += profEmail;
-        if (profTelefone) {
-            if (contatoTexto) contatoTexto += ' | ';
-            contatoTexto += profTelefone;
-        }
-        detalhesProfissionalContato.textContent = contatoTexto || 'Sem informações de contato';
-        
-        detalhesItens.innerHTML = '';
-        if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
-            detalhesTituloItens.textContent = `Itens do Pedido (${pedido.itens.length})`;
-            pedido.itens.forEach((item, index) => {
+        // ============================================
+        // MODAL E PDF
+        // ============================================
+        function preencherModalDetalhes(pedido) {
+            if (!pedido) return;
+            
+            const profData = profissionaisMap.get(pedido.profissionalId);
+            const profNome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || 'Profissional';
+            const profTelefone = profData?.telefone || '';
+            const profEmail = profData?.email || '';
+            
+            modalTitle.textContent = `Pedido ${pedido.numeroPedido || pedido.id.substring(0, 8)}`;
+            detalhesNumero.textContent = pedido.numeroPedido || pedido.id.substring(0, 8);
+            detalhesData.textContent = formatarData(pedido.dataPedido);
+            detalhesTipo.textContent = pedido.tipoPedido === 'servico' ? 'Serviço' : 
+                                      pedido.tipoPedido === 'produto' ? 'Produto' : 'Misto';
+            
+            detalhesStatus.innerHTML = getStatusBadge(pedido.statusPedido);
+            detalhesPagamento.innerHTML = getPagamentoBadge(pedido.statusPagamento);
+            
+            detalhesProfissionalAvatar.textContent = profNome.charAt(0).toUpperCase();
+            detalhesProfissionalNome.textContent = profNome;
+            
+            let contatoTexto = '';
+            if (profTelefone) {
+                contatoTexto += `WhatsApp: ${profTelefone}`;
+                if (profEmail) contatoTexto += ' | ';
+            }
+            if (profEmail) {
+                contatoTexto += `Email: ${profEmail}`;
+            }
+            detalhesProfissionalContato.textContent = contatoTexto || 'Sem informações de contato';
+            
+            detalhesItens.innerHTML = '';
+            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
+                detalhesTituloItens.textContent = `Itens do Pedido (${pedido.itens.length})`;
+                pedido.itens.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'servico-item';
+                    itemDiv.innerHTML = `
+                        <div class="servico-header"><h6 class="mb-0">${index + 1}. ${item.nome || 'Item'}</h6></div>
+                        <div class="row mt-2">
+                            <div class="col-6"><small>Quantidade: ${item.quantidade || 1}</small></div>
+                            <div class="col-6 text-end"><small>Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small></div>
+                        </div>
+                        ${item.descricao ? `<p class="mt-2 mb-0"><small>${item.descricao}</small></p>` : ''}
+                    `;
+                    detalhesItens.appendChild(itemDiv);
+                });
+            } else {
+                detalhesTituloItens.textContent = 'Item do Pedido';
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'servico-item';
-                itemDiv.innerHTML = `
-                    <div class="servico-header"><h6 class="mb-0">${index + 1}. ${item.nome || 'Item'}</h6></div>
-                    <div class="row mt-2">
-                        <div class="col-6"><small>Quantidade: ${item.quantidade || 1}</small></div>
-                        <div class="col-6 text-end"><small>Unitário: R$ ${(item.precoUnitario || 0).toFixed(2)}</small></div>
-                    </div>
-                    ${item.descricao ? `<p class="mt-2 mb-0"><small>${item.descricao}</small></p>` : ''}
-                `;
+                itemDiv.innerHTML = `<div class="servico-header"><h6 class="mb-0">${pedido.nomeServico || 'Serviço/Produto'}</h6></div><p class="mt-2 mb-0"><small>Descrição não disponível</small></p>`;
                 detalhesItens.appendChild(itemDiv);
-            });
-        } else {
-            detalhesTituloItens.textContent = 'Item do Pedido';
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'servico-item';
-            itemDiv.innerHTML = `<div class="servico-header"><h6 class="mb-0">${pedido.nomeServico || 'Serviço/Produto'}</h6></div><p class="mt-2 mb-0"><small>Descrição não disponível</small></p>`;
-            detalhesItens.appendChild(itemDiv);
-        }
-        
-        detalhesSubtotal.textContent = `R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`;
-        detalhesDescontos.textContent = `R$ ${(pedido.totalDescontos || 0).toFixed(2)}`;
-        detalhesValorPago.textContent = `R$ ${(pedido.valorPago || 0).toFixed(2)}`;
-        detalhesValorTotal.textContent = `R$ ${(pedido.valorTotal || 0).toFixed(2)}`;
-        
-        if (pedido.observacoes) {
-            detalhesObservacoesContainer.style.display = 'block';
-            detalhesObservacoes.textContent = pedido.observacoes;
-        } else {
-            detalhesObservacoesContainer.style.display = 'none';
-        }
-    }
+            }
+            
+            detalhesSubtotal.textContent = `R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`;
+            detalhesDescontos.textContent = `R$ ${(pedido.totalDescontos || 0).toFixed(2)}`;
+            detalhesValorPago.textContent = `R$ ${(pedido.valorPago || 0).toFixed(2)}`;
+            detalhesValorTotal.textContent = `R$ ${(pedido.valorTotal || 0).toFixed(2)}`;
+            
+            if (pedido.observacoes) {
+                detalhesObservacoesContainer.style.display = 'block';
+                detalhesObservacoes.textContent = pedido.observacoes;
+            } else {
+                detalhesObservacoesContainer.style.display = 'none';
+            }
 
-    // ============================================
-    // PDF CORRIGIDO PARA CLIENTE
-    // ============================================
-    function gerarPDFCliente(pedido) {
-        const { jsPDF } = window.jspdf;
-        if (!jsPDF) {
-            alert('Biblioteca de PDF não carregada. Recarregue a página.');
-            return;
+            // Configurar botões do modal
+            if (btnContatoWhatsApp) {
+                btnContatoWhatsApp.onclick = function() {
+                    abrirWhatsApp(pedido);
+                };
+            }
+
+            if (btnGerarPDF) {
+                btnGerarPDF.onclick = function() {
+                    gerarPDFCliente(pedido);
+                };
+            }
         }
-        
-        try {
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 20;
-            let y = 20;
-            
-            // Cabeçalho
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(68, 104, 154);
-            doc.text('COMPROVANTE DE PEDIDO', pageWidth / 2, y, { align: 'center' });
-            
-            y += 10;
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Nº ${pedido.numeroPedido || pedido.id.substring(0, 8)}`, pageWidth / 2, y, { align: 'center' });
-            
-            y += 15;
-            
-            // Linha divisória
-            doc.setDrawColor(200, 200, 200);
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
-            
-            // Seção: Dados do Pedido
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(68, 104, 154);
-            doc.text('DADOS DO PEDIDO', margin, y);
-            y += 8;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
-            
-            const dataPedido = pedido.dataPedido ? new Date(pedido.dataPedido).toLocaleDateString('pt-BR') : '--/--/----';
-            
-            doc.text(`Data do Pedido: ${dataPedido}`, margin, y);
-            y += 6;
-            doc.text(`Tipo: ${pedido.tipoPedido === 'servico' ? 'Serviço' : pedido.tipoPedido === 'produto' ? 'Produto' : 'Misto'}`, margin, y);
-            y += 6;
-            doc.text(`Status: ${getStatusTexto(pedido.statusPedido)}`, margin, y);
-            y += 6;
-            doc.text(`Pagamento: ${getPagamentoTexto(pedido.statusPagamento)}`, margin, y);
-            y += 12;
-            
-            // Linha divisória
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
-            
-            // Seção: Profissional
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(68, 104, 154);
-            doc.text('PROFISSIONAL', margin, y);
-            y += 8;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
-            doc.text(`${pedido.profissionalNome || 'Não informado'}`, margin, y);
-            y += 6;
-            
-            if (pedido.profissionalEmail) {
-                doc.text(`E-mail: ${pedido.profissionalEmail}`, margin, y);
-                y += 6;
+
+        function gerarPDFCliente(pedido) {
+            if (typeof window.jspdf === 'undefined') {
+                alert('Biblioteca de PDF não carregada. Por favor, recarregue a página.');
+                return;
             }
             
-            if (pedido.profissionalTelefone) {
-                doc.text(`Telefone: ${pedido.profissionalTelefone}`, margin, y);
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 20;
+                let y = 20;
+                
+                // Cabeçalho
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(68, 104, 154);
+                doc.text('COMPROVANTE DE PEDIDO', pageWidth / 2, y, { align: 'center' });
+                
+                y += 10;
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Nº ${pedido.numeroPedido || pedido.id.substring(0, 8)}`, pageWidth / 2, y, { align: 'center' });
+                
+                y += 15;
+                
+                // Linha divisória
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, y, pageWidth - margin, y);
+                y += 10;
+                
+                // Seção: Dados do Pedido
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(68, 104, 154);
+                doc.text('DADOS DO PEDIDO', margin, y);
+                y += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 0);
+                
+                const dataPedido = pedido.dataPedido ? new Date(pedido.dataPedido).toLocaleDateString('pt-BR') : '--/--/----';
+                
+                doc.text(`Data do Pedido: ${dataPedido}`, margin, y);
                 y += 6;
-            }
-            
-            y += 6;
-            
-            // Linha divisória
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
-            
-            // Seção: Itens
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(68, 104, 154);
-            doc.text('ITENS DO PEDIDO', margin, y);
-            y += 10;
-            
-            if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
-                pedido.itens.forEach((item, index) => {
-                    if (y > 250) {
+                doc.text(`Tipo: ${pedido.tipoPedido === 'servico' ? 'Serviço' : pedido.tipoPedido === 'produto' ? 'Produto' : 'Misto'}`, margin, y);
+                y += 6;
+                doc.text(`Status: ${getStatusTexto(pedido.statusPedido)}`, margin, y);
+                y += 6;
+                doc.text(`Pagamento: ${getPagamentoTexto(pedido.statusPagamento)}`, margin, y);
+                y += 12;
+                
+                // Linha divisória
+                doc.line(margin, y, pageWidth - margin, y);
+                y += 10;
+                
+                // Seção: Profissional
+                const profData = profissionaisMap.get(pedido.profissionalId);
+                const profNome = profData?.nomeProfissional || profData?.apelido || pedido.profissionalNome || 'Profissional';
+                const profTelefone = profData?.telefone || '';
+                const profEmail = profData?.email || '';
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(68, 104, 154);
+                doc.text('PROFISSIONAL', margin, y);
+                y += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 0);
+                doc.text(`${profNome}`, margin, y);
+                y += 6;
+                
+                if (profEmail) {
+                    doc.text(`E-mail: ${profEmail}`, margin, y);
+                    y += 6;
+                }
+                
+                if (profTelefone) {
+                    doc.text(`Telefone: ${profTelefone}`, margin, y);
+                    y += 6;
+                }
+                
+                y += 6;
+                
+                // Linha divisória
+                doc.line(margin, y, pageWidth - margin, y);
+                y += 10;
+                
+                // Seção: Itens
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(68, 104, 154);
+                doc.text('ITENS DO PEDIDO', margin, y);
+                y += 10;
+                
+                if (Array.isArray(pedido.itens) && pedido.itens.length > 0) {
+                    pedido.itens.forEach((item, index) => {
+                        if (y > 250) {
+                            doc.addPage();
+                            y = 20;
+                        }
+                        
+                        // Box do item
+                        doc.setDrawColor(230, 230, 230);
+                        doc.setFillColor(248, 249, 250);
+                        doc.roundedRect(margin, y - 5, pageWidth - (margin * 2), 25, 3, 3, 'FD');
+                        
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`${index + 1}. ${item.nome || 'Item'}`, margin + 5, y + 5);
+                        
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(9);
+                        doc.setTextColor(100, 100, 100);
+                        
+                        const qtd = item.quantidade || 1;
+                        const unit = (item.precoUnitario || 0).toFixed(2);
+                        const total = ((item.precoUnitario || 0) * qtd).toFixed(2);
+                        
+                        doc.text(`Qtd: ${qtd}  |  Unit: R$ ${unit}  |  Total: R$ ${total}`, margin + 5, y + 14);
+                        
+                        if (item.descricao) {
+                            const desc = item.descricao.length > 50 ? item.descricao.substring(0, 50) + '...' : item.descricao;
+                            doc.text(desc, margin + 5, y + 20);
+                        }
+                        
+                        y += 32;
+                    });
+                } else {
+                    doc.setFontSize(10);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text('Nenhum item detalhado', margin, y);
+                    y += 10;
+                }
+                
+                // Totais
+                if (y > 220) {
+                    doc.addPage();
+                    y = 20;
+                } else {
+                    y += 5;
+                }
+                
+                // Box de totais
+                doc.setDrawColor(68, 104, 154);
+                doc.setFillColor(248, 249, 250);
+                doc.roundedRect(margin, y, pageWidth - (margin * 2), 50, 5, 5, 'FD');
+                
+                y += 10;
+                const col1 = margin + 10;
+                const col2 = pageWidth - margin - 10;
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 0);
+                
+                // Subtotal
+                doc.text('Subtotal:', col1, y);
+                doc.text(`R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`, col2, y, { align: 'right' });
+                y += 10;
+                
+                // Descontos
+                if (pedido.totalDescontos > 0) {
+                    doc.text('Descontos:', col1, y);
+                    doc.setTextColor(200, 0, 0);
+                    doc.text(`- R$ ${pedido.totalDescontos.toFixed(2)}`, col2, y, { align: 'right' });
+                    doc.setTextColor(0, 0, 0);
+                    y += 10;
+                }
+                
+                // Valor Pago
+                if (pedido.valorPago > 0) {
+                    doc.text('Valor Pago:', col1, y);
+                    doc.setTextColor(0, 128, 0);
+                    doc.text(`R$ ${pedido.valorPago.toFixed(2)}`, col2, y, { align: 'right' });
+                    doc.setTextColor(0, 0, 0);
+                    y += 10;
+                }
+                
+                // Valor Total em negrito
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.text('TOTAL:', col1, y);
+                doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, col2, y, { align: 'right' });
+                
+                // Observações
+                if (pedido.observacoes) {
+                    y += 20;
+                    if (y > 270) {
                         doc.addPage();
                         y = 20;
                     }
                     
-                    // Box do item
-                    doc.setDrawColor(230, 230, 230);
-                    doc.setFillColor(248, 249, 250);
-                    doc.roundedRect(margin, y - 5, pageWidth - (margin * 2), 25, 3, 3, 'FD');
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(68, 104, 154);
+                    doc.text('OBSERVAÇÕES', margin, y);
+                    y += 8;
                     
                     doc.setFontSize(10);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(0, 0, 0);
-                    doc.text(`${index + 1}. ${item.nome || 'Item'}`, margin + 5, y + 5);
-                    
                     doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(9);
-                    doc.setTextColor(100, 100, 100);
+                    doc.setTextColor(0, 0, 0);
                     
-                    const qtd = item.quantidade || 1;
-                    const unit = (item.precoUnitario || 0).toFixed(2);
-                    const total = ((item.precoUnitario || 0) * qtd).toFixed(2);
-                    
-                    doc.text(`Qtd: ${qtd}  |  Unit: R$ ${unit}  |  Total: R$ ${total}`, margin + 5, y + 14);
-                    
-                    if (item.descricao) {
-                        const desc = item.descricao.length > 50 ? item.descricao.substring(0, 50) + '...' : item.descricao;
-                        doc.text(desc, margin + 5, y + 20);
-                    }
-                    
-                    y += 32;
-                });
-            } else {
-                doc.setFontSize(10);
-                doc.setTextColor(150, 150, 150);
-                doc.text('Nenhum item detalhado', margin, y);
-                y += 10;
-            }
-            
-            // Totais
-            if (y > 220) {
-                doc.addPage();
-                y = 20;
-            } else {
-                y += 5;
-            }
-            
-            // Box de totais
-            doc.setDrawColor(68, 104, 154);
-            doc.setFillColor(248, 249, 250);
-            doc.roundedRect(margin, y, pageWidth - (margin * 2), 50, 5, 5, 'FD');
-            
-            y += 10;
-            const col1 = margin + 10;
-            const col2 = pageWidth - margin - 10;
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
-            
-            // Subtotal
-            doc.text('Subtotal:', col1, y);
-            doc.text(`R$ ${(pedido.subtotal || pedido.valorTotal || 0).toFixed(2)}`, col2, y, { align: 'right' });
-            y += 10;
-            
-            // Descontos
-            if (pedido.totalDescontos > 0) {
-                doc.text('Descontos:', col1, y);
-                doc.setTextColor(200, 0, 0);
-                doc.text(`- R$ ${pedido.totalDescontos.toFixed(2)}`, col2, y, { align: 'right' });
-                doc.setTextColor(0, 0, 0);
-                y += 10;
-            }
-            
-            // Valor pago
-            if (pedido.valorPago > 0) {
-                doc.text('Valor Pago:', col1, y);
-                doc.setTextColor(0, 150, 0);
-                doc.text(`R$ ${pedido.valorPago.toFixed(2)}`, col2, y, { align: 'right' });
-                doc.setTextColor(0, 0, 0);
-                y += 10;
-            }
-            
-            // Total
-            y += 2;
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('TOTAL:', col1, y);
-            doc.setTextColor(68, 104, 154);
-            doc.text(`R$ ${(pedido.valorTotal || 0).toFixed(2)}`, col2, y, { align: 'right' });
-            
-            // Rodapé
-            y = 280;
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(150, 150, 150);
-            doc.text('Documento gerado por ScanHub - scanhub.com.br', pageWidth / 2, y, { align: 'center' });
-            doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`, pageWidth / 2, y + 5, { align: 'center' });
-            
-            // Salvar
-            const nomeArquivo = `Pedido-${pedido.numeroPedido || pedido.id.substring(0, 8)}.pdf`;
-            doc.save(nomeArquivo);
-            
-        } catch (error) {
-            alert('Erro ao gerar PDF. Tente novamente.');
-        }
-    }
-
-    // ============================================
-    // UTILITÁRIAS
-    // ============================================
-    function getStatusBadge(status) {
-        const badges = {
-            'pendente': '<span class="badge-status status-pendente"><i class="fas fa-clock me-1"></i> Pendente</span>',
-            'andamento': '<span class="badge-status status-andamento"><i class="fas fa-spinner me-1"></i> Em Andamento</span>',
-            'concluido': '<span class="badge-status status-concluido"><i class="fas fa-check-circle me-1"></i> Concluído</span>',
-            'cancelado': '<span class="badge-status status-cancelado"><i class="fas fa-times-circle me-1"></i> Cancelado</span>'
-        };
-        return badges[status] || '<span class="badge-status">Desconhecido</span>';
-    }
-
-    function getPagamentoBadge(status) {
-        const badges = {
-            'a_receber': '<span class="badge-status status-a_receber"><i class="fas fa-clock me-1"></i> A Receber</span>',
-            'pago': '<span class="badge-status status-pago"><i class="fas fa-check-circle me-1"></i> Pago</span>',
-            'parcial': '<span class="badge-status status-parcial"><i class="fas fa-money-check-alt me-1"></i> Parcial</span>',
-            'atrasado': '<span class="badge-status status-atrasado"><i class="fas fa-exclamation-triangle me-1"></i> Atrasado</span>'
-        };
-        return badges[status] || '<span class="badge-status">Desconhecido</span>';
-    }
-
-    function getPagamentoTexto(status) {
-        const textos = {
-            'a_receber': 'A Receber',
-            'pago': 'Pago',
-            'parcial': 'Pago Parcialmente',
-            'atrasado': 'Em Atraso'
-        };
-        return textos[status] || status;
-    }
-
-    function getStatusTexto(status) {
-        const textos = {
-            'pendente': 'Pendente',
-            'andamento': 'Em Andamento',
-            'concluido': 'Concluído',
-            'cancelado': 'Cancelado',
-            'a_receber': 'A Receber',
-            'pago': 'Pago',
-            'parcial': 'Pago Parcialmente',
-            'atrasado': 'Em Atraso'
-        };
-        return textos[status] || status;
-    }
-
-    function formatarData(dataString) {
-        if (!dataString) return '--/--/----';
-        try {
-            const date = new Date(dataString);
-            if (isNaN(date.getTime())) return '--/--/----';
-            return date.toLocaleDateString('pt-BR');
-        } catch {
-            return '--/--/----';
-        }
-    }
-
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-    function inicializarEventListeners() {
-        if (tabButtons.length > 0) {
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    statusFiltro = this.getAttribute('data-status');
-                    atualizarTabelaECards();
-                });
-            });
-        }
-        
-        if (searchPedidos) searchPedidos.addEventListener('input', atualizarTabelaECards);
-        if (filterProfissional) filterProfissional.addEventListener('change', atualizarTabelaECards);
-        if (filterMes) filterMes.addEventListener('change', atualizarTabelaECards);
-        
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                if (dashboardMenu) dashboardMenu.classList.toggle('show');
-                const icon = menuToggle.querySelector('i');
-                if (icon) {
-                    icon.classList.toggle('fa-bars');
-                    icon.classList.toggle('fa-times');
+                    const splitObs = doc.splitTextToSize(pedido.observacoes, pageWidth - (margin * 2));
+                    doc.text(splitObs, margin, y);
                 }
-            });
-        }
-        
-        document.addEventListener('click', (e) => {
-            if (dashboardMenu && menuToggle) {
-                if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                    dashboardMenu.classList.remove('show');
-                    const icon = menuToggle.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
-                    }
+                
+                // Rodapé
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(`Página ${i} de ${pageCount} | Documento gerado em ${new Date().toLocaleString('pt-BR')}`, pageWidth / 2, 285, { align: 'center' });
+                    doc.text('ScanHub - Conectando você aos melhores profissionais', pageWidth / 2, 290, { align: 'center' });
                 }
+                
+                // Download
+                const fileName = `Pedido_${pedido.numeroPedido || pedido.id.substring(0, 8)}_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                alert('Erro ao gerar PDF. Tente novamente.');
             }
-        });
-        
+        }
+
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        function getStatusBadge(status) {
+            const statusMap = {
+                'pendente': '<span class="badge bg-warning">Pendente</span>',
+                'andamento': '<span class="badge bg-info">Em Andamento</span>',
+                'concluido': '<span class="badge bg-success">Concluído</span>',
+                'cancelado': '<span class="badge bg-danger">Cancelado</span>'
+            };
+            return statusMap[status] || '<span class="badge bg-secondary">Desconhecido</span>';
+        }
+
+        function getPagamentoBadge(status) {
+            const pagamentoMap = {
+                'pago': '<span class="badge bg-success">Pago</span>',
+                'a_receber': '<span class="badge bg-warning">A Receber</span>',
+                'parcial': '<span class="badge bg-info">Parcial</span>',
+                'atrasado': '<span class="badge bg-danger">Atrasado</span>',
+                'cancelado': '<span class="badge bg-secondary">Cancelado</span>'
+            };
+            return pagamentoMap[status] || '<span class="badge bg-secondary">N/A</span>';
+        }
+
+        function getStatusTexto(status) {
+            const statusMap = {
+                'pendente': 'Pendente',
+                'andamento': 'Em Andamento',
+                'concluido': 'Concluído',
+                'cancelado': 'Cancelado'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getPagamentoTexto(status) {
+            const pagamentoMap = {
+                'pago': 'Pago',
+                'a_receber': 'A Receber',
+                'parcial': 'Pagamento Parcial',
+                'atrasado': 'Atrasado',
+                'cancelado': 'Cancelado'
+            };
+            return pagamentoMap[status] || status;
+        }
+
+        function formatarData(data) {
+            if (!data) return '--/--/----';
+            try {
+                const d = new Date(data);
+                return d.toLocaleDateString('pt-BR');
+            } catch {
+                return '--/--/----';
+            }
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
         if (btnLogout) {
             btnLogout.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
                     window.location.href = 'login.html';
                 } catch (error) {
-                    alert('Erro ao sair. Tente novamente.');
+                    console.error('Erro ao fazer logout:', error);
                 }
             });
         }
-        
-        if (btnContatoWhatsApp) {
-            btnContatoWhatsApp.addEventListener('click', abrirWhatsApp);
+
+        if (menuToggle && dashboardMenu) {
+            menuToggle.addEventListener('click', () => {
+                dashboardMenu.classList.toggle('show');
+            });
         }
-        
-        // Event listener para o botão de PDF no modal (delegação)
-        document.addEventListener('click', (e) => {
-            if (e.target && (e.target.id === 'btnGerarPDF' || e.target.closest('#btnGerarPDF'))) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (pedidoSelecionado) {
-                    gerarPDFCliente(pedidoSelecionado);
-                }
-            }
-        });
-        
-        window.addEventListener('focus', () => {
-            if (currentUser) carregarPedidos();
-        });
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        inicializarEventListeners();
-    });
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                statusFiltro = btn.dataset.status || 'todos';
+                atualizarTabelaECards();
+            });
+        });
 
-</script>
+        if (searchPedidos) {
+            searchPedidos.addEventListener('input', () => {
+                atualizarTabelaECards();
+            });
+        }
+
+        if (filterProfissional) {
+            filterProfissional.addEventListener('change', () => {
+                atualizarTabelaECards();
+            });
+        }
+
+        if (filterMes) {
+            filterMes.addEventListener('change', () => {
+                atualizarTabelaECards();
+            });
+        }
+
+    </script>
 </body>
 </html>
