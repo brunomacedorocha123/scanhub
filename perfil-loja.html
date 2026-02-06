@@ -1088,10 +1088,12 @@
 
     // Estado
     let lojaData = null;
-    let logoUrl = '';
-    let bannerUrl = '';
-    let fachadaUrl = '';
-    let galeriaUrls = [];
+    let imagens = {
+        logo: '',
+        capa: '',
+        fachada: '',
+        galeria: []
+    };
 
     // Funções de formatação
     window.formatarCNPJ = function(input) {
@@ -1322,36 +1324,29 @@
         }
     }
 
-    function converterParaBase64(arquivo) {
-        return new Promise((resolve, reject) => {
-            const leitor = new FileReader();
-            leitor.onload = (e) => resolve(e.target.result);
-            leitor.onerror = reject;
-            leitor.readAsDataURL(arquivo);
-        });
-    }
-
-    // Logo da loja - FOTO DO PERFIL (CORRIGIDA)
+    // Logo da loja - FOTO DO PERFIL
     logoInput.addEventListener('change', async (e) => {
         const arquivo = e.target.files[0];
         if (!arquivo) return;
         
         try {
             loadingOverlay.style.display = 'flex';
-            logoUrl = await uploadParaImgur(arquivo);  // SALVA NA VARIÁVEL GLOBAL
+            const url = await uploadParaImgur(arquivo);
+            
+            // Salvar no estado
+            imagens.logo = url;
             
             // Atualizar visualmente
             const img = logoDisplay.querySelector('img');
             if (img) {
-                img.src = logoUrl;
+                img.src = url;
             } else {
                 logoDisplay.innerHTML = '';
                 const newImg = document.createElement('img');
-                newImg.src = logoUrl;
+                newImg.src = url;
                 newImg.alt = 'Logo da loja';
                 logoDisplay.appendChild(newImg);
                 
-                // Adicionar botão de upload
                 const uploadBtn = document.createElement('label');
                 uploadBtn.className = 'logo-upload-btn';
                 uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
@@ -1363,8 +1358,6 @@
                 uploadBtn.appendChild(input);
                 logoDisplay.appendChild(uploadBtn);
             }
-            
-            console.log('Foto do perfil atualizada:', logoUrl);
         } catch (error) {
             alert('Erro ao enviar foto do perfil');
         } finally {
@@ -1373,11 +1366,8 @@
     });
 
     // Clique no logo para upload
-    logoDisplay.addEventListener('click', function(e) {
-        // Não disparar se clicar no botão de upload
-        if (!e.target.closest('.logo-upload-btn')) {
-            logoInput.click();
-        }
+    logoDisplay.addEventListener('click', function() {
+        logoInput.click();
     });
 
     // Banner
@@ -1387,9 +1377,13 @@
         
         try {
             loadingOverlay.style.display = 'flex';
-            bannerUrl = await uploadParaImgur(arquivo);
+            const url = await uploadParaImgur(arquivo);
             
-            bannerImage.src = bannerUrl;
+            // Salvar no estado
+            imagens.capa = url;
+            
+            // Atualizar visualmente
+            bannerImage.src = url;
             bannerPreview.style.display = 'block';
         } catch (error) {
             alert('Erro ao enviar banner');
@@ -1399,7 +1393,7 @@
     });
 
     window.removerBanner = function() {
-        bannerUrl = '';
+        imagens.capa = '';
         bannerPreview.style.display = 'none';
     };
 
@@ -1412,9 +1406,13 @@
         
         try {
             loadingOverlay.style.display = 'flex';
-            fachadaUrl = await uploadParaImgur(arquivo);
+            const url = await uploadParaImgur(arquivo);
             
-            fachadaImage.src = fachadaUrl;
+            // Salvar no estado
+            imagens.fachada = url;
+            
+            // Atualizar visualmente
+            fachadaImage.src = url;
             fachadaPreview.style.display = 'block';
         } catch (error) {
             alert('Erro ao enviar foto da fachada');
@@ -1424,7 +1422,7 @@
     });
 
     window.removerFotoFachada = function() {
-        fachadaUrl = '';
+        imagens.fachada = '';
         fachadaPreview.style.display = 'none';
     };
 
@@ -1434,7 +1432,7 @@
     galeriaInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
         
-        if (galeriaUrls.length + files.length > 6) {
+        if (imagens.galeria.length + files.length > 6) {
             alert('Máximo de 6 fotos na galeria');
             return;
         }
@@ -1443,7 +1441,11 @@
             try {
                 loadingOverlay.style.display = 'flex';
                 const imageUrl = await uploadParaImgur(file);
-                galeriaUrls.push(imageUrl);
+                
+                // Salvar no estado
+                imagens.galeria.push(imageUrl);
+                
+                // Atualizar visualmente
                 adicionarFotoGaleria(imageUrl);
             } catch (error) {
                 alert('Erro ao enviar foto');
@@ -1467,7 +1469,9 @@
 
     window.removerFotoGaleria = function(url, element) {
         if (confirm('Remover esta foto da galeria?')) {
-            galeriaUrls = galeriaUrls.filter(foto => foto !== url);
+            // Remover do estado
+            imagens.galeria = imagens.galeria.filter(foto => foto !== url);
+            // Remover visualmente
             element.parentElement.remove();
         }
     };
@@ -1523,8 +1527,8 @@
             estado.value = dados.endereco.estado || '';
             
             if (dados.endereco.fachada) {
-                fachadaUrl = dados.endereco.fachada;
-                fachadaImage.src = fachadaUrl;
+                imagens.fachada = dados.endereco.fachada;
+                fachadaImage.src = imagens.fachada;
                 fachadaPreview.style.display = 'block';
             }
         }
@@ -1606,18 +1610,18 @@
             youtube.value = dados.redesSociais.youtube || '';
         }
         
-        // Seção 8: Galeria - AGORA CARREGA A FOTO DO PERFIL TAMBÉM
+        // Seção 8: Galeria - CARREGAR IMAGENS
         if (dados.imagens) {
-            // Carregar logo/foto do perfil - IMPORTANTE!
+            // Logo/foto do perfil
             if (dados.imagens.logo) {
-                logoUrl = dados.imagens.logo;  // SALVA NA VARIÁVEL GLOBAL
+                imagens.logo = dados.imagens.logo;
                 const img = logoDisplay.querySelector('img');
                 if (img) {
-                    img.src = logoUrl;
+                    img.src = imagens.logo;
                 } else {
                     logoDisplay.innerHTML = '';
                     const newImg = document.createElement('img');
-                    newImg.src = logoUrl;
+                    newImg.src = imagens.logo;
                     newImg.alt = 'Logo da loja';
                     logoDisplay.appendChild(newImg);
                     
@@ -1632,18 +1636,20 @@
                     uploadBtn.appendChild(input);
                     logoDisplay.appendChild(uploadBtn);
                 }
-                console.log('Foto do perfil carregada:', logoUrl);
             }
             
+            // Banner
             if (dados.imagens.capa) {
-                bannerUrl = dados.imagens.capa;
-                bannerImage.src = bannerUrl;
+                imagens.capa = dados.imagens.capa;
+                bannerImage.src = imagens.capa;
                 bannerPreview.style.display = 'block';
             }
             
+            // Galeria
             if (dados.imagens.galeria && Array.isArray(dados.imagens.galeria)) {
-                galeriaUrls = dados.imagens.galeria;
-                galeriaUrls.forEach(url => adicionarFotoGaleria(url));
+                imagens.galeria = dados.imagens.galeria;
+                galeriaLoja.innerHTML = '';
+                imagens.galeria.forEach(url => adicionarFotoGaleria(url));
             }
         }
         
@@ -1673,24 +1679,22 @@
             .trim();
     }
 
-    // Validar CNPJ - VERSÃO SIMPLIFICADA PARA TESTES
+    // Validar CNPJ
     function validarCNPJ(cnpj) {
         cnpj = cnpj.replace(/[^\d]/g, '');
         
-        // Verifica se tem 14 dígitos
         if (cnpj.length !== 14) {
             return false;
         }
         
-        // Elimina CNPJs com todos os dígitos iguais
         if (/^(\d)\1+$/.test(cnpj)) {
             return false;
         }
         
-        return true; // Aceita qualquer CNPJ com 14 dígitos diferentes
+        return true;
     }
 
-    // Salvar perfil - VERSÃO CORRIGIDA
+    // Salvar perfil
     btnSalvarPerfil.addEventListener('click', async () => {
         if (!auth.currentUser) {
             alert('Você precisa estar logado');
@@ -1716,7 +1720,7 @@
             razaoSocial.classList.remove('is-invalid');
         }
         
-        // CNPJ - VALIDAÇÃO SIMPLIFICADA
+        // CNPJ
         const cnpjValue = cnpj.value.replace(/\D/g, '');
         if (!cnpjValue || cnpjValue.length !== 14) {
             cnpj.classList.add('is-invalid');
@@ -1778,8 +1782,6 @@
         btnSalvarPerfil.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
 
         try {
-            console.log('Salvando com foto do perfil:', logoUrl); // DEBUG
-            
             // Coletar horários
             const horarios = {};
             const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
@@ -1814,7 +1816,7 @@
                 valeRefeicao: document.getElementById('pagamento_vale')?.checked || false
             };
             
-            // Preparar dados - AGORA SALVA A FOTO DO PERFIL
+            // Preparar dados
             const dadosLoja = {
                 userId: auth.currentUser.uid,
                 status: 'ativo',
@@ -1840,7 +1842,7 @@
                     bairro: bairro.value.trim(),
                     cidade: cidade.value.trim(),
                     estado: estado.value.trim(),
-                    fachada: fachadaUrl || null
+                    fachada: imagens.fachada || null
                 },
                 
                 // Seção 3
@@ -1863,11 +1865,11 @@
                     youtube: youtube.value.trim() || null
                 },
                 
-                // Seção 8 - IMAGENS (FOTO DO PERFIL AGORA É SALVA)
+                // Seção 8 - IMAGENS (AGORA SALVA TUDO)
                 imagens: {
-                    logo: logoUrl || null,  // FOTO DO PERFIL
-                    capa: bannerUrl || null,
-                    galeria: galeriaUrls
+                    logo: imagens.logo || null,
+                    capa: imagens.capa || null,
+                    galeria: imagens.galeria
                 },
                 
                 // Seção 9
@@ -1884,8 +1886,6 @@
                 slug: gerarSlug(nomeFantasia.value.trim())
             };
             
-            console.log('Dados da imagem sendo salvos:', dadosLoja.imagens); // DEBUG
-            
             // Salvar no Firestore
             const lojistaRef = doc(db, "lojistas", auth.currentUser.uid);
             await setDoc(lojistaRef, dadosLoja, { merge: true });
@@ -1898,7 +1898,6 @@
             
         } catch (error) {
             alert('❌ Erro ao salvar perfil: ' + error.message);
-            console.error('Erro detalhado:', error);
         } finally {
             loadingOverlay.style.display = 'none';
             btnSalvarPerfil.disabled = false;
