@@ -21,7 +21,6 @@
             --light-color: #e8ecef;
             --dark-color: #2c3e50;
             --white: #ffffff;
-            --gradient: linear-gradient(135deg, #44689a 0%, #33c47 100%);
         }
 
         * {
@@ -59,7 +58,7 @@
             border-radius: 25px;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
             padding: 60px 50px;
-            max-width: 700px;
+            max-width: 900px;
             width: 100%;
             text-align: center;
             animation: containerAppear 0.8s ease;
@@ -90,13 +89,13 @@
         .escolha-header p {
             color: #666;
             font-size: 1.2rem;
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
         .opcoes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
         }
@@ -105,12 +104,17 @@
             background: white;
             border: 3px solid #e0e0e0;
             border-radius: 20px;
-            padding: 40px 30px;
+            padding: 40px 25px;
             text-align: center;
             transition: all 0.4s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .opcao-card:hover {
@@ -127,6 +131,12 @@
         .opcao-card.profissional:hover {
             border-color: #FF6B35;
             background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+        }
+
+        .opcao-card.lojista:hover {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
         }
 
@@ -147,6 +157,11 @@
             transform: scale(1.1) rotate(-5deg);
         }
 
+        .opcao-card.lojista:hover .opcao-icon {
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+        }
+
         .opcao-title {
             font-size: 1.8rem;
             font-weight: 700;
@@ -163,8 +178,9 @@
             color: #666;
             font-size: 1rem;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             transition: color 0.4s ease;
+            flex-grow: 1;
         }
 
         .opcao-card:hover .opcao-desc {
@@ -178,7 +194,7 @@
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s ease;
-            margin-top: 10px;
+            margin-top: auto;
         }
 
         .opcao-card.cliente .opcao-btn {
@@ -193,6 +209,12 @@
             border: 2px solid #FF6B35;
         }
 
+        .opcao-card.lojista .opcao-btn {
+            background: #28a745;
+            color: white;
+            border: 2px solid #28a745;
+        }
+
         .opcao-card:hover .opcao-btn {
             background: white;
             color: var(--dark-color);
@@ -205,6 +227,10 @@
 
         .opcao-card.profissional:hover .opcao-btn {
             color: #FF6B35;
+        }
+
+        .opcao-card.lojista:hover .opcao-btn {
+            color: #28a745;
         }
 
         .user-info {
@@ -258,6 +284,12 @@
             }
         }
 
+        @media (max-width: 992px) {
+            .opcoes-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
         @media (max-width: 768px) {
             .escolha-container {
                 padding: 40px 25px;
@@ -279,6 +311,16 @@
             .logo img {
                 height: 60px;
                 transform: scale(1.8);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .escolha-container {
+                padding: 30px 20px;
+            }
+            
+            .opcoes-grid {
+                gap: 15px;
             }
         }
     </style>
@@ -335,6 +377,20 @@
                     <i class="fas fa-arrow-right me-2"></i>Acessar como Profissional
                 </a>
             </div>
+
+            <!-- Opção Lojista/Comércio -->
+            <div class="opcao-card lojista" id="opcaoLojista">
+                <div class="opcao-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3 class="opcao-title">Sou Lojista/Comércio</h3>
+                <p class="opcao-desc">
+                    Tenho um ponto fixo de vendas. Quero gerenciar meu estoque, vendas e atendimento ao cliente.
+                </p>
+                <a href="#" class="opcao-btn" id="btnLojista">
+                    <i class="fas fa-arrow-right me-2"></i>Acessar como Lojista
+                </a>
+            </div>
         </div>
 
         <!-- Texto do Rodapé -->
@@ -353,21 +409,10 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            signOut 
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc,
-            updateDoc
-        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
             authDomain: "scanhub-ed512.firebaseapp.com",
@@ -377,24 +422,21 @@
             appId: "1:1083305018831:web:f7594d560439c8965c3eba"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        console.log('🎯 Página de escolha carregada');
-
-        // Elementos DOM
         const userName = document.getElementById('userName');
         const userId = document.getElementById('userId');
         const userInfo = document.getElementById('userInfo');
         const opcaoCliente = document.getElementById('opcaoCliente');
         const opcaoProfissional = document.getElementById('opcaoProfissional');
+        const opcaoLojista = document.getElementById('opcaoLojista');
         const btnCliente = document.getElementById('btnCliente');
         const btnProfissional = document.getElementById('btnProfissional');
+        const btnLojista = document.getElementById('btnLojista');
         const alertMessage = document.getElementById('alertMessage');
 
-        // Mostrar mensagem
         function mostrarMensagem(mensagem, tipo = 'erro') {
             alertMessage.textContent = mensagem;
             alertMessage.className = `alert alert-${tipo}`;
@@ -405,10 +447,8 @@
             }, 5000);
         }
 
-        // Atualizar tipo no Firestore
         async function atualizarTipoUsuario(uid, tipo) {
             try {
-                console.log(`💾 Atualizando tipo para: ${tipo}`);
                 const userRef = doc(db, "usuarios", uid);
                 await updateDoc(userRef, {
                     tipoUsuario: tipo,
@@ -422,68 +462,57 @@
             }
         }
 
-        // Redirecionar para dashboard
         function redirecionarParaDashboard(tipo) {
-            console.log(`🚀 Redirecionando para: ${tipo}`);
-            
-            // Salvar na sessão
             localStorage.setItem('scanhub_tipo_acesso', tipo);
             
             if (tipo === 'cliente') {
                 window.location.href = 'cliente-dashboard.html';
             } else if (tipo === 'profissional') {
                 window.location.href = 'profissional-dashboard.html';
+            } else if (tipo === 'lojista') {
+                window.location.href = 'loja-dashboard.html';
             }
         }
 
-        // Verificar autenticação
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log('✅ Usuário autenticado:', user.uid);
-                
                 try {
-                    // Buscar dados do usuário
                     const userRef = doc(db, "usuarios", user.uid);
                     const userDoc = await getDoc(userRef);
                     
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
                         
-                        // Atualizar interface
                         userName.textContent = userData.apelido || user.displayName || 'Usuário';
                         userId.textContent = userData.idScanHub || '---';
                         userInfo.style.display = 'block';
                         
-                        // Verificar se já tem tipo
                         if (userData.tipoUsuario) {
-                            mostrarMensagem(`Você já está configurado como ${userData.tipoUsuario === 'cliente' ? 'Cliente' : 'Profissional'}. Você pode alterar abaixo.`, 'info');
+                            const tipoMap = {
+                                'cliente': 'Cliente',
+                                'profissional': 'Profissional',
+                                'lojista': 'Lojista'
+                            };
+                            mostrarMensagem(`Você já está configurado como ${tipoMap[userData.tipoUsuario]}. Você pode alterar abaixo.`, 'info');
                         }
                         
                     } else {
-                        console.log('Documento do usuário não encontrado');
                         mostrarMensagem('Dados do usuário incompletos. Por favor, complete seu cadastro.', 'warning');
                     }
                     
                 } catch (error) {
-                    console.error('Erro ao carregar dados:', error);
                     mostrarMensagem('Erro ao carregar dados do usuário.', 'danger');
                 }
                 
             } else {
-                // Usuário não logado, redirecionar para login
-                console.log('🔒 Usuário não autenticado. Redirecionando...');
                 window.location.href = 'login.html';
             }
         });
 
-        // Event Listeners
         btnCliente.addEventListener('click', async (e) => {
             e.preventDefault();
-            console.log('👤 Cliente selecionado');
-            
             const user = auth.currentUser;
             if (user) {
-                // Atualizar tipo
                 const atualizado = await atualizarTipoUsuario(user.uid, 'cliente');
                 if (atualizado) {
                     redirecionarParaDashboard('cliente');
@@ -497,11 +526,8 @@
 
         btnProfissional.addEventListener('click', async (e) => {
             e.preventDefault();
-            console.log('👷 Profissional selecionado');
-            
             const user = auth.currentUser;
             if (user) {
-                // Atualizar tipo
                 const atualizado = await atualizarTipoUsuario(user.uid, 'profissional');
                 if (atualizado) {
                     redirecionarParaDashboard('profissional');
@@ -513,16 +539,24 @@
             }
         });
 
-        // Clique nas cards também funciona
-        opcaoCliente.addEventListener('click', () => {
-            btnCliente.click();
+        btnLojista.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (user) {
+                const atualizado = await atualizarTipoUsuario(user.uid, 'lojista');
+                if (atualizado) {
+                    redirecionarParaDashboard('lojista');
+                } else {
+                    mostrarMensagem('Erro ao salvar escolha. Tente novamente.', 'danger');
+                }
+            } else {
+                mostrarMensagem('Usuário não autenticado.', 'danger');
+            }
         });
 
-        opcaoProfissional.addEventListener('click', () => {
-            btnProfissional.click();
-        });
-
-        console.log('✅ Página de escolha pronta para uso');
+        opcaoCliente.addEventListener('click', () => btnCliente.click());
+        opcaoProfissional.addEventListener('click', () => btnProfissional.click());
+        opcaoLojista.addEventListener('click', () => btnLojista.click());
     </script>
 </body>
 </html>
