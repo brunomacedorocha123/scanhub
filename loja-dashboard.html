@@ -616,12 +616,13 @@
                     <span>Dashboard</span>
                 </a>
             </li>
-         <li>
-    <a href="perfil-loja.html" onclick="window.open('perfil-loja.html', '_blank'); return false;">
-        <i class="fas fa-store-alt"></i>
-        <span>Minha Loja</span>
-    </a>
-</li>
+            <!-- LINK DIRETO PARA PERFIL LOJA - SEM data-page -->
+            <li>
+                <a href="perfil-loja.html" id="linkPerfilLoja">
+                    <i class="fas fa-store-alt"></i>
+                    <span>Minha Loja</span>
+                </a>
+            </li>
             <li>
                 <a href="#" data-page="produtos">
                     <i class="fas fa-box-open"></i>
@@ -967,6 +968,7 @@
         const menuLinks = document.querySelectorAll('.dashboard-menu a');
         const contentAreas = document.querySelectorAll('.content-area');
         const loader = document.getElementById('loader');
+        const linkPerfilLoja = document.getElementById('linkPerfilLoja');
 
         // Elementos de estatísticas
         const totalVendas = document.getElementById('totalVendas');
@@ -1054,20 +1056,20 @@
             unsubscribeFunctions = [];
 
             // Listener para dados da loja
-            const lojaRef = doc(db, "lojas", userId);
-            const unsubscribeLoja = onSnapshot(lojaRef, (doc) => {
+            const lojistaRef = doc(db, "lojistas", userId);
+            const unsubscribeLoja = onSnapshot(lojistaRef, (doc) => {
                 if (doc.exists()) {
                     lojaData = doc.data();
                     atualizarDadosLoja(lojaData);
                 } else {
-                    // Loja não existe, redirecionar para criação
-                    window.location.href = 'criar-perfil-loja.html';
+                    // Lojista não existe, redirecionar para criação
+                    window.location.href = 'perfil-loja.html';
                 }
             });
             unsubscribeFunctions.push(unsubscribeLoja);
 
             // Listener para produtos
-            const produtosRef = collection(db, "lojas", userId, "produtos");
+            const produtosRef = collection(db, "lojistas", userId, "produtos");
             const unsubscribeProdutos = onSnapshot(produtosRef, (snapshot) => {
                 const produtos = [];
                 let totalProdutosCount = 0;
@@ -1113,7 +1115,7 @@
             unsubscribeFunctions.push(unsubscribeProdutos);
 
             // Listener para pedidos
-            const pedidosRef = collection(db, "lojas", userId, "pedidos");
+            const pedidosRef = collection(db, "lojistas", userId, "pedidos");
             const unsubscribePedidos = onSnapshot(pedidosRef, (snapshot) => {
                 const pedidos = [];
                 let pedidosPendentesCount = 0;
@@ -1146,7 +1148,7 @@
             unsubscribeFunctions.push(unsubscribePedidos);
 
             // Listener para clientes
-            const clientesRef = collection(db, "lojas", userId, "clientes");
+            const clientesRef = collection(db, "lojistas", userId, "clientes");
             const unsubscribeClientes = onSnapshot(clientesRef, (snapshot) => {
                 const totalClientesCount = snapshot.size;
                 
@@ -1173,8 +1175,8 @@
             }
 
             // Nome da loja
-            if (data.nomeLoja) {
-                welcomeName.textContent = `Bem-vindo, ${data.nomeLoja}! 🛒`;
+            if (data.dadosCadastrais?.nomeFantasia) {
+                welcomeName.textContent = `Bem-vindo, ${data.dadosCadastrais.nomeFantasia}! 🛒`;
             }
 
             // Descrição da loja
@@ -1386,9 +1388,19 @@
             }
         });
 
-        // Navegação entre páginas
+        // Navegação entre páginas - CORRIGIDO
         menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
+                // Verifica se o link tem atributo data-page
+                const hasDataPage = link.hasAttribute('data-page');
+                
+                // Se NÃO tem data-page (é o link "Minha Loja"), deixa o link funcionar normalmente
+                if (!hasDataPage) {
+                    // Não executa preventDefault, deixa o href funcionar
+                    return;
+                }
+                
+                // Só para links com data-page (páginas internas)
                 e.preventDefault();
                 
                 // Remover active de todos
@@ -1425,6 +1437,12 @@
             });
         });
 
+        // Link direto para Perfil Loja - funciona independentemente
+        linkPerfilLoja.addEventListener('click', (e) => {
+            // Não faz nada especial, deixa o href="perfil-loja.html" funcionar
+            // O link vai abrir normalmente
+        });
+
         // Botões de ação rápida
         btnNovoProduto.addEventListener('click', () => {
             window.location.href = 'novo-produto.html';
@@ -1444,7 +1462,7 @@
 
         // Adicionar funcionalidade aos botões internos
         document.getElementById('btnConfigurarLoja').addEventListener('click', () => {
-            window.location.href = 'configurar-loja.html';
+            window.location.href = 'perfil-loja.html';
         });
 
         document.getElementById('btnAdicionarProduto').addEventListener('click', () => {
