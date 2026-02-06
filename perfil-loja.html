@@ -467,7 +467,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg bg-white shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="dashboard-lojista.html">
+            <a class="navbar-brand" href="loja-dashboard.html">
                 <img src="logoscanhub.png" alt="ScanHub">
             </a>
             <div class="d-flex">
@@ -1088,7 +1088,7 @@
 
     // Estado
     let lojaData = null;
-    let logoUrl = '';  // Apenas para a imagem do perfil (logoDisplay)
+    let logoUrl = '';
     let bannerUrl = '';
     let fachadaUrl = '';
     let galeriaUrls = [];
@@ -1322,29 +1322,25 @@
         }
     }
 
-    // Função para obter a foto de perfil atual do logoDisplay
-    function obterFotoPerfil() {
-        // Verifica se há uma tag <img> dentro do logoDisplay
-        const imgElement = logoDisplay.querySelector('img');
-        
-        if (imgElement && imgElement.src && !imgElement.src.includes('data:')) {
-            return imgElement.src;  // Retorna a URL da imagem
-        }
-        
-        // Se não tem imagem, retorna null
-        return null;
+    function converterParaBase64(arquivo) {
+        return new Promise((resolve, reject) => {
+            const leitor = new FileReader();
+            leitor.onload = (e) => resolve(e.target.result);
+            leitor.onerror = reject;
+            leitor.readAsDataURL(arquivo);
+        });
     }
 
-    // Logo da loja - FOTO DO PERFIL
+    // Logo da loja - FOTO DO PERFIL (CORRIGIDA)
     logoInput.addEventListener('change', async (e) => {
         const arquivo = e.target.files[0];
         if (!arquivo) return;
         
         try {
             loadingOverlay.style.display = 'flex';
-            logoUrl = await uploadParaImgur(arquivo);  // Esta é a variável que salva a URL
+            logoUrl = await uploadParaImgur(arquivo);  // SALVA NA VARIÁVEL GLOBAL
             
-            // Atualizar visualmente o logoDisplay
+            // Atualizar visualmente
             const img = logoDisplay.querySelector('img');
             if (img) {
                 img.src = logoUrl;
@@ -1355,6 +1351,7 @@
                 newImg.alt = 'Logo da loja';
                 logoDisplay.appendChild(newImg);
                 
+                // Adicionar botão de upload
                 const uploadBtn = document.createElement('label');
                 uploadBtn.className = 'logo-upload-btn';
                 uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
@@ -1372,6 +1369,14 @@
             alert('Erro ao enviar foto do perfil');
         } finally {
             loadingOverlay.style.display = 'none';
+        }
+    });
+
+    // Clique no logo para upload
+    logoDisplay.addEventListener('click', function(e) {
+        // Não disparar se clicar no botão de upload
+        if (!e.target.closest('.logo-upload-btn')) {
+            logoInput.click();
         }
     });
 
@@ -1601,11 +1606,11 @@
             youtube.value = dados.redesSociais.youtube || '';
         }
         
-        // Seção 8: Galeria - IMPORTANTE: Carregar a foto do perfil também
+        // Seção 8: Galeria - AGORA CARREGA A FOTO DO PERFIL TAMBÉM
         if (dados.imagens) {
-            // Carregar logo/foto do perfil
+            // Carregar logo/foto do perfil - IMPORTANTE!
             if (dados.imagens.logo) {
-                logoUrl = dados.imagens.logo;
+                logoUrl = dados.imagens.logo;  // SALVA NA VARIÁVEL GLOBAL
                 const img = logoDisplay.querySelector('img');
                 if (img) {
                     img.src = logoUrl;
@@ -1627,6 +1632,7 @@
                     uploadBtn.appendChild(input);
                     logoDisplay.appendChild(uploadBtn);
                 }
+                console.log('Foto do perfil carregada:', logoUrl);
             }
             
             if (dados.imagens.capa) {
@@ -1772,9 +1778,7 @@
         btnSalvarPerfil.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
 
         try {
-            // DEBUG: Verificar a foto do perfil antes de salvar
-            console.log('Foto do perfil (logoUrl):', logoUrl);
-            console.log('LogoDisplay atual:', logoDisplay.innerHTML);
+            console.log('Salvando com foto do perfil:', logoUrl); // DEBUG
             
             // Coletar horários
             const horarios = {};
@@ -1810,11 +1814,7 @@
                 valeRefeicao: document.getElementById('pagamento_vale')?.checked || false
             };
             
-            // Obter a foto de perfil atual
-            const fotoPerfilAtual = obterFotoPerfil();
-            console.log('Foto de perfil obtida:', fotoPerfilAtual);
-            
-            // Preparar dados - COM A FOTO DO PERFIL
+            // Preparar dados - AGORA SALVA A FOTO DO PERFIL
             const dadosLoja = {
                 userId: auth.currentUser.uid,
                 status: 'ativo',
@@ -1863,9 +1863,9 @@
                     youtube: youtube.value.trim() || null
                 },
                 
-                // Seção 8 - IMAGENS (CORRIGIDO)
+                // Seção 8 - IMAGENS (FOTO DO PERFIL AGORA É SALVA)
                 imagens: {
-                    logo: fotoPerfilAtual || logoUrl || null,  // Primeiro tenta da função, depois da variável
+                    logo: logoUrl || null,  // FOTO DO PERFIL
                     capa: bannerUrl || null,
                     galeria: galeriaUrls
                 },
@@ -1884,8 +1884,7 @@
                 slug: gerarSlug(nomeFantasia.value.trim())
             };
             
-            // DEBUG: Verificar o que será salvo
-            console.log('Dados a serem salvos:', dadosLoja.imagens);
+            console.log('Dados da imagem sendo salvos:', dadosLoja.imagens); // DEBUG
             
             // Salvar no Firestore
             const lojistaRef = doc(db, "lojistas", auth.currentUser.uid);
@@ -1917,22 +1916,6 @@
         categoriaLoja.addEventListener('change', function() {
             if (this.value) {
                 lojaCategoria.textContent = this.value;
-            }
-        });
-        
-        // Click no logo para upload
-        const logoUploadBtn = logoDisplay.querySelector('.logo-upload-btn');
-        if (logoUploadBtn) {
-            logoUploadBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                logoInput.click();
-            });
-        }
-        
-        // Também permitir click direto no logoDisplay
-        logoDisplay.addEventListener('click', (e) => {
-            if (e.target === logoDisplay || e.target.classList.contains('fa-store')) {
-                logoInput.click();
             }
         });
     });
