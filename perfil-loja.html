@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil da Loja - ScanHub</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2ecc71;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .navbar-brand img {
+            height: 60px;
+            transform: scale(2);
+            transform-origin: left center;
+        }
+
+        .container-main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Header da Loja */
+        .loja-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Logo da Loja */
+        .loja-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: #666;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .loja-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-upload-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+
+        .logo-upload-btn:hover {
+            transform: scale(1.1);
+            background: #27ae60;
+        }
+
+        /* Seções */
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--accent-color);
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+        }
+
+        /* Campos de Horário */
+        .horario-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .horario-dia {
+            width: 100px;
+            font-weight: 500;
+        }
+
+        .horario-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .time-input {
+            width: 100px;
+        }
+
+        .fechado-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Checkboxes e Radios */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary-color);
+            background: #f0f9f0;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background: #e8f6e8;
+        }
+
+        /* Galeria */
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #f8f9fa;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-item-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-item:hover .gallery-item-remove {
+            opacity: 1;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Save Button */
+        .btn-save {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        /* Configurações */
+        .config-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container-main {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+            
+            .loja-header, .section-card {
+                padding: 20px;
+            }
+            
+            .loja-logo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .horario-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .horario-inputs {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 10px 12px;
+            }
+        }
+
+        /* Helper Text */
+        .helper-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Validação */
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        /* Banner Upload */
+        .banner-upload {
+            margin: 20px 0;
+        }
+
+        .banner-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .banner-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard-lojista.html">
+                <img src="logoscanhub.png" alt="ScanHub">
+            </a>
+            <div class="d-flex">
+                <a href="dashboard-lojista.html" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar para Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-main">
+        <!-- Loja Header -->
+        <div class="loja-header">
+            <div class="loja-logo" id="logoDisplay">
+                <i class="fas fa-store"></i>
+                <label class="logo-upload-btn">
+                    <i class="fas fa-camera"></i>
+                    <input type="file" id="logoInput" accept="image/*" style="display: none;">
+                </label>
+            </div>
+            
+            <h2 id="lojaNome">Minha Loja</h2>
+            <p class="text-muted" id="lojaCategoria">Selecione uma categoria</p>
+        </div>
+
+        <!-- Seção 1: Dados Cadastrais -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-file-contract"></i>Dados Cadastrais da Loja
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-store"></i>Nome Fantasia
+                        </label>
+                        <input type="text" class="form-control" id="nomeFantasia" 
+                               placeholder="Ex: Supermercado Central" required>
+                        <div class="invalid-feedback">Informe o nome fantasia da loja</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-building"></i>Razão Social
+                        </label>
+                        <input type="text" class="form-control" id="razaoSocial" 
+                               placeholder="Ex: Supermercado Central LTDA" required>
+                        <div class="invalid-feedback">Informe a razão social</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-id-card"></i>CNPJ
+                        </label>
+                        <input type="text" class="form-control" id="cnpj" 
+                               placeholder="00.000.000/0000-00" required
+                               oninput="formatarCNPJ(this)">
+                        <div class="invalid-feedback">Informe um CNPJ válido</div>
+                        <div class="helper-text">Digite apenas números, formatamos automaticamente</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-file-alt"></i>Inscrição Estadual
+                        </label>
+                        <input type="text" class="form-control" id="inscricaoEstadual" 
+                               placeholder="Opcional">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-phone"></i>Telefone Comercial
+                        </label>
+                        <input type="tel" class="form-control" id="telefone" 
+                               placeholder="(11) 99999-9999" required
+                               oninput="formatarTelefone(this)">
+                        <div class="invalid-feedback">Informe um telefone válido</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-envelope"></i>E-mail Comercial
+                        </label>
+                        <input type="email" class="form-control" id="emailComercial" 
+                               placeholder="contato@loja.com" required>
+                        <div class="invalid-feedback">Informe um e-mail válido</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-globe"></i>Site da Loja
+                        </label>
+                        <input type="url" class="form-control" id="siteLoja" 
+                               placeholder="https://www.sualoja.com.br">
+                        <div class="helper-text">Opcional</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt"></i>Ano de Fundação
+                        </label>
+                        <input type="number" class="form-control" id="anoFundacao" 
+                               placeholder="Ex: 2010" min="1900" max="2024">
+                        <div class="helper-text">Em que ano sua loja foi fundada?</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Endereço -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-map-marker-alt"></i>Endereço da Loja
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-mail-bulk"></i>CEP
+                        </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cep" 
+                                   placeholder="00000-000" required
+                                   oninput="formatarCEP(this)"
+                                   onblur="buscarEnderecoPorCEP()">
+                            <button class="btn btn-outline-secondary" type="button" onclick="buscarEnderecoPorCEP()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Informe um CEP válido</div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-road"></i>Logradouro
+                        </label>
+                        <input type="text" class="form-control" id="logradouro" 
+                               placeholder="Rua, Avenida, etc." readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="fas fa-hashtag"></i>Número
+                        </label>
+                        <input type="text" class="form-control" id="numero" 
+                               placeholder="123" required>
+                        <div class="invalid-feedback">Informe o número</div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-building"></i>Complemento
+                        </label>
+                        <input type="text" class="form-control" id="complemento" 
+                               placeholder="Sala, Loja, etc.">
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-map-pin"></i>Bairro
+                        </label>
+                        <input type="text" class="form-control" id="bairro" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-city"></i>Cidade
+                        </label>
+                        <input type="text" class="form-control" id="cidade" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-flag"></i>Estado
+                        </label>
+                        <input type="text" class="form-control" id="estado" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-camera"></i>Foto da Fachada
+                </label>
+                <div class="banner-upload">
+                    <div class="upload-area" id="fachadaUploadArea">
+                        <i class="fas fa-camera"></i>
+                        <h5>Clique para adicionar foto da fachada</h5>
+                        <p class="text-muted">Recomendado: 1200x600 pixels</p>
+                        <input type="file" id="fachadaInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="banner-preview" id="fachadaPreview" style="display: none;">
+                        <img src="" alt="Fachada" id="fachadaImage">
+                        <div class="banner-remove" onclick="removerFotoFachada()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 3: Horário de Funcionamento -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-clock"></i>Horário de Funcionamento
+            </h3>
+            
+            <div class="horario-container">
+                <!-- Dias serão gerados pelo JavaScript -->
+            </div>
+            
+            <div class="helper-text mt-3">
+                <i class="fas fa-info-circle"></i> Os horários serão mostrados no seu perfil público
+            </div>
+        </div>
+
+        <!-- Seção 4: Categoria da Loja -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-tag"></i>Categoria da Loja
+            </h3>
+            
+            <div class="form-group">
+                <label class="form-label required">
+                    <i class="fas fa-store-alt"></i>Selecione a categoria principal
+                </label>
+                <select class="form-select" id="categoriaLoja" required>
+                    <option value="">Escolha uma categoria...</option>
+                    <optgroup label="🍽️ Alimentação">
+                        <option value="Restaurante">Restaurante</option>
+                        <option value="Lanchonete">Lanchonete</option>
+                        <option value="Padaria">Padaria</option>
+                        <option value="Confeitaria">Confeitaria</option>
+                        <option value="Pizzaria">Pizzaria</option>
+                        <option value="Hamburgueria">Hamburgueria</option>
+                        <option value="Sorveteria">Sorveteria</option>
+                        <option value="Cafeteria">Cafeteria</option>
+                        <option value="Açai">Açai</option>
+                        <option value="Mercado/Supermercado">Mercado/Supermercado</option>
+                        <option value="Adega">Adega</option>
+                        <option value="Rotisseria">Rotisseria</option>
+                    </optgroup>
+                    <optgroup label="👕 Varejo - Roupas">
+                        <option value="Loja de Roupas">Loja de Roupas</option>
+                        <option value="Loja de Calçados">Loja de Calçados</option>
+                        <option value="Moda Feminina">Moda Feminina</option>
+                        <option value="Moda Masculina">Moda Masculina</option>
+                        <option value="Moda Infantil">Moda Infantil</option>
+                        <option value="Moda Praia">Moda Praia</option>
+                        <option value="Moda Fitness">Moda Fitness</option>
+                        <option value="Lingerie">Lingerie</option>
+                        <option value="Acessórios">Acessórios</option>
+                    </optgroup>
+                    <optgroup label="📱 Varejo - Eletrônicos">
+                        <option value="Loja de Celulares">Loja de Celulares</option>
+                        <option value="Eletrônicos">Eletrônicos</option>
+                        <option value="Informática">Informática</option>
+                        <option value="Games">Games</option>
+                        <option value="Eletrodomésticos">Eletrodomésticos</option>
+                        <option value="Áudio e Som">Áudio e Som</option>
+                    </optgroup>
+                    <optgroup label="🛍️ Varejo - Diversos">
+                        <option value="Farmácia/Drogaria">Farmácia/Drogaria</option>
+                        <option value="Pet Shop">Pet Shop</option>
+                        <option value="Livraria">Livraria</option>
+                        <option value="Papelaria">Papelaria</option>
+                        <option value="Presentes">Presentes</option>
+                        <option value="Decoração">Decoração</option>
+                        <option value="Móveis">Móveis</option>
+                        <option value="Construção/Materiais">Construção/Materiais</option>
+                        <option value="Ferragem">Ferragem</option>
+                        <option value="Tintas">Tintas</option>
+                        <option value="Auto Peças">Auto Peças</option>
+                        <option value="Brinquedos">Brinquedos</option>
+                        <option value="Esportes">Esportes</option>
+                        <option value="Beleza e Perfumaria">Beleza e Perfumaria</option>
+                        <option value="Joalheria">Joalheria</option>
+                        <option value="Óticas">Óticas</option>
+                        <option value="Floricultura">Floricultura</option>
+                        <option value="Cama/Mesa/Banho">Cama/Mesa/Banho</option>
+                    </optgroup>
+                    <optgroup label="🔧 Serviços Comerciais">
+                        <option value="Oficina Mecânica">Oficina Mecânica</option>
+                        <option value="Lavanderia">Lavanderia</option>
+                        <option value="Assistência Técnica">Assistência Técnica</option>
+                        <option value="Chaveiro">Chaveiro</option>
+                        <option value="Costura">Costura</option>
+                        <option value="Impressão/Cópias">Impressão/Cópias</option>
+                        <option value="Locadora">Locadora</option>
+                    </optgroup>
+                    <optgroup label="📦 Outros">
+                        <option value="Outro">Outro</option>
+                    </optgroup>
+                </select>
+                <div class="invalid-feedback">Selecione uma categoria para sua loja</div>
+            </div>
+        </div>
+
+        <!-- Seção 5: Serviços Oferecidos -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-concierge-bell"></i>Serviços Oferecidos
+            </h3>
+            
+            <div class="options-grid" id="servicosContainer">
+                <!-- Gerado por JavaScript -->
+            </div>
+            
+            <div class="mt-4" id="entregaContainer" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-truck"></i>Raio de entrega (km)
+                    </label>
+                    <input type="number" class="form-control" id="raioEntrega" 
+                           min="1" max="50" placeholder="Ex: 10">
+                    <div class="helper-text">Distância máxima para entrega própria</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 6: Formas de Pagamento -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-credit-card"></i>Formas de Pagamento Aceitas
+            </h3>
+            
+            <div class="options-grid" id="pagamentosContainer">
+                <!-- Gerado por JavaScript -->
+            </div>
+        </div>
+
+        <!-- Seção 7: Redes Sociais -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-share-alt"></i>Redes Sociais & Links
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-instagram"></i>Instagram
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">@</span>
+                            <input type="text" class="form-control" id="instagram" 
+                                   placeholder="usuario">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-facebook"></i>Facebook
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">facebook.com/</span>
+                            <input type="text" class="form-control" id="facebook" 
+                                   placeholder="paginadaloja">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-whatsapp"></i>WhatsApp para Pedidos
+                        </label>
+                        <input type="tel" class="form-control" id="whatsapp" 
+                               placeholder="(11) 99999-9999"
+                               oninput="formatarTelefone(this)">
+                        <div class="helper-text">Número para receber pedidos</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-youtube"></i>Vídeo do YouTube
+                        </label>
+                        <input type="text" class="form-control" id="youtube" 
+                               placeholder="ID do vídeo ou link">
+                        <div class="helper-text">Ex: dQw4w9WgXcQ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 8: Galeria da Loja -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-images"></i>Galeria da Loja
+            </h3>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-image"></i>Banner/Capa da Loja
+                </label>
+                <div class="banner-upload">
+                    <div class="upload-area" id="bannerUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h5>Arraste ou clique para adicionar banner</h5>
+                        <p class="text-muted">Recomendado: 1920x400 pixels</p>
+                        <input type="file" id="bannerInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="banner-preview" id="bannerPreview" style="display: none;">
+                        <img src="" alt="Banner" id="bannerImage">
+                        <div class="banner-remove" onclick="removerBanner()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-camera"></i>Fotos do Interior
+                </label>
+                <div class="upload-area" id="galeriaUploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h5>Arraste ou clique para adicionar fotos</h5>
+                    <p class="text-muted">Máximo 6 fotos (tamanho recomendado: 800x600)</p>
+                    <input type="file" id="galeriaInput" accept="image/*" multiple style="display: none;">
+                </div>
+                
+                <div class="gallery-grid" id="galeriaLoja">
+                    <!-- Fotos serão adicionadas aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 9: Configurações -->
+        <div class="section-card">
+            <h3 class="section-title">
+                <i class="fas fa-cog"></i>Configurações do Perfil
+            </h3>
+            
+            <div class="config-item">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="visivelBusca" checked>
+                    <label class="form-check-label" for="visivelBusca">
+                        <i class="fas fa-eye"></i> Visível nas buscas
+                    </label>
+                    <p class="helper-text mb-0">Clientes poderão encontrar sua loja nas buscas do ScanHub</p>
+                </div>
+            </div>
+            
+            <div class="config-item">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="aceitaPedidosOnline" checked>
+                    <label class="form-check-label" for="aceitaPedidosOnline">
+                        <i class="fas fa-shopping-cart"></i> Aceita pedidos online
+                    </label>
+                    <p class="helper-text mb-0">Clientes poderão fazer pedidos pelo site/app</p>
+                </div>
+            </div>
+            
+            <div class="config-item">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="mostrarEstoque" checked>
+                    <label class="form-check-label" for="mostrarEstoque">
+                        <i class="fas fa-box"></i> Mostrar estoque no catálogo
+                    </label>
+                    <p class="helper-text mb-0">Exibir quantidades disponíveis nos produtos</p>
+                </div>
+            </div>
+            
+            <div class="config-item">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="permitirAvaliacoes" checked>
+                    <label class="form-check-label" for="permitirAvaliacoes">
+                        <i class="fas fa-star"></i> Permitir avaliações
+                    </label>
+                    <p class="helper-text mb-0">Clientes poderão avaliar sua loja e produtos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão Salvar -->
+        <div class="section-card">
+            <button class="btn btn-save" id="btnSalvarPerfil">
+                <i class="fas fa-save me-2"></i>Salvar Perfil da Loja
+            </button>
+            <div class="text-center mt-3">
+                <a href="dashboard-lojista.html" class="text-muted">
+                    <i class="fas fa-arrow-left me-1"></i>Voltar para o dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.appspot.com",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Elementos DOM
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const logoDisplay = document.getElementById('logoDisplay');
+        const logoInput = document.getElementById('logoInput');
+        const lojaNome = document.getElementById('lojaNome');
+        const lojaCategoria = document.getElementById('lojaCategoria');
+        const btnSalvarPerfil = document.getElementById('btnSalvarPerfil');
+
+        // Seção 1
+        const nomeFantasia = document.getElementById('nomeFantasia');
+        const razaoSocial = document.getElementById('razaoSocial');
+        const cnpj = document.getElementById('cnpj');
+        const inscricaoEstadual = document.getElementById('inscricaoEstadual');
+        const telefone = document.getElementById('telefone');
+        const emailComercial = document.getElementById('emailComercial');
+        const siteLoja = document.getElementById('siteLoja');
+        const anoFundacao = document.getElementById('anoFundacao');
+
+        // Seção 2
+        const cep = document.getElementById('cep');
+        const logradouro = document.getElementById('logradouro');
+        const numero = document.getElementById('numero');
+        const complemento = document.getElementById('complemento');
+        const bairro = document.getElementById('bairro');
+        const cidade = document.getElementById('cidade');
+        const estado = document.getElementById('estado');
+        const fachadaUploadArea = document.getElementById('fachadaUploadArea');
+        const fachadaInput = document.getElementById('fachadaInput');
+        const fachadaPreview = document.getElementById('fachadaPreview');
+        const fachadaImage = document.getElementById('fachadaImage');
+
+        // Seção 3
+        const horarioContainer = document.querySelector('.horario-container');
+
+        // Seção 4
+        const categoriaLoja = document.getElementById('categoriaLoja');
+
+        // Seção 5
+        const servicosContainer = document.getElementById('servicosContainer');
+        const entregaContainer = document.getElementById('entregaContainer');
+        const raioEntrega = document.getElementById('raioEntrega');
+
+        // Seção 6
+        const pagamentosContainer = document.getElementById('pagamentosContainer');
+
+        // Seção 7
+        const instagram = document.getElementById('instagram');
+        const facebook = document.getElementById('facebook');
+        const whatsapp = document.getElementById('whatsapp');
+        const youtube = document.getElementById('youtube');
+
+        // Seção 8
+        const bannerUploadArea = document.getElementById('bannerUploadArea');
+        const bannerInput = document.getElementById('bannerInput');
+        const bannerPreview = document.getElementById('bannerPreview');
+        const bannerImage = document.getElementById('bannerImage');
+        const galeriaUploadArea = document.getElementById('galeriaUploadArea');
+        const galeriaInput = document.getElementById('galeriaInput');
+        const galeriaLoja = document.getElementById('galeriaLoja');
+
+        // Seção 9
+        const visivelBusca = document.getElementById('visivelBusca');
+        const aceitaPedidosOnline = document.getElementById('aceitaPedidosOnline');
+        const mostrarEstoque = document.getElementById('mostrarEstoque');
+        const permitirAvaliacoes = document.getElementById('permitirAvaliacoes');
+
+        // Estado
+        let lojaData = null;
+        let logoUrl = '';
+        let bannerUrl = '';
+        let fachadaUrl = '';
+        let galeriaUrls = [];
+
+        // Funções de formatação
+        window.formatarCNPJ = function(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length <= 14) {
+                if (value.length > 12) {
+                    value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+                } else if (value.length > 8) {
+                    value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})/, '$1.$2.$3/$4');
+                } else if (value.length > 5) {
+                    value = value.replace(/^(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+                } else if (value.length > 2) {
+                    value = value.replace(/^(\d{2})(\d{3})/, '$1.$2');
+                }
+            }
+            
+            input.value = value;
+        };
+
+        window.formatarTelefone = function(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{4})/, '($1) $2');
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d{2})/, '($1)');
+            }
+            
+            input.value = value;
+        };
+
+        window.formatarCEP = function(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 5) {
+                value = value.replace(/^(\d{5})(\d{3})/, '$1-$2');
+            }
+            
+            input.value = value;
+        };
+
+        // Buscar endereço por CEP
+        window.buscarEnderecoPorCEP = async function() {
+            const cepValue = cep.value.replace(/\D/g, '');
+            
+            if (cepValue.length !== 8) {
+                return;
+            }
+            
+            try {
+                loadingOverlay.style.display = 'flex';
+                
+                const response = await fetch(`https://viacep.com.br/ws/${cepValue}/json/`);
+                const data = await response.json();
+                
+                if (!data.erro) {
+                    logradouro.value = data.logradouro;
+                    bairro.value = data.bairro;
+                    cidade.value = data.localidade;
+                    estado.value = data.uf;
+                    
+                    logradouro.readonly = false;
+                    bairro.readonly = false;
+                    cidade.readonly = false;
+                    estado.readonly = false;
+                } else {
+                    limparEndereco();
+                    alert('CEP não encontrado. Preencha manualmente.');
+                }
+            } catch (error) {
+                limparEndereco();
+                alert('Erro ao buscar CEP. Preencha manualmente.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        };
+
+        function limparEndereco() {
+            logradouro.value = '';
+            bairro.value = '';
+            cidade.value = '';
+            estado.value = '';
+            
+            logradouro.readonly = false;
+            bairro.readonly = false;
+            cidade.readonly = false;
+            estado.readonly = false;
+        }
+
+        // Inicializar horários
+        function inicializarHorarios() {
+            const dias = [
+                { nome: 'Segunda', valor: 'segunda', aberto: true, abre: '09:00', fecha: '18:00' },
+                { nome: 'Terça', valor: 'terca', aberto: true, abre: '09:00', fecha: '18:00' },
+                { nome: 'Quarta', valor: 'quarta', aberto: true, abre: '09:00', fecha: '18:00' },
+                { nome: 'Quinta', valor: 'quinta', aberto: true, abre: '09:00', fecha: '18:00' },
+                { nome: 'Sexta', valor: 'sexta', aberto: true, abre: '09:00', fecha: '20:00' },
+                { nome: 'Sábado', valor: 'sabado', aberto: true, abre: '10:00', fecha: '16:00' },
+                { nome: 'Domingo', valor: 'domingo', aberto: false, abre: '00:00', fecha: '00:00' }
+            ];
+            
+            dias.forEach(dia => {
+                const row = document.createElement('div');
+                row.className = 'horario-row';
+                row.innerHTML = `
+                    <div class="horario-dia">${dia.nome}</div>
+                    <div class="horario-inputs">
+                        <input type="time" class="form-control time-input" 
+                               id="horaAbre_${dia.valor}" value="${dia.abre}"
+                               ${!dia.aberto ? 'disabled' : ''}>
+                        <span>até</span>
+                        <input type="time" class="form-control time-input" 
+                               id="horaFecha_${dia.valor}" value="${dia.fecha}"
+                               ${!dia.aberto ? 'disabled' : ''}>
+                    </div>
+                    <div class="fechado-checkbox">
+                        <input type="checkbox" id="fechado_${dia.valor}" 
+                               ${!dia.aberto ? 'checked' : ''}>
+                        <label for="fechado_${dia.valor}">Fechado</label>
+                    </div>
+                `;
+                
+                const fechadoCheck = row.querySelector(`#fechado_${dia.valor}`);
+                const horaAbre = row.querySelector(`#horaAbre_${dia.valor}`);
+                const horaFecha = row.querySelector(`#horaFecha_${dia.valor}`);
+                
+                fechadoCheck.addEventListener('change', function() {
+                    horaAbre.disabled = this.checked;
+                    horaFecha.disabled = this.checked;
+                    
+                    if (this.checked) {
+                        horaAbre.value = '00:00';
+                        horaFecha.value = '00:00';
+                    }
+                });
+                
+                horarioContainer.appendChild(row);
+            });
+        }
+
+        // Inicializar serviços
+        function inicializarServicos() {
+            const servicos = [
+                { id: 'entrega', label: 'Entrega Própria', icon: 'fas fa-truck' },
+                { id: 'retirada', label: 'Retirada no Local', icon: 'fas fa-store' },
+                { id: 'pedidos_online', label: 'Aceita Pedidos Online', icon: 'fas fa-shopping-cart' },
+                { id: 'whatsapp', label: 'Atendimento WhatsApp', icon: 'fab fa-whatsapp' }
+            ];
+            
+            servicos.forEach(servico => {
+                const item = document.createElement('div');
+                item.className = 'option-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="servico_${servico.id}" hidden>
+                    <i class="${servico.icon}"></i>
+                    <span>${servico.label}</span>
+                `;
+                
+                item.addEventListener('click', function() {
+                    const checkbox = this.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                    this.classList.toggle('selected', checkbox.checked);
+                    
+                    if (servico.id === 'entrega') {
+                        entregaContainer.style.display = checkbox.checked ? 'block' : 'none';
+                        if (!checkbox.checked) raioEntrega.value = '';
+                    }
+                });
+                
+                servicosContainer.appendChild(item);
+            });
+        }
+
+        // Inicializar pagamentos
+        function inicializarPagamentos() {
+            const pagamentos = [
+                { id: 'dinheiro', label: 'Dinheiro', icon: 'fas fa-money-bill-wave' },
+                { id: 'pix', label: 'PIX', icon: 'fas fa-qrcode' },
+                { id: 'credito', label: 'Cartão de Crédito', icon: 'fas fa-credit-card' },
+                { id: 'debito', label: 'Cartão de Débito', icon: 'fas fa-credit-card' },
+                { id: 'vale', label: 'Vale-Refeição', icon: 'fas fa-utensils' }
+            ];
+            
+            pagamentos.forEach(pagamento => {
+                const item = document.createElement('div');
+                item.className = 'option-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="pagamento_${pagamento.id}" hidden>
+                    <i class="${pagamento.icon}"></i>
+                    <span>${pagamento.label}</span>
+                `;
+                
+                item.addEventListener('click', function() {
+                    const checkbox = this.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                    this.classList.toggle('selected', checkbox.checked);
+                });
+                
+                pagamentosContainer.appendChild(item);
+            });
+        }
+
+        // Upload de imagens para Imgur
+        async function uploadParaImgur(arquivo) {
+            const CLIENT_ID = '546c25a59c58ad7';
+            const formData = new FormData();
+            formData.append('image', arquivo);
+            formData.append('type', 'file');
+            
+            try {
+                const resposta = await fetch('https://api.imgur.com/3/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Client-ID ${CLIENT_ID}`
+                    },
+                    body: formData
+                });
+                
+                const dados = await resposta.json();
+                return dados.data.link;
+            } catch (error) {
+                throw new Error('Falha ao enviar imagem');
+            }
+        }
+
+        function converterParaBase64(arquivo) {
+            return new Promise((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onload = (e) => resolve(e.target.result);
+                leitor.onerror = reject;
+                leitor.readAsDataURL(arquivo);
+            });
+        }
+
+        // Logo da loja
+        logoInput.addEventListener('change', async (e) => {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            
+            try {
+                loadingOverlay.style.display = 'flex';
+                logoUrl = await uploadParaImgur(arquivo);
+                
+                const img = logoDisplay.querySelector('img');
+                if (img) {
+                    img.src = logoUrl;
+                } else {
+                    logoDisplay.innerHTML = '';
+                    const newImg = document.createElement('img');
+                    newImg.src = logoUrl;
+                    newImg.alt = 'Logo da loja';
+                    logoDisplay.appendChild(newImg);
+                    
+                    const uploadBtn = document.createElement('label');
+                    uploadBtn.className = 'logo-upload-btn';
+                    uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.style.display = 'none';
+                    input.addEventListener('change', logoInput.onchange);
+                    uploadBtn.appendChild(input);
+                    logoDisplay.appendChild(uploadBtn);
+                }
+            } catch (error) {
+                alert('Erro ao enviar logo');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        // Banner
+        bannerInput.addEventListener('change', async (e) => {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            
+            try {
+                loadingOverlay.style.display = 'flex';
+                bannerUrl = await uploadParaImgur(arquivo);
+                
+                bannerImage.src = bannerUrl;
+                bannerPreview.style.display = 'block';
+            } catch (error) {
+                alert('Erro ao enviar banner');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        window.removerBanner = function() {
+            bannerUrl = '';
+            bannerPreview.style.display = 'none';
+        };
+
+        bannerUploadArea.addEventListener('click', () => bannerInput.click());
+
+        // Fachada
+        fachadaInput.addEventListener('change', async (e) => {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            
+            try {
+                loadingOverlay.style.display = 'flex';
+                fachadaUrl = await uploadParaImgur(arquivo);
+                
+                fachadaImage.src = fachadaUrl;
+                fachadaPreview.style.display = 'block';
+            } catch (error) {
+                alert('Erro ao enviar foto da fachada');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        window.removerFotoFachada = function() {
+            fachadaUrl = '';
+            fachadaPreview.style.display = 'none';
+        };
+
+        fachadaUploadArea.addEventListener('click', () => fachadaInput.click());
+
+        // Galeria
+        galeriaInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            
+            if (galeriaUrls.length + files.length > 6) {
+                alert('Máximo de 6 fotos na galeria');
+                return;
+            }
+            
+            for (const file of files) {
+                try {
+                    loadingOverlay.style.display = 'flex';
+                    const imageUrl = await uploadParaImgur(file);
+                    galeriaUrls.push(imageUrl);
+                    adicionarFotoGaleria(imageUrl);
+                } catch (error) {
+                    alert('Erro ao enviar foto');
+                } finally {
+                    loadingOverlay.style.display = 'none';
+                }
+            }
+        });
+
+        function adicionarFotoGaleria(url) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${url}" alt="Galeria">
+                <div class="gallery-item-remove" onclick="removerFotoGaleria('${url}', this)">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            galeriaLoja.appendChild(item);
+        }
+
+        window.removerFotoGaleria = function(url, element) {
+            if (confirm('Remover esta foto da galeria?')) {
+                galeriaUrls = galeriaUrls.filter(foto => foto !== url);
+                element.parentElement.remove();
+            }
+        };
+
+        galeriaUploadArea.addEventListener('click', () => galeriaInput.click());
+
+        // Carregar dados existentes
+        onAuthStateChanged(auth, async (usuario) => {
+            if (usuario) {
+                try {
+                    loadingOverlay.style.display = 'flex';
+                    
+                    const lojistaRef = doc(db, "lojistas", usuario.uid);
+                    const lojistaDoc = await getDoc(lojistaRef);
+                    
+                    if (lojistaDoc.exists()) {
+                        lojaData = lojistaDoc.data();
+                        carregarDadosLoja(lojaData);
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar dados da loja");
+                } finally {
+                    loadingOverlay.style.display = 'none';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function carregarDadosLoja(dados) {
+            if (!dados) return;
+            
+            // Seção 1: Dados Cadastrais
+            if (dados.dadosCadastrais) {
+                nomeFantasia.value = dados.dadosCadastrais.nomeFantasia || '';
+                razaoSocial.value = dados.dadosCadastrais.razaoSocial || '';
+                cnpj.value = dados.dadosCadastrais.cnpj || '';
+                inscricaoEstadual.value = dados.dadosCadastrais.inscricaoEstadual || '';
+                telefone.value = dados.dadosCadastrais.telefone || '';
+                emailComercial.value = dados.dadosCadastrais.email || '';
+                siteLoja.value = dados.dadosCadastrais.site || '';
+                anoFundacao.value = dados.dadosCadastrais.anoFundacao || '';
+            }
+            
+            // Seção 2: Endereço
+            if (dados.endereco) {
+                cep.value = dados.endereco.cep || '';
+                logradouro.value = dados.endereco.logradouro || '';
+                numero.value = dados.endereco.numero || '';
+                complemento.value = dados.endereco.complemento || '';
+                bairro.value = dados.endereco.bairro || '';
+                cidade.value = dados.endereco.cidade || '';
+                estado.value = dados.endereco.estado || '';
+                
+                if (dados.endereco.fachada) {
+                    fachadaUrl = dados.endereco.fachada;
+                    fachadaImage.src = fachadaUrl;
+                    fachadaPreview.style.display = 'block';
+                }
+            }
+            
+            // Seção 3: Horários
+            if (dados.horarios) {
+                for (const [dia, horario] of Object.entries(dados.horarios)) {
+                    const horaAbreInput = document.getElementById(`horaAbre_${dia}`);
+                    const horaFechaInput = document.getElementById(`horaFecha_${dia}`);
+                    const fechadoCheck = document.getElementById(`fechado_${dia}`);
+                    
+                    if (horaAbreInput && horaFechaInput && fechadoCheck) {
+                        horaAbreInput.value = horario.abre || '00:00';
+                        horaFechaInput.value = horario.fecha || '00:00';
+                        fechadoCheck.checked = horario.fechado || false;
+                        horaAbreInput.disabled = horario.fechado;
+                        horaFechaInput.disabled = horario.fechado;
+                    }
+                }
+            }
+            
+            // Seção 4: Categoria
+            if (dados.categoria) {
+                categoriaLoja.value = dados.categoria;
+                lojaCategoria.textContent = dados.categoria;
+            }
+            
+            // Seção 5: Serviços
+            if (dados.servicos) {
+                if (dados.servicos.entregaPropria) {
+                    document.getElementById('servico_entrega').checked = true;
+                    document.querySelector('[for="servico_entrega"]').parentElement.classList.add('selected');
+                    entregaContainer.style.display = 'block';
+                    raioEntrega.value = dados.servicos.raioEntrega || '';
+                }
+                if (dados.servicos.retiradaLocal) {
+                    document.getElementById('servico_retirada').checked = true;
+                    document.querySelector('[for="servico_retirada"]').parentElement.classList.add('selected');
+                }
+                if (dados.servicos.aceitaPedidosOnline) {
+                    document.getElementById('servico_pedidos_online').checked = true;
+                    document.querySelector('[for="servico_pedidos_online"]').parentElement.classList.add('selected');
+                }
+                if (dados.servicos.atendimentoWhatsapp) {
+                    document.getElementById('servico_whatsapp').checked = true;
+                    document.querySelector('[for="servico_whatsapp"]').parentElement.classList.add('selected');
+                }
+            }
+            
+            // Seção 6: Pagamentos
+            if (dados.pagamentos) {
+                if (dados.pagamentos.dinheiro) {
+                    document.getElementById('pagamento_dinheiro').checked = true;
+                    document.querySelector('[for="pagamento_dinheiro"]').parentElement.classList.add('selected');
+                }
+                if (dados.pagamentos.pix) {
+                    document.getElementById('pagamento_pix').checked = true;
+                    document.querySelector('[for="pagamento_pix"]').parentElement.classList.add('selected');
+                }
+                if (dados.pagamentos.cartaoCredito) {
+                    document.getElementById('pagamento_credito').checked = true;
+                    document.querySelector('[for="pagamento_credito"]').parentElement.classList.add('selected');
+                }
+                if (dados.pagamentos.cartaoDebito) {
+                    document.getElementById('pagamento_debito').checked = true;
+                    document.querySelector('[for="pagamento_debito"]').parentElement.classList.add('selected');
+                }
+                if (dados.pagamentos.valeRefeicao) {
+                    document.getElementById('pagamento_vale').checked = true;
+                    document.querySelector('[for="pagamento_vale"]').parentElement.classList.add('selected');
+                }
+            }
+            
+            // Seção 7: Redes Sociais
+            if (dados.redesSociais) {
+                instagram.value = dados.redesSociais.instagram || '';
+                facebook.value = dados.redesSociais.facebook || '';
+                whatsapp.value = dados.redesSociais.whatsapp || '';
+                youtube.value = dados.redesSociais.youtube || '';
+            }
+            
+            // Seção 8: Galeria
+            if (dados.imagens) {
+                if (dados.imagens.logo) {
+                    logoUrl = dados.imagens.logo;
+                    const img = logoDisplay.querySelector('img');
+                    if (img) {
+                        img.src = logoUrl;
+                    } else {
+                        logoDisplay.innerHTML = '';
+                        const newImg = document.createElement('img');
+                        newImg.src = logoUrl;
+                        newImg.alt = 'Logo da loja';
+                        logoDisplay.appendChild(newImg);
+                        
+                        const uploadBtn = document.createElement('label');
+                        uploadBtn.className = 'logo-upload-btn';
+                        uploadBtn.innerHTML = '<i class="fas fa-camera"></i>';
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.style.display = 'none';
+                        input.addEventListener('change', logoInput.onchange);
+                        uploadBtn.appendChild(input);
+                        logoDisplay.appendChild(uploadBtn);
+                    }
+                }
+                
+                if (dados.imagens.capa) {
+                    bannerUrl = dados.imagens.capa;
+                    bannerImage.src = bannerUrl;
+                    bannerPreview.style.display = 'block';
+                }
+                
+                if (dados.imagens.galeria && Array.isArray(dados.imagens.galeria)) {
+                    galeriaUrls = dados.imagens.galeria;
+                    galeriaUrls.forEach(url => adicionarFotoGaleria(url));
+                }
+            }
+            
+            // Seção 9: Configurações
+            if (dados.configuracoes) {
+                visivelBusca.checked = dados.configuracoes.visivelBusca !== false;
+                aceitaPedidosOnline.checked = dados.configuracoes.aceitaPedidosOnline !== false;
+                mostrarEstoque.checked = dados.configuracoes.mostrarEstoque !== false;
+                permitirAvaliacoes.checked = dados.configuracoes.permitirAvaliacoes !== false;
+            }
+            
+            // Atualizar nome da loja
+            if (dados.dadosCadastrais?.nomeFantasia) {
+                lojaNome.textContent = dados.dadosCadastrais.nomeFantasia;
+                document.title = `${dados.dadosCadastrais.nomeFantasia} - Perfil da Loja`;
+            }
+        }
+
+        // Gerar slug automático
+        function gerarSlug(texto) {
+            return texto
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+        }
+
+        // Validar CNPJ
+        function validarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/[^\d]/g, '');
+            
+            if (cnpj.length !== 14) return false;
+            
+            // Elimina CNPJs inválidos conhecidos
+            if (/^(\d)\1+$/.test(cnpj)) return false;
+            
+            // Valida DVs
+            let tamanho = cnpj.length - 2;
+            let numeros = cnpj.substring(0, tamanho);
+            let digitos = cnpj.substring(tamanho);
+            let soma = 0;
+            let pos = tamanho - 7;
+            
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos.charAt(0)) return false;
+            
+            tamanho = tamanho + 1;
+            numeros = cnpj.substring(0, tamanho);
+            soma = 0;
+            pos = tamanho - 7;
+            
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos.charAt(1)) return false;
+            
+            return true;
+        }
+
+        // Salvar perfil
+        btnSalvarPerfil.addEventListener('click', async () => {
+            if (!auth.currentUser) {
+                alert('Você precisa estar logado');
+                return;
+            }
+
+            // Validações
+            let isValid = true;
+            
+            // Nome Fantasia
+            if (!nomeFantasia.value.trim()) {
+                nomeFantasia.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                nomeFantasia.classList.remove('is-invalid');
+            }
+            
+            // Razão Social
+            if (!razaoSocial.value.trim()) {
+                razaoSocial.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                razaoSocial.classList.remove('is-invalid');
+            }
+            
+            // CNPJ
+            if (!cnpj.value.trim() || !validarCNPJ(cnpj.value)) {
+                cnpj.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                cnpj.classList.remove('is-invalid');
+            }
+            
+            // Telefone
+            const telefoneValue = telefone.value.replace(/\D/g, '');
+            if (!telefoneValue || telefoneValue.length < 10) {
+                telefone.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                telefone.classList.remove('is-invalid');
+            }
+            
+            // Email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailComercial.value.trim() || !emailRegex.test(emailComercial.value)) {
+                emailComercial.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                emailComercial.classList.remove('is-invalid');
+            }
+            
+            // CEP
+            const cepValue = cep.value.replace(/\D/g, '');
+            if (!cepValue || cepValue.length !== 8) {
+                cep.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                cep.classList.remove('is-invalid');
+            }
+            
+            // Número
+            if (!numero.value.trim()) {
+                numero.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                numero.classList.remove('is-invalid');
+            }
+            
+            // Categoria
+            if (!categoriaLoja.value) {
+                categoriaLoja.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                categoriaLoja.classList.remove('is-invalid');
+            }
+            
+            if (!isValid) {
+                alert('Preencha os campos obrigatórios corretamente');
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            btnSalvarPerfil.disabled = true;
+            btnSalvarPerfil.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+
+            try {
+                // Coletar horários
+                const horarios = {};
+                const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
+                
+                dias.forEach(dia => {
+                    const horaAbreInput = document.getElementById(`horaAbre_${dia}`);
+                    const horaFechaInput = document.getElementById(`horaFecha_${dia}`);
+                    const fechadoCheck = document.getElementById(`fechado_${dia}`);
+                    
+                    horarios[dia] = {
+                        abre: horaAbreInput?.value || '00:00',
+                        fecha: horaFechaInput?.value || '00:00',
+                        fechado: fechadoCheck?.checked || false
+                    };
+                });
+                
+                // Coletar serviços
+                const servicos = {
+                    entregaPropria: document.getElementById('servico_entrega')?.checked || false,
+                    retiradaLocal: document.getElementById('servico_retirada')?.checked || false,
+                    aceitaPedidosOnline: document.getElementById('servico_pedidos_online')?.checked || false,
+                    atendimentoWhatsapp: document.getElementById('servico_whatsapp')?.checked || false,
+                    raioEntrega: servicos.entregaPropria ? parseInt(raioEntrega.value) || 0 : 0
+                };
+                
+                // Coletar pagamentos
+                const pagamentos = {
+                    dinheiro: document.getElementById('pagamento_dinheiro')?.checked || false,
+                    pix: document.getElementById('pagamento_pix')?.checked || false,
+                    cartaoCredito: document.getElementById('pagamento_credito')?.checked || false,
+                    cartaoDebito: document.getElementById('pagamento_debito')?.checked || false,
+                    valeRefeicao: document.getElementById('pagamento_vale')?.checked || false
+                };
+                
+                // Preparar dados
+                const dadosLoja = {
+                    userId: auth.currentUser.uid,
+                    status: 'ativo',
+                    
+                    // Seção 1
+                    dadosCadastrais: {
+                        nomeFantasia: nomeFantasia.value.trim(),
+                        razaoSocial: razaoSocial.value.trim(),
+                        cnpj: cnpj.value.trim(),
+                        inscricaoEstadual: inscricaoEstadual.value.trim() || null,
+                        telefone: telefone.value.trim(),
+                        email: emailComercial.value.trim(),
+                        site: siteLoja.value.trim() || null,
+                        anoFundacao: anoFundacao.value ? parseInt(anoFundacao.value) : null
+                    },
+                    
+                    // Seção 2
+                    endereco: {
+                        cep: cep.value.trim(),
+                        logradouro: logradouro.value.trim(),
+                        numero: numero.value.trim(),
+                        complemento: complemento.value.trim() || null,
+                        bairro: bairro.value.trim(),
+                        cidade: cidade.value.trim(),
+                        estado: estado.value.trim(),
+                        fachada: fachadaUrl || null
+                    },
+                    
+                    // Seção 3
+                    horarios: horarios,
+                    
+                    // Seção 4
+                    categoria: categoriaLoja.value,
+                    
+                    // Seção 5
+                    servicos: servicos,
+                    
+                    // Seção 6
+                    pagamentos: pagamentos,
+                    
+                    // Seção 7
+                    redesSociais: {
+                        instagram: instagram.value.trim() || null,
+                        facebook: facebook.value.trim() || null,
+                        whatsapp: whatsapp.value.trim() || null,
+                        youtube: youtube.value.trim() || null
+                    },
+                    
+                    // Seção 8
+                    imagens: {
+                        logo: logoUrl || null,
+                        capa: bannerUrl || null,
+                        galeria: galeriaUrls
+                    },
+                    
+                    // Seção 9
+                    configuracoes: {
+                        visivelBusca: visivelBusca.checked,
+                        aceitaPedidosOnline: aceitaPedidosOnline.checked,
+                        mostrarEstoque: mostrarEstoque.checked,
+                        permitirAvaliacoes: permitirAvaliacoes.checked
+                    },
+                    
+                    // Metadata
+                    criadoEm: lojaData?.criadoEm || new Date().toISOString(),
+                    atualizadoEm: new Date().toISOString(),
+                    slug: gerarSlug(nomeFantasia.value.trim())
+                };
+                
+                // Salvar no Firestore
+                const lojistaRef = doc(db, "lojistas", auth.currentUser.uid);
+                await setDoc(lojistaRef, dadosLoja, { merge: true });
+                
+                // Atualizar interface
+                lojaNome.textContent = dadosLoja.dadosCadastrais.nomeFantasia;
+                lojaCategoria.textContent = dadosLoja.categoria;
+                
+                alert('✅ Perfil da loja salvo com sucesso!');
+                
+            } catch (error) {
+                alert('❌ Erro ao salvar perfil: ' + error.message);
+            } finally {
+                loadingOverlay.style.display = 'none';
+                btnSalvarPerfil.disabled = false;
+                btnSalvarPerfil.innerHTML = '<i class="fas fa-save me-2"></i>Salvar Perfil da Loja';
+            }
+        });
+
+        // Inicializar componentes
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarHorarios();
+            inicializarServicos();
+            inicializarPagamentos();
+            
+            // Atualizar categoria no header
+            categoriaLoja.addEventListener('change', function() {
+                if (this.value) {
+                    lojaCategoria.textContent = this.value;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
