@@ -16,16 +16,14 @@
     
     <style>
         :root {
-            --primary-color: #27ae60; /* Verde mais escuro e profissional */
-            --secondary-color: #2c8c4d; /* Verde secundário */
+            --primary-color: #27ae60;
+            --secondary-color: #2c8c4d;
             --accent-color: #e74c3c;
             --warning-color: #f39c12;
             --light-color: #f8f9fa;
             --dark-color: #2c3e50;
             --white: #ffffff;
             --gradient-primary: linear-gradient(135deg, #27ae60 0%, #219653 100%);
-            --gradient-secondary: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            --gradient-warning: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
         }
 
         * {
@@ -46,13 +44,11 @@
         .navbar-brand-dashboard {
             display: flex;
             align-items: center;
-            transform: scale(2.5);
-            transform-origin: left center;
-            margin-right: 40px;
+            margin-right: 30px;
         }
 
         .navbar-brand-dashboard img {
-            height: 60px;
+            height: 45px;
             width: auto;
             object-fit: contain;
         }
@@ -61,7 +57,7 @@
         .navbar-dashboard {
             background: var(--white);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 15px 0;
+            padding: 12px 0;
             position: fixed;
             top: 0;
             left: 0;
@@ -69,66 +65,72 @@
             z-index: 1000;
         }
 
-        /* Menu Principal */
+        /* Menu Principal - Mais compacto */
         .dashboard-menu {
             list-style: none;
             display: flex;
-            gap: 5px;
+            gap: 2px;
             margin: 0;
             padding: 0;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .dashboard-menu::-webkit-scrollbar {
+            display: none;
         }
 
         .dashboard-menu li {
-            flex: 1;
-            min-width: 120px;
+            flex-shrink: 0;
         }
 
         .dashboard-menu a {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 15px 10px;
+            padding: 10px 8px;
             color: var(--dark-color);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             transition: all 0.3s ease;
-            border-radius: 10px;
+            border-radius: 8px;
             background: transparent;
             text-align: center;
             position: relative;
+            min-width: 70px;
         }
 
         .dashboard-menu a:hover,
         .dashboard-menu a.active {
             background: rgba(39, 174, 96, 0.1);
             color: var(--primary-color);
-            transform: translateY(-2px);
         }
 
         .dashboard-menu i {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
+            font-size: 1.1rem;
+            margin-bottom: 3px;
         }
 
         .dashboard-menu span {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             line-height: 1.2;
+            white-space: nowrap;
         }
 
         /* Badge de notificação */
         .menu-badge {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 5px;
+            right: 5px;
             background: var(--accent-color);
             color: white;
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
+            padding: 1px 4px;
+            border-radius: 8px;
+            min-width: 15px;
             text-align: center;
         }
 
@@ -141,29 +143,29 @@
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: var(--gradient-primary);
             color: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
-            border: 3px solid var(--white);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--white);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .user-details h5 {
             margin: 0;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .user-details small {
             color: #666;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
 
         /* Main Content */
@@ -176,20 +178,20 @@
         .welcome-card {
             background: var(--gradient-primary);
             color: var(--white);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
         }
 
         .welcome-card h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
         }
 
         .welcome-card p {
             opacity: 0.9;
-            font-size: 1rem;
+            font-size: 0.9rem;
             margin-bottom: 0;
         }
 
@@ -198,46 +200,48 @@
             display: inline-flex;
             align-items: center;
             background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin-top: 10px;
+            padding: 4px 12px;
+            border-radius: 15px;
+            margin-top: 8px;
+            font-size: 0.8rem;
         }
 
         .status-indicator {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 6px;
         }
 
         .status-active {
-            background: var(--primary-color);
+            background: var(--white);
         }
 
         .status-inactive {
-            background: #95a5a6;
+            background: rgba(255, 255, 255, 0.6);
         }
 
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background: var(--white);
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 16px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            border-top: 4px solid transparent;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+            border-top: 3px solid transparent;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
 
         .stat-card.vendas {
@@ -261,8 +265,8 @@
         }
 
         .stat-card i {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
         }
 
         .stat-card.vendas i { color: var(--primary-color); }
@@ -272,136 +276,86 @@
         .stat-card.assinatura i { color: #e74c3c; }
 
         .stat-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            font-size: 1.5rem;
+            margin-bottom: 4px;
             color: var(--dark-color);
         }
 
         .stat-card p {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             margin: 0;
         }
 
-        /* Cartão de Assinatura */
-        .assinatura-card {
-            background: var(--white);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid var(--primary-color);
-        }
-
-        .assinatura-header {
+        /* Botões de Ação - Linha única */
+        .action-buttons {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .assinatura-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-ativa {
-            background: rgba(39, 174, 96, 0.1);
-            color: var(--primary-color);
-        }
-
-        .status-expirada {
-            background: rgba(231, 76, 60, 0.1);
-            color: #c0392b;
-        }
-
-        .assinatura-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-
-        .info-item {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .info-item label {
-            display: block;
-            color: #666;
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-        }
-
-        .info-item .value {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--dark-color);
-        }
-
-        .assinatura-actions {
-            display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
-        .btn-assinatura {
+        .btn-action {
             flex: 1;
-            min-width: 120px;
-            padding: 10px 15px;
+            min-width: 0;
+            padding: 10px 12px;
             border-radius: 10px;
             border: none;
             font-weight: 600;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            gap: 6px;
+            transition: all 0.2s ease;
             cursor: pointer;
+            white-space: nowrap;
         }
 
-        .btn-primary-assinatura {
+        .btn-primary-action {
             background: var(--gradient-primary);
             color: var(--white);
         }
 
-        .btn-secondary-assinatura {
-            background: var(--light-color);
+        .btn-secondary-action {
+            background: #f1f3f5;
             color: var(--dark-color);
-            border: 2px solid #e0e0e0;
+            border: 1px solid #dee2e6;
         }
 
-        .btn-warning-assinatura {
-            background: var(--gradient-warning);
+        .btn-accent-action {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             color: var(--white);
         }
 
-        .btn-assinatura:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        .btn-warning-action {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: var(--white);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         /* Alertas de Estoque */
         .alerts-container {
             background: var(--white);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid var(--warning-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+            border-left: 4px solid var(--warning-color);
             display: none;
         }
 
         /* Content Areas */
         .content-area {
             background: var(--white);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            margin-bottom: 25px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+            margin-bottom: 20px;
             display: none;
             animation: fadeIn 0.3s ease;
         }
@@ -419,33 +373,35 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--light-color);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--light-color);
         }
 
         .area-header h4 {
             margin: 0;
             color: var(--dark-color);
+            font-size: 1.1rem;
         }
 
         /* Placeholder Content */
         .content-placeholder {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 15px;
             color: #666;
         }
 
         .content-placeholder i {
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: #ddd;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .content-placeholder h4 {
             color: #999;
             font-weight: 400;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 1rem;
         }
 
         /* Mobile Menu Toggle */
@@ -453,45 +409,50 @@
             display: none;
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--dark-color);
-            padding: 5px 10px;
+            padding: 5px 8px;
         }
 
         /* Responsivo */
         @media (max-width: 1200px) {
-            .navbar-brand-dashboard {
-                transform: scale(2);
+            .navbar-brand-dashboard img {
+                height: 40px;
             }
             
             .dashboard-menu a {
-                font-size: 0.8rem;
-                padding: 12px 8px;
+                padding: 8px 6px;
+                min-width: 65px;
             }
             
             .dashboard-menu i {
-                font-size: 1.2rem;
+                font-size: 1rem;
             }
         }
 
         @media (max-width: 992px) {
-            .navbar-brand-dashboard {
-                transform: scale(1.8);
-                margin-right: 20px;
+            body {
+                padding-top: 70px;
+            }
+            
+            .navbar-dashboard {
+                padding: 10px 0;
             }
             
             .dashboard-menu {
                 position: fixed;
-                top: 80px;
+                top: 70px;
                 left: 0;
                 right: 0;
                 background: var(--white);
                 flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                border-radius: 0 0 20px 20px;
+                padding: 15px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border-radius: 0 0 15px 15px;
                 display: none;
                 z-index: 999;
+                max-height: 70vh;
+                overflow-y: auto;
             }
             
             .dashboard-menu.show {
@@ -505,16 +466,18 @@
             .dashboard-menu a {
                 flex-direction: row;
                 justify-content: flex-start;
-                padding: 15px;
-                font-size: 1rem;
+                padding: 12px 15px;
+                font-size: 0.9rem;
                 text-align: left;
+                min-width: auto;
             }
             
             .dashboard-menu i {
-                margin-right: 15px;
+                margin-right: 12px;
                 margin-bottom: 0;
-                width: 25px;
+                width: 20px;
                 text-align: center;
+                font-size: 1.1rem;
             }
             
             .mobile-menu-toggle {
@@ -523,39 +486,12 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                padding-top: 70px;
-            }
-            
-            .navbar-brand-dashboard {
-                transform: scale(1.6);
-            }
-            
             .main-content {
                 padding: 15px;
             }
             
             .welcome-card {
-                padding: 20px;
-            }
-            
-            .welcome-card h1 {
-                font-size: 1.6rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .assinatura-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .navbar-brand-dashboard {
-                transform: scale(1.4);
+                padding: 16px;
             }
             
             .welcome-card h1 {
@@ -563,7 +499,36 @@
             }
             
             .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .btn-action {
+                min-width: calc(50% - 4px);
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .btn-action {
+                min-width: 100%;
+            }
+            
+            .navbar-brand-dashboard img {
+                height: 35px;
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
             }
         }
 
@@ -588,8 +553,8 @@
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border: 3px solid #f3f3f3;
             border-top: 3px solid var(--primary-color);
             border-radius: 50%;
@@ -604,9 +569,9 @@
         /* Badges */
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
             font-weight: 600;
         }
 
@@ -661,7 +626,7 @@
                 </div>
 
                 <!-- Botão Logout -->
-                <button class="btn btn-outline-danger btn-sm ms-3" id="btnLogout">
+                <button class="btn btn-outline-danger btn-sm ms-2" id="btnLogout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span class="d-none d-md-inline">Sair</span>
                 </button>
@@ -669,8 +634,8 @@
         </div>
     </nav>
 
-    <!-- Menu Dashboard Horizontal Específico para Lojista -->
-    <div class="container-fluid">
+    <!-- Menu Dashboard Horizontal Compacto -->
+    <div class="container-fluid px-0">
         <ul class="dashboard-menu" id="dashboardMenu">
             <li>
                 <a href="#" class="active" data-page="dashboard">
@@ -679,7 +644,7 @@
                 </a>
             </li>
             <li>
-                <a href="perfil-loja.html" id="linkPerfilLoja">
+                <a href="perfil-loja.html">
                     <i class="fas fa-store-alt"></i>
                     <span>Minha Loja</span>
                 </a>
@@ -747,7 +712,7 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Welcome Card com Status da Loja -->
+        <!-- Welcome Card -->
         <div class="welcome-card">
             <h1 id="welcomeName"></h1>
             <p id="welcomeMessage"></p>
@@ -757,13 +722,12 @@
             </div>
         </div>
 
-        <!-- Stats Overview para Lojista -->
+        <!-- Stats Overview -->
         <div class="stats-grid">
             <div class="stat-card vendas">
                 <i class="fas fa-money-bill-wave"></i>
                 <h3 id="totalVendas">R$ 0,00</h3>
                 <p>Vendas Hoje</p>
-                <div class="stat-trend" id="trendVendas" style="display: none;"></div>
             </div>
             <div class="stat-card estoque">
                 <i class="fas fa-cubes"></i>
@@ -787,52 +751,13 @@
             </div>
         </div>
 
-        <!-- Cartão de Assinatura -->
-        <div class="assinatura-card" id="assinaturaCard" style="display: none;">
-            <div class="assinatura-header">
-                <h5 class="mb-0"><i class="fas fa-crown me-2"></i>Sua Assinatura</h5>
-                <span class="assinatura-status" id="assinaturaStatus">Status</span>
-            </div>
-            <div class="assinatura-info">
-                <div class="info-item">
-                    <label>Plano Atual</label>
-                    <div class="value" id="planoAtual">-</div>
-                </div>
-                <div class="info-item">
-                    <label>Valor Mensal</label>
-                    <div class="value" id="valorMensal">-</div>
-                </div>
-                <div class="info-item">
-                    <label>Vencimento</label>
-                    <div class="value" id="dataVencimento">-</div>
-                </div>
-                <div class="info-item">
-                    <label>Limite Produtos</label>
-                    <div class="value" id="limiteProdutos">-</div>
-                </div>
-            </div>
-            <div class="assinatura-actions">
-                <button class="btn-assinatura btn-primary-assinatura" id="btnUpgradePlano">
-                    <i class="fas fa-arrow-up"></i> Upgrade
-                </button>
-                <button class="btn-assinatura btn-secondary-assinatura" id="btnHistoricoPagamentos">
-                    <i class="fas fa-history"></i> Histórico
-                </button>
-                <button class="btn-assinatura btn-warning-assinatura" id="btnGerenciarPagamento">
-                    <i class="fas fa-credit-card"></i> Pagamento
-                </button>
-            </div>
-        </div>
-
-        <!-- Alertas de Estoque Baixo -->
+        <!-- Alertas de Estoque -->
         <div class="alerts-container" id="alertsContainer">
-            <h5><i class="fas fa-exclamation-triangle text-warning"></i> Alertas de Estoque</h5>
-            <div id="alertasLista">
-                <!-- Alertas serão carregados do Firestore -->
-            </div>
+            <h5 class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Alertas de Estoque</h5>
+            <div id="alertasLista"></div>
         </div>
 
-        <!-- Botões de Ação Rápidos para Lojista -->
+        <!-- Botões de Ação Rápidos -->
         <div class="action-buttons">
             <button class="btn-action btn-primary-action" id="btnNovoProduto">
                 <i class="fas fa-plus"></i>
@@ -842,13 +767,17 @@
                 <i class="fas fa-clipboard-list"></i>
                 Ver Pedidos
             </button>
-            <button class="btn-action btn-accent-action" id="btnReporEstoque">
+            <button class="btn-action btn-warning-action" id="btnReporEstoque">
                 <i class="fas fa-warehouse"></i>
                 Repor Estoque
             </button>
-            <button class="btn-action btn-secondary-action" id="btnPromocao">
+            <button class="btn-action btn-accent-action" id="btnPromocao">
                 <i class="fas fa-tag"></i>
                 Nova Promoção
+            </button>
+            <button class="btn-action btn-secondary-action" id="btnGerenciarAssinatura">
+                <i class="fas fa-crown"></i>
+                Assinatura
             </button>
         </div>
 
@@ -859,10 +788,9 @@
                 <span class="status-badge" id="statusDashboard">Carregando...</span>
             </div>
             
-            <!-- Pedidos Recentes -->
             <h5 class="mb-3">Pedidos Recentes</h5>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover table-sm">
                     <thead>
                         <tr>
                             <th># Pedido</th>
@@ -874,8 +802,8 @@
                     </thead>
                     <tbody id="pedidosRecentes">
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="fas fa-shopping-cart fa-2x mb-2"></i><br>
+                            <td colspan="5" class="text-center text-muted py-3">
+                                <i class="fas fa-shopping-cart fa-lg mb-2"></i><br>
                                 Carregando pedidos...
                             </td>
                         </tr>
@@ -883,11 +811,10 @@
                 </table>
             </div>
 
-            <!-- Produtos Mais Vendidos -->
             <h5 class="mb-3 mt-4">Produtos em Destaque</h5>
-            <div class="row" id="produtosDestaque">
-                <div class="col-12 text-center text-muted py-4">
-                    <i class="fas fa-box-open fa-2x mb-2"></i><br>
+            <div class="row g-2" id="produtosDestaque">
+                <div class="col-12 text-center text-muted py-3">
+                    <i class="fas fa-box-open fa-lg mb-2"></i><br>
                     Carregando produtos...
                 </div>
             </div>
@@ -902,7 +829,7 @@
                 <i class="fas fa-store-alt"></i>
                 <h4>Configure sua loja</h4>
                 <p class="text-muted">Adicione informações da sua loja, horários, endereço e contatos</p>
-                <button class="btn btn-primary mt-3" id="btnConfigurarLoja">
+                <button class="btn btn-primary btn-sm mt-2" id="btnConfigurarLoja">
                     <i class="fas fa-cog"></i> Configurar Loja
                 </button>
             </div>
@@ -912,7 +839,7 @@
         <div id="pageProdutos" class="content-area">
             <div class="area-header">
                 <h4>Produtos</h4>
-                <button class="btn btn-sm btn-primary" id="btnAdicionarProduto">
+                <button class="btn btn-primary btn-sm" id="btnAdicionarProduto">
                     <i class="fas fa-plus"></i> Adicionar
                 </button>
             </div>
@@ -945,7 +872,7 @@
                 <h4>Pedidos</h4>
                 <div>
                     <span class="status-badge status-warning me-2">Pendentes: <span id="contadorPendentes">0</span></span>
-                    <button class="btn btn-sm btn-success" id="btnNovoPedido">
+                    <button class="btn btn-success btn-sm" id="btnNovoPedido">
                         <i class="fas fa-plus"></i> Novo
                     </button>
                 </div>
@@ -974,7 +901,7 @@
         <div id="pageFornecedores" class="content-area">
             <div class="area-header">
                 <h4>Fornecedores</h4>
-                <button class="btn btn-sm btn-primary" id="btnNovoFornecedor">
+                <button class="btn btn-primary btn-sm" id="btnNovoFornecedor">
                     <i class="fas fa-plus"></i> Novo
                 </button>
             </div>
@@ -989,7 +916,7 @@
         <div id="pagePromocoes" class="content-area">
             <div class="area-header">
                 <h4>Promoções & Descontos</h4>
-                <button class="btn btn-sm btn-warning" id="btnNovaPromocao">
+                <button class="btn btn-warning btn-sm" id="btnNovaPromocao">
                     <i class="fas fa-tag"></i> Nova Promoção
                 </button>
             </div>
@@ -1023,15 +950,12 @@
                 <i class="fas fa-crown"></i>
                 <h4>Gerenciamento de Assinatura</h4>
                 <p class="text-muted">Gerencie seu plano, pagamentos e faça upgrade</p>
-                <div class="mt-4">
-                    <button class="btn btn-primary me-2" id="btnVerPlanos">
+                <div class="mt-3">
+                    <button class="btn btn-primary btn-sm me-2" id="btnVerPlanos">
                         <i class="fas fa-eye"></i> Ver Planos
                     </button>
-                    <button class="btn btn-success me-2" id="btnPagarAssinatura">
+                    <button class="btn btn-success btn-sm me-2" id="btnPagarAssinatura">
                         <i class="fas fa-credit-card"></i> Pagar Fatura
-                    </button>
-                    <button class="btn btn-outline-secondary" id="btnCancelarAssinatura">
-                        <i class="fas fa-times"></i> Cancelar
                     </button>
                 </div>
             </div>
@@ -1041,8 +965,8 @@
         <div id="pageNotificacoes" class="content-area">
             <div class="area-header">
                 <h4>Notificações</h4>
-                <button class="btn btn-sm btn-outline-secondary" id="btnMarcarTodasLidas">
-                    <i class="fas fa-check-double"></i> Marcar todas como lidas
+                <button class="btn btn-outline-secondary btn-sm" id="btnMarcarTodasLidas">
+                    <i class="fas fa-check-double"></i> Marcar lidas
                 </button>
             </div>
             <div class="content-placeholder">
@@ -1055,7 +979,6 @@
 
     <!-- Firebase e Scripts -->
     <script type="module">
-    // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { 
         getAuth, 
@@ -1067,13 +990,9 @@
         doc, 
         getDoc,
         collection,
-        query,
-        where,
-        getDocs,
         onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
         authDomain: "scanhub-ed512.firebaseapp.com",
@@ -1083,12 +1002,10 @@
         appId: "1:1083305018831:web:f7594d560439c8965c3eba"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Elementos DOM
     const userName = document.getElementById('userName');
     const userAvatar = document.getElementById('userAvatar');
     const userId = document.getElementById('userId');
@@ -1103,26 +1020,14 @@
     const contentAreas = document.querySelectorAll('.content-area');
     const loader = document.getElementById('loader');
 
-    // Elementos de estatísticas
     const totalVendas = document.getElementById('totalVendas');
     const totalProdutos = document.getElementById('totalProdutos');
     const pedidosPendentes = document.getElementById('pedidosPendentes');
     const totalClientes = document.getElementById('totalClientes');
+    const statusAssinatura = document.getElementById('statusAssinatura');
     const pedidosRecentes = document.getElementById('pedidosRecentes');
     const produtosDestaque = document.getElementById('produtosDestaque');
 
-    // Elementos de assinatura
-    const assinaturaCard = document.getElementById('assinaturaCard');
-    const statusAssinatura = document.getElementById('statusAssinatura');
-    const assinaturaStatus = document.getElementById('assinaturaStatus');
-    const planoAtual = document.getElementById('planoAtual');
-    const valorMensal = document.getElementById('valorMensal');
-    const dataVencimento = document.getElementById('dataVencimento');
-    const limiteProdutos = document.getElementById('limiteProdutos');
-    const badgeAssinatura = document.getElementById('badgeAssinatura');
-    const statusPageAssinatura = document.getElementById('statusPageAssinatura');
-
-    // Alertas
     const alertsContainer = document.getElementById('alertsContainer');
     const alertasLista = document.getElementById('alertasLista');
     const contadorBaixo = document.getElementById('contadorBaixo');
@@ -1130,32 +1035,24 @@
     const contadorPendentes = document.getElementById('contadorPendentes');
     const contadorClientes = document.getElementById('contadorClientes');
 
-    // Badges do menu
     const badgeProdutos = document.getElementById('badgeProdutos');
     const badgePedidos = document.getElementById('badgePedidos');
+    const badgeAssinatura = document.getElementById('badgeAssinatura');
     const badgeNotificacoes = document.getElementById('badgeNotificacoes');
+    const statusPageAssinatura = document.getElementById('statusPageAssinatura');
 
-    // Botões de ação
     const btnNovoProduto = document.getElementById('btnNovoProduto');
     const btnVerPedidos = document.getElementById('btnVerPedidos');
     const btnReporEstoque = document.getElementById('btnReporEstoque');
     const btnPromocao = document.getElementById('btnPromocao');
-    const btnUpgradePlano = document.getElementById('btnUpgradePlano');
-    const btnHistoricoPagamentos = document.getElementById('btnHistoricoPagamentos');
-    const btnGerenciarPagamento = document.getElementById('btnGerenciarPagamento');
+    const btnGerenciarAssinatura = document.getElementById('btnGerenciarAssinatura');
     const btnVerPlanos = document.getElementById('btnVerPlanos');
     const btnPagarAssinatura = document.getElementById('btnPagarAssinatura');
-    const btnCancelarAssinatura = document.getElementById('btnCancelarAssinatura');
 
-    // Estado da aplicação
     let userData = null;
     let lojaData = null;
     let assinaturaData = null;
     let unsubscribeFunctions = [];
-
-    // ============================================
-    // FUNÇÃO PRINCIPAL PARA CARREGAR USUÁRIO
-    // ============================================
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -1177,17 +1074,13 @@
                     window.location.href = 'criar-perfil.html';
                 }
             } catch (error) {
-                mostrarErro("Erro ao carregar dados da loja");
+                mostrarErro("Erro ao carregar dados");
                 loader.classList.add('hide');
             }
         } else {
             window.location.href = 'login.html';
         }
     });
-
-    // ============================================
-    // CARREGAR DADOS DA LOJA
-    // ============================================
 
     async function carregarDadosLoja(userId) {
         try {
@@ -1197,14 +1090,8 @@
             if (lojistaDoc.exists()) {
                 lojaData = lojistaDoc.data();
             }
-        } catch (error) {
-            // Não faz nada, a loja pode não ter sido configurada ainda
-        }
+        } catch (error) {}
     }
-
-    // ============================================
-    // CARREGAR DADOS DA ASSINATURA
-    // ============================================
 
     async function carregarAssinatura(userId) {
         try {
@@ -1214,89 +1101,42 @@
             if (assinaturaDoc.exists()) {
                 assinaturaData = assinaturaDoc.data();
                 atualizarInterfaceAssinatura(assinaturaData);
-            } else {
-                // Se não tem assinatura, criar uma básica (trial)
-                assinaturaData = {
-                    plano: "Trial",
-                    status: "ativa",
-                    valorMensal: 0,
-                    dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                    limiteProdutos: 50,
-                    trial: true
-                };
-                atualizarInterfaceAssinatura(assinaturaData);
             }
         } catch (error) {
-            // Em caso de erro, mostrar plano básico
-            assinaturaData = {
-                plano: "Básico",
-                status: "ativa",
-                valorMensal: 0,
-                dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                limiteProdutos: 50
-            };
-            atualizarInterfaceAssinatura(assinaturaData);
+            statusAssinatura.textContent = "Básico";
+            statusPageAssinatura.textContent = "Ativa";
+            statusPageAssinatura.className = "status-badge status-success";
         }
     }
 
-    // ============================================
-    // ATUALIZAR INTERFACE DA ASSINATURA
-    // ============================================
-
     function atualizarInterfaceAssinatura(data) {
-        if (!data) return;
+        if (!data) {
+            statusAssinatura.textContent = "Básico";
+            return;
+        }
         
-        assinaturaCard.style.display = 'block';
-        
-        // Status
         statusAssinatura.textContent = data.plano || "Básico";
-        assinaturaStatus.textContent = data.status === "ativa" ? "Ativa" : "Expirada";
-        assinaturaStatus.className = data.status === "ativa" ? 
-            "assinatura-status status-ativa" : 
-            "assinatura-status status-expirada";
-        
         statusPageAssinatura.textContent = data.status === "ativa" ? "Ativa" : "Expirada";
         statusPageAssinatura.className = data.status === "ativa" ? 
             "status-badge status-success" : 
             "status-badge status-danger";
         
-        // Dados do plano
-        planoAtual.textContent = data.plano || "Básico";
-        
-        if (data.valorMensal > 0) {
-            valorMensal.textContent = `R$ ${data.valorMensal.toFixed(2)}/mês`;
-        } else {
-            valorMensal.textContent = "Grátis";
+        if (data.trial) {
+            badgeAssinatura.textContent = "Trial";
+            badgeAssinatura.style.display = 'inline-block';
         }
         
-        // Data de vencimento
         if (data.dataVencimento) {
             const dataVenc = data.dataVencimento.toDate ? 
                 data.dataVencimento.toDate() : 
                 new Date(data.dataVencimento);
-            dataVencimento.textContent = dataVenc.toLocaleDateString('pt-BR');
-            
-            // Verificar se está perto de expirar
             const diasRestantes = Math.ceil((dataVenc - new Date()) / (1000 * 60 * 60 * 24));
             if (diasRestantes <= 7 && data.status === "ativa") {
                 badgeAssinatura.textContent = "!";
                 badgeAssinatura.style.display = 'inline-block';
             }
         }
-        
-        // Limite de produtos
-        limiteProdutos.textContent = data.limiteProdutos || "50";
-        
-        // Mostrar badge se for trial
-        if (data.trial) {
-            badgeAssinatura.textContent = "Trial";
-            badgeAssinatura.style.display = 'inline-block';
-        }
     }
-
-    // ============================================
-    // INICIALIZAR DASHBOARD
-    // ============================================
 
     async function inicializarDashboard(userId) {
         try {
@@ -1306,10 +1146,6 @@
             mostrarErro("Erro ao configurar dashboard");
         }
     }
-
-    // ============================================
-    // ATUALIZAR INTERFACE COM DADOS DA LOJA
-    // ============================================
 
     function atualizarInterfaceUsuarioComLoja(userData, lojaData) {
         let nomeParaMostrar = '';
@@ -1338,26 +1174,21 @@
         userId.textContent = idParaMostrar;
         
         if (lojaData?.dadosCadastrais?.nomeFantasia) {
-            welcomeName.textContent = `Bem-vindo, ${lojaData.dadosCadastrais.nomeFantasia}! 🛒`;
+            welcomeName.textContent = `Bem-vindo, ${lojaData.dadosCadastrais.nomeFantasia}!`;
         } else if (userData?.apelido) {
-            welcomeName.textContent = `Bem-vindo, ${userData.apelido}! 🛒`;
+            welcomeName.textContent = `Bem-vindo, ${userData.apelido}!`;
         } else {
-            welcomeName.textContent = `Bem-vindo à sua loja! 🛒`;
+            welcomeName.textContent = `Bem-vindo à sua loja!`;
         }
         
         welcomeMessage.textContent = lojaData?.descricao || 
-            'Gerencie seus produtos, estoque, pedidos e muito mais em um só lugar.';
+            'Gerencie sua loja de forma simples e eficiente.';
     }
-
-    // ============================================
-    // CONFIGURAR LISTENERS EM TEMPO REAL
-    // ============================================
 
     async function configurarListeners(userId) {
         unsubscribeFunctions.forEach(unsub => unsub && unsub());
         unsubscribeFunctions = [];
 
-        // Listener para dados da loja
         const lojistaRef = doc(db, "lojistas", userId);
         const unsubscribeLoja = onSnapshot(lojistaRef, (doc) => {
             if (doc.exists()) {
@@ -1369,7 +1200,6 @@
         });
         unsubscribeFunctions.push(unsubscribeLoja);
 
-        // Listener para assinatura
         const assinaturaRef = doc(db, "assinaturas", userId);
         const unsubscribeAssinatura = onSnapshot(assinaturaRef, (doc) => {
             if (doc.exists()) {
@@ -1380,7 +1210,6 @@
         });
         unsubscribeFunctions.push(unsubscribeAssinatura);
 
-        // Listener para produtos
         const produtosRef = collection(db, "lojistas", userId, "produtos");
         const unsubscribeProdutos = onSnapshot(produtosRef, (snapshot) => {
             const produtos = [];
@@ -1421,7 +1250,6 @@
         });
         unsubscribeFunctions.push(unsubscribeProdutos);
 
-        // Listener para pedidos
         const pedidosRef = collection(db, "lojistas", userId, "pedidos");
         const unsubscribePedidos = onSnapshot(pedidosRef, (snapshot) => {
             const pedidos = [];
@@ -1450,7 +1278,6 @@
         });
         unsubscribeFunctions.push(unsubscribePedidos);
 
-        // Listener para clientes
         const clientesRef = collection(db, "lojistas", userId, "clientes");
         const unsubscribeClientes = onSnapshot(clientesRef, (snapshot) => {
             const totalClientesCount = snapshot.size;
@@ -1460,19 +1287,15 @@
         unsubscribeFunctions.push(unsubscribeClientes);
     }
 
-    // ============================================
-    // ATUALIZAR DADOS DA LOJA
-    // ============================================
-
     function atualizarDadosLoja(data) {
         if (data.status === 'ativo' || data.status === 'aberta') {
             statusIndicator.className = 'status-indicator status-active';
-            statusLoja.textContent = 'Loja Online - Aberta';
+            statusLoja.textContent = 'Loja Online';
             document.getElementById('statusDashboard').className = 'status-badge status-success';
             document.getElementById('statusDashboard').textContent = 'Online';
         } else {
             statusIndicator.className = 'status-indicator status-inactive';
-            statusLoja.textContent = 'Loja Offline - Fechada';
+            statusLoja.textContent = 'Loja Offline';
             document.getElementById('statusDashboard').className = 'status-badge status-danger';
             document.getElementById('statusDashboard').textContent = 'Offline';
         }
@@ -1488,10 +1311,6 @@
         }
     }
 
-    // ============================================
-    // ATUALIZAR ALERTAS DE ESTOQUE
-    // ============================================
-
     function atualizarAlertasEstoque(produtos) {
         alertasLista.innerHTML = '';
         
@@ -1504,14 +1323,14 @@
 
         if (produtosZerados.length > 0) {
             const alerta = document.createElement('div');
-            alerta.className = 'alert-item';
+            alerta.className = 'alert-item mb-2';
             alerta.innerHTML = `
-                <div class="alert-icon">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div>
-                    <strong>${produtosZerados.length} produto(s) com estoque ZERADO</strong>
-                    <p class="mb-0 text-muted">Reponha urgentemente para evitar perda de vendas</p>
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-exclamation-circle text-danger me-2 mt-1"></i>
+                    <div>
+                        <strong class="d-block">${produtosZerados.length} produto(s) com estoque ZERADO</strong>
+                        <small class="text-muted">Reponha urgentemente</small>
+                    </div>
                 </div>
             `;
             alertasLista.appendChild(alerta);
@@ -1521,21 +1340,17 @@
             const alerta = document.createElement('div');
             alerta.className = 'alert-item';
             alerta.innerHTML = `
-                <div class="alert-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div>
-                    <strong>${produtosBaixos.length} produto(s) com estoque BAIXO</strong>
-                    <p class="mb-0 text-muted">Considere fazer reposição em breve</p>
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                    <div>
+                        <strong class="d-block">${produtosBaixos.length} produto(s) com estoque BAIXO</strong>
+                        <small class="text-muted">Considere fazer reposição</small>
+                    </div>
                 </div>
             `;
             alertasLista.appendChild(alerta);
         }
     }
-
-    // ============================================
-    // ATUALIZAR PEDIDOS RECENTES
-    // ============================================
 
     function atualizarPedidosRecentes(pedidos) {
         const pedidosOrdenados = pedidos
@@ -1564,8 +1379,8 @@
                 }
                 
                 tr.innerHTML = `
-                    <td><strong>#${pedido.id.substring(0, 8)}</strong></td>
-                    <td>${pedido.nomeCliente || 'Cliente'}</td>
+                    <td><strong>#${pedido.id.substring(0, 6)}</strong></td>
+                    <td>${pedido.nomeCliente?.substring(0, 15) || 'Cliente'}</td>
                     <td>R$ ${(pedido.valorTotal || 0).toFixed(2)}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${dataFormatada}</td>
@@ -1575,18 +1390,14 @@
         } else {
             pedidosRecentes.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
-                        <i class="fas fa-shopping-cart fa-2x mb-2"></i><br>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        <i class="fas fa-shopping-cart fa-lg mb-2"></i><br>
                         Nenhum pedido encontrado
                     </td>
                 </tr>
             `;
         }
     }
-
-    // ============================================
-    // ATUALIZAR PRODUTOS EM DESTAQUE
-    // ============================================
 
     function atualizarProdutosDestaque(produtos) {
         const produtosOrdenados = produtos
@@ -1598,34 +1409,30 @@
             produtosDestaque.innerHTML = '';
             produtosOrdenados.forEach(produto => {
                 const col = document.createElement('div');
-                col.className = 'col-md-4 mb-3';
+                col.className = 'col-md-4 col-6';
                 
                 let estoqueClass = 'status-success';
                 if (produto.estoque <= 3) estoqueClass = 'status-danger';
                 else if (produto.estoque <= 8) estoqueClass = 'status-warning';
                 
                 col.innerHTML = `
-                    <div class="stat-card">
-                        <h5>${produto.nome || 'Produto'}</h5>
-                        <p class="mb-2">Preço: <strong>R$ ${(produto.preco || 0).toFixed(2)}</strong></p>
-                        <p class="mb-0">Estoque: <span class="status-badge ${estoqueClass}">${produto.estoque || 0} un.</span></p>
+                    <div class="stat-card h-100">
+                        <h6 class="mb-1">${produto.nome?.substring(0, 20) || 'Produto'}</h6>
+                        <p class="mb-2">R$ ${(produto.preco || 0).toFixed(2)}</p>
+                        <p class="mb-0"><span class="status-badge ${estoqueClass}">${produto.estoque || 0} un.</span></p>
                     </div>
                 `;
                 produtosDestaque.appendChild(col);
             });
         } else {
             produtosDestaque.innerHTML = `
-                <div class="col-12 text-center text-muted py-4">
-                    <i class="fas fa-box-open fa-2x mb-2"></i><br>
+                <div class="col-12 text-center text-muted py-3">
+                    <i class="fas fa-box-open fa-lg mb-2"></i><br>
                     Nenhum produto cadastrado
                 </div>
             `;
         }
     }
-
-    // ============================================
-    // FUNÇÕES AUXILIARES
-    // ============================================
 
     function mostrarErro(mensagem) {
         const alertDiv = document.createElement('div');
@@ -1637,11 +1444,6 @@
         document.querySelector('.main-content').prepend(alertDiv);
     }
 
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-
-    // Logout
     btnLogout.addEventListener('click', async () => {
         try {
             unsubscribeFunctions.forEach(unsub => unsub && unsub());
@@ -1652,7 +1454,6 @@
         }
     });
 
-    // Toggle Menu Mobile
     menuToggle.addEventListener('click', () => {
         dashboardMenu.classList.toggle('show');
         const icon = menuToggle.querySelector('i');
@@ -1665,7 +1466,6 @@
         }
     });
 
-    // Fechar menu ao clicar fora (mobile)
     document.addEventListener('click', (e) => {
         if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
             dashboardMenu.classList.remove('show');
@@ -1675,14 +1475,9 @@
         }
     });
 
-    // Navegação entre páginas
     menuLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            const hasDataPage = link.hasAttribute('data-page');
-            
-            if (!hasDataPage) {
-                return;
-            }
+            if (!link.hasAttribute('data-page')) return;
             
             e.preventDefault();
             
@@ -1692,14 +1487,7 @@
             link.classList.add('active');
             
             const page = link.getAttribute('data-page');
-            let pageId;
-            
-            if (page === 'perfil-loja') {
-                pageId = 'pagePerfilLoja';
-            } else {
-                pageId = `page${page.charAt(0).toUpperCase() + page.slice(1)}`;
-            }
-            
+            const pageId = `page${page.charAt(0).toUpperCase() + page.slice(1)}`;
             const targetPage = document.getElementById(pageId);
             
             if (targetPage) {
@@ -1715,7 +1503,6 @@
         });
     });
 
-    // Botões de ação rápida
     btnNovoProduto.addEventListener('click', () => {
         window.location.href = 'novo-produto.html';
     });
@@ -1732,17 +1519,8 @@
         window.location.href = 'nova-promocao.html';
     });
 
-    // Botões de assinatura
-    btnUpgradePlano.addEventListener('click', () => {
-        window.location.href = 'planos-assinatura.html';
-    });
-
-    btnHistoricoPagamentos.addEventListener('click', () => {
-        window.location.href = 'historico-pagamentos.html';
-    });
-
-    btnGerenciarPagamento.addEventListener('click', () => {
-        window.location.href = 'gerenciar-pagamento.html';
+    btnGerenciarAssinatura.addEventListener('click', () => {
+        document.querySelector('[data-page="assinaturas"]').click();
     });
 
     btnVerPlanos.addEventListener('click', () => {
@@ -1753,14 +1531,6 @@
         window.location.href = 'pagar-assinatura.html';
     });
 
-    btnCancelarAssinatura.addEventListener('click', () => {
-        if (confirm('Tem certeza que deseja cancelar sua assinatura?')) {
-            // Implementar cancelamento da assinatura
-            mostrarErro('Funcionalidade de cancelamento em desenvolvimento');
-        }
-    });
-
-    // Botões internos
     document.getElementById('btnConfigurarLoja').addEventListener('click', () => {
         window.location.href = 'perfil-loja.html';
     });
