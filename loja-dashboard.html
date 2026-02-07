@@ -607,7 +607,7 @@
         <div class="container-fluid">
             <div class="d-flex align-items-center w-100">
                 <!-- Logo -->
-                <a class="navbar-brand-dashboard" href="#">
+                <a class="navbar-brand-dashboard" href="dashboard-loja.html">
                     <img src="logoscanhub.png" alt="ScanHub">
                 </a>
 
@@ -823,451 +823,466 @@
 
     <!-- Firebase e Scripts -->
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { 
-        getAuth, 
-        onAuthStateChanged,
-        signOut 
-    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-    import { 
-        getFirestore, 
-        doc, 
-        getDoc,
-        collection,
-        onSnapshot
-    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc,
+            collection,
+            onSnapshot
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
-        authDomain: "scanhub-ed512.firebaseapp.com",
-        projectId: "scanhub-ed512",
-        storageBucket: "scanhub-ed512.firebasestorage.app",
-        messagingSenderId: "1083305018831",
-        appId: "1:1083305018831:web:f7594d560439c8965c3eba"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYqWTg2RAr4IbqxRsl58TZGQ9tKnyFK14",
+            authDomain: "scanhub-ed512.firebaseapp.com",
+            projectId: "scanhub-ed512",
+            storageBucket: "scanhub-ed512.firebasestorage.app",
+            messagingSenderId: "1083305018831",
+            appId: "1:1083305018831:web:f7594d560439c8965c3eba"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    const userName = document.getElementById('userName');
-    const userAvatar = document.getElementById('userAvatar');
-    const userId = document.getElementById('userId');
-    const welcomeName = document.getElementById('welcomeName');
-    const welcomeMessage = document.getElementById('welcomeMessage');
-    const statusLoja = document.getElementById('statusLoja');
-    const statusIndicator = document.getElementById('statusIndicator');
-    const btnLogout = document.getElementById('btnLogout');
-    const menuToggle = document.getElementById('menuToggle');
-    const dashboardMenu = document.getElementById('dashboardMenu');
-    const loader = document.getElementById('loader');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const userId = document.getElementById('userId');
+        const welcomeName = document.getElementById('welcomeName');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const statusLoja = document.getElementById('statusLoja');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const btnLogout = document.getElementById('btnLogout');
+        const menuToggle = document.getElementById('menuToggle');
+        const dashboardMenu = document.getElementById('dashboardMenu');
+        const loader = document.getElementById('loader');
 
-    const totalVendas = document.getElementById('totalVendas');
-    const totalProdutos = document.getElementById('totalProdutos');
-    const pedidosPendentes = document.getElementById('pedidosPendentes');
-    const totalClientes = document.getElementById('totalClientes');
-    const statusAssinatura = document.getElementById('statusAssinatura');
-    const pedidosRecentes = document.getElementById('pedidosRecentes');
-    const produtosDestaque = document.getElementById('produtosDestaque');
+        const totalVendas = document.getElementById('totalVendas');
+        const totalProdutos = document.getElementById('totalProdutos');
+        const pedidosPendentes = document.getElementById('pedidosPendentes');
+        const totalClientes = document.getElementById('totalClientes');
+        const statusAssinatura = document.getElementById('statusAssinatura');
+        const pedidosRecentes = document.getElementById('pedidosRecentes');
+        const produtosDestaque = document.getElementById('produtosDestaque');
 
-    const alertsContainer = document.getElementById('alertsContainer');
-    const alertasLista = document.getElementById('alertasLista');
-    const badgeProdutos = document.getElementById('badgeProdutos');
-    const badgePedidos = document.getElementById('badgePedidos');
-    const badgeAssinatura = document.getElementById('badgeAssinatura');
+        const alertsContainer = document.getElementById('alertsContainer');
+        const alertasLista = document.getElementById('alertasLista');
+        const badgeProdutos = document.getElementById('badgeProdutos');
+        const badgePedidos = document.getElementById('badgePedidos');
+        const badgeAssinatura = document.getElementById('badgeAssinatura');
 
-    const btnNovoProduto = document.getElementById('btnNovoProduto');
-    const btnVerPedidos = document.getElementById('btnVerPedidos');
-    const btnReporEstoque = document.getElementById('btnReporEstoque');
-    const btnPromocao = document.getElementById('btnPromocao');
-    const btnGerenciarAssinatura = document.getElementById('btnGerenciarAssinatura');
+        const btnNovoProduto = document.getElementById('btnNovoProduto');
+        const btnVerPedidos = document.getElementById('btnVerPedidos');
+        const btnReporEstoque = document.getElementById('btnReporEstoque');
+        const btnPromocao = document.getElementById('btnPromocao');
+        const btnGerenciarAssinatura = document.getElementById('btnGerenciarAssinatura');
 
-    let userData = null;
-    let lojaData = null;
-    let unsubscribeFunctions = [];
+        let userData = null;
+        let lojaData = null;
+        let unsubscribeFunctions = [];
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            try {
-                const userRef = doc(db, "usuarios", user.uid);
-                const userDoc = await getDoc(userRef);
-                
-                if (userDoc.exists()) {
-                    userData = userDoc.data();
-                    await carregarDadosLoja(user.uid);
-                    await carregarAssinatura(user.uid);
-                    await inicializarDashboard(user.uid);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const userDoc = await getDoc(userRef);
                     
-                    setTimeout(() => {
-                        loader.classList.add('hide');
-                    }, 500);
-                    
-                } else {
-                    window.location.href = 'criar-perfil.html';
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                        await carregarDadosLoja(user.uid);
+                        await carregarAssinatura(user.uid);
+                        await inicializarDashboard(user.uid);
+                        
+                        setTimeout(() => {
+                            loader.classList.add('hide');
+                        }, 500);
+                        
+                    } else {
+                        window.location.href = 'criar-perfil.html';
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar dados do usuário:', error);
+                    loader.classList.add('hide');
                 }
-            } catch (error) {
-                loader.classList.add('hide');
-            }
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
-
-    async function carregarDadosLoja(userId) {
-        try {
-            const lojistaRef = doc(db, "lojistas", userId);
-            const lojistaDoc = await getDoc(lojistaRef);
-            
-            if (lojistaDoc.exists()) {
-                lojaData = lojistaDoc.data();
-            }
-        } catch (error) {}
-    }
-
-    async function carregarAssinatura(userId) {
-        try {
-            const assinaturaRef = doc(db, "assinaturas", userId);
-            const assinaturaDoc = await getDoc(assinaturaRef);
-            
-            if (assinaturaDoc.exists()) {
-                const data = assinaturaDoc.data();
-                statusAssinatura.textContent = data.plano || "Básico";
-                
-                if (data.trial) {
-                    badgeAssinatura.textContent = "Trial";
-                    badgeAssinatura.style.display = 'inline-block';
-                }
-            }
-        } catch (error) {
-            statusAssinatura.textContent = "Básico";
-        }
-    }
-
-    async function inicializarDashboard(userId) {
-        try {
-            atualizarInterfaceUsuarioComLoja(userData, lojaData);
-            await configurarListeners(userId);
-        } catch (error) {}
-    }
-
-    function atualizarInterfaceUsuarioComLoja(userData, lojaData) {
-        let nomeParaMostrar = '';
-        let inicialParaAvatar = '';
-        let idParaMostrar = '';
-        
-        if (lojaData?.dadosCadastrais?.nomeFantasia) {
-            nomeParaMostrar = lojaData.dadosCadastrais.nomeFantasia;
-            inicialParaAvatar = lojaData.dadosCadastrais.nomeFantasia.charAt(0).toUpperCase();
-        } else if (userData?.apelido) {
-            nomeParaMostrar = userData.apelido;
-            inicialParaAvatar = userData.apelido.charAt(0).toUpperCase();
-        } else if (userData?.email) {
-            nomeParaMostrar = userData.email.split('@')[0];
-            inicialParaAvatar = userData.email.charAt(0).toUpperCase();
-        }
-        
-        if (userData?.idScanHub) {
-            idParaMostrar = `ID: ${userData.idScanHub}`;
-        } else if (auth.currentUser?.uid) {
-            idParaMostrar = `UID: ${auth.currentUser.uid.substring(0, 8)}...`;
-        }
-        
-        userName.textContent = nomeParaMostrar;
-        userAvatar.textContent = inicialParaAvatar;
-        userId.textContent = idParaMostrar;
-        
-        if (lojaData?.dadosCadastrais?.nomeFantasia) {
-            welcomeName.textContent = `Bem-vindo, ${lojaData.dadosCadastrais.nomeFantasia}!`;
-        } else if (userData?.apelido) {
-            welcomeName.textContent = `Bem-vindo, ${userData.apelido}!`;
-        } else {
-            welcomeName.textContent = `Bem-vindo à sua loja!`;
-        }
-        
-        welcomeMessage.textContent = lojaData?.descricao || 
-            'Gerencie sua loja de forma simples e eficiente.';
-    }
-
-    async function configurarListeners(userId) {
-        unsubscribeFunctions.forEach(unsub => unsub && unsub());
-        unsubscribeFunctions = [];
-
-        const lojistaRef = doc(db, "lojistas", userId);
-        const unsubscribeLoja = onSnapshot(lojistaRef, (doc) => {
-            if (doc.exists()) {
-                const novoLojaData = doc.data();
-                lojaData = novoLojaData;
-                atualizarDadosLoja(novoLojaData);
-                atualizarInterfaceUsuarioComLoja(userData, novoLojaData);
+            } else {
+                window.location.href = 'login.html';
             }
         });
-        unsubscribeFunctions.push(unsubscribeLoja);
 
-        const produtosRef = collection(db, "lojistas", userId, "produtos");
-        const unsubscribeProdutos = onSnapshot(produtosRef, (snapshot) => {
-            const produtos = [];
-            let totalProdutosCount = 0;
-            let estoqueBaixoCount = 0;
-            let estoqueZeradoCount = 0;
-
-            snapshot.forEach(doc => {
-                const produto = { id: doc.id, ...doc.data() };
-                produtos.push(produto);
+        async function carregarDadosLoja(userId) {
+            try {
+                const lojistaRef = doc(db, "lojistas", userId);
+                const lojistaDoc = await getDoc(lojistaRef);
                 
-                if (produto.estoque !== undefined) {
-                    if (produto.estoque <= 0) {
-                        estoqueZeradoCount++;
-                    } else if (produto.estoque <= (produto.estoqueMinimo || 5)) {
-                        estoqueBaixoCount++;
+                if (lojistaDoc.exists()) {
+                    lojaData = lojistaDoc.data();
+                }
+            } catch (error) {}
+        }
+
+        async function carregarAssinatura(userId) {
+            try {
+                const assinaturaRef = doc(db, "assinaturas", userId);
+                const assinaturaDoc = await getDoc(assinaturaRef);
+                
+                if (assinaturaDoc.exists()) {
+                    const data = assinaturaDoc.data();
+                    statusAssinatura.textContent = data.plano || "Básico";
+                    
+                    if (data.trial) {
+                        badgeAssinatura.textContent = "Trial";
+                        badgeAssinatura.style.display = 'inline-block';
+                    }
+                }
+            } catch (error) {
+                statusAssinatura.textContent = "Básico";
+            }
+        }
+
+        async function inicializarDashboard(userId) {
+            try {
+                atualizarInterfaceUsuarioComLoja(userData, lojaData);
+                await configurarListeners(userId);
+            } catch (error) {}
+        }
+
+        function atualizarInterfaceUsuarioComLoja(userData, lojaData) {
+            let nomeParaMostrar = '';
+            let inicialParaAvatar = '';
+            let idParaMostrar = '';
+            
+            if (lojaData?.dadosCadastrais?.nomeFantasia) {
+                nomeParaMostrar = lojaData.dadosCadastrais.nomeFantasia;
+                inicialParaAvatar = lojaData.dadosCadastrais.nomeFantasia.charAt(0).toUpperCase();
+            } else if (userData?.apelido) {
+                nomeParaMostrar = userData.apelido;
+                inicialParaAvatar = userData.apelido.charAt(0).toUpperCase();
+            } else if (userData?.email) {
+                nomeParaMostrar = userData.email.split('@')[0];
+                inicialParaAvatar = userData.email.charAt(0).toUpperCase();
+            }
+            
+            if (userData?.idScanHub) {
+                idParaMostrar = `ID: ${userData.idScanHub}`;
+            } else if (auth.currentUser?.uid) {
+                idParaMostrar = `UID: ${auth.currentUser.uid.substring(0, 8)}...`;
+            }
+            
+            userName.textContent = nomeParaMostrar;
+            userAvatar.textContent = inicialParaAvatar;
+            userId.textContent = idParaMostrar;
+            
+            if (lojaData?.dadosCadastrais?.nomeFantasia) {
+                welcomeName.textContent = `Bem-vindo, ${lojaData.dadosCadastrais.nomeFantasia}!`;
+            } else if (userData?.apelido) {
+                welcomeName.textContent = `Bem-vindo, ${userData.apelido}!`;
+            } else {
+                welcomeName.textContent = `Bem-vindo à sua loja!`;
+            }
+            
+            welcomeMessage.textContent = lojaData?.descricao || 
+                'Gerencie sua loja de forma simples e eficiente.';
+        }
+
+        async function configurarListeners(userId) {
+            unsubscribeFunctions.forEach(unsub => unsub && unsub());
+            unsubscribeFunctions = [];
+
+            const lojistaRef = doc(db, "lojistas", userId);
+            const unsubscribeLoja = onSnapshot(lojistaRef, (doc) => {
+                if (doc.exists()) {
+                    const novoLojaData = doc.data();
+                    lojaData = novoLojaData;
+                    atualizarDadosLoja(novoLojaData);
+                    atualizarInterfaceUsuarioComLoja(userData, novoLojaData);
+                }
+            });
+            unsubscribeFunctions.push(unsubscribeLoja);
+
+            const produtosRef = collection(db, "lojistas", userId, "produtos");
+            const unsubscribeProdutos = onSnapshot(produtosRef, (snapshot) => {
+                const produtos = [];
+                let totalProdutosCount = 0;
+                let estoqueBaixoCount = 0;
+                let estoqueZeradoCount = 0;
+
+                snapshot.forEach(doc => {
+                    const produto = { id: doc.id, ...doc.data() };
+                    produtos.push(produto);
+                    
+                    if (produto.estoque !== undefined) {
+                        if (produto.estoque <= 0) {
+                            estoqueZeradoCount++;
+                        } else if (produto.estoque <= (produto.estoqueMinimo || 5)) {
+                            estoqueBaixoCount++;
+                        }
+                    }
+                });
+
+                totalProdutosCount = produtos.length;
+                totalProdutos.textContent = totalProdutosCount;
+                
+                const totalAlertas = estoqueBaixoCount + estoqueZeradoCount;
+                if (totalAlertas > 0) {
+                    badgeProdutos.textContent = totalAlertas;
+                    badgeProdutos.style.display = 'inline-block';
+                    alertsContainer.style.display = 'block';
+                    atualizarAlertasEstoque(produtos);
+                } else {
+                    badgeProdutos.style.display = 'none';
+                    alertsContainer.style.display = 'none';
+                }
+
+                atualizarProdutosDestaque(produtos);
+            });
+            unsubscribeFunctions.push(unsubscribeProdutos);
+
+            const pedidosRef = collection(db, "lojistas", userId, "pedidos");
+            const unsubscribePedidos = onSnapshot(pedidosRef, (snapshot) => {
+                const pedidos = [];
+                let pedidosPendentesCount = 0;
+
+                snapshot.forEach(doc => {
+                    const pedido = { id: doc.id, ...doc.data() };
+                    pedidos.push(pedido);
+                    
+                    if (pedido.status === 'pendente' || pedido.status === 'processando') {
+                        pedidosPendentesCount++;
+                    }
+                });
+
+                pedidosPendentes.textContent = pedidosPendentesCount;
+                
+                if (pedidosPendentesCount > 0) {
+                    badgePedidos.textContent = pedidosPendentesCount;
+                    badgePedidos.style.display = 'inline-block';
+                } else {
+                    badgePedidos.style.display = 'none';
+                }
+
+                atualizarPedidosRecentes(pedidos);
+            });
+            unsubscribeFunctions.push(unsubscribePedidos);
+
+            const clientesRef = collection(db, "lojistas", userId, "clientes");
+            const unsubscribeClientes = onSnapshot(clientesRef, (snapshot) => {
+                const totalClientesCount = snapshot.size;
+                totalClientes.textContent = totalClientesCount;
+            });
+            unsubscribeFunctions.push(unsubscribeClientes);
+        }
+
+        function atualizarDadosLoja(data) {
+            if (data.status === 'ativo' || data.status === 'aberta') {
+                statusIndicator.className = 'status-indicator status-active';
+                statusLoja.textContent = 'Loja Online';
+                document.getElementById('statusDashboard').className = 'status-badge status-success';
+                document.getElementById('statusDashboard').textContent = 'Online';
+            } else {
+                statusIndicator.className = 'status-indicator status-inactive';
+                statusLoja.textContent = 'Loja Offline';
+                document.getElementById('statusDashboard').className = 'status-badge status-danger';
+                document.getElementById('statusDashboard').textContent = 'Offline';
+            }
+
+            if (data.vendasHoje !== undefined) {
+                totalVendas.textContent = `R$ ${data.vendasHoje.toFixed(2)}`;
+            } else {
+                totalVendas.textContent = 'R$ 0,00';
+            }
+        }
+
+        function atualizarAlertasEstoque(produtos) {
+            alertasLista.innerHTML = '';
+            
+            const produtosZerados = produtos.filter(p => p.estoque !== undefined && p.estoque <= 0);
+            const produtosBaixos = produtos.filter(p => 
+                p.estoque !== undefined && 
+                p.estoque > 0 && 
+                p.estoque <= (p.estoqueMinimo || 5)
+            );
+
+            if (produtosZerados.length > 0) {
+                const alerta = document.createElement('div');
+                alerta.className = 'alert-item mb-2';
+                alerta.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-circle text-danger me-2 mt-1"></i>
+                        <div>
+                            <strong class="d-block">${produtosZerados.length} produto(s) com estoque ZERADO</strong>
+                            <small class="text-muted">Reponha urgentemente</small>
+                        </div>
+                    </div>
+                `;
+                alertasLista.appendChild(alerta);
+            }
+            
+            if (produtosBaixos.length > 0) {
+                const alerta = document.createElement('div');
+                alerta.className = 'alert-item';
+                alerta.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                        <div>
+                            <strong class="d-block">${produtosBaixos.length} produto(s) com estoque BAIXO</strong>
+                            <small class="text-muted">Considere fazer reposição</small>
+                        </div>
+                    </div>
+                `;
+                alertasLista.appendChild(alerta);
+            }
+        }
+
+        function atualizarPedidosRecentes(pedidos) {
+            const pedidosOrdenados = pedidos
+                .sort((a, b) => new Date(b.dataCriacao || 0) - new Date(a.dataCriacao || 0))
+                .slice(0, 5);
+
+            if (pedidosOrdenados.length > 0) {
+                pedidosRecentes.innerHTML = '';
+                pedidosOrdenados.forEach(pedido => {
+                    const tr = document.createElement('tr');
+                    let statusClass = 'status-warning';
+                    let statusText = pedido.status || 'Pendente';
+                    
+                    if (statusText === 'processando' || statusText === 'preparando') {
+                        statusClass = 'status-info';
+                    } else if (statusText === 'entregue' || statusText === 'concluido') {
+                        statusClass = 'status-success';
+                    } else if (statusText === 'cancelado') {
+                        statusClass = 'status-danger';
+                    }
+                    
+                    let dataFormatada = '';
+                    if (pedido.dataCriacao) {
+                        const data = pedido.dataCriacao.toDate ? pedido.dataCriacao.toDate() : new Date(pedido.dataCriacao);
+                        dataFormatada = data.toLocaleDateString('pt-BR');
+                    }
+                    
+                    tr.innerHTML = `
+                        <td><strong>#${pedido.id.substring(0, 6)}</strong></td>
+                        <td>${pedido.nomeCliente?.substring(0, 15) || 'Cliente'}</td>
+                        <td>R$ ${(pedido.valorTotal || 0).toFixed(2)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${dataFormatada}</td>
+                    `;
+                    pedidosRecentes.appendChild(tr);
+                });
+            } else {
+                pedidosRecentes.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">
+                            <i class="fas fa-shopping-cart fa-lg mb-2"></i><br>
+                            Nenhum pedido encontrado
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function atualizarProdutosDestaque(produtos) {
+            const produtosOrdenados = produtos
+                .filter(p => p.estoque !== undefined && p.estoque > 0)
+                .sort((a, b) => (b.vendas || 0) - (a.vendas || 0))
+                .slice(0, 3);
+
+            if (produtosOrdenados.length > 0) {
+                produtosDestaque.innerHTML = '';
+                produtosOrdenados.forEach(produto => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-4 col-6';
+                    
+                    let estoqueClass = 'status-success';
+                    if (produto.estoque <= 3) estoqueClass = 'status-danger';
+                    else if (produto.estoque <= 8) estoqueClass = 'status-warning';
+                    
+                    col.innerHTML = `
+                        <div class="stat-card h-100">
+                            <h6 class="mb-1">${produto.nome?.substring(0, 20) || 'Produto'}</h6>
+                            <p class="mb-2">R$ ${(produto.preco || 0).toFixed(2)}</p>
+                            <p class="mb-0"><span class="status-badge ${estoqueClass}">${produto.estoque || 0} un.</span></p>
+                        </div>
+                    `;
+                    produtosDestaque.appendChild(col);
+                });
+            } else {
+                produtosDestaque.innerHTML = `
+                    <div class="col-12 text-center text-muted py-3">
+                        <i class="fas fa-box-open fa-lg mb-2"></i><br>
+                        Nenhum produto cadastrado
+                    </div>
+                `;
+            }
+        }
+
+        btnLogout.addEventListener('click', async () => {
+            try {
+                unsubscribeFunctions.forEach(unsub => unsub && unsub());
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {}
+        });
+
+        menuToggle.addEventListener('click', () => {
+            dashboardMenu.classList.toggle('show');
+            const icon = menuToggle.querySelector('i');
+            if (dashboardMenu.classList.contains('show')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dashboardMenu.classList.remove('show');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Direcionamento dos botões
+        btnNovoProduto.addEventListener('click', () => {
+            window.location.href = 'novo-produto.html';
+        });
+
+        btnVerPedidos.addEventListener('click', () => {
+            window.location.href = 'pedidos-loja.html';
+        });
+
+        btnReporEstoque.addEventListener('click', () => {
+            window.location.href = 'estoque-loja.html';
+        });
+
+        btnPromocao.addEventListener('click', () => {
+            window.location.href = 'promocoes.html';
+        });
+
+        btnGerenciarAssinatura.addEventListener('click', () => {
+            window.location.href = 'assinatura-loja.html';
+        });
+
+        // Adicionar direcionamento para o menu de navegação
+        document.querySelectorAll('.dashboard-menu a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Se não for o link do dashboard, permitir o direcionamento
+                if (!link.classList.contains('active')) {
+                    e.preventDefault();
+                    const href = link.getAttribute('href');
+                    if (href && href !== '#') {
+                        window.location.href = href;
                     }
                 }
             });
-
-            totalProdutosCount = produtos.length;
-            totalProdutos.textContent = totalProdutosCount;
-            
-            const totalAlertas = estoqueBaixoCount + estoqueZeradoCount;
-            if (totalAlertas > 0) {
-                badgeProdutos.textContent = totalAlertas;
-                badgeProdutos.style.display = 'inline-block';
-                alertsContainer.style.display = 'block';
-                atualizarAlertasEstoque(produtos);
-            } else {
-                badgeProdutos.style.display = 'none';
-                alertsContainer.style.display = 'none';
-            }
-
-            atualizarProdutosDestaque(produtos);
         });
-        unsubscribeFunctions.push(unsubscribeProdutos);
-
-        const pedidosRef = collection(db, "lojistas", userId, "pedidos");
-        const unsubscribePedidos = onSnapshot(pedidosRef, (snapshot) => {
-            const pedidos = [];
-            let pedidosPendentesCount = 0;
-
-            snapshot.forEach(doc => {
-                const pedido = { id: doc.id, ...doc.data() };
-                pedidos.push(pedido);
-                
-                if (pedido.status === 'pendente' || pedido.status === 'processando') {
-                    pedidosPendentesCount++;
-                }
-            });
-
-            pedidosPendentes.textContent = pedidosPendentesCount;
-            
-            if (pedidosPendentesCount > 0) {
-                badgePedidos.textContent = pedidosPendentesCount;
-                badgePedidos.style.display = 'inline-block';
-            } else {
-                badgePedidos.style.display = 'none';
-            }
-
-            atualizarPedidosRecentes(pedidos);
-        });
-        unsubscribeFunctions.push(unsubscribePedidos);
-
-        const clientesRef = collection(db, "lojistas", userId, "clientes");
-        const unsubscribeClientes = onSnapshot(clientesRef, (snapshot) => {
-            const totalClientesCount = snapshot.size;
-            totalClientes.textContent = totalClientesCount;
-        });
-        unsubscribeFunctions.push(unsubscribeClientes);
-    }
-
-    function atualizarDadosLoja(data) {
-        if (data.status === 'ativo' || data.status === 'aberta') {
-            statusIndicator.className = 'status-indicator status-active';
-            statusLoja.textContent = 'Loja Online';
-            document.getElementById('statusDashboard').className = 'status-badge status-success';
-            document.getElementById('statusDashboard').textContent = 'Online';
-        } else {
-            statusIndicator.className = 'status-indicator status-inactive';
-            statusLoja.textContent = 'Loja Offline';
-            document.getElementById('statusDashboard').className = 'status-badge status-danger';
-            document.getElementById('statusDashboard').textContent = 'Offline';
-        }
-
-        if (data.vendasHoje !== undefined) {
-            totalVendas.textContent = `R$ ${data.vendasHoje.toFixed(2)}`;
-        } else {
-            totalVendas.textContent = 'R$ 0,00';
-        }
-    }
-
-    function atualizarAlertasEstoque(produtos) {
-        alertasLista.innerHTML = '';
-        
-        const produtosZerados = produtos.filter(p => p.estoque !== undefined && p.estoque <= 0);
-        const produtosBaixos = produtos.filter(p => 
-            p.estoque !== undefined && 
-            p.estoque > 0 && 
-            p.estoque <= (p.estoqueMinimo || 5)
-        );
-
-        if (produtosZerados.length > 0) {
-            const alerta = document.createElement('div');
-            alerta.className = 'alert-item mb-2';
-            alerta.innerHTML = `
-                <div class="d-flex align-items-start">
-                    <i class="fas fa-exclamation-circle text-danger me-2 mt-1"></i>
-                    <div>
-                        <strong class="d-block">${produtosZerados.length} produto(s) com estoque ZERADO</strong>
-                        <small class="text-muted">Reponha urgentemente</small>
-                    </div>
-                </div>
-            `;
-            alertasLista.appendChild(alerta);
-        }
-        
-        if (produtosBaixos.length > 0) {
-            const alerta = document.createElement('div');
-            alerta.className = 'alert-item';
-            alerta.innerHTML = `
-                <div class="d-flex align-items-start">
-                    <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
-                    <div>
-                        <strong class="d-block">${produtosBaixos.length} produto(s) com estoque BAIXO</strong>
-                        <small class="text-muted">Considere fazer reposição</small>
-                    </div>
-                </div>
-            `;
-            alertasLista.appendChild(alerta);
-        }
-    }
-
-    function atualizarPedidosRecentes(pedidos) {
-        const pedidosOrdenados = pedidos
-            .sort((a, b) => new Date(b.dataCriacao || 0) - new Date(a.dataCriacao || 0))
-            .slice(0, 5);
-
-        if (pedidosOrdenados.length > 0) {
-            pedidosRecentes.innerHTML = '';
-            pedidosOrdenados.forEach(pedido => {
-                const tr = document.createElement('tr');
-                let statusClass = 'status-warning';
-                let statusText = pedido.status || 'Pendente';
-                
-                if (statusText === 'processando' || statusText === 'preparando') {
-                    statusClass = 'status-info';
-                } else if (statusText === 'entregue' || statusText === 'concluido') {
-                    statusClass = 'status-success';
-                } else if (statusText === 'cancelado') {
-                    statusClass = 'status-danger';
-                }
-                
-                let dataFormatada = '';
-                if (pedido.dataCriacao) {
-                    const data = pedido.dataCriacao.toDate ? pedido.dataCriacao.toDate() : new Date(pedido.dataCriacao);
-                    dataFormatada = data.toLocaleDateString('pt-BR');
-                }
-                
-                tr.innerHTML = `
-                    <td><strong>#${pedido.id.substring(0, 6)}</strong></td>
-                    <td>${pedido.nomeCliente?.substring(0, 15) || 'Cliente'}</td>
-                    <td>R$ ${(pedido.valorTotal || 0).toFixed(2)}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${dataFormatada}</td>
-                `;
-                pedidosRecentes.appendChild(tr);
-            });
-        } else {
-            pedidosRecentes.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-3">
-                        <i class="fas fa-shopping-cart fa-lg mb-2"></i><br>
-                        Nenhum pedido encontrado
-                    </td>
-                </tr>
-            `;
-        }
-    }
-
-    function atualizarProdutosDestaque(produtos) {
-        const produtosOrdenados = produtos
-            .filter(p => p.estoque !== undefined && p.estoque > 0)
-            .sort((a, b) => (b.vendas || 0) - (a.vendas || 0))
-            .slice(0, 3);
-
-        if (produtosOrdenados.length > 0) {
-            produtosDestaque.innerHTML = '';
-            produtosOrdenados.forEach(produto => {
-                const col = document.createElement('div');
-                col.className = 'col-md-4 col-6';
-                
-                let estoqueClass = 'status-success';
-                if (produto.estoque <= 3) estoqueClass = 'status-danger';
-                else if (produto.estoque <= 8) estoqueClass = 'status-warning';
-                
-                col.innerHTML = `
-                    <div class="stat-card h-100">
-                        <h6 class="mb-1">${produto.nome?.substring(0, 20) || 'Produto'}</h6>
-                        <p class="mb-2">R$ ${(produto.preco || 0).toFixed(2)}</p>
-                        <p class="mb-0"><span class="status-badge ${estoqueClass}">${produto.estoque || 0} un.</span></p>
-                    </div>
-                `;
-                produtosDestaque.appendChild(col);
-            });
-        } else {
-            produtosDestaque.innerHTML = `
-                <div class="col-12 text-center text-muted py-3">
-                    <i class="fas fa-box-open fa-lg mb-2"></i><br>
-                    Nenhum produto cadastrado
-                </div>
-            `;
-        }
-    }
-
-    btnLogout.addEventListener('click', async () => {
-        try {
-            unsubscribeFunctions.forEach(unsub => unsub && unsub());
-            await signOut(auth);
-            window.location.href = 'login.html';
-        } catch (error) {
-        }
-    });
-
-    menuToggle.addEventListener('click', () => {
-        dashboardMenu.classList.toggle('show');
-        const icon = menuToggle.querySelector('i');
-        if (dashboardMenu.classList.contains('show')) {
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-times');
-        } else {
-            icon.classList.remove('fa-times');
-            icon.classList.add('fa-bars');
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!dashboardMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-            dashboardMenu.classList.remove('show');
-            const icon = menuToggle.querySelector('i');
-            icon.classList.remove('fa-times');
-            icon.classList.add('fa-bars');
-        }
-    });
-
-    btnNovoProduto.addEventListener('click', () => {
-        window.location.href = 'novo-produto.html';
-    });
-
-    btnVerPedidos.addEventListener('click', () => {
-        window.location.href = 'pedidos-loja.html';
-    });
-
-    btnReporEstoque.addEventListener('click', () => {
-        window.location.href = 'estoque-loja.html';
-    });
-
-    btnPromocao.addEventListener('click', () => {
-        window.location.href = 'promocoes.html';
-    });
-
-    btnGerenciarAssinatura.addEventListener('click', () => {
-        window.location.href = 'assinatura-loja.html';
-    });
-</script>
+    </script>
 </body>
 </html>
