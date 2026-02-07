@@ -650,58 +650,58 @@
                 </a>
             </li>
             <li>
-                <a href="#" data-page="produtos">
+                <a href="catalogo-loja.html">
                     <i class="fas fa-box-open"></i>
                     <span>Produtos</span>
                     <span class="menu-badge" id="badgeProdutos" style="display: none;"></span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="estoque">
+                <a href="estoque-loja.html">
                     <i class="fas fa-warehouse"></i>
                     <span>Estoque</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="pedidos">
+                <a href="pedidos-loja.html">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Pedidos</span>
                     <span class="menu-badge" id="badgePedidos" style="display: none;"></span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="clientes">
+                <a href="clientes-loja.html">
                     <i class="fas fa-users"></i>
                     <span>Clientes</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="fornecedores">
+                <a href="fornecedores.html">
                     <i class="fas fa-truck-loading"></i>
                     <span>Fornecedores</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="promocoes">
+                <a href="promocoes.html">
                     <i class="fas fa-tag"></i>
                     <span>Promoções</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="financeiro">
+                <a href="financeiro-loja.html">
                     <i class="fas fa-chart-line"></i>
                     <span>Financeiro</span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="assinaturas">
+                <a href="assinatura-loja.html">
                     <i class="fas fa-crown"></i>
                     <span>Assinatura</span>
                     <span class="menu-badge" id="badgeAssinatura" style="display: none;"></span>
                 </a>
             </li>
             <li>
-                <a href="#" data-page="notificacoes">
+                <a href="notificacoes-loja.html">
                     <i class="fas fa-bell"></i>
                     <span>Notificações</span>
                     <span class="menu-badge" id="badgeNotificacoes" style="display: none;"></span>
@@ -819,162 +819,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Perfil da Loja -->
-        <div id="pagePerfilLoja" class="content-area">
-            <div class="area-header">
-                <h4>Perfil da Loja</h4>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-store-alt"></i>
-                <h4>Configure sua loja</h4>
-                <p class="text-muted">Adicione informações da sua loja, horários, endereço e contatos</p>
-                <button class="btn btn-primary btn-sm mt-2" id="btnConfigurarLoja">
-                    <i class="fas fa-cog"></i> Configurar Loja
-                </button>
-            </div>
-        </div>
-
-        <!-- Produtos -->
-        <div id="pageProdutos" class="content-area">
-            <div class="area-header">
-                <h4>Produtos</h4>
-                <button class="btn btn-primary btn-sm" id="btnAdicionarProduto">
-                    <i class="fas fa-plus"></i> Adicionar
-                </button>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-boxes"></i>
-                <h4>Gerencie seus produtos</h4>
-                <p class="text-muted">Adicione, edite ou remova produtos do seu catálogo</p>
-            </div>
-        </div>
-
-        <!-- Estoque -->
-        <div id="pageEstoque" class="content-area">
-            <div class="area-header">
-                <h4>Controle de Estoque</h4>
-                <div>
-                    <span class="status-badge status-warning me-2">Baixo: <span id="contadorBaixo">0</span></span>
-                    <span class="status-badge status-danger">Zerado: <span id="contadorZerado">0</span></span>
-                </div>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-chart-bar"></i>
-                <h4>Controle de estoque</h4>
-                <p class="text-muted">Acompanhe níveis de estoque e receba alertas automáticos</p>
-            </div>
-        </div>
-
-        <!-- Pedidos -->
-        <div id="pagePedidos" class="content-area">
-            <div class="area-header">
-                <h4>Pedidos</h4>
-                <div>
-                    <span class="status-badge status-warning me-2">Pendentes: <span id="contadorPendentes">0</span></span>
-                    <button class="btn btn-success btn-sm" id="btnNovoPedido">
-                        <i class="fas fa-plus"></i> Novo
-                    </button>
-                </div>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-clipboard-list"></i>
-                <h4>Gerencie seus pedidos</h4>
-                <p class="text-muted">Acompanhe pedidos, atualize status e gerencie entregas</p>
-            </div>
-        </div>
-
-        <!-- Clientes -->
-        <div id="pageClientes" class="content-area">
-            <div class="area-header">
-                <h4>Clientes</h4>
-                <span class="status-badge status-info">Total: <span id="contadorClientes">0</span> clientes</span>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-user-friends"></i>
-                <h4>Base de clientes</h4>
-                <p class="text-muted">Gerencie seus clientes e histórico de compras</p>
-            </div>
-        </div>
-
-        <!-- Fornecedores -->
-        <div id="pageFornecedores" class="content-area">
-            <div class="area-header">
-                <h4>Fornecedores</h4>
-                <button class="btn btn-primary btn-sm" id="btnNovoFornecedor">
-                    <i class="fas fa-plus"></i> Novo
-                </button>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-truck"></i>
-                <h4>Fornecedores</h4>
-                <p class="text-muted">Gerencie seus fornecedores e pedidos de reposição</p>
-            </div>
-        </div>
-
-        <!-- Promoções -->
-        <div id="pagePromocoes" class="content-area">
-            <div class="area-header">
-                <h4>Promoções & Descontos</h4>
-                <button class="btn btn-warning btn-sm" id="btnNovaPromocao">
-                    <i class="fas fa-tag"></i> Nova Promoção
-                </button>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-percent"></i>
-                <h4>Promoções ativas</h4>
-                <p class="text-muted">Crie e gerencie promoções para aumentar suas vendas</p>
-            </div>
-        </div>
-
-        <!-- Financeiro -->
-        <div id="pageFinanceiro" class="content-area">
-            <div class="area-header">
-                <h4>Financeiro</h4>
-                <span class="status-badge status-success">Saldo: R$ <span id="saldoAtual">0,00</span></span>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-chart-pie"></i>
-                <h4>Controle financeiro</h4>
-                <p class="text-muted">Acompanhe vendas, despesas e relatórios financeiros</p>
-            </div>
-        </div>
-
-        <!-- Assinaturas -->
-        <div id="pageAssinaturas" class="content-area">
-            <div class="area-header">
-                <h4>Gerenciar Assinatura</h4>
-                <span class="status-badge" id="statusPageAssinatura">Status</span>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-crown"></i>
-                <h4>Gerenciamento de Assinatura</h4>
-                <p class="text-muted">Gerencie seu plano, pagamentos e faça upgrade</p>
-                <div class="mt-3">
-                    <button class="btn btn-primary btn-sm me-2" id="btnVerPlanos">
-                        <i class="fas fa-eye"></i> Ver Planos
-                    </button>
-                    <button class="btn btn-success btn-sm me-2" id="btnPagarAssinatura">
-                        <i class="fas fa-credit-card"></i> Pagar Fatura
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notificações -->
-        <div id="pageNotificacoes" class="content-area">
-            <div class="area-header">
-                <h4>Notificações</h4>
-                <button class="btn btn-outline-secondary btn-sm" id="btnMarcarTodasLidas">
-                    <i class="fas fa-check-double"></i> Marcar lidas
-                </button>
-            </div>
-            <div class="content-placeholder">
-                <i class="fas fa-bell"></i>
-                <h4>Central de notificações</h4>
-                <p class="text-muted">Acompanhe alertas, mensagens e atualizações da loja</p>
-            </div>
-        </div>
     </div>
 
     <!-- Firebase e Scripts -->
@@ -1016,8 +860,6 @@
     const btnLogout = document.getElementById('btnLogout');
     const menuToggle = document.getElementById('menuToggle');
     const dashboardMenu = document.getElementById('dashboardMenu');
-    const menuLinks = document.querySelectorAll('.dashboard-menu a');
-    const contentAreas = document.querySelectorAll('.content-area');
     const loader = document.getElementById('loader');
 
     const totalVendas = document.getElementById('totalVendas');
@@ -1030,28 +872,18 @@
 
     const alertsContainer = document.getElementById('alertsContainer');
     const alertasLista = document.getElementById('alertasLista');
-    const contadorBaixo = document.getElementById('contadorBaixo');
-    const contadorZerado = document.getElementById('contadorZerado');
-    const contadorPendentes = document.getElementById('contadorPendentes');
-    const contadorClientes = document.getElementById('contadorClientes');
-
     const badgeProdutos = document.getElementById('badgeProdutos');
     const badgePedidos = document.getElementById('badgePedidos');
     const badgeAssinatura = document.getElementById('badgeAssinatura');
-    const badgeNotificacoes = document.getElementById('badgeNotificacoes');
-    const statusPageAssinatura = document.getElementById('statusPageAssinatura');
 
     const btnNovoProduto = document.getElementById('btnNovoProduto');
     const btnVerPedidos = document.getElementById('btnVerPedidos');
     const btnReporEstoque = document.getElementById('btnReporEstoque');
     const btnPromocao = document.getElementById('btnPromocao');
     const btnGerenciarAssinatura = document.getElementById('btnGerenciarAssinatura');
-    const btnVerPlanos = document.getElementById('btnVerPlanos');
-    const btnPagarAssinatura = document.getElementById('btnPagarAssinatura');
 
     let userData = null;
     let lojaData = null;
-    let assinaturaData = null;
     let unsubscribeFunctions = [];
 
     onAuthStateChanged(auth, async (user) => {
@@ -1074,7 +906,6 @@
                     window.location.href = 'criar-perfil.html';
                 }
             } catch (error) {
-                mostrarErro("Erro ao carregar dados");
                 loader.classList.add('hide');
             }
         } else {
@@ -1099,42 +930,16 @@
             const assinaturaDoc = await getDoc(assinaturaRef);
             
             if (assinaturaDoc.exists()) {
-                assinaturaData = assinaturaDoc.data();
-                atualizarInterfaceAssinatura(assinaturaData);
+                const data = assinaturaDoc.data();
+                statusAssinatura.textContent = data.plano || "Básico";
+                
+                if (data.trial) {
+                    badgeAssinatura.textContent = "Trial";
+                    badgeAssinatura.style.display = 'inline-block';
+                }
             }
         } catch (error) {
             statusAssinatura.textContent = "Básico";
-            statusPageAssinatura.textContent = "Ativa";
-            statusPageAssinatura.className = "status-badge status-success";
-        }
-    }
-
-    function atualizarInterfaceAssinatura(data) {
-        if (!data) {
-            statusAssinatura.textContent = "Básico";
-            return;
-        }
-        
-        statusAssinatura.textContent = data.plano || "Básico";
-        statusPageAssinatura.textContent = data.status === "ativa" ? "Ativa" : "Expirada";
-        statusPageAssinatura.className = data.status === "ativa" ? 
-            "status-badge status-success" : 
-            "status-badge status-danger";
-        
-        if (data.trial) {
-            badgeAssinatura.textContent = "Trial";
-            badgeAssinatura.style.display = 'inline-block';
-        }
-        
-        if (data.dataVencimento) {
-            const dataVenc = data.dataVencimento.toDate ? 
-                data.dataVencimento.toDate() : 
-                new Date(data.dataVencimento);
-            const diasRestantes = Math.ceil((dataVenc - new Date()) / (1000 * 60 * 60 * 24));
-            if (diasRestantes <= 7 && data.status === "ativa") {
-                badgeAssinatura.textContent = "!";
-                badgeAssinatura.style.display = 'inline-block';
-            }
         }
     }
 
@@ -1142,9 +947,7 @@
         try {
             atualizarInterfaceUsuarioComLoja(userData, lojaData);
             await configurarListeners(userId);
-        } catch (error) {
-            mostrarErro("Erro ao configurar dashboard");
-        }
+        } catch (error) {}
     }
 
     function atualizarInterfaceUsuarioComLoja(userData, lojaData) {
@@ -1200,16 +1003,6 @@
         });
         unsubscribeFunctions.push(unsubscribeLoja);
 
-        const assinaturaRef = doc(db, "assinaturas", userId);
-        const unsubscribeAssinatura = onSnapshot(assinaturaRef, (doc) => {
-            if (doc.exists()) {
-                const novaAssinaturaData = doc.data();
-                assinaturaData = novaAssinaturaData;
-                atualizarInterfaceAssinatura(novaAssinaturaData);
-            }
-        });
-        unsubscribeFunctions.push(unsubscribeAssinatura);
-
         const produtosRef = collection(db, "lojistas", userId, "produtos");
         const unsubscribeProdutos = onSnapshot(produtosRef, (snapshot) => {
             const produtos = [];
@@ -1232,8 +1025,6 @@
 
             totalProdutosCount = produtos.length;
             totalProdutos.textContent = totalProdutosCount;
-            contadorBaixo.textContent = estoqueBaixoCount;
-            contadorZerado.textContent = estoqueZeradoCount;
             
             const totalAlertas = estoqueBaixoCount + estoqueZeradoCount;
             if (totalAlertas > 0) {
@@ -1265,7 +1056,6 @@
             });
 
             pedidosPendentes.textContent = pedidosPendentesCount;
-            contadorPendentes.textContent = pedidosPendentesCount;
             
             if (pedidosPendentesCount > 0) {
                 badgePedidos.textContent = pedidosPendentesCount;
@@ -1282,7 +1072,6 @@
         const unsubscribeClientes = onSnapshot(clientesRef, (snapshot) => {
             const totalClientesCount = snapshot.size;
             totalClientes.textContent = totalClientesCount;
-            contadorClientes.textContent = totalClientesCount;
         });
         unsubscribeFunctions.push(unsubscribeClientes);
     }
@@ -1298,10 +1087,6 @@
             statusLoja.textContent = 'Loja Offline';
             document.getElementById('statusDashboard').className = 'status-badge status-danger';
             document.getElementById('statusDashboard').textContent = 'Offline';
-        }
-
-        if (data.saldo !== undefined) {
-            document.getElementById('saldoAtual').textContent = data.saldo.toFixed(2);
         }
 
         if (data.vendasHoje !== undefined) {
@@ -1434,23 +1219,12 @@
         }
     }
 
-    function mostrarErro(mensagem) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-        alertDiv.innerHTML = `
-            ${mensagem}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.querySelector('.main-content').prepend(alertDiv);
-    }
-
     btnLogout.addEventListener('click', async () => {
         try {
             unsubscribeFunctions.forEach(unsub => unsub && unsub());
             await signOut(auth);
             window.location.href = 'login.html';
         } catch (error) {
-            mostrarErro('Erro ao sair. Tente novamente.');
         }
     });
 
@@ -1475,84 +1249,24 @@
         }
     });
 
-    menuLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            if (!link.hasAttribute('data-page')) return;
-            
-            e.preventDefault();
-            
-            menuLinks.forEach(l => l.classList.remove('active'));
-            contentAreas.forEach(area => area.classList.remove('active'));
-            
-            link.classList.add('active');
-            
-            const page = link.getAttribute('data-page');
-            const pageId = `page${page.charAt(0).toUpperCase() + page.slice(1)}`;
-            const targetPage = document.getElementById(pageId);
-            
-            if (targetPage) {
-                targetPage.classList.add('active');
-            }
-            
-            if (window.innerWidth <= 992) {
-                dashboardMenu.classList.remove('show');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-    });
-
     btnNovoProduto.addEventListener('click', () => {
         window.location.href = 'novo-produto.html';
     });
 
     btnVerPedidos.addEventListener('click', () => {
-        document.querySelector('[data-page="pedidos"]').click();
+        window.location.href = 'pedidos-loja.html';
     });
 
     btnReporEstoque.addEventListener('click', () => {
-        document.querySelector('[data-page="fornecedores"]').click();
+        window.location.href = 'estoque-loja.html';
     });
 
     btnPromocao.addEventListener('click', () => {
-        window.location.href = 'nova-promocao.html';
+        window.location.href = 'promocoes.html';
     });
 
     btnGerenciarAssinatura.addEventListener('click', () => {
-        document.querySelector('[data-page="assinaturas"]').click();
-    });
-
-    btnVerPlanos.addEventListener('click', () => {
-        window.location.href = 'planos-assinatura.html';
-    });
-
-    btnPagarAssinatura.addEventListener('click', () => {
-        window.location.href = 'pagar-assinatura.html';
-    });
-
-    document.getElementById('btnConfigurarLoja').addEventListener('click', () => {
-        window.location.href = 'perfil-loja.html';
-    });
-
-    document.getElementById('btnAdicionarProduto').addEventListener('click', () => {
-        window.location.href = 'novo-produto.html';
-    });
-
-    document.getElementById('btnNovoPedido').addEventListener('click', () => {
-        window.location.href = 'novo-pedido.html';
-    });
-
-    document.getElementById('btnNovoFornecedor').addEventListener('click', () => {
-        window.location.href = 'novo-fornecedor.html';
-    });
-
-    document.getElementById('btnNovaPromocao').addEventListener('click', () => {
-        window.location.href = 'nova-promocao.html';
-    });
-
-    document.getElementById('btnMarcarTodasLidas').addEventListener('click', () => {
-        badgeNotificacoes.style.display = 'none';
+        window.location.href = 'assinatura-loja.html';
     });
 </script>
 </body>
